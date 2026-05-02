@@ -880,10 +880,19 @@
     overflow-x: hidden;
     max-width: 100vw;
   }
-  /* Long words (URLs, model names) shouldn't blow out the layout. */
-  h1, h2, h3, h4, p, a, li, strong, span, em {
-    overflow-wrap: anywhere;
-    word-break: break-word;
+  /* Long unbreakable strings (URLs, model names) shouldn't blow out the
+     layout — but regular words must NOT break mid-character. break-word
+     only kicks in when a string can't fit any other way; `anywhere` was
+     causing "Phantomline" and other brand-length words to wrap as
+     "Phantomlin / e" on narrow columns. Headlines explicitly opt out of
+     breaking entirely; they wrap at whitespace only. */
+  p, a, li, em, .lede {
+    overflow-wrap: break-word;
+  }
+  h1, h2, h3, h4, .hero-logo-name, .brand-name {
+    overflow-wrap: normal;
+    word-break: keep-all;
+    hyphens: none;
   }
   /* Defensive: any rogue media should never exceed its container. */
   img, svg, canvas, video {
