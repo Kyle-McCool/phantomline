@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>About Phantomline | Built for creators tired of subscription stacking</title>
+<meta name="description" content="Phantomline is a local-first AI video studio for faceless YouTube creators. Why we built it, what runs on your machine, and the philosophy behind no-paid-API." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="About Phantomline" />
+<meta property="og:description" content="A local-first AI video studio for faceless YouTube creators. Built by creators tired of subscription stacking." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "About", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/">
+      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+      <span class="brand-name">Phantomline</span>
+    </a>
+    <div class="navlinks">
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article">
+      <header class="article-head">
+        <div class="eyebrow">About</div>
+        <h1>Built for creators tired of subscription stacking.</h1>
+        <p class="article-lede">A faceless YouTube channel today demands a script tool, a voice tool, a captions tool, a music tool, a thumbnail tool, an SEO tool, a scheduler, and a cloud render farm. That's eight subscriptions and a credit card with a fresh subscription scar every month. Phantomline is the alternative.</p>
+      </header>
+
+      <h2>What Phantomline is</h2>
+      <p>Phantomline is a local-first AI video studio. It generates scripts, narration, captions, music beds, visual layers, MP4 exports, and YouTube publishing drafts — on your own machine. No per-render API fees. No usage caps you have to count against your project margin. License keys validate offline. The only thing on our servers is the marketing site.</p>
+
+      <h2>What runs locally</h2>
+      <p>On the desktop install, the heavy AI work happens on your hardware:</p>
+      <ul>
+        <li><strong>Ollama</strong> handles the language model — Llama 3.1 by default, but any model you can fit in your VRAM. Scripts, titles, descriptions, hooks.</li>
+        <li><strong>Kokoro TTS</strong> handles narration. 16 voices ship with it. The model is ~330 MB on first run, then everything's local.</li>
+        <li><strong>MusicGen</strong> generates ambient backing tracks via HuggingFace transformers. Crossfade-loops to any length you need.</li>
+        <li><strong>ffmpeg</strong> assembles the final MP4. Industry standard, no Adobe license required.</li>
+        <li><strong>Forge / AUTOMATIC1111</strong> (optional) for AI-generated scenes if you have it running locally on port 7861.</li>
+      </ul>
+      <p>On the browser version (phantomline.xyz/app), the same pipeline runs in-browser via WebLLM (Llama 3.2 1B over WebGPU), Web Speech API for TTS, Web Audio for music, ffmpeg.wasm for MP4. After the first load, the whole thing is airplane-mode safe.</p>
+
+      <h2>Why local-first matters</h2>
+      <p>The math on cloud-only AI video tools breaks at volume. Imagine you're shipping 30 videos a month — pretty normal for a faceless channel that wants to grow. At 4 cents a render across the script, voice, music, and caption pipeline (which is honestly cheap for a cloud stack), you're paying $1.20 per video, $36/month, on top of the subscriptions.</p>
+      <p>Now scale that to multi-channel. Five faceless niches, 30 videos each, and the API meter is $180/month. Pure overhead before anyone watches a video.</p>
+      <p>Local AI inverts this. Once you've installed the models, every render is free. The hardware you already own does the work.</p>
+
+      <h2>Why faceless YouTube specifically</h2>
+      <p>The faceless niche has a unique workflow profile. Creators ship volume — Reddit story channels can publish daily, listicle channels often post 3x a day. The bottleneck is rarely creative; it's pipeline cost and tool friction.</p>
+      <p>General-purpose AI video tools (Pictory, InVideo, etc.) are designed for marketers making one explainer video a quarter. They're priced and shaped for that use case. Faceless creators get squeezed by per-export limits, watermark removal upcharges, and renew-or-die subscriptions.</p>
+      <p>Phantomline is shaped for the volume use case from the start: render queues, schedule drafts, project bundles, channel-aware analytics, vidIQ-aware Optimize Library for republishing old uploads.</p>
+
+      <h2>What we believe</h2>
+      <ol>
+        <li>Software you paid for should keep working when the company's website goes offline.</li>
+        <li>"Subscription" should never be a synonym for "we hold your work hostage."</li>
+        <li>If a feature doesn't need a server, it shouldn't have one.</li>
+        <li>Honest pricing is the cheapest marketing channel.</li>
+        <li>Lifetime tiers are a real promise, not a launch gimmick. Founding Lifetime customers get every Creator Pro feature forever, even if our pricing rises.</li>
+      </ol>
+
+      <h2>Who's behind this</h2>
+      <p>Phantomline is built by Kyle Makarski. <a href="mailto:kyle@makko.ai">kyle@makko.ai</a> for direct contact. Cesar handles UI work. The repo lives at <a href="https://github.com/daculturedswine/phantomline" rel="noopener" target="_blank">github.com/daculturedswine/phantomline</a> for the people who care.</p>
+
+      <h2>Get started</h2>
+      <p><a class="cta" href="/app">Open the studio</a> or <a href="/pricing">see pricing</a>. The free tier needs no card.</p>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

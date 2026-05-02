@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>{{ competitor.title_tag }}</title>
+<meta name="description" content="{{ competitor.meta_description }}" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="{{ competitor.title_tag }}" />
+<meta property="og:description" content="{{ competitor.meta_description }}" />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta property="og:site_name" content="Phantomline" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ competitor.title_tag }}" />
+<meta name="twitter:description" content="{{ competitor.meta_description }}" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Alternatives", "item": "{{ site_url }}/alternatives"},
+    {"@type": "ListItem", "position": 3, "name": "{{ competitor.name }} alternative", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ competitor.h1 }}",
+  "description": "{{ competitor.meta_description }}",
+  "datePublished": "2026-05-02",
+  "dateModified": "2026-05-02",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-wordmark.svg"}
+  },
+  "image": "{{ site_url }}/static/phantomline-wordmark.svg",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for q, a in competitor.faq %}
+    {
+      "@type": "Question",
+      "name": {{ q | tojson }},
+      "acceptedAnswer": {"@type": "Answer", "text": {{ a | tojson }}}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/">
+      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+      <span class="brand-name">Phantomline</span>
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <a href="/alternatives">Alternatives</a> <span>›</span>
+        <span class="current">{{ competitor.name }}</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">{{ competitor.name }} alternative</div>
+        <h1>{{ competitor.h1 }}</h1>
+        <p class="article-lede">{{ competitor.tagline }}. Compare features, pricing, and faceless-YouTube fit. Honest, factual, no clickbait.</p>
+      </header>
+
+      {% for paragraph in competitor.intro.split('\n\n') %}
+      <p>{{ paragraph }}</p>
+      {% endfor %}
+
+      <h2>Quick comparison</h2>
+      <table>
+        <thead>
+          <tr>
+            {% for header in competitor.comparison_rows[0] %}
+            <th>{{ header }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in competitor.comparison_rows[1:] %}
+          <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h2>When {{ competitor.name }} makes sense</h2>
+      {% for paragraph in competitor.when_competitor_wins.split('\n\n') %}
+      <p>{{ paragraph }}</p>
+      {% endfor %}
+
+      <h3>{{ competitor.name }}'s strengths</h3>
+      <ul>
+        {% for strength in competitor.competitor_strengths %}
+        <li>{{ strength }}</li>
+        {% endfor %}
+      </ul>
+
+      <h2>When Phantomline makes more sense</h2>
+      {% for paragraph in competitor.when_phantomline_wins.split('\n\n') %}
+      <p>{{ paragraph }}</p>
+      {% endfor %}
+
+      <h3>Phantomline's advantages for the faceless YouTube workflow</h3>
+      <ul>
+        {% for advantage in competitor.phantomline_advantages %}
+        <li>{{ advantage }}</li>
+        {% endfor %}
+      </ul>
+
+      <h2>Feature-by-feature comparison</h2>
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>Phantomline</th><th>{{ competitor.name }}</th></tr>
+        </thead>
+        <tbody>
+          {% for feature, phantom, comp in competitor.feature_comparison %}
+          <tr>
+            <td>{{ feature }}</td>
+            <td>{{ phantom }}</td>
+            <td>{{ comp }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h2>Pricing comparison</h2>
+      <h3>Phantomline pricing</h3>
+      <p>{{ competitor.pricing_comparison_phantomline }}</p>
+      <h3>{{ competitor.name }} pricing</h3>
+      <p>{{ competitor.pricing_comparison_competitor }}</p>
+
+      <h2>Who should pick which?</h2>
+      <h3>Pick {{ competitor.name }} if…</h3>
+      <p>{{ competitor.who_picks_competitor }}</p>
+      <h3>Pick Phantomline if…</h3>
+      <p>{{ competitor.who_picks_phantomline }}</p>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        {% for q, a in competitor.faq %}
+        <details>
+          <summary>{{ q }}</summary>
+          <p>{{ a }}</p>
+        </details>
+        {% endfor %}
+      </div>
+
+      <h2>Try Phantomline</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <p class="article-meta" style="margin-top: 28px;">
+        Looking at other tools? See the <a href="/alternatives">full alternatives list</a>.
+      </p>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

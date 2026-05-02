@@ -22,6 +22,18 @@
     font-size: 15px;
     line-height: 1.5;
     min-height: 100vh;
+    /* Mobile defensive — prevent any rogue absolutely-positioned element
+       (notification panel, dropdowns) from forcing horizontal scroll on
+       phones. The studio is grid-heavy and a single overflowing child
+       can break layout below ~640px. */
+    overflow-x: clip;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  /* Long words / model names / URLs shouldn't punch out the layout. */
+  h1, h2, h3, h4, p, code, span, strong {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .wrap {
     max-width: 1320px;
@@ -3313,4 +3325,93 @@
   body.engine-server .engine-device-only,
   body.engine-server [data-engine-device-only] {
     display: none !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     Studio mobile pass (≤640px). The studio is grid-heavy on desktop;
+     existing breakpoints collapse columns at 900/1100/1200, but they
+     don't cover small-screen edge cases like dense form rows, tab pills
+     overflowing, dropdown menus going off-edge, or the launch checklist
+     sprouting horizontal whitespace. This block tightens those.
+     ---------------------------------------------------------------------- */
+  @media (max-width: 640px) {
+    .wrap {
+      padding: 14px 14px 40px;
+      column-gap: 14px;
+      row-gap: 14px;
+    }
+    header {
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    .brand .brand-mark {
+      gap: 8px;
+    }
+    .brand .brand-icon { height: 32px; width: 32px; }
+    .brand .brand-name { font-size: 22px; }
+    .brand-tagline { display: none; }
+    .header-actions {
+      gap: 8px;
+    }
+    .ollama-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+    /* Sidebar tab list — make it horizontal, scrollable, so it doesn't
+       eat half the viewport vertically before the user even sees content. */
+    .sidebar, .tabs-vertical, .left-rail {
+      width: 100%;
+    }
+    /* Tab buttons stack as horizontal scroll instead of one-per-row. */
+    .tab-list, .tabs, .nav-list {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      gap: 6px;
+      padding-bottom: 6px;
+    }
+    .tab-btn {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      font-size: 13px;
+      padding: 8px 12px;
+    }
+    /* Forms — single-column at all costs. */
+    .grid, .form-grid, .row, .two-col {
+      grid-template-columns: 1fr !important;
+      gap: 10px;
+    }
+    /* Notification panel + dropdowns — clamp width and align right edge to viewport. */
+    .notification-panel, .dropdown, .menu, .popover {
+      max-width: calc(100vw - 24px) !important;
+      right: 12px !important;
+    }
+    /* Launch checklist on phones — give the "X READY" status pill room
+       to wrap below the label rather than crash off the right edge. */
+    .launch-check {
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+    }
+    .launch-status {
+      grid-column: 2 / 3;
+      justify-self: start;
+      margin-top: 2px;
+    }
+    .launch-check-actions {
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .launch-action {
+      font-size: 11px;
+      padding: 5px 9px;
+    }
+    /* Buttons + CTAs full-width when they're the primary action. */
+    .btn-primary, .btn-cta {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    }
   }
