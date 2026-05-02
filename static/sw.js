@@ -8,15 +8,24 @@
  *
  * Bumping CACHE_VERSION invalidates the previous cache on the next visit.
  */
-// Bumped on 2026-05-02 to invalidate the legacy "ghostline" branded
-// wordmark PNG that lingered in client SW caches after the Phantomline
-// rebrand. Bumping this string forces the activate handler below to
-// drop every old cache entry on next visit.
-const CACHE_VERSION = "phantomline-v2";
+// Bump on every breaking SW change so the activate handler below can
+// drop stale caches. v2 cleared the lingering ghostline-branded wordmark
+// PNG; v3 invalidates the now-stale "/" cache entry that pointed at
+// the studio (it now points at the marketing landing instead).
+const CACHE_VERSION = "phantomline-v3";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 
-const SHELL_URLS = ["/", "/static/ghostline.css", "/static/ghostline.js"];
+// Pre-warm both the marketing landing (/) AND the studio (/app) so users
+// have offline access to whichever they last opened. The landing CSS and
+// the studio CSS are different files; cache both.
+const SHELL_URLS = [
+  "/",
+  "/app",
+  "/static/ghostline.css",
+  "/static/ghostline.js",
+  "/static/landing.css",
+];
 
 self.addEventListener("install", (event) => {
   // Pre-warm the offline shell so a flaky connection still loads the UI.

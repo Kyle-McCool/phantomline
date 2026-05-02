@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 480" role="img" aria-labelledby="wmtitle wmdesc">
+  <title id="wmtitle">Phantomline</title>
+  <desc id="wmdesc">The Phantomline brand wordmark — a cyan ghost-line motion icon followed by the word Phantomline in a serif gradient.</desc>
+  <defs>
+    <!-- Same icon glow filter we use on the standalone logo. -->
+    <filter id="iconGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.12
+                0 0 0 0 0.95
+                0 0 0 0 1
+                0 0 0 0.95 0" result="cyan"/>
+      <feMerge>
+        <feMergeNode in="cyan"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Cyan motion-line gradient, matches the ghost icon and the brand-name CSS. -->
+    <linearGradient id="iconLine" x1="160" y1="800" x2="820" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0aa7b5" stop-opacity="0"/>
+      <stop offset="0.24" stop-color="#22e7f5"/>
+      <stop offset="0.62" stop-color="#a9ffff"/>
+      <stop offset="1" stop-color="#1ee8f6"/>
+    </linearGradient>
+    <!-- Wordmark text gradient — same hues, oriented horizontally so the
+         brightest band lands roughly on the middle of "Phantomline". -->
+    <linearGradient id="wordGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#baffff"/>
+      <stop offset="0.55" stop-color="#22e7f5"/>
+      <stop offset="1" stop-color="#1ee8f6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="480" fill="none"/>
+
+  <!-- ICON: cyan ghost-line, scaled and translated to sit on the left. -->
+  <g transform="translate(0, -30) scale(0.46)" filter="url(#iconGlow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M176 626c126-32 220-65 281-139 58-71 108-163 203-213 75-40 166-39 223 15 82 79 69 234 16 339-34 68-82 119-131 151" stroke="url(#iconLine)" stroke-width="22"/>
+    <path d="M208 694c130-54 229-100 298-64 54 28 44 87-5 121-61 41-145 72-240 109" stroke="url(#iconLine)" stroke-width="14" opacity="0.9"/>
+    <path d="M302 783c127-44 255-96 375-151" stroke="#22e7f5" stroke-width="12" opacity="0.75"/>
+    <path d="M451 492c55-58 91-106 136-166" stroke="#26f3ff" stroke-width="13" opacity="0.95"/>
+    <path d="M632 354c31 28 57 41 84 45-28 8-56 2-84-45Z" fill="#baffff" stroke="#20e9f5" stroke-width="7"/>
+    <path d="M759 397c29-3 57-18 88-48-9 38-42 55-88 48Z" fill="#baffff" stroke="#20e9f5" stroke-width="7"/>
+    <path d="M611 468l112 62-112 68V468Z" fill="#baffff" fill-opacity="0.16" stroke="#baffff" stroke-width="22"/>
+    <path d="M260 561c133-31 212-25 274 12" stroke="#24eaf6" stroke-width="11" opacity="0.8"/>
+    <path d="M560 820c98-31 183-84 256-155" stroke="#20e9f5" stroke-width="11" opacity="0.75"/>
+  </g>
+
+  <!-- WORDMARK: "Phantomline" in a Cormorant-style serif. We try the local
+       Cormorant Garamond first, then fall back to Playfair Display, then
+       to platform serifs so the SVG renders on every device — a hosted
+       SVG can't @import webfonts reliably. -->
+  <text
+    x="500" y="305"
+    fill="url(#wordGradient)"
+    font-family="'Cormorant Garamond','Playfair Display','Times New Roman',Georgia,serif"
+    font-size="232"
+    font-weight="600"
+    letter-spacing="3"
+    style="font-feature-settings:'liga','dlig';">Phantomline</text>
+</svg>

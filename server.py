@@ -1621,7 +1621,20 @@ def run_job(job_id, inputs):
 # ---------------------------------------------------------------------------
 
 @app.route("/")
-def index():
+def root():
+    """Public root — show the marketing landing page so first-time visitors
+    to phantomline.xyz see the pitch and pricing, not the empty studio.
+    Logged-in / returning users hit /app for the actual workspace."""
+    return render_template("landing.html", pricing=PRICING)
+
+
+@app.route("/app")
+@app.route("/app/")
+@app.route("/studio")
+def studio():
+    """The real application UI. Moved off `/` so the root URL can show
+    marketing content. Both /app and /studio are accepted; the canonical
+    is /app (referenced by the landing page CTAs)."""
     return render_template(
         "index.html",
         defaults={

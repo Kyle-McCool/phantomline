@@ -862,3 +862,119 @@
     line-height: 1.6;
     font-size: 14px;
   }
+
+  /* ----------------------------------------------------------------------
+     Mobile polish pass.
+
+     The earlier breakpoints (1060 / 900 / 620) shrunk the hero copy but
+     left the decorative 3D phone-stack + absolute-positioned floating
+     cards in place, where they overflowed narrow viewports and produced
+     horizontal scroll on phones. Below ~640px we hide the device stage
+     entirely (it's a flourish; the real value is the hero copy + CTAs)
+     and also enforce a stricter no-overflow contract on the document.
+     ---------------------------------------------------------------------- */
+  html, body {
+    /* `clip` is stricter than `hidden` — nothing inside can scroll out
+       even programmatically. Falls back to hidden on older browsers. */
+    overflow-x: clip;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  /* Long words (URLs, model names) shouldn't blow out the layout. */
+  h1, h2, h3, h4, p, a, li, strong, span, em {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  /* Defensive: any rogue media should never exceed its container. */
+  img, svg, canvas, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 640px) {
+    /* The 3D phone-preview is a desktop flex; on a phone the user is
+       literally holding the real thing, so it adds zero value and is
+       the #1 cause of horizontal overflow. Drop it. */
+    .hero-device-stage,
+    .phone-stack,
+    .floating-card,
+    #heroThree {
+      display: none !important;
+    }
+    .hero {
+      min-height: auto;
+      padding: 28px 0 36px;
+    }
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .hero-copy { text-align: left; }
+    .hero-logo {
+      gap: 10px;
+      margin: 0 0 14px;
+    }
+    .hero-logo-icon { height: 48px; width: 48px; }
+    .hero-logo-name { font-size: 38px; letter-spacing: 0.4px; }
+    h1 {
+      font-size: clamp(34px, 9.4vw, 48px);
+      line-height: 1.05;
+    }
+    .lede { font-size: 15px; }
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .hero-actions .cta {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    }
+    .proof {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .proof div { padding: 10px 12px; }
+    .wrap {
+      width: min(100% - 20px, 1280px);
+      padding: 16px 0 56px;
+    }
+    .top {
+      padding: 8px 10px;
+      gap: 10px;
+      top: 6px;
+    }
+    .brand .brand-icon { height: 36px; width: 36px; }
+    .brand .brand-name { font-size: 22px; }
+    .section { padding: 18px 14px; }
+    /* Section headings + body text get more breathing room and tighter
+       sizes so paragraphs don't push past viewport on iOS Safari. */
+    .section h2 { font-size: clamp(26px, 6.6vw, 34px); }
+    .section p { font-size: 15px; }
+    /* Pricing cards stack vertically with full width. */
+    .pricing-grid { grid-template-columns: 1fr !important; gap: 14px; }
+    .pricing-card { padding: 18px 16px; }
+    /* FAQ details */
+    .faq details summary { padding: 14px 16px; font-size: 15px; }
+    .faq details p { padding: 0 16px 14px; }
+    /* Final CTA section */
+    .final {
+      padding: 24px 16px;
+      text-align: center;
+    }
+    .final .cta {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+      margin-top: 14px;
+    }
+  }
+
+  /* Extra-narrow phones (≤380px — older iPhone SE, Galaxy A series) */
+  @media (max-width: 380px) {
+    .hero-logo-name { font-size: 32px; }
+    .hero-logo-icon { height: 42px; width: 42px; }
+    h1 { font-size: clamp(30px, 9vw, 40px); }
+    .brand .brand-name { font-size: 19px; }
+  }
