@@ -1,249 +1,269 @@
 # Phantomline
 
-Phantomline creates local AI videos without showing your face. Write stories from scratch,
-narrate any book or script with a local TTS, score the result with
-ambient music, and mix everything into a single upload-ready file.
-Everything runs on your own machine via Ollama, Kokoro, and MusicGen.
-Nothing leaves your computer.
+> Local-first AI faceless video studio. Desktop + PWA + Android APK from one Flask codebase.
+> No paid APIs. Founding lifetime $79.
 
-You get two ways to run it:
+**Live:** https://phantomline.xyz
+**Repo:** https://github.com/daculturedswine/phantomline
 
-1. **Web UI** on `http://localhost:5000` - clean, professional, runs locally.
-2. **Command line** - same engine, no browser needed.
-
-The output file is just:
-
-```
-TITLE: <Generated Title>
-
-<full narration script - plain prose, no markdown>
-```
-
-No outline, no notes, no "Here is your script", no scene labels, no fluff.
+Phantomline turns ideas into scripts, narration, captions, music, B-roll, SEO packages, and scheduled YouTube posts. Heavy AI inference runs on the user's machine (Ollama + Kokoro + MusicGen) on desktop, or in the browser (WebLLM + Web Speech + Web Audio + ffmpeg.wasm) on the hosted PWA. Either way, no SaaS bill on the AI side.
 
 ---
 
-## What it does
+## Two deploy modes (read this first)
 
-- Generates a **title** from your idea.
-- Builds an **internal story plan** (never written to the final file).
-- Writes the script in **sections** of ~1,500 words at a time, because
-  most local models can't reliably produce 10,000 words in one shot.
-- Maintains a **rolling summary** that's fed back into the model before
-  each section, so the story stays coherent across the whole length.
-- After every section, saves a **partial draft** + a **state file** so
-  you never lose work if generation crashes or you stop it.
-- Cleans the output: strips markdown, "Here is", "Section X:", scene
-  labels, asterisks for emphasis, etc.
-- Saves the final file as `<Title>.txt` in `output/`.
-- **Narrates the script with Kokoro TTS** (fully local) and downloads
-  it as MP3 - voice picker, speed control, ready for YouTube upload.
+Phantomline runs the **same Flask app** in two modes depending on where it's hosted:
 
----
+### Hosted mode — `https://phantomline.xyz` (Render)
+- Slim deploy: Flask + numpy + Pillow + requests only (`requirements.txt`).
+- The server is a thin web tier: serves the landing page, license issuance, billing webhooks, and cheap API helpers (YouTube research, channel insights).
+- **All AI inference happens in the user's browser** via WebLLM (Llama 3.2 1B in WebGPU), Web Speech API for TTS, Web Audio for music, and ffmpeg.wasm for MP4 assembly.
+- The bundled music pack ships in `static/library/music/` for users without WebGPU.
+- Auto-deploys on every push to `main` via `render.yaml`.
 
-## Requirements
+### Desktop mode — `python server.py` (local install)
+- Full deploy: also installs `requirements-desktop.txt` (kokoro, transformers, soundfile, lameenc).
+- Runs server-side AI: Ollama (LLM), Kokoro (TTS), MusicGen via HuggingFace transformers (music), ffmpeg subprocess (video).
+- Optional: Forge / AUTOMATIC1111 at `http://127.0.0.1:7861` for AI-generated scenes.
+- This is the "power user" mode where everything is local, including the model weights.
 
-- **Windows / Mac / Linux**
-- **Python 3.9+**
-- **Ollama** running locally - install from https://ollama.com
-- A pulled model. Recommended: `llama3.1` (or any newer Llama / Mistral / Qwen you prefer).
-  ```
-  ollama pull llama3.1
-  ```
-- **Disk space**: ~2 GB free. The TTS dependencies (PyTorch + Kokoro) are
-  large. The Kokoro voice model itself (~330 MB) is pulled from
-  Hugging Face on the first time you press *Generate audio*.
+The same `server.py` boots in either mode. Heavy ML imports (`tts`, `music`, `video_assembler`) are wrapped in `try/except` so the hosted deploy doesn't crash without them.
 
 ---
 
-## Setup (Windows)
+## Quick start (local dev, full desktop mode)
 
-Open **Command Prompt** or **PowerShell** in the `bedtime-story-gen` folder.
+```bash
+git clone https://github.com/daculturedswine/phantomline.git
+cd phantomline
 
-```
+# Python venv
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # Mac/Linux
+
+# Install web tier + desktop AI tier
 pip install -r requirements.txt
+pip install -r requirements-desktop.txt
+
+# Pull at least one Ollama model
+# (install Ollama first from https://ollama.com)
+ollama pull llama3.1
+
+# Set up local env
+cp .env.example .env             # then edit values
+# ^ if .env.example doesn't exist, create .env with:
+#   GHOSTLINE_LICENSE_SECRET=<openssl rand -hex 32>
+#   YOUTUBE_API_KEY_2=<optional, for YouTube research routes>
+
+# Run
+python server.py
+# → http://localhost:5000
 ```
 
-Make sure Ollama is running. Either:
-
-- Open the Ollama desktop app, **or**
-- Run `ollama serve` in another terminal.
-
----
-
-## Run the Web UI (recommended)
-
-```
+If you only want the slim web tier (no Ollama / Kokoro / MusicGen):
+```bash
+pip install -r requirements.txt
 python server.py
 ```
-
-Then open **http://localhost:5000** in your browser.
-
-Features:
-
-- Form with sensible defaults (sci-fi alien invasion bedtime story, 10,000 words, llama3.1).
-- Click-to-fill genre chips for the supported types.
-- Auto-detects which Ollama models you have installed and lets you pick one.
-- Live progress: current section, running word count, progress bar, log.
-- Shows the finished script inline with **Copy** and **Download .txt** buttons.
-- Shows the path the file was saved to (`output/<Title>.txt`).
-- **Kokoro TTS panel**: pick a voice, set speed, click **Generate audio**,
-  preview in the page, and **Download MP3** for your YouTube upload.
-  16 calm voices to choose from (American + British, female + male).
-  Edits to the script textarea are sent to Kokoro, so you can tweak the
-  copy before narration.
-
-The page polls the server every 1.5 seconds - there is no websocket, no
-build step, nothing to install on the front end.
+The server boots, the landing page works, but generation routes will return 503 until you install desktop deps.
 
 ---
 
-## Run from the command line
-
-Interactive (prompts you for everything; press Enter to accept defaults):
+## Architecture at a glance
 
 ```
-python story_generator.py
+phantomline/
+├── server.py                    # Flask app entry. Imports route blueprints,
+│                                  registers them, and handles startup.
+│
+├── core.py                      # Shared module-level state — paths, project store
+│                                  singleton, JSON helpers, YouTube connection cache.
+│                                  Routes import from here.
+│
+├── routes/                      # Flask blueprints, one per concern
+│   ├── billing.py               # License keys, tier gating, Stripe checkout URLs,
+│   │                              quota enforcement (free tier: 5 renders/mo)
+│   ├── system.py                # Health checks, model listing
+│   ├── launch.py                # First-run readiness probes + test render
+│   ├── insights.py              # Channel analytics ingest (Pro tier)
+│   ├── research.py              # YouTube keyword research (Pro tier)
+│   ├── optimize.py              # Per-video repackaging (Pro tier)
+│   └── bundles.py               # Project import/export
+│
+├── story_generator.py           # Long-form Ollama story engine (CLI + library)
+├── tts.py                       # Kokoro TTS (lazy-loaded; desktop only)
+├── music.py                     # MusicGen + crossfade loop + narration mixdown (desktop)
+├── video_assembler.py           # ffmpeg subprocess MP4 builder (desktop)
+├── projects.py                  # Persistent project store with atomic writes
+├── youtube_publish.py           # YouTube Data API v3 client + OAuth dance
+├── youtube_research.py          # vidIQ-style autocomplete + ranking signals
+├── channel_insights.py          # Analytics CSV → ranked keyword profile
+├── license.py                   # Offline HMAC-SHA256 license validation
+│
+├── static/
+│   ├── ghostline.css            # Studio app styles (file path preserved)
+│   ├── landing.css              # Marketing page styles
+│   ├── ghostline.js             # Studio app JS (~5000 lines; file path preserved)
+│   ├── engines.js               # Browser-side AI adapters (WebLLM, Web Speech,
+│   │                              ffmpeg.wasm, Pexels, bundled music library)
+│   ├── manifest.json            # PWA manifest
+│   ├── sw.js                    # Service worker (cache-first /static, network-first HTML)
+│   ├── ghostline-logo.svg       # Brand icon (vector, no text)
+│   └── library/music/           # 8 royalty-free ambient tracks (~11 MB total)
+│
+├── templates/
+│   ├── index.html               # Studio app shell
+│   └── landing.html             # Marketing site at /landing
+│
+├── supabase/
+│   └── functions/
+│       └── issue-license/       # Deno Edge Function: Stripe webhook → email license
+│
+├── render.yaml                  # Render Blueprint declarative deploy config
+├── capacitor.config.json        # Android APK wrapper config
+├── requirements.txt             # Web tier deps (slim)
+├── requirements-desktop.txt     # Desktop AI tier deps (heavy)
+└── output/                      # User-generated content. Gitignored.
+    ├── projects/                # One folder per saved project
+    ├── projects.json            # Project index (atomic writes)
+    └── publishing/              # YouTube OAuth tokens cache
 ```
 
-Non-interactive:
+### Naming convention note
 
-```
-python story_generator.py --non-interactive ^
-  --topic "A small town's deep-space telescope picks up a centuries-old approach signal" ^
-  --genre "sci-fi alien invasion" ^
-  --tone "cinematic, slow-burn, eerie, calm bedtime narration" ^
-  --words 10000 ^
-  --model llama3.1
-```
+The project was originally called **Ghostline**, then rebranded to **Phantomline**. Filenames, env var names, JS globals, localStorage keys, and the license key prefix (`GHL1.`) were intentionally preserved during the rebrand to avoid breaking existing installs and license keys. **All user-facing strings say Phantomline.** When editing, follow the same rule:
 
-(`^` is the Windows line-continuation character; on Mac/Linux use `\`.)
-
-Resume a job that crashed or was interrupted:
-
-```
-python story_generator.py --resume output/<Title>.state.json
-```
-
-The CLI prints progress dots while each section streams and prints a
-summary line after every section.
+- ✅ User-visible text → "Phantomline"
+- ❌ File paths, env vars, JS globals, license prefix → leave as `ghostline.*` / `GHOSTLINE_*` / `GhostlineEngines` / `GHL1.`
 
 ---
 
-## Supported story types
+## Environment variables
 
-The defaults work great for:
+Set these in `.env` for local dev, or in Render's Environment tab for production.
 
-- sci-fi alien invasion *(default)*
-- mystery
-- strange disappearances
-- deep ocean horror
-- ancient alien discoveries
-- abandoned towns
-- lost transmissions
-- government coverups
-- cosmic horror
+| Variable | Required? | Purpose |
+|---|---|---|
+| `GHOSTLINE_LICENSE_SECRET` | yes | HMAC secret for license signing/verification. Generate with `openssl rand -hex 32`. Must match whatever issuer (Supabase Edge Function) issues keys. |
+| `YOUTUBE_API_KEY_2` | for research | YouTube Data API v3 key. Each key is 10k units/day; add `YOUTUBE_API_KEY_3`, `_4`, etc. to scale. |
+| `YOUTUBE_CLIENT_ID` | for publish | OAuth client ID for in-app YouTube publishing. |
+| `YOUTUBE_CLIENT_SECRET` | for publish | OAuth client secret. |
+| `GHOSTLINE_TELEMETRY_URL` | optional | If set, error events POST here. Local JSONL in `output/telemetry/` works regardless. |
+| `GHOSTLINE_LICENSE_SECRETS_LEGACY` | rotation | Comma-separated old secrets, accepted during rotation windows. |
 
-You can also type any custom genre / tone - the pipeline is generic.
-
----
-
-## Output
-
-Everything lands in `output/`:
-
-| File | What |
-| --- | --- |
-| `<Title>.txt` | **Final clean script.** This is the file you use. |
-| `<Title>.partial.txt` | Saved after every section while generating. Same format. Useful if generation fails halfway. |
-| `<Title>.state.json` | Internal plan + sections + rolling summary. Used for `--resume`. Safe to delete after the final file is written. |
-| `<Title>.mp3` | Kokoro narration audio (when you press **Generate audio**). |
-
-The final file is exactly:
-
-```
-TITLE: The Signal That Was Always There
-
-It started the night the antenna stopped lying...
-```
-
-No markdown. No bullet points. No scene labels. No author notes.
+**Never commit `.env`.** It's in `.gitignore`.
 
 ---
 
-## Tuning notes
+## License system
 
-- **Length**: bigger `--words` = longer script. Each section is ~1,500
-  words, so 10,000 words is roughly 7 sections. The final section is
-  reserved for a coherent ending.
-- **Model**: `llama3.1` is the default. Larger models (e.g. `llama3.1:70b`)
-  give better prose but are much slower. Smaller models (e.g. `llama3.2:3b`)
-  are faster but may need more cleanup.
-- **Speed**: a 10,000-word story on a typical 8B model takes 5–15 minutes
-  on a modern PC. Watch the log - if it stalls for minutes, your model
-  may be too large for your VRAM and is swapping to CPU.
-- **Quality**: if a story comes out flat, try a different genre/tone, or
-  edit the topic to specify one *concrete strange thing* that happens -
-  e.g. "a lighthouse keeper finds a second lighthouse on the same
-  island that wasn't there yesterday".
+Offline-verifiable HMAC keys. Format:
+
+```
+GHL1.<base64-payload>.<base64-signature>
+```
+
+Payload is JSON: `{tier: "pro", email: "...", iat: <unix>, exp: <unix>, lifetime: bool}`. Signature is HMAC-SHA256 of the payload with `GHOSTLINE_LICENSE_SECRET`.
+
+Validation lives in `license.py::validate(key)`. Tier gating uses `routes.billing::enforce_tier(required)` which returns `(ok, error)`. Quota enforcement uses `consume_quota()` (free tier: 5 renders/month).
+
+To rotate the secret, set the new value in `GHOSTLINE_LICENSE_SECRET` and add the old value to `GHOSTLINE_LICENSE_SECRETS_LEGACY` (comma-separated) until you reissue all customer keys.
+
+---
+
+## Dev workflow
+
+### Branching
+
+`main` is the production branch. Render's `autoDeploy: true` ships every push to `main`. Don't push WIP commits to main — branch first.
+
+```bash
+git checkout -b feature/whatever
+# work, commit, push
+git push -u origin feature/whatever
+gh pr create --title "..." --body "..."
+```
+
+When the PR is approved and CI's clean (no CI yet — TODO), merge to main and Render auto-deploys.
+
+### Running tests
+
+There aren't formal tests yet. Smoke-test by:
+
+1. `python server.py` boots without import errors
+2. http://localhost:5000 loads the studio
+3. http://localhost:5000/landing loads the marketing page
+4. `/api/system/health` returns `{"ok": true}`
+
+If any of those break, your change broke something.
+
+### Touching the front-end
+
+The studio app's CSS is `static/ghostline.css` (~3000 lines) and JS is `static/ghostline.js` (~5000 lines). Both are intentionally not bundled — they're served as-is and cache-busted via `?v=<mtime>` (the `versioned` Jinja filter in `server.py`).
+
+If you add a new static asset and the browser doesn't pick it up, bump `CACHE_VERSION` in `static/sw.js` to invalidate the service worker cache.
+
+### Touching the back-end
+
+Each route blueprint owns its concern. Keep handlers thin — push logic into the module-level functions (`story_generator.py`, `youtube_research.py`, etc.) so they're testable without Flask.
+
+When you add a new blueprint, register it in `server.py`:
+
+```python
+from routes.your_module import your_bp
+app.register_blueprint(your_bp)
+```
+
+---
+
+## Deploying
+
+### Production (already set up)
+
+Render reads `render.yaml` from `main` and provisions. Push to `main` → auto-deploy. Logs at https://dashboard.render.com/.
+
+### Custom domain
+
+Already wired: `phantomline.xyz` and `www.phantomline.xyz` → Render's free tier instance via:
+- A record `@` → `216.24.57.1`
+- CNAME `www` → `phantomline.onrender.com`
+
+SSL is auto-provisioned via Let's Encrypt.
+
+### Mobile (Capacitor wrap)
+
+```bash
+npm i
+npx cap sync android
+npx cap open android   # opens Android Studio
+```
+
+The wrapper points at `https://phantomline.xyz` so the APK is just a chrome around the live site. See `MOBILE_BUILD.md` for the keystore + signing dance.
 
 ---
 
 ## Troubleshooting
 
-**"Cannot reach Ollama at http://localhost:11434"**
-Open the Ollama app, or run `ollama serve` in another terminal.
+**`pip install -r requirements-desktop.txt` fails on Windows**
+PyTorch wheels for some Python versions are flaky. Try Python 3.11 if you're on 3.13.
 
-**"Ollama returned 404 - the model 'X' is not installed"**
-Run `ollama pull X` first.
+**The hosted server (Render) returns 503 for `/api/render`**
+Expected. Hosted is web-tier-only; rendering happens browser-side via `engines.js`. Use the desktop install if you want server-side rendering.
 
-**The script came out short**
-Increase `--words`, or your local model is hitting its `num_predict`
-limit per turn. The generator already retries short sections once.
+**`ollama offline` badge on local install**
+Open the Ollama desktop app, or run `ollama serve` in another terminal.
 
-**The web UI shows "ollama offline"**
-Same fix as above - the badge re-checks every 15 seconds.
+**Service worker is serving stale assets after a deploy**
+Bump `CACHE_VERSION` in `static/sw.js`. The `activate` handler clears any cache whose key doesn't match the new version.
 
-**Generation crashed midway**
-Re-run with `python story_generator.py --resume output/<Title>.state.json`.
-You'll continue from the last saved section.
+**Render deploy fails with "Exited with status 1"**
+Check the Logs tab. 99% of the time it's a missing dep or import error — wrap the offending import in `try/except` if it's an optional desktop module.
 
 ---
 
-## File map
+## License
 
-```
-bedtime-story-gen/
-├── story_generator.py   # long + short story generation engine + CLI
-├── tts.py               # Kokoro TTS wrapper
-├── music.py             # MusicGen + crossfade-loop + narration mixdown
-├── projects.py          # persistent project store (survives restart)
-├── server.py            # Flask web UI on localhost:5000
-├── templates/
-│   ├── index.html       # the studio app
-│   └── landing.html     # marketing page at /landing
-├── requirements.txt
-├── README.md
-└── output/
-    ├── projects/        # one folder per saved project
-    │   └── <id>/        # script.txt, audio.mp3, etc + tracked in projects.json
-    ├── projects.json    # project index, atomic writes
-    └── uploaded/        # one-shot uploads (also indexed as projects)
-```
+Proprietary. Contact kyle@makko.ai for commercial licensing.
 
-## What's where in the UI
-
-The studio uses a left sidebar (Create / Library) instead of top tabs.
-
-**Create**
-- **Long Story** - section-by-section 10,000+ word generation with rolling summary.
-- **Short Script** - 30-second to 10-minute one-shot scripts. Includes 12 niche presets and a "describe the script" field.
-- **Narrate Text** - paste any text, narrate with Kokoro, download MP3.
-- **Music & Mix** - generate background music with MusicGen, crossfade-loop to any length, mix with narration (or an uploaded narration file) into a single MP3.
-
-**Library**
-- **All Projects** - every story, narration, music bed, mix, and uploaded file you've created. Filter by type. Inline audio preview. Download / delete per card. Persists across server restarts.
-
-A landing page is served at `/landing` for sharing screenshots or demoing the app.
+The repo is private — collaborators have explicit access via GitHub. Do not redistribute.
