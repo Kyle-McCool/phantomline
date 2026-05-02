@@ -9,15 +9,14 @@ services:
   - type: web
     name: phantomline
     runtime: python
-    plan: starter        # $7/mo, always-on, 512 MB RAM. Free tier sleeps after 15 min idle.
+    plan: free           # Free tier: 512 MB RAM, sleeps after 15 min idle (cold start ~30s).
+                         # Upgrade to "starter" ($7/mo) for always-on once billing is set up.
+                         # Free tier has no persistent disk — output/ is ephemeral, but the
+                         # user downloads renders immediately so loss-on-restart is acceptable.
     buildCommand: pip install -r requirements.txt
     startCommand: python server.py
     healthCheckPath: /
     autoDeploy: true     # auto-deploy on every push to main branch
-    disk:
-      name: ghostline-data
-      mountPath: /opt/render/project/src/output
-      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.6"
