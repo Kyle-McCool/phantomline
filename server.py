@@ -102,6 +102,11 @@ app.jinja_env.auto_reload = True
 _ALLOWED_ORIGINS = {
     "http://127.0.0.1:5000", "http://localhost:5000",
     "https://127.0.0.1:5000", "https://localhost:5000",
+    # Production origins — without these the same-origin CSRF guard below
+    # would 403 every POST coming from the deployed site (browsers send the
+    # actual page Origin on POST, even for same-origin requests).
+    "https://phantomline.xyz", "https://www.phantomline.xyz",
+    "https://phantomline.onrender.com",
 }
 
 
@@ -183,6 +188,109 @@ def _versioned_filter(path):
         return path
     sep = "&" if "?" in path else "?"
     return f"{path}{sep}v={mtime}"
+
+
+# ---------------------------------------------------------------------------
+# SEO infrastructure
+#
+# - SITE_URL: canonical origin for absolute URLs in canonical/og/sitemap.
+#   Override via SITE_URL env var if we ever change domains.
+# - context processor: every Jinja template gets `site_url` plus a
+#   pre-computed `canonical_url` for the current request, so templates
+#   can render `<link rel="canonical" href="{{ canonical_url }}">` without
+#   each route having to pass it explicitly.
+# - /robots.txt and /sitemap.xml: standard discovery files. Robots is
+#   static-ish text; sitemap is generated from a small route registry so
+#   we don't drift from reality every time we add a page.
+# ---------------------------------------------------------------------------
+SITE_URL = os.environ.get("SITE_URL", "https://phantomline.xyz").rstrip("/")
+
+
+@app.context_processor
+def _seo_globals():
+    """Inject canonical-URL helpers into every template render. The
+    canonical_url is the production-domain URL for whatever path the
+    current request is on, with no query string and no trailing slash
+    (except for "/" itself)."""
+    path = request.path or "/"
+    if path != "/" and path.endswith("/"):
+        path = path.rstrip("/")
+    return {
+        "site_url": SITE_URL,
+        "canonical_url": f"{SITE_URL}{path}",
+    }
+
+
+# Public, indexable URLs for the sitemap. Each entry is (path, priority,
+# changefreq). Routes that are app-internal (e.g. /api/*, /app, /studio)
+# stay out — Google should index marketing surfaces, not the workspace.
+_SITEMAP_ROUTES = [
+    ("/",         "1.0", "weekly"),
+    ("/pricing",  "0.9", "monthly"),
+    ("/landing",  "0.5", "monthly"),  # legacy alias; lower priority
+]
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    """Tell crawlers what to index. We allow the marketing surface +
+    static assets (Googlebot needs CSS/JS to render the page properly),
+    block API/admin/auth, and explicitly opt in well-behaved AI crawlers
+    (GPTBot, ClaudeBot, PerplexityBot) — Phantomline benefits from being
+    discoverable by AI search."""
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Allow: /sw.js\n"
+        "Allow: /static/manifest.json\n"
+        "Allow: /static/\n"
+        "Disallow: /api/\n"
+        "Disallow: /admin/\n"
+        "Disallow: /auth/\n"
+        "Disallow: /account/\n"
+        "Disallow: /*?token=\n"
+        "Disallow: /*?session=\n"
+        "\n"
+        "User-agent: GPTBot\n"
+        "Allow: /\n"
+        "\n"
+        "User-agent: ClaudeBot\n"
+        "Allow: /\n"
+        "\n"
+        "User-agent: PerplexityBot\n"
+        "Allow: /\n"
+        "\n"
+        f"Sitemap: {SITE_URL}/sitemap.xml\n"
+    )
+    response = app.response_class(body, mimetype="text/plain")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    """Generate sitemap.xml from the route registry above. lastmod is
+    set to today on every render — fine for a small site; revisit if we
+    ever add programmatic page generation (then track per-page mtimes)."""
+    today = time.strftime("%Y-%m-%d")
+    urls = "\n".join(
+        f"  <url>\n"
+        f"    <loc>{SITE_URL}{path}</loc>\n"
+        f"    <lastmod>{today}</lastmod>\n"
+        f"    <changefreq>{changefreq}</changefreq>\n"
+        f"    <priority>{priority}</priority>\n"
+        f"  </url>"
+        for (path, priority, changefreq) in _SITEMAP_ROUTES
+    )
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{urls}\n"
+        "</urlset>\n"
+    )
+    response = app.response_class(body, mimetype="application/xml")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
 
 # In-memory job tables. One Python process = one user, so this is fine.
 JOBS = {}
@@ -1624,8 +1732,22 @@ def run_job(job_id, inputs):
 def root():
     """Public root — show the marketing landing page so first-time visitors
     to phantomline.xyz see the pitch and pricing, not the empty studio.
-    Logged-in / returning users hit /app for the actual workspace."""
+    Logged-in / returning users hit /app for the actual workspace.
+
+    PRICING is lazily imported from routes.billing inside the function
+    body to avoid a circular import (routes/billing imports from core,
+    which is imported by server)."""
+    from routes.billing import PRICING
     return render_template("landing.html", pricing=PRICING)
+
+
+@app.route("/pricing")
+def pricing_page():
+    """Dedicated pricing URL — separated from the homepage so /pricing has
+    its own ranking target in search. Mirrors the same PRICING data that
+    drives the landing page's #pricing section."""
+    from routes.billing import PRICING
+    return render_template("pricing.html", pricing=PRICING)
 
 
 @app.route("/app")
