@@ -221,13 +221,19 @@ def _seo_globals():
     }
 
 
-# Public, indexable URLs for the sitemap. Each entry is (path, priority,
-# changefreq). Routes that are app-internal (e.g. /api/*, /app, /studio)
-# stay out — Google should index marketing surfaces, not the workspace.
+# Static portion of the sitemap. Per-competitor /alternatives/<slug>
+# pages are appended dynamically in sitemap_xml() from alternatives.py.
+# Routes that are app-internal (e.g. /api/*, /app, /studio) stay out —
+# Google should index marketing surfaces, not the workspace.
 _SITEMAP_ROUTES = [
-    ("/",         "1.0", "weekly"),
-    ("/pricing",  "0.9", "monthly"),
-    ("/landing",  "0.5", "monthly"),  # legacy alias; lower priority
+    ("/",                              "1.0", "weekly"),
+    ("/pricing",                       "0.9", "monthly"),
+    ("/local-ai-video-generator",      "0.85", "monthly"),
+    ("/alternatives",                  "0.8", "monthly"),
+    ("/about",                         "0.7", "monthly"),
+    ("/privacy",                       "0.4", "yearly"),
+    ("/terms",                         "0.4", "yearly"),
+    ("/landing",                       "0.3", "monthly"),  # legacy alias
 ]
 
 
@@ -269,10 +275,16 @@ def robots_txt():
 
 @app.route("/sitemap.xml")
 def sitemap_xml():
-    """Generate sitemap.xml from the route registry above. lastmod is
-    set to today on every render — fine for a small site; revisit if we
-    ever add programmatic page generation (then track per-page mtimes)."""
+    """Generate sitemap.xml from the static route registry plus the
+    dynamic per-competitor alternative pages. lastmod is set to today on
+    every render — fine for a small site; revisit if we ever add
+    programmatic page generation (then track per-page mtimes)."""
+    from alternatives import COMPETITORS
     today = time.strftime("%Y-%m-%d")
+    routes = list(_SITEMAP_ROUTES)
+    # Each competitor alternative page is a real ranking target.
+    for c in COMPETITORS:
+        routes.append((f"/alternatives/{c['slug']}", "0.7", "monthly"))
     urls = "\n".join(
         f"  <url>\n"
         f"    <loc>{SITE_URL}{path}</loc>\n"
@@ -280,7 +292,7 @@ def sitemap_xml():
         f"    <changefreq>{changefreq}</changefreq>\n"
         f"    <priority>{priority}</priority>\n"
         f"  </url>"
-        for (path, priority, changefreq) in _SITEMAP_ROUTES
+        for (path, priority, changefreq) in routes
     )
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -1748,6 +1760,61 @@ def pricing_page():
     drives the landing page's #pricing section."""
     from routes.billing import PRICING
     return render_template("pricing.html", pricing=PRICING)
+
+
+@app.route("/about")
+def about_page():
+    """Long-form 'who and why' page. Important for E-E-A-T signals and
+    for visitors deciding whether to trust a brand new domain."""
+    return render_template("about.html")
+
+
+@app.route("/privacy")
+def privacy_page():
+    """Privacy policy. Linked from the footer; required content for any
+    site that takes payments or stores user data."""
+    return render_template("privacy.html")
+
+
+@app.route("/terms")
+def terms_page():
+    """Terms of Service. Refund window, license grant, content ownership,
+    governing law. Required content for any site that takes payments."""
+    return render_template("terms.html")
+
+
+@app.route("/alternatives")
+def alternatives_hub():
+    """Hub page listing every competitor we have an alternatives page for.
+    Internal links from here distribute SEO authority to the per-competitor
+    pages — that's the actual ranking-target wedge for a new domain."""
+    from alternatives import COMPETITORS
+    return render_template("alternatives_hub.html", competitors=COMPETITORS)
+
+
+@app.route("/alternatives/<slug>")
+def alternative_page(slug):
+    """Per-competitor alternative page (e.g. /alternatives/submagic).
+    Data lives in alternatives.py; the template is shared but each entry
+    ships unique copy so Google doesn't penalize as thin content."""
+    from alternatives import COMPETITORS_BY_SLUG
+    competitor = COMPETITORS_BY_SLUG.get(slug)
+    if not competitor:
+        return jsonify({"ok": False, "error": "Unknown competitor"}), 404
+    return render_template("alternative.html", competitor=competitor)
+
+
+@app.route("/local-ai-video-generator")
+def pillar_local_ai_video_generator():
+    """Pillar page for the 'local AI video generator' wedge — the broadest
+    keyword Phantomline can realistically rank for as a new domain. Long
+    article (~1900 words) explaining what local AI video generation is,
+    why faceless creators care, and where Phantomline fits.
+
+    Internal-links to: /alternatives, /alternatives/submagic,
+    /alternatives/opus-clip, /pricing, /about. Those interior links pass
+    SEO authority back to the comparison and pricing pages."""
+    return render_template("pillar_local_ai.html")
 
 
 @app.route("/app")

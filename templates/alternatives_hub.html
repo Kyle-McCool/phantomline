@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AI Video Tool Alternatives for Faceless YouTube | Phantomline</title>
+<meta name="description" content="Compare alternatives to Submagic, OpusClip, and other AI video tools for faceless YouTube creators. Local-first workflows with no subscription lock-in." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="AI Video Tool Alternatives for Faceless YouTube | Phantomline" />
+<meta property="og:description" content="Compare alternatives to Submagic, OpusClip, and other tools for faceless YouTube creators." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Alternatives", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "AI Video Tool Alternatives for Faceless YouTube",
+  "description": "Compare alternatives to Submagic, OpusClip, and other AI video tools for faceless YouTube creators.",
+  "url": "{{ canonical_url }}",
+  "hasPart": [
+    {% for c in competitors %}
+    {
+      "@type": "Article",
+      "name": "{{ c.h1 }}",
+      "url": "{{ site_url }}/alternatives/{{ c.slug }}",
+      "headline": "{{ c.h1 }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/">
+      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+      <span class="brand-name">Phantomline</span>
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives" aria-current="page">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article" style="max-width: 920px;">
+      <header class="article-head">
+        <div class="eyebrow">Alternatives</div>
+        <h1>AI Video Tool Alternatives for Faceless YouTube Creators</h1>
+        <p class="article-lede">Faceless YouTube creators get squeezed by tool stacking — script tool, voice tool, captions tool, music tool, scheduler. Each one is a separate subscription. Here's how Phantomline compares to the cloud-only competitors people most often switch from.</p>
+      </header>
+
+      <h2>Why creators look for alternatives</h2>
+      <p>Three pressures push creators off their existing tool stack:</p>
+      <ol>
+        <li><strong>Subscription fatigue.</strong> Once you're paying $20-30/month each for captions, voice, music, and scheduling, you're at $80+/month before you've made a single video. Faceless channels often stay unprofitable for months — that overhead is brutal.</li>
+        <li><strong>Per-render caps and credit limits.</strong> Cloud tools meter generation. The free tier evaporates by mid-month, the next tier up is double the price, and high-volume creators end up gaming the limits or upgrading involuntarily.</li>
+        <li><strong>Privacy + IP concerns.</strong> Your script ideas, your channel analytics, your unfinished videos — all of it sits on someone else's server. For creators researching unique niches or shipping at volume, a local-first workflow is materially better.</li>
+      </ol>
+
+      <h2>Local-first alternatives</h2>
+      <p>Phantomline runs the entire faceless YouTube pipeline on your hardware. Script generation via Ollama (or WebLLM in the browser), narration via Kokoro TTS or Web Speech, music via MusicGen plus a bundled royalty-free pack, captions and visuals layered into the render, and ffmpeg producing the final MP4. Cost per render: zero, after you've installed the models. Privacy: complete — nothing leaves your machine.</p>
+
+      <h2>Comparison list</h2>
+      <p>Detailed comparisons by competitor:</p>
+
+      <div class="alt-grid">
+        {% for c in competitors %}
+        <a class="alt-card" href="/alternatives/{{ c.slug }}">
+          <h3>{{ c.name }} alternative</h3>
+          <p class="alt-card-tag">{{ c.tagline }}</p>
+          <p>{{ c.meta_description }}</p>
+          <span class="alt-card-cta">Compare →</span>
+        </a>
+        {% endfor %}
+      </div>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Does Phantomline replace all of these tools?</summary>
+          <p>For faceless YouTube workflows, mostly yes. Phantomline generates scripts, narration, captions, music, and MP4 exports in one pipeline. Tools focused on a single slice (e.g. captioning existing footage, or clipping podcasts) may still be sharper for that narrow use case — but Phantomline removes the need for a stack of subscriptions.</p>
+        </details>
+        <details>
+          <summary>Why local-first instead of cloud?</summary>
+          <p>Cost and privacy. Cloud AI tools meter usage — every render is a billable event. At faceless-channel volume (30-90 videos/month), that compounds painfully. Local AI runs on hardware you already own, so each render is free after the install. Privacy is the second axis: your scripts and channel analytics never leave your machine.</p>
+        </details>
+        <details>
+          <summary>Which alternative page should I read first?</summary>
+          <p>Pick the one closest to the tool you're currently paying for. If you're on Submagic, start with the Submagic comparison. If you're on OpusClip for clip generation, start there. The comparison is most useful when you're framing the trade-offs against a tool you actually use.</p>
+        </details>
+      </div>
+
+      <p style="margin-top: 32px;"><a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

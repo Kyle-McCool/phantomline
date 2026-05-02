@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Privacy Policy | Phantomline</title>
+<meta name="description" content="How Phantomline handles your data. Short version: scripts, audio, video, and analytics stay on your machine. We collect almost nothing." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Privacy Policy | Phantomline" />
+<meta property="og:description" content="What Phantomline collects, what it doesn't, and how local-first changes the privacy story." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Privacy", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/">
+      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+      <span class="brand-name">Phantomline</span>
+    </a>
+    <div class="navlinks">
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article">
+      <header class="article-head">
+        <div class="eyebrow">Privacy</div>
+        <h1>Privacy Policy</h1>
+        <p class="article-lede">Phantomline is local-first by design. Scripts, audio, video, and channel analytics stay on your machine. We collect almost nothing — and what we do collect, we tell you about here.</p>
+        <p class="article-meta">Last updated: May 2, 2026</p>
+      </header>
+
+      <h2>What stays on your device</h2>
+      <p>When you use Phantomline locally or in the browser, the following never leaves your machine unless you explicitly export or upload it:</p>
+      <ul>
+        <li>Scripts you generate or paste</li>
+        <li>Narration audio (Kokoro on desktop, Web Speech in the browser)</li>
+        <li>Music tracks (the bundled pack and any Web Audio output)</li>
+        <li>Rendered MP4 videos</li>
+        <li>Project library, saved presets, and brand templates</li>
+        <li>Channel analytics CSVs you upload for the insights feature</li>
+        <li>License keys (HMAC-signed and validated offline)</li>
+      </ul>
+
+      <h2>What we collect</h2>
+      <p>The hosted version of Phantomline (phantomline.xyz) collects standard server logs from your browser when you visit pages — IP address, user agent, requested URL, and timestamp. These are kept for 30 days for diagnostic and security purposes and are not used for tracking or advertising.</p>
+      <p>If you enable optional anonymous error telemetry in Settings, the desktop app sends crash and error events to a logging endpoint. This is opt-in. The events do not include your scripts, audio, or video. You can disable it at any time.</p>
+
+      <h2>What we don't collect</h2>
+      <ul>
+        <li>We do not have analytics SDKs from Google, Meta, TikTok, or any ad platform on this site.</li>
+        <li>We do not run pixel trackers.</li>
+        <li>We do not sell, rent, or share user data.</li>
+        <li>We do not train AI models on your content. Your scripts and renders are yours.</li>
+      </ul>
+
+      <h2>Third-party services you may opt in to</h2>
+      <p>Phantomline integrates with several third parties only when you explicitly choose to use them. When you connect any of these, your data flows to that third party under their privacy policy:</p>
+      <ul>
+        <li><strong>YouTube Data API:</strong> when you connect a YouTube channel for publishing or research, requests go directly from your machine to YouTube. We do not proxy or store the OAuth tokens — they live on your device.</li>
+        <li><strong>Pexels API:</strong> if you add a Pexels API key for stock B-roll, requests go directly from your machine to Pexels.</li>
+        <li><strong>Stripe:</strong> when you upgrade to a paid plan, payment processing happens on Stripe's hosted checkout. We never see your card details.</li>
+        <li><strong>Resend:</strong> license delivery emails (one per purchase) are sent through Resend.</li>
+      </ul>
+
+      <h2>Cookies</h2>
+      <p>The marketing site uses no third-party cookies. The studio uses browser localStorage to remember your settings, project library, and license — these never leave your device.</p>
+
+      <h2>Children</h2>
+      <p>Phantomline is not directed at children under 13. We do not knowingly collect data from children.</p>
+
+      <h2>Changes</h2>
+      <p>We may update this policy as the product evolves. The "Last updated" date above always reflects the current version. Material changes will be announced on the homepage and in the changelog.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about privacy or data handling: <a href="mailto:kyle@makko.ai">kyle@makko.ai</a>.</p>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
