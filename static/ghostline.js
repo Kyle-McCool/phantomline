@@ -1802,12 +1802,56 @@ function applyLaunchDemo(key, {openCreate=true} = {}) {
   if (openCreate) document.querySelector('.tab-btn[data-tab="make"]')?.click();
 }
 
+/* Client-side capability detector for the hosted readiness payload.
+ * Server returns status: "check_client" + a client_check key; we run
+ * the matching probe here and resolve the dot color before render so
+ * users never see "checking…" lingering. */
+function _evaluateClientCheck(check) {
+  if (check.status !== 'check_client') return check;
+  const probe = check.client_check;
+  let ok = false;
+  try {
+    if (probe === 'webgpu') {
+      ok = !!(navigator.gpu && typeof navigator.gpu.requestAdapter === 'function');
+    } else if (probe === 'speech_synthesis') {
+      ok = ('speechSynthesis' in window) && Array.isArray(window.speechSynthesis.getVoices?.());
+    } else if (probe === 'ffmpeg_wasm') {
+      ok = (typeof WebAssembly !== 'undefined') && (typeof WebAssembly.instantiate === 'function');
+    }
+  } catch (e) { ok = false; }
+  return {
+    ...check,
+    status: ok ? 'ready' : (check.required ? 'missing' : 'optional'),
+    detail: ok ? (check.ready_detail || check.detail) : (check.missing_detail || check.detail),
+  };
+}
+
 function renderLaunchReadiness(data) {
-  const checks = data.checks || [];
-  $('launchScore').textContent = String(data.score ?? '--');
-  $('launchReadinessText').textContent = data.launch_ready
-    ? 'Core local studio is ready. Optional tools can be connected when needed.'
-    : 'Finish the required setup items before charging through the full workflow.';
+  const isHosted = data.mode === 'hosted';
+  // Resolve any client_check items before deciding score / readiness text,
+  // so the server's "check_client" placeholder never reaches the DOM.
+  const checks = (data.checks || []).map(_evaluateClientCheck);
+  // Hosted score: % of required browser checks that resolved "ready".
+  // Local score: server already computed it.
+  let score;
+  if (isHosted) {
+    const required = checks.filter(c => c.required);
+    const ready = required.filter(c => c.status === 'ready');
+    score = required.length ? Math.round((ready.length / required.length) * 100) : 100;
+  } else {
+    score = data.score;
+  }
+  const launchReady = isHosted
+    ? checks.filter(c => c.required).every(c => c.status === 'ready')
+    : !!data.launch_ready;
+  $('launchScore').textContent = String(score ?? '--');
+  $('launchReadinessText').textContent = isHosted
+    ? (launchReady
+        ? (data.subheadline || 'Browser AI engines ready. No local install needed.')
+        : 'Your browser is missing one of the required engines. Try Chrome, Edge, or another modern Chromium.')
+    : (launchReady
+        ? 'Core local studio is ready. Optional tools can be connected when needed.'
+        : 'Finish the required setup items before charging through the full workflow.');
   $('launchChecks').innerHTML = checks.map(c => {
     const cls = c.status === 'ready' ? 'ready' : (c.status === 'missing' ? 'missing' : 'optional');
     // Render action buttons for any non-ready item that has actions.

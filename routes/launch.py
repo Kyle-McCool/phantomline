@@ -43,6 +43,41 @@ from core import (
 launch_bp = Blueprint("launch", __name__)
 
 
+# ---------------------------------------------------------------------------
+# Hosted vs local mode detection.
+#
+# On localhost, the readiness checklist is the desktop install flow:
+# Ollama, Kokoro voices, Forge, etc. — things the user installs locally.
+#
+# On phantomline.xyz / *.onrender.com, none of that applies — AI inference
+# runs in the user's browser via WebLLM, Web Speech, Web Audio, ffmpeg.wasm.
+# Showing first-time hosted visitors a red "Ollama MISSING" badge confuses
+# them and tanks conversion. So we serve a different checklist tailored to
+# browser engines, with capability detection deferred to the client.
+#
+# Override with ?mode=hosted (or ?mode=local) for previewing the other
+# mode from localhost — useful in dev.
+# ---------------------------------------------------------------------------
+_HOSTED_HOST_SUFFIXES = (".onrender.com", "phantomline.xyz", "phantomline.com", "phantomline.app")
+
+
+def _is_hosted_request() -> bool:
+    """Return True if the request is hitting a hosted (production) domain.
+
+    Order of precedence:
+      1. Explicit ?mode= query override (for dev preview)
+      2. PHANTOMLINE_HOSTED env var (set by deploy targets)
+      3. request.host suffix match against known production domains
+    """
+    mode_override = (request.args.get("mode") or "").strip().lower()
+    if mode_override in ("hosted", "local"):
+        return mode_override == "hosted"
+    if os.environ.get("PHANTOMLINE_HOSTED", "").lower() in ("1", "true", "yes"):
+        return True
+    host = (request.host or "").lower()
+    return any(host == s.lstrip(".") or host.endswith(s) for s in _HOSTED_HOST_SUFFIXES)
+
+
 YOUTUBE_CONNECTION_PATH = OUTPUT_DIR / "publishing" / "youtube_connection.json"
 
 
@@ -65,9 +100,16 @@ def _youtube_connected() -> bool:
 def api_launch_readiness():
     """First-run product readiness checks for non-technical users.
 
-    Each check now ships an `actions` array describing how the user can
-    fix a missing/optional item — install link, CLI command to copy, or
-    a server-side install (e.g. `ollama pull llama3.1`). The frontend
+    Hosted vs local: see _is_hosted_request() above. On hosted we serve a
+    completely different checklist that describes the browser AI stack
+    (WebLLM, Web Speech, Web Audio, ffmpeg.wasm). The browser-side capability
+    checks (status: 'check_client') are evaluated by the frontend on render
+    so we don't pretend the server knows whether the user's browser has
+    WebGPU / SharedArrayBuffer.
+
+    Each check ships an `actions` array describing how the user can fix
+    a missing/optional item — install link, CLI command to copy, or a
+    server-side install (e.g. `ollama pull llama3.1`). The frontend
     renders these as buttons so the checklist is actionable, not just
     diagnostic.
 
@@ -77,6 +119,119 @@ def api_launch_readiness():
       {kind: "pull",     label, value: <action_id>}   POSTs to /api/launch/install
       {kind: "internal", label, value: <target>}      JS-side handler
     """
+    if _is_hosted_request():
+        return _readiness_hosted()
+    return _readiness_local()
+
+
+def _readiness_hosted():
+    """Browser-mode readiness payload. Server doesn't know browser caps,
+    so capability checks are marked status: "check_client" — the JS
+    looks at navigator.gpu, window.speechSynthesis, etc. and updates
+    the dot color before render. Server-side concerns we CAN check
+    (YouTube API, channel insights, demo content) stay the same."""
+    insights = channel_insights.load(BASE_DIR)
+    youtube_api = youtube_research.health()
+    youtube_status = _youtube_connected()
+    projects = PROJECTS.all()[:200]
+    videos = [p for p in projects if p.get("kind") == project_store.KIND_VIDEO]
+    narrations = [p for p in projects if p.get("kind") == project_store.KIND_NARRATION]
+
+    checks = [
+        {
+            "id": "browser_ai",
+            "label": "Browser AI engine",
+            "status": "check_client",
+            "client_check": "webgpu",
+            "required": True,
+            "detail": "Llama 3.2 1B via WebGPU. Detecting browser support…",
+            "ready_detail": "Llama 3.2 1B ready (downloads ~1 GB on first use, cached after).",
+            "missing_detail": "WebGPU not detected. Try Chrome, Edge, or any Chromium-based browser. Safari support is limited.",
+            "actions": [],
+        },
+        {
+            "id": "browser_voice",
+            "label": "Browser voice engine",
+            "status": "check_client",
+            "client_check": "speech_synthesis",
+            "required": True,
+            "detail": "System TTS via Web Speech API. Detecting voices…",
+            "ready_detail": "System TTS available — voices vary by OS and browser.",
+            "missing_detail": "Web Speech API unavailable. Try a modern Chromium or Safari.",
+            "actions": [],
+        },
+        {
+            "id": "browser_music",
+            "label": "Bundled music + Web Audio",
+            "status": "ready",
+            "required": False,
+            "detail": "8-track royalty-free pack ships with the app. Web Audio synthesizes ambient beds.",
+            "actions": [],
+        },
+        {
+            "id": "browser_video",
+            "label": "Browser MP4 renderer",
+            "status": "check_client",
+            "client_check": "ffmpeg_wasm",
+            "required": True,
+            "detail": "ffmpeg.wasm renders MP4 in the browser. Detecting…",
+            "ready_detail": "ffmpeg.wasm ready. Multi-threaded rendering enabled.",
+            "missing_detail": "Browser does not expose WebAssembly. Use a modern browser.",
+            "actions": [],
+        },
+        {
+            "id": "youtube_api",
+            "label": "YouTube research API",
+            "status": "ready" if youtube_api.get("available") else "optional",
+            "required": False,
+            "detail": "Live keyword ranking available" if youtube_api.get("available") else "Optional. SEO works in candidate mode without a key.",
+            "actions": [],
+        },
+        {
+            "id": "youtube",
+            "label": "YouTube publishing",
+            "status": "ready" if youtube_status else "optional",
+            "required": False,
+            "detail": "YouTube connected" if youtube_status else "Optional until you want scheduling/upload.",
+            "actions": ([] if youtube_status else
+                        [{"kind": "internal", "label": "Connect in Publish", "value": "tab:publish"}]),
+        },
+        {
+            "id": "insights",
+            "label": "Channel intelligence",
+            "status": "ready" if insights else "optional",
+            "required": False,
+            "detail": "Analytics are feeding ideas and titles" if insights else "Optional. Upload analytics later for smarter recommendations.",
+            "actions": ([] if insights else
+                        [{"kind": "internal", "label": "Upload analytics CSV", "value": "tab:insights"}]),
+        },
+        {
+            "id": "demo",
+            "label": "Demo workflow",
+            "status": "ready" if videos else "optional",
+            "required": False,
+            "detail": f"{len(videos)} rendered video(s), {len(narrations)} narration(s) saved" if videos or narrations else "No finished videos yet. Load the demo workflow to see what a finished package looks like.",
+            "actions": ([] if videos else
+                        [{"kind": "internal", "label": "Load demo workflow", "value": "demo:reddit"}]),
+        },
+    ]
+    return jsonify({
+        "ok": True,
+        "mode": "hosted",
+        "score": None,  # client computes after capability checks
+        "checks": checks,
+        "headline": "Phantomline browser mode",
+        "subheadline": "Everything below runs on your device — no installs, no Ollama, no Python. Want full local AI with bigger models? Get the desktop app.",
+        "desktop_cta": {
+            "label": "Get the desktop app",
+            "url": "/#workflow",  # TODO: real download page
+        },
+        "launch_ready": False,
+        "blockers": [],
+    })
+
+
+def _readiness_local():
     models = sg.check_ollama()
     # Disambiguate Ollama states:
     #   models is None  -> Ollama daemon unreachable (install/start it)
@@ -221,6 +376,7 @@ def api_launch_readiness():
     blockers = [c for c in required if c.get("status") != "ready"]
     return jsonify({
         "ok": True,
+        "mode": "local",
         "score": score,
         "checks": checks,
         "launch_ready": not blockers,
