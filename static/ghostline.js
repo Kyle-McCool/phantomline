@@ -1810,18 +1810,102 @@ function renderLaunchReadiness(data) {
     : 'Finish the required setup items before charging through the full workflow.';
   $('launchChecks').innerHTML = checks.map(c => {
     const cls = c.status === 'ready' ? 'ready' : (c.status === 'missing' ? 'missing' : 'optional');
+    // Render action buttons for any non-ready item that has actions.
+    // The dataset attributes carry the action's kind/value back to the
+    // delegated click handler below — keeps this template free of
+    // inline JS so escapeHtml does its job and we don't open XSS.
+    const actions = (c.actions || []).map((a, i) => {
+      const primary = i === 0 ? ' primary' : '';
+      const icon = a.kind === 'link' ? '↗' : a.kind === 'copy' ? '⧉' : a.kind === 'pull' ? '⤓' : '→';
+      return `<button type="button" class="launch-action${primary}"
+                data-kind="${escapeHtml(a.kind)}"
+                data-value="${escapeHtml(a.value)}"
+                data-check="${escapeHtml(c.id)}">
+        <span class="launch-action-icon">${icon}</span>
+        <span>${escapeHtml(a.label || '')}</span>
+      </button>`;
+    }).join('');
+    const actionsBlock = actions ? `<div class="launch-check-actions">${actions}</div>` : '';
     return `
-      <div class="launch-check ${cls}">
+      <div class="launch-check ${cls}" data-check-id="${escapeHtml(c.id)}">
         <span class="launch-dot"></span>
         <div>
           <strong>${escapeHtml(c.label || '')}${c.required ? ' *' : ''}</strong>
           <div class="hint">${escapeHtml(c.detail || '')}</div>
+          ${actionsBlock}
         </div>
         <span class="launch-status">${escapeHtml(c.status || '')}</span>
       </div>
     `;
   }).join('');
 }
+
+/* Delegated click handler for the per-check action buttons. Lives outside
+ * renderLaunchReadiness so we attach it once at startup, not on every
+ * re-render (avoids dupe handlers leaking event listeners). */
+async function handleLaunchActionClick(ev) {
+  const btn = ev.target.closest('.launch-action');
+  if (!btn) return;
+  const kind = btn.dataset.kind;
+  const value = btn.dataset.value;
+  const checkId = btn.dataset.check;
+  if (!kind || !value) return;
+
+  if (kind === 'link') {
+    window.open(value, '_blank', 'noopener');
+    return;
+  }
+  if (kind === 'copy') {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast(`Copied: ${value.length > 40 ? value.slice(0, 37) + '...' : value}`);
+    } catch (e) {
+      toast('Copy failed — copy manually: ' + value, true);
+    }
+    return;
+  }
+  if (kind === 'internal') {
+    // Two patterns supported: "tab:<id>" jumps to a top-level tab,
+    // "demo:<id>" loads a demo workflow.
+    if (value.startsWith('tab:')) {
+      const target = value.slice(4);
+      document.querySelector(`.tab-btn[data-tab="${target}"]`)?.click();
+    } else if (value.startsWith('demo:')) {
+      const id = value.slice(5);
+      if (typeof applyLaunchDemo === 'function') applyLaunchDemo(id);
+    }
+    return;
+  }
+  if (kind === 'pull') {
+    // Server-side install (e.g. ollama pull). Disable button, show a
+    // pending state, then re-run readiness on completion so the dot
+    // flips green automatically.
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="launch-action-icon">…</span><span>Installing</span>';
+    try {
+      const r = await fetch('/api/launch/install', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: value}),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        toast(`${checkId} installed — re-checking readiness`);
+        await runLaunchReadinessCheck();
+      } else {
+        toast(d.error || 'Install failed', true);
+        btn.disabled = false;
+        btn.innerHTML = original;
+      }
+    } catch (e) {
+      toast('Install request failed: ' + (e.message || e), true);
+      btn.disabled = false;
+      btn.innerHTML = original;
+    }
+  }
+}
+document.addEventListener('click', handleLaunchActionClick);
 
 async function runLaunchReadinessCheck() {
   const btn = $('launchCheckBtn');

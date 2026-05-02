@@ -1987,6 +1987,52 @@
     font-size: 11px;
     color: var(--muted);
   }
+  /* Per-check action buttons. Render under the hint text only when the
+     check is missing/optional and the backend ships an actions array. */
+  .launch-check-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .launch-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, transform 60ms;
+  }
+  .launch-action:hover {
+    background: rgba(34,231,245,0.08);
+    border-color: rgba(34,231,245,0.35);
+  }
+  .launch-action:active { transform: translateY(1px); }
+  .launch-action[disabled] {
+    opacity: 0.55;
+    cursor: progress;
+  }
+  .launch-action.primary {
+    border-color: rgba(34,231,245,0.55);
+    background: rgba(34,231,245,0.10);
+    color: #baffff;
+  }
+  .launch-action.primary:hover {
+    background: rgba(34,231,245,0.18);
+    border-color: rgba(34,231,245,0.85);
+  }
+  .launch-action-icon {
+    font-size: 13px;
+    line-height: 1;
+    opacity: 0.85;
+  }
   .launch-demo-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
