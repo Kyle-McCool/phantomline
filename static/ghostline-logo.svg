@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Ghostline logo</title>
+  <desc id="desc">A cyan ghost-shaped motion line with a play button face.</desc>
+  <defs>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.12 0 0 0 0 0.95 0 0 0 0 1 0 0 0 0.95 0" result="cyan"/>
+      <feMerge>
+        <feMergeNode in="cyan"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="line" x1="160" y1="800" x2="820" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0aa7b5" stop-opacity="0"/>
+      <stop offset="0.24" stop-color="#22e7f5"/>
+      <stop offset="0.62" stop-color="#a9ffff"/>
+      <stop offset="1" stop-color="#1ee8f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="none"/>
+  <g filter="url(#glow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M176 626c126-32 220-65 281-139 58-71 108-163 203-213 75-40 166-39 223 15 82 79 69 234 16 339-34 68-82 119-131 151" stroke="url(#line)" stroke-width="15"/>
+    <path d="M208 694c130-54 229-100 298-64 54 28 44 87-5 121-61 41-145 72-240 109" stroke="url(#line)" stroke-width="10" opacity="0.9"/>
+    <path d="M302 783c127-44 255-96 375-151" stroke="#22e7f5" stroke-width="8" opacity="0.75"/>
+    <path d="M451 492c55-58 91-106 136-166" stroke="#26f3ff" stroke-width="9" opacity="0.95"/>
+    <path d="M632 354c31 28 57 41 84 45-28 8-56 2-84-45Z" fill="#baffff" stroke="#20e9f5" stroke-width="5"/>
+    <path d="M759 397c29-3 57-18 88-48-9 38-42 55-88 48Z" fill="#baffff" stroke="#20e9f5" stroke-width="5"/>
+    <path d="M611 468l112 62-112 68V468Z" fill="#baffff" fill-opacity="0.16" stroke="#baffff" stroke-width="17"/>
+    <path d="M260 561c133-31 212-25 274 12" stroke="#24eaf6" stroke-width="8" opacity="0.8"/>
+    <path d="M560 820c98-31 183-84 256-155" stroke="#20e9f5" stroke-width="8" opacity="0.75"/>
+  </g>
+</svg>

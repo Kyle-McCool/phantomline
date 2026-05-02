@@ -1,0 +1,43 @@
+{
+  "appId": "fun.ghostline.studio",
+  "appName": "Ghostline",
+  "webDir": "static",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://YOUR-PWA-DOMAIN-HERE.com",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false,
+    "buildOptions": {
+      "keystorePath": "keys/release.keystore",
+      "keystoreAlias": "ghostline-release",
+      "releaseType": "AAB"
+    }
+  },
+  "ios": {
+    "scheme": "Ghostline",
+    "contentInset": "automatic"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 1500,
+      "backgroundColor": "#090b0c",
+      "androidSplashResourceName": "splash",
+      "iosSpinnerStyle": "small"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#090b0c"
+    },
+    "App": {
+      "statusBarHidden": false,
+      "androidStatusBar": {
+        "color": "#090b0c"
+      }
+    }
+  }
+}

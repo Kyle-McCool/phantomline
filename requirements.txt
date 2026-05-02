@@ -1,0 +1,13 @@
+requests>=2.31
+flask>=3.0
+numpy>=1.24
+
+# --- Kokoro TTS ---
+kokoro>=0.9.4
+soundfile>=0.12
+lameenc>=1.7
+
+# --- Music generation (MusicGen via HuggingFace transformers) ---
+# transformers is already pulled in by kokoro, but pin a version that has
+# MusicgenForConditionalGeneration available.
+transformers>=4.42

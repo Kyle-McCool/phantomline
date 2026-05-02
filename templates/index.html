@@ -1,0 +1,1735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Ghostline - Local AI videos without showing your face</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ghostline" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
+<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" />
+<link rel="preconnect" href="https://unpkg.com" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js" defer></script>
+<script src="{{ '/static/engines.js' | versioned }}" defer></script>
+<link rel="stylesheet" href="{{ '/static/ghostline.css' | versioned }}" />
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/landing" title="Open landing page">
+      <img class="brand-logo" src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Ghostline" />
+      <small class="brand-tagline">local AI videos without showing your face</small>
+    </a>
+    <div class="header-actions">
+      <div class="notification-wrap">
+        <button id="notificationBell" class="notification-button" type="button" title="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+          <span id="notificationCount" class="notification-count">0</span>
+        </button>
+        <div id="notificationPanel" class="notification-panel">
+          <div class="notification-head">
+            <strong>Notifications</strong>
+            <div class="notification-actions">
+              <button id="enableDesktopNotificationsBtn" type="button">Desktop</button>
+              <button id="markNotificationsReadBtn" type="button">Mark read</button>
+            </div>
+          </div>
+          <div id="notificationList" class="notification-list"></div>
+        </div>
+      </div>
+      <div id="ollamaBadge" class="ollama-badge"><span class="pulse"></span> <span id="ollamaText">checking ollama...</span></div>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <div class="nav-section">Workflow</div>
+    <button class="tab-btn active" data-tab="launch">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/><path d="M5 19l2-2M17 7l2-2"/></svg></span>
+      Launch Setup
+    </button>
+    <button class="tab-btn" data-tab="make">
+      <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 9l5 3-5 3V9z"/><path d="M4 21h16"/></svg></span>
+      Create Video
+    </button>
+    <button class="tab-btn" data-tab="publish" data-pub-jump="compose">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><path d="M18 14l3 3-3 3M12 17h9"/></svg></span>
+      Publish
+    </button>
+    <button class="tab-btn" data-tab="library">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 7l3-3h5l2 2h8v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+      Library
+    </button>
+    <button class="tab-btn" data-tab="settings">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 3.4-.2-.1a1.7 1.7 0 0 0-1.9.3l-.2.2-3.8-2.2v-.3a1.7 1.7 0 0 0-1.4-1.6l-.3-.1V12l.3-.1a1.7 1.7 0 0 0 1.4-1.6V10l3.8-2.2.2.2a1.7 1.7 0 0 0 1.9.3l.2-.1 2 3.4-.1.1a1.7 1.7 0 0 0-.3 1.9l.1.3z"/></svg></span>
+      Settings
+    </button>
+    <button id="advancedNavToggle" class="tab-btn nav-toggle" type="button">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg></span>
+      Advanced Tools <span class="chev">v</span>
+    </button>
+    <div class="nav-section secondary-nav">Intelligence</div>
+    <button class="tab-btn secondary-nav" data-tab="publish" data-pub-jump="seo">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 5.7-2.3L21 21"/><path d="M8 10h8M8 13h5"/></svg></span>
+      SEO Finder
+    </button>
+    <button class="tab-btn secondary-nav" data-tab="publish" data-pub-jump="analytics">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-9"/></svg></span>
+      Analytics
+    </button>
+    <button class="tab-btn secondary-nav" data-tab="optimize">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 12l4 4 12-12"/><path d="M2 18h20"/></svg></span>
+      Optimize
+    </button>
+    <div class="nav-section secondary-nav">Advanced</div>
+    <button class="tab-btn secondary-nav engine-server-only" data-tab="generate">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 19h16M5 17l8-8 4 4-8 8H5v-4zM13 9l3-3 4 4-3 3"/></svg></span>
+      Long Story
+    </button>
+    <button class="tab-btn secondary-nav" data-tab="short">
+      <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+      Short Script
+    </button>
+    <button class="tab-btn secondary-nav" data-tab="paste">
+      <span class="ico"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></span>
+      Narrate Text
+    </button>
+    <button class="tab-btn secondary-nav engine-server-only" data-tab="music">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+      Music &amp; Mix
+    </button>
+    <button class="tab-btn secondary-nav engine-server-only" data-tab="video">
+      <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 9l5 3-5 3V9z"/></svg></span>
+      Video Studio
+    </button>
+  </div>
+
+  <div id="tab-launch" class="tab-content active">
+    <div class="launch-shell">
+      <section class="panel launch-hero">
+        <div class="make-eyebrow">First-run setup</div>
+        <h2>Get Ghostline ready to ship videos.</h2>
+        <p class="hint">Run one local readiness check, load a proven demo workflow, then create your first faceless short with almost no typing.</p>
+        <div class="launch-score-card">
+          <div>
+            <strong>Launch readiness</strong>
+            <div class="hint" id="launchReadinessText">Checking your local studio...</div>
+          </div>
+          <div class="launch-score" id="launchScore">--</div>
+        </div>
+        <div class="launch-actions">
+          <button id="launchCheckBtn" class="btn" type="button">Run readiness check</button>
+          <button id="launchDemoBtn" class="btn secondary" type="button">Load demo workflow</button>
+          <button id="launchStartBtn" class="btn secondary" type="button">Open Create Video</button>
+        </div>
+        <div class="quality-list" style="margin-top:24px;">
+          <div class="quality-pill">Local scripts</div>
+          <div class="quality-pill">Local voiceover</div>
+          <div class="quality-pill">Captions + music</div>
+          <div class="quality-pill">Publish draft</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="launch-card">
+          <div class="make-section-title"><strong>System checklist</strong><span>required + optional</span></div>
+          <div id="launchChecks">
+            <div class="hint">Run the readiness check to see what is ready on this machine.</div>
+          </div>
+        </div>
+        <div class="launch-card">
+          <div class="make-section-title"><strong>One-click demo workflows</strong><span>fills Create Video</span></div>
+          <div class="launch-demo-grid">
+            <button class="demo-tile" type="button" data-demo="reddit">
+              <strong>Reddit parkour short</strong>
+              <span class="hint">1-minute 9:16 storytime package built for uploaded retention footage.</span>
+            </button>
+            <button class="demo-tile" type="button" data-demo="horror">
+              <strong>Rule horror short</strong>
+              <span class="hint">Loopable scary story using AI scenes if Forge is ready.</span>
+            </button>
+            <button class="demo-tile" type="button" data-demo="survival">
+              <strong>Survival tips host</strong>
+              <span class="hint">Cartoon recurring host with clear action captions.</span>
+            </button>
+            <button class="demo-tile" type="button" data-demo="ai-tool">
+              <strong>AI tool review</strong>
+              <span class="hint">Search-friendly faceless explainer package for software niches.</span>
+            </button>
+          </div>
+          <div class="hint" id="launchDemoStatus" style="margin-top:12px;">Pick a demo to fill the workflow, then render when ready.</div>
+        </div>
+        <div class="launch-card">
+          <div class="make-section-title"><strong>What a paying user needs</strong><span>10/10 target</span></div>
+          <div class="readiness-checklist">
+            <div class="check-chip ok">Ready - core create-to-publish path</div>
+            <div class="check-chip">Next - guided first video and dependency repair</div>
+            <div class="check-chip">Next - pricing/licensing and launch analytics</div>
+          </div>
+        </div>
+        <div class="launch-card">
+          <div class="make-section-title"><strong>Repair + test bench</strong><span>prove the machine works</span></div>
+          <div class="hint">Run a tiny local MP4 render before committing to a full video, or jump straight to the setup area that needs attention.</div>
+          <div class="launch-tool-grid">
+            <button id="launchTestRenderBtn" class="btn secondary" type="button">Test 8-sec render</button>
+            <button id="launchOpenSettingsBtn" class="btn secondary" type="button">Open Settings</button>
+            <button id="launchOpenConnectionsBtn" class="btn secondary" type="button">Connect YouTube</button>
+            <button id="launchUseSourceModeBtn" class="btn secondary" type="button">Use retention footage</button>
+          </div>
+          <div class="hint" id="launchTestStatus" style="margin-top:12px;">No test render yet.</div>
+          <div class="launch-test-result" id="launchTestResult"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="tab-make" class="tab-content">
+    <div class="workflow-grid">
+      <section class="panel make-main-panel">
+        <div class="make-hero">
+          <div>
+            <div class="make-eyebrow">Local creator studio</div>
+            <h2>Make faceless videos from a few clicks</h2>
+            <p class="hint">Pick a format, choose a visual layer, let Ollama shape the hook and title package, then render a narrated MP4 on your own machine.</p>
+            <div class="make-trust-row">
+              <span class="make-trust-pill">Local Ollama scripts</span>
+              <span class="make-trust-pill">No paid APIs</span>
+              <span class="make-trust-pill">Shorts / Reels / TikTok ready</span>
+              <span class="make-trust-pill">Captions + music included</span>
+            </div>
+            <div class="workflow-rail" aria-label="Create workflow">
+              <div class="rail-step"><b>1</b><strong>Format</strong><span>Pick the channel lane.</span></div>
+              <div class="rail-step"><b>2</b><strong>Idea + title</strong><span>Generate the click package.</span></div>
+              <div class="rail-step"><b>3</b><strong>Visuals</strong><span>AI scenes or retention footage.</span></div>
+              <div class="rail-step"><b>4</b><strong>Render</strong><span>Voice, captions, music, MP4.</span></div>
+              <div class="rail-step"><b>5</b><strong>Publish</strong><span>Schedule-ready post draft.</span></div>
+            </div>
+          </div>
+          <div class="make-mini-actions">
+            <button id="makeLoadDemoBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Load Demo</button>
+            <button id="makeSaveBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Save Brand</button>
+            <button id="makeLoadBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Load Brand</button>
+          </div>
+        </div>
+
+        <!-- Channel Insights: persistent analytics + SEO state.
+             When configured, every idea/title generation is automatically
+             informed by the user's actual channel performance data. -->
+        <div id="insightsPanel" class="insights-panel compact">
+          <div class="ip-head">
+            <span class="ip-title">Optional channel intelligence</span>
+            <span class="ip-status" id="insightsStatus">not configured</span>
+          </div>
+          <div id="insightsBody" class="ip-empty">
+            Upload analytics once to make ideas, titles, scripts, SEO, and publish packages follow what already works for your channel.
+          </div>
+          <div class="ip-actions" id="insightsActions">
+            <button type="button" id="insightsImportAnalyticsBtn">Import Overview CSV</button>
+            <button type="button" id="insightsImportTrafficBtn">Import Traffic Sources CSV</button>
+            <button type="button" id="insightsImportSearchBtn">Import Search Terms CSV</button>
+            <button type="button" id="insightsClearBtn" style="margin-left:auto; opacity:0.65;">Clear</button>
+          </div>
+          <input type="file" id="insightsAnalyticsFile" accept=".csv,.tsv" style="display:none;" />
+          <input type="file" id="insightsTrafficFile" accept=".csv,.tsv" style="display:none;" />
+          <input type="file" id="insightsSearchFile" accept=".csv,.tsv" style="display:none;" />
+        </div>
+
+        <div class="make-stage">
+          <div class="make-stage-title">
+            <strong>1. Pick the channel format</strong>
+            <span>One click fills the creative direction.</span>
+          </div>
+          <div class="choice-grid" id="makeRecipeCards">
+            <button class="choice-card" type="button" data-recipe="viral-story"><strong>Viral Story Short</strong><span>Confession, betrayal, horror, or impossible tension in under 45s.</span></button>
+            <button class="choice-card active" type="button" data-recipe="custom"><strong>Custom</strong><span>Flexible faceless video for any niche.</span></button>
+            <button class="choice-card" type="button" data-recipe="scary-story"><strong>Scary story</strong><span>Slow-burn narration with eerie visuals.</span></button>
+            <button class="choice-card" type="button" data-recipe="reddit-story"><strong>Reddit-style</strong><span>Personal conflict, twist, and payoff.</span></button>
+            <button class="choice-card" type="button" data-recipe="survival"><strong>Survival tips</strong><span>Actionable steps with a visual host.</span></button>
+            <button class="choice-card" type="button" data-recipe="mystery"><strong>Mystery doc</strong><span>Facts, theories, and unresolved tension.</span></button>
+            <button class="choice-card" type="button" data-recipe="finance"><strong>Finance</strong><span>Simple money lessons without hype.</span></button>
+            <button class="choice-card" type="button" data-recipe="history"><strong>History</strong><span>Dramatic explainers with clear stakes.</span></button>
+            <button class="choice-card" type="button" data-recipe="kids-edu"><strong>Kids edu</strong><span>Friendly, visual, parent-safe explainers.</span></button>
+            <button class="choice-card" type="button" data-recipe="motivational"><strong>Motivation</strong><span>Punchy emotional shorts.</span></button>
+          </div>
+          <select id="makeRecipe" style="display:none;">
+            <option value="custom" selected>Custom faceless channel</option>
+            <option value="viral-story">Viral Story Short</option>
+            <option value="survival">Survival tips</option>
+            <option value="mystery">Mystery documentary</option>
+            <option value="history">History explainer</option>
+            <option value="kids-edu">Kids educational</option>
+            <option value="tech">Tech explainer</option>
+            <option value="finance">Finance explainer</option>
+            <option value="scary-story">Scary story narration</option>
+            <option value="motivational">Motivational shorts</option>
+            <option value="reddit-story">Reddit-style story</option>
+          </select>
+        </div>
+
+        <div class="make-stage" id="makeViralStage" style="display:none;">
+          <div class="make-stage-title">
+            <strong>Story engine</strong>
+            <span>Ghostline uses this to shape the hook, twist, captions, and loop.</span>
+          </div>
+          <div class="choice-grid" id="makeTensionCards">
+            <button class="choice-card active" type="button" data-tension="betrayal_drama"><strong>Betrayal / Drama</strong><span>Wrong screenshots, hidden phones, secrets.</span></button>
+            <button class="choice-card" type="button" data-tension="confession_secret"><strong>Confession / Secret</strong><span>A private lie or secret finally leaks.</span></button>
+            <button class="choice-card" type="button" data-tension="rule_horror"><strong>Rule Horror</strong><span>A clear rule gets broken.</span></button>
+            <button class="choice-card" type="button" data-tension="impossible_situation"><strong>Impossible Situation</strong><span>A text, person, or event that should not exist.</span></button>
+          </div>
+          <div class="row">
+            <div>
+              <label for="makeTensionFormat">Tension format</label>
+              <select id="makeTensionFormat">
+                <option value="betrayal_drama" selected>Betrayal / Drama</option>
+                <option value="confession_secret">Confession / Secret</option>
+                <option value="rule_horror">Rule-Based Horror</option>
+                <option value="impossible_situation">Impossible Situation</option>
+              </select>
+            </div>
+            <div>
+              <label for="makeLoopType">Loop ending</label>
+              <select id="makeLoopType">
+                <option value="circular" selected>Circular callback</option>
+                <option value="missing-info">Missing information</option>
+                <option value="hard-cut">Fast hard cut</option>
+                <option value="question">Question ending</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="make-stage">
+          <div class="make-stage-title">
+            <strong>2. Generate or choose the idea</strong>
+            <span>Typing is optional.</span>
+          </div>
+          <div class="script-actions" style="margin-top:0;">
+            <button id="makeShuffleIdeaBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Generate Ideas</button>
+            <button id="makeTitleIdeasBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;" disabled data-blocked-reason="Generate and pick an idea first">Generate Titles</button>
+            <span class="hint" id="makeIdeaStatus" style="align-self:center;"></span>
+          </div>
+          <div id="makeIdeaDeck" class="idea-deck"></div>
+          <div id="makeTitleDeck" class="idea-deck"></div>
+          <div class="title-package" id="makeTitlePackage">
+            <label for="makePreferredTitle">Chosen YouTube title</label>
+            <input type="text" id="makePreferredTitle" placeholder="Click a generated title or write your own." />
+          </div>
+          <div class="row">
+            <div>
+              <label for="makePinnedComment">Pinned comment</label>
+              <input type="text" id="makePinnedComment" placeholder="Would you have checked?" />
+            </div>
+            <div>
+              <label for="makeHashtags">Hashtags</label>
+              <input type="text" id="makeHashtags" placeholder="#shorts #storytime #plotwist" />
+            </div>
+          </div>
+          <label for="makeTopic">Selected video idea</label>
+          <textarea id="makeTopic" rows="3">{{ defaults.topic }}</textarea>
+        </div>
+
+        <div class="make-stage">
+          <div class="make-stage-title">
+            <strong>3. Pick the visual layer</strong>
+            <span>Generated art or attention footage.</span>
+          </div>
+          <div class="choice-grid" id="makeVisualSourceCards">
+            <button class="choice-card active" type="button" data-mode="generated"><strong>AI scene images</strong><span>Generate matching local scene stills with Forge.</span></button>
+            <button class="choice-card" type="button" data-mode="source"><strong>Retention footage</strong><span>Use gameplay, parkour, screen recordings, or any background clip.</span></button>
+          </div>
+        </div>
+
+        <div class="make-stage">
+          <div class="make-stage-title">
+            <strong>4. Final render choices</strong>
+            <span>Only the essentials before render.</span>
+          </div>
+        <div class="make-top-grid">
+          <div>
+            <label for="makeVideoMode">Visual source</label>
+            <select id="makeVideoMode">
+              <option value="generated" selected>Generate scene images</option>
+              <option value="source">Use retention/source footage</option>
+            </select>
+          </div>
+          <div>
+            <label for="makeDuration">Length</label>
+            <select id="makeDuration">
+              <option value="70">30 seconds</option>
+              <option value="95">40 seconds</option>
+              <option value="140">1 minute</option>
+              <option value="280" selected>2 minutes</option>
+              <option value="700">5 minutes</option>
+              <option value="1400">10 minutes</option>
+              <option value="2800">20 minutes</option>
+              <option value="4200">30 minutes</option>
+              <option value="8400">60 minutes</option>
+            </select>
+            <div id="makeDurationHint" class="hint" style="margin-top:6px;">Short-form mode.</div>
+          </div>
+          <div>
+            <label for="makeAspect">Video ratio</label>
+            <select id="makeAspect">
+              <option value="16:9" selected>16:9 YouTube</option>
+              <option value="9:16">9:16 Shorts / TikTok</option>
+              <option value="1:1">1:1 square</option>
+            </select>
+          </div>
+        </div>
+        </div>
+
+        <div id="makeSourceVideoPanel" class="make-section" style="display:none;">
+          <div class="make-section-title">
+            <strong>3b. Source video</strong>
+            <span>Gameplay, parkour, clips, screen recordings.</span>
+          </div>
+          <label for="makeSourceVideoFile">Source video</label>
+          <input type="file" id="makeSourceVideoFile" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-msvideo,video/x-matroska" />
+          <div class="row">
+            <div>
+              <label for="makeSourceFit">Video fit</label>
+              <select id="makeSourceFit">
+                <option value="cover" selected>Fill frame / crop</option>
+                <option value="contain">Fit full video / black bars</option>
+              </select>
+            </div>
+            <div>
+              <label for="makeCaptions">Captions</label>
+              <select id="makeCaptions">
+                <option value="1" selected>Burn in captions</option>
+                <option value="0">No captions</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="makeCaptionStyle">Caption style</label>
+              <select id="makeCaptionStyle">
+                <option value="tiktok" selected>TikTok bold</option>
+                <option value="clean">Clean lower-third</option>
+                <option value="horror">Mystery / horror</option>
+                <option value="kids">Kids cartoon</option>
+                <option value="documentary">Documentary</option>
+              </select>
+            </div>
+            <div>
+              <label for="makePatternInterrupts">Pattern interrupts</label>
+              <select id="makePatternInterrupts">
+                <option value="1" selected>Every few seconds</option>
+                <option value="0">Off</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="makeSourceEnhance">Source enhancer</label>
+              <select id="makeSourceEnhance">
+                <option value="vivid" selected>Vivid short-form</option>
+                <option value="warm">Warm</option>
+                <option value="dark">Dark mystery</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div>
+              <label for="makeTitleStyle">Title style</label>
+              <select id="makeTitleStyle">
+                <option value="top" selected>Top badge</option>
+                <option value="none">No title overlay</option>
+              </select>
+            </div>
+          </div>
+          <div class="hint" id="makeSourceVideoStatus" style="margin-top:6px;">Upload gameplay, parkour, drone footage, screen recordings, or any clip you want narrated.</div>
+        </div>
+
+        <details class="advanced-box">
+          <summary>Advanced creative controls</summary>
+          <div class="advanced-inner">
+        <div class="make-section">
+          <div class="make-section-title">
+            <strong>Advanced audience and script</strong>
+            <span>Defines the hook, voice, and pacing.</span>
+          </div>
+
+        <div class="row">
+          <div>
+            <label for="makeNiche">Niche</label>
+            <input type="text" id="makeNiche" value="{{ defaults.genre }}" />
+          </div>
+          <div>
+            <label for="makeAudience">Audience</label>
+            <input type="text" id="makeAudience" value="curious general viewers" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="makeFormat">Video format</label>
+            <select id="makeFormat">
+              <option value="story">Narrated story</option>
+              <option value="listicle">Listicle</option>
+              <option value="tutorial">Step-by-step tutorial</option>
+              <option value="documentary">Mini documentary</option>
+              <option value="explainer">Explainer</option>
+              <option value="short-hook">Short-form hook</option>
+              <option value="viral-short">Viral story short</option>
+            </select>
+          </div>
+          <div>
+            <label for="makeModel">Ollama model</label>
+            <select id="makeModel"><option value="{{ defaults.model }}">{{ defaults.model }}</option></select>
+          </div>
+        </div>
+
+        <label for="makeDesc">Script direction</label>
+        <textarea id="makeDesc" rows="3">Open with a strong hook, keep each section visual, avoid filler, and write for a single narrator.</textarea>
+
+        <div class="row">
+          <div>
+            <label for="makeHookStyle">Hook style</label>
+            <select id="makeHookStyle">
+              <option value="mistake" selected>Mistake warning</option>
+              <option value="question">Shocking question</option>
+              <option value="secret">Most people don't know</option>
+              <option value="cold-open">Visual cold open</option>
+              <option value="countdown">Countdown / list</option>
+              <option value="conflict">Story conflict</option>
+            </select>
+          </div>
+          <div>
+            <label for="makeKeywordMode">Keyword emphasis</label>
+            <select id="makeKeywordMode">
+              <option value="auto" selected>Auto highlight</option>
+              <option value="minimal">Minimal</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="makeVoice">Voice</label>
+            <select id="makeVoice"></select>
+          </div>
+          <div>
+            <label for="makeTone">Narration tone</label>
+            <input type="text" id="makeTone" value="{{ defaults.tone }}" />
+          </div>
+        </div>
+        </div>
+
+        <div class="make-section">
+          <div class="make-section-title">
+            <strong>Advanced visual identity</strong>
+            <span>Controls platform format and brand look.</span>
+          </div>
+
+        <div class="row">
+          <div>
+            <label for="makeSceneSeconds">Seconds per scene</label>
+            <input type="number" id="makeSceneSeconds" min="4" max="12" step="1" value="8" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="makeVisualPreset">Visual style</label>
+            <select id="makeVisualPreset">
+              <option value="cinematic-photoreal" selected>Cinematic photoreal</option>
+              <option value="animated-film">Animated film</option>
+              <option value="storybook">Storybook illustration</option>
+              <option value="cartoon">Clean cartoon</option>
+              <option value="survival-channel">Survival tips channel</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div>
+            <label for="makeAmbience">Ambience</label>
+            <input type="text" id="makeAmbience" value="night mist, soft blue moonlight, calm suspense" />
+          </div>
+        </div>
+
+        <label for="makeVisualStyle">Style details</label>
+        <input type="text" id="makeVisualStyle" value="dark cinematic sci-fi, atmospheric fog, soft contrast, film grain" />
+
+        <label for="makeVisualCharacter">Recurring character / host</label>
+        <input type="text" id="makeVisualCharacter" placeholder="Example: a small friendly backpacker host demonstrating each survival tip, orange jacket, simple readable silhouette" />
+        </div>
+
+        <div class="make-section">
+          <div class="make-section-title">
+            <strong>Advanced sound and retention</strong>
+            <span>Music and the quality checks that stop the scroll.</span>
+          </div>
+        <label for="makeMusicPrompt">Music bed</label>
+        <textarea id="makeMusicPrompt" rows="2">calm cinematic ambient pad, distant piano, low strings, soft reverb, no drums, sleep-friendly, slow tempo</textarea>
+        <div class="quality-list">
+          <div class="quality-pill">Hook in first 3 seconds</div>
+          <div class="quality-pill">9:16 export for short-form</div>
+          <div class="quality-pill">Captions inside safe area</div>
+          <div class="quality-pill">Motion/pattern change every few seconds</div>
+        </div>
+        </div>
+          </div>
+        </details>
+
+        <button id="makeVideoBtn" class="btn">5. Render Video</button>
+        <button id="makeCancelBtn" class="btn secondary" type="button" style="display:none; margin-left:8px;" data-blocked-reason="No render in progress">Stop watching</button>
+        <div class="hint" style="margin-top:10px;">
+          For 20+ minute videos, Ghostline writes the script in sections, then narrates, scores, mixes, and timelines the full audio. Draft renders now use scene motion clips when present, then still images, and only fall back to cards for missing scenes.
+        </div>
+      </section>
+
+      <section class="panel make-studio-panel">
+        <div class="studio-head">
+          <div>
+            <h2>Studio Preview</h2>
+            <div class="hint">A live read on the video package you are building.</div>
+          </div>
+          <div class="studio-live">Local</div>
+        </div>
+
+        <div class="studio-preview-card">
+          <div class="phone-preview">
+            <div class="phone-preview-inner" id="makePhonePreviewInner" data-platform="tiktok">
+              <video id="makePhonePreviewVideo" class="phone-preview-video" controls playsinline></video>
+              <div class="platform-ui" id="makePlatformUi" aria-hidden="true">
+                <div class="platform-status"><span>9:41</span><span class="status-icons">||| WiFi []</span></div>
+                <div class="platform-tabs"><span>Explore</span><span>Following</span><strong>For You</strong></div>
+                <div class="platform-top-left">Q</div>
+                <div class="platform-top-icons"><span>Q</span><span>...</span></div>
+                <div class="platform-actions" id="makePlatformActions">
+                  <div class="platform-action"><span class="icon" data-icon="profile"></span><small>2.8M</small></div>
+                  <div class="platform-action"><span class="icon" data-icon="like"></span><small>2.8M</small></div>
+                  <div class="platform-action"><span class="icon" data-icon="chat"></span><small>2.8M</small></div>
+                  <div class="platform-action"><span class="icon" data-icon="send"></span><small>2.8M</small></div>
+                </div>
+                <div class="platform-meta-block" id="makePlatformMeta">
+                  <strong>@your_channel</strong>
+                  <span>Caption safe preview. Keep subtitles out of app buttons.</span>
+                </div>
+                <div class="caption-safe-guide"></div>
+              </div>
+              <div class="preview-title" id="makePreviewTitle">Ghostline short</div>
+              <div class="preview-caption" id="makePreviewCaption">Pick a <span>hook</span></div>
+              <div class="preview-meta">
+                <span id="makePreviewRatio">9:16</span>
+                <span id="makePreviewMeta">Local render</span>
+              </div>
+            </div>
+          </div>
+          <div class="platform-preview-toggle" id="makePlatformPreviewToggle">
+            <button type="button" class="active" data-platform="tiktok">TikTok</button>
+            <button type="button" data-platform="shorts">Shorts</button>
+            <button type="button" data-platform="reels">Reels</button>
+          </div>
+          <div class="studio-specs">
+            <div class="studio-spec"><span>Format</span><strong id="makeSpecFormat">Custom</strong></div>
+            <div class="studio-spec"><span>Visuals</span><strong id="makeSpecVisual">AI scenes</strong></div>
+            <div class="studio-spec"><span>Length</span><strong id="makeSpecLength">2 min</strong></div>
+          </div>
+        </div>
+
+        <div class="readiness-card">
+          <div class="readiness-top">
+            <div>
+              <strong>Video readiness</strong>
+              <div class="hint" style="margin-top:2px;">Quality gates before rendering.</div>
+            </div>
+            <div class="readiness-score" id="makeReadinessScore">0</div>
+          </div>
+          <div class="readiness-items" id="makeReadinessItems"></div>
+        </div>
+        <div class="next-action-card">
+          <div class="make-section-title">
+            <div>
+              <strong>Next best action</strong>
+              <div class="hint" id="makeNextActionText">Load a demo or generate ideas to begin.</div>
+            </div>
+          </div>
+          <button id="makeNextActionBtn" class="btn secondary" type="button">Start</button>
+        </div>
+
+        <h2 style="margin-top:18px;">Production line</h2>
+        <div class="workflow-steps">
+          <div class="workflow-step" id="makeStepScript">
+            <div class="num">1</div><div><strong>Script</strong><span>Write the voiceover.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepNarration">
+            <div class="num">2</div><div><strong>Narration</strong><span>Generate voice audio locally.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepScenes">
+            <div class="num">3</div><div><strong>Visuals</strong><span>Generate scene art or prepare source video.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepMusic">
+            <div class="num">4</div><div><strong>Music</strong><span>Create a background bed.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepMix">
+            <div class="num">5</div><div><strong>Mix</strong><span>Ducks music under narration.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepTimeline">
+            <div class="num">6</div><div><strong>Timeline</strong><span>Match scenes to audio length.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepVideo">
+            <div class="num">7</div><div><strong>Video</strong><span>Render MP4.</span></div><div class="state">waiting</div>
+          </div>
+        </div>
+
+        <div id="makeResult" class="make-result">
+          <h2 style="margin-top:0;">Video ready</h2>
+          <div class="handoff-card" id="makeHandoffCard">
+            <strong>Finish the launch package</strong>
+            <div class="hint">Preview the MP4, check the publish draft, then schedule or upload from Publish Studio.</div>
+            <div class="readiness-checklist" id="makeHandoffChecklist"></div>
+            <div class="handoff-actions">
+              <button class="btn secondary" id="makePreviewFinalBtn" type="button">Preview final video</button>
+              <button class="btn secondary" id="makePublishDraftBtn" type="button">Review publish draft</button>
+            </div>
+          </div>
+          <div class="script-actions">
+            <button class="btn secondary" id="makeDownloadVideoBtn">Download MP4</button>
+            <button class="btn secondary" id="makeOpenPublishBtn">Review publish draft</button>
+            <button class="btn secondary" id="makeOpenLibraryBtn">Open Library</button>
+            <button class="btn secondary" id="makeOpenAdvancedBtn">Edit scenes</button>
+          </div>
+          <video id="makePreviewVideo" controls></video>
+          <p class="hint" id="makeResultHint"></p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="tab-generate" class="tab-content">
+  <div class="grid">
+    <!-- LEFT: Form -->
+    <section class="panel">
+      <h2>Story input</h2>
+      <div class="advanced-banner"><strong>Advanced manual tool</strong>Most users should start with Create Video. Use this when you only want a long script or narration source.</div>
+
+      <label for="topic">Story idea / topic</label>
+      <textarea id="topic" rows="4">{{ defaults.topic }}</textarea>
+
+      <label for="genre">Genre</label>
+      <input type="text" id="genre" value="{{ defaults.genre }}" />
+      <div class="hint">Click to use:</div>
+      <div id="genreChips">
+        {% for g in defaults.genres %}<span class="tag" data-g="{{ g }}">{{ g }}</span>{% endfor %}
+      </div>
+
+      <label for="tone">Tone</label>
+      <input type="text" id="tone" value="{{ defaults.tone }}" />
+
+      <div class="row">
+        <div>
+          <label for="words">Target word count</label>
+          <input type="number" id="words" min="500" step="500" value="{{ defaults.words }}" />
+        </div>
+        <div>
+          <label for="model">Ollama model</label>
+          <select id="model">
+            <option value="{{ defaults.model }}">{{ defaults.model }}</option>
+          </select>
+          <div class="hint">Falls back to text if Ollama is unreachable.</div>
+        </div>
+      </div>
+
+      <button id="startBtn" class="btn">Generate Story</button>
+      <div class="hint" style="margin-top:10px;">
+        Section-by-section generation with rolling context. A 10,000-word story typically takes 5–15 minutes depending on the model and your hardware.
+      </div>
+    </section>
+
+    <!-- RIGHT: Dashboard (idle) / Status (running) -->
+    <section class="panel" id="genRight">
+      <!-- IDLE DASHBOARD -->
+      <div id="genIdle" class="dashboard">
+        <div class="hero-card">
+          <h2>What would you like to make?</h2>
+          <p>Pick a starting point. You can edit any field afterwards.</p>
+          <div class="hero-choices">
+            <button class="hero-choice" data-go="generate">
+              <span class="hc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16M5 17l8-8 4 4-8 8H5v-4zM13 9l3-3 4 4-3 3"/></svg></span>
+              <div><strong>Long story</strong><span class="hint">10,000 word narration with rolling memory.</span></div>
+            </button>
+            <button class="hero-choice" data-go="short">
+              <span class="hc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <div><strong>Short script</strong><span class="hint">30s to 10min, ready to film.</span></div>
+            </button>
+            <button class="hero-choice" data-go="paste">
+              <span class="hc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></span>
+              <div><strong>Narrate text</strong><span class="hint">Turn any book or script into audio.</span></div>
+            </button>
+            <button class="hero-choice" data-go="music">
+              <span class="hc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+              <div><strong>Music &amp; mix</strong><span class="hint">Score and mix into one MP3.</span></div>
+            </button>
+            <button class="hero-choice" data-go="video">
+              <span class="hc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 9l5 3-5 3V9z"/></svg></span>
+              <div><strong>Video plan</strong><span class="hint">Break a script into scenes and local visual prompts.</span></div>
+            </button>
+          </div>
+        </div>
+
+        <div class="recent-strip">
+          <h3>Recent work</h3>
+          <div class="recent-row" id="recentRow">
+            <div class="empty-state" style="padding:30px 14px;">
+              <div class="big">📖</div>
+              <h3 style="margin:0;">Nothing here yet</h3>
+              <p style="margin:6px 0 0;">Your finished projects will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKING (visible while a job is running) -->
+      <div id="genWorking" style="display:none;">
+        <h2 class="eyebrow">Status</h2>
+
+        <div id="titleDisplay" class="title-display empty">Starting...</div>
+
+        <div class="status-grid">
+          <div class="stat">
+            <div class="label">Section</div>
+            <div class="value" id="sectionStat">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Words written</div>
+            <div class="value" id="wordsStat">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Status</div>
+            <div class="value" id="statusStat" style="font-size:14px;">idle</div>
+          </div>
+        </div>
+
+        <div class="progress"><div id="progressBar"></div></div>
+
+        <div class="log" id="log"><span class="line"><span class="t">·</span>Awaiting input.</span></div>
+      </div>
+
+      <div id="scriptOutput" class="script-output">
+        <h2 style="margin-top:22px;">Final script</h2>
+        <textarea id="scriptText"></textarea>
+        <div class="script-actions">
+          <button class="btn secondary" id="copyBtn">Copy to clipboard</button>
+          <button class="btn secondary" id="downloadBtn">Download .txt</button>
+          <button class="btn secondary" id="scriptVideoBtn">Send to Video Studio</button>
+          <span class="hint" id="savedPathHint" style="margin-left:auto;align-self:center;"></span>
+        </div>
+
+        <h2 style="margin-top:28px;">Narration audio (Kokoro TTS)</h2>
+        <div class="row">
+          <div>
+            <label for="voice">Voice</label>
+            <select id="voice"></select>
+          </div>
+          <div>
+            <label for="speed">Speed: <span id="speedVal">1.00x</span></label>
+            <input type="range" id="speed" min="0.7" max="1.3" step="0.05" value="1.0" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="audioFmt">Format</label>
+            <select id="audioFmt">
+              <option value="mp3" selected>MP3 (smaller, recommended)</option>
+              <option value="wav">WAV (lossless, larger)</option>
+            </select>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="ttsBtn" class="btn">Generate audio</button>
+          </div>
+        </div>
+        <div class="hint">
+          Edits to the script above are sent to Kokoro. First run downloads the model (~330 MB).
+          Long stories take several minutes - synthesis runs locally on your machine.
+        </div>
+
+        <div id="ttsPanel" class="tts-panel" style="display:none;">
+          <div class="status-grid" style="margin-top:14px;">
+            <div class="stat">
+              <div class="label">TTS status</div>
+              <div class="value" id="ttsStatus" style="font-size:14px;">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Segment</div>
+              <div class="value" id="ttsSegment">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Characters</div>
+              <div class="value" id="ttsChars" style="font-size:14px;">0</div>
+            </div>
+          </div>
+          <div class="progress"><div id="ttsProgress"></div></div>
+          <audio id="ttsAudio" controls style="width:100%; margin-top:8px; display:none;"></audio>
+          <div class="script-actions">
+            <button class="btn secondary" id="ttsDownloadBtn" disabled data-blocked-reason="Generate audio first">Download audio</button>
+            <span class="hint" id="ttsPathHint" style="margin-left:auto;align-self:center;"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+
+  <div id="tab-short" class="tab-content">
+    <section class="panel">
+      <h2>Short script</h2>
+      <div class="advanced-banner"><strong>Advanced manual tool</strong>Create Video already builds scripts, narration, captions, music, and MP4. Use this for standalone short scripts or experiments.</div>
+      <p class="hint" style="margin-top:0;">
+        One-shot generator for short-form videos. Pick a duration; the script comes back as a single tight scene with a hook and a haunting close.
+      </p>
+
+      <label>Duration</label>
+      <div id="durButtons" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+        <button class="dur-btn" data-words="70"   data-label="30s">30s · 70 words</button>
+        <button class="dur-btn" data-words="105"  data-label="45s">45s · 105 words</button>
+        <button class="dur-btn" data-words="140"  data-label="1m">1 min · 140 words</button>
+        <button class="dur-btn active" data-words="280" data-label="2m">2 min · 280 words</button>
+        <button class="dur-btn" data-words="420"  data-label="3m">3 min · 420 words</button>
+        <button class="dur-btn" data-words="700"  data-label="5m">5 min · 700 words</button>
+        <button class="dur-btn" data-words="1400" data-label="10m">10 min · 1400 words</button>
+      </div>
+      <div class="hint" style="margin-top:0;">Word counts assume ~140 wpm narration.</div>
+
+      <label>Niche presets (Viral Shorts Playbook)</label>
+      <div id="nicheChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
+      <div class="hint">Click a niche to pre-fill the topic + style description below.</div>
+
+      <label for="shortTopic">Story idea / topic</label>
+      <textarea id="shortTopic" rows="3">{{ defaults.topic }}</textarea>
+
+      <label for="shortDesc">Describe the script (style, voice, pacing, hook angle)</label>
+      <textarea id="shortDesc" rows="3" placeholder="e.g. cold-open hook, rising dread, single-narrator voiceover, end on an unanswered question"></textarea>
+
+      <div class="row">
+        <div>
+          <label for="shortGenre">Genre</label>
+          <input type="text" id="shortGenre" value="{{ defaults.genre }}" />
+        </div>
+        <div>
+          <label for="shortTone">Tone</label>
+          <input type="text" id="shortTone" value="{{ defaults.tone }}" />
+        </div>
+      </div>
+      <div id="shortGenreChips" style="margin-top:4px;">
+        {% for g in defaults.genres %}<span class="tag" data-target="shortGenre" data-g="{{ g }}">{{ g }}</span>{% endfor %}
+      </div>
+
+      <label for="shortModel">Ollama model</label>
+      <select id="shortModel">
+        <option value="{{ defaults.model }}">{{ defaults.model }}</option>
+      </select>
+
+      <button id="shortBtn" class="btn">Generate Short Script</button>
+
+      <div id="shortStatusPanel" style="display:none; margin-top:18px;">
+        <div id="shortTitleDisplay" class="title-display empty">Working…</div>
+        <div class="status-grid">
+          <div class="stat">
+            <div class="label">Status</div>
+            <div class="value" id="shortStatus" style="font-size:14px;">starting</div>
+          </div>
+          <div class="stat">
+            <div class="label">Words</div>
+            <div class="value" id="shortWords">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Target</div>
+            <div class="value" id="shortTarget">-</div>
+          </div>
+        </div>
+        <div class="progress"><div id="shortProgress"></div></div>
+        <div id="shortNextActions" class="script-actions" style="display:none; margin-top:16px;">
+          <button class="btn secondary" id="shortShowScriptBtn">Show script</button>
+          <button class="btn secondary" id="shortNarrateTopBtn">Narrate</button>
+          <button class="btn secondary" id="shortVideoTopBtn">Video Studio</button>
+          <button class="btn" id="shortProductionBtn" style="width:auto; margin-top:0;">Build Production Kit</button>
+        </div>
+        <div class="hint" id="shortProductionHint" style="display:none; margin-top:10px;"></div>
+      </div>
+
+      <div id="shortOutput" class="script-output">
+        <h2 style="margin-top:22px;">Final script</h2>
+        <textarea id="shortScriptText"></textarea>
+        <div class="script-actions">
+          <button class="btn secondary" id="shortCopyBtn">Copy</button>
+          <button class="btn secondary" id="shortDownloadBtn">Download .txt</button>
+          <button class="btn secondary" id="shortNarrateBtn">Send to Narrate tab →</button>
+          <button class="btn secondary" id="shortVideoBtn">Send to Video Studio</button>
+          <span class="hint" id="shortPathHint" style="margin-left:auto;align-self:center;"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="tab-paste" class="tab-content">
+    <section class="panel">
+      <h2>Narrate your own text</h2>
+      <div class="advanced-banner"><strong>Advanced manual tool</strong>Use this when you already have a script and only need local voiceover audio.</div>
+      <p class="hint" style="margin-top:0;">
+        Paste any script, story, or article. Kokoro will narrate it locally and produce a downloadable MP3.
+      </p>
+
+      <label for="pasteTitle">Output filename</label>
+      <input type="text" id="pasteTitle" placeholder="my_narration" value="narration" />
+
+      <label for="pasteText">Text to narrate</label>
+      <textarea id="pasteText" class="paste-text" placeholder="Paste your story here..."></textarea>
+      <div class="hint" id="pasteCount" style="margin-top:6px;">0 characters · 0 words</div>
+
+      <div class="row">
+        <div>
+          <label for="pasteVoice">Voice</label>
+          <select id="pasteVoice"></select>
+        </div>
+        <div>
+          <label for="pasteSpeed">Speed: <span id="pasteSpeedVal">1.00x</span></label>
+          <input type="range" id="pasteSpeed" min="0.7" max="1.3" step="0.05" value="1.0" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="pasteFmt">Format</label>
+          <select id="pasteFmt">
+            <option value="mp3" selected>MP3 (smaller, recommended)</option>
+            <option value="wav">WAV (lossless, larger)</option>
+          </select>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="pasteBtn" class="btn">Generate audio</button>
+        </div>
+      </div>
+
+      <div id="pastePanel" style="display:none; margin-top:16px;">
+        <div class="status-grid">
+          <div class="stat">
+            <div class="label">Status</div>
+            <div class="value" id="pasteStatus" style="font-size:14px;">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Segment</div>
+            <div class="value" id="pasteSegment">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Characters</div>
+            <div class="value" id="pasteChars" style="font-size:14px;">0</div>
+          </div>
+        </div>
+        <div class="progress"><div id="pasteProgress"></div></div>
+        <audio id="pasteAudio" controls style="width:100%; margin-top:8px; display:none;"></audio>
+        <div class="script-actions">
+          <button class="btn secondary" id="pasteDownloadBtn" disabled data-blocked-reason="Generate audio first">Download audio</button>
+          <span class="hint" id="pastePathHint" style="margin-left:auto;align-self:center;"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="tab-video" class="tab-content">
+    <section class="panel">
+      <h2>Video Studio</h2>
+      <div class="advanced-banner"><strong>Advanced manual tool</strong>Create Video handles the normal end-to-end path. Use Video Studio when you want to edit plans, timelines, or render settings by hand.</div>
+      <p class="hint" style="margin-top:0;">
+        Turn a finished narration script into a timed visual plan. Ghostline will use matching scene motion clips or still images when you render the draft MP4, and only use fallback cards for scenes with no media yet.
+      </p>
+
+      <label for="videoTitle">Video title</label>
+      <input type="text" id="videoTitle" placeholder="The Silent Watchers in the Darkening Skies" />
+
+      <label for="videoScript">Narration script</label>
+      <textarea id="videoScript" class="paste-text" placeholder="Paste a Ghostline script here, or send one from Long Story / Short Script."></textarea>
+      <div class="hint" id="videoCount" style="margin-top:6px;">0 words</div>
+
+      <div class="row">
+        <div>
+          <label for="videoWorkflow">Workflow</label>
+          <select id="videoWorkflow">
+            <option value="image-to-video" selected>Image to video (recommended)</option>
+            <option value="text-to-video">Text to video</option>
+            <option value="image-only">Image only / Ken Burns edit</option>
+          </select>
+        </div>
+        <div>
+          <label for="videoAspect">Aspect</label>
+          <select id="videoAspect">
+            <option value="16:9" selected>16:9 YouTube</option>
+            <option value="9:16">9:16 Shorts</option>
+            <option value="1:1">1:1 square test</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="videoSceneSeconds">Seconds per scene</label>
+          <input type="number" id="videoSceneSeconds" min="4" max="12" step="1" value="8" />
+        </div>
+        <div>
+          <label for="videoVisualPreset">Visual style</label>
+          <select id="videoVisualPreset">
+            <option value="cinematic-photoreal" selected>Cinematic photoreal</option>
+            <option value="animated-film">Animated film</option>
+            <option value="storybook">Storybook illustration</option>
+            <option value="cartoon">Clean cartoon</option>
+            <option value="survival-channel">Survival tips channel</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="videoStyle">Style details</label>
+          <input type="text" id="videoStyle" value="dark cinematic sci-fi, atmospheric fog, soft contrast, film grain" />
+        </div>
+        <div>
+          <label for="videoAmbience">Ambience</label>
+          <input type="text" id="videoAmbience" value="night mist, soft blue moonlight, calm suspense" />
+        </div>
+      </div>
+
+      <label for="videoVisualCharacter">Recurring character / host</label>
+      <input type="text" id="videoVisualCharacter" placeholder="Example: a small friendly backpacker host demonstrating each survival tip, orange jacket, simple readable silhouette" />
+
+      <div class="row">
+        <div>
+          <label for="videoImageProvider">Scene image source</label>
+          <select id="videoImageProvider">
+            <option value="forge" selected>Local Forge + FLUX</option>
+            <option value="none">Manual assets only</option>
+          </select>
+        </div>
+        <div>
+          <label for="videoImageQuality">Image quality</label>
+          <select id="videoImageQuality">
+            <option value="high" selected>high</option>
+            <option value="medium">medium</option>
+            <option value="low">low</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="videoForgeUrl">Forge URL</label>
+          <input type="text" id="videoForgeUrl" value="http://127.0.0.1:7861" />
+        </div>
+        <div>
+          <label for="videoForgeCheckpoint">Forge checkpoint</label>
+          <input type="text" id="videoForgeCheckpoint" value="flux1-dev-bnb-nf4-v2.safetensors" />
+        </div>
+      </div>
+      <div class="hint" style="margin-top:6px;">
+        Local Forge generation creates real per-scene stills and saves them into the timeline project's <code>visuals</code> folder before rendering the MP4.
+      </div>
+
+      <button id="videoPlanBtn" class="btn">Create Video Plan</button>
+
+      <div id="videoPlanPanel" style="display:none; margin-top:18px;">
+        <div class="status-grid">
+          <div class="stat">
+            <div class="label">Scenes</div>
+            <div class="value" id="videoSceneCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Runtime</div>
+            <div class="value" id="videoRuntime" style="font-size:14px;">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Visuals</div>
+            <div class="value" id="videoBackendLabel" style="font-size:14px;">Local Forge</div>
+          </div>
+        </div>
+        <div class="script-actions">
+          <button class="btn secondary" id="videoCopyBtn">Copy prompts</button>
+          <button class="btn secondary" id="videoDownloadPlanBtn" disabled data-blocked-reason="Generate the scene plan first">Download plan JSON</button>
+          <button class="btn secondary" id="videoDownloadPromptsBtn" disabled data-blocked-reason="Generate the scene plan first">Download prompts</button>
+          <span class="hint" id="videoPathHint" style="margin-left:auto;align-self:center;"></span>
+        </div>
+        <div class="hint" style="margin-top:10px;">
+          Local Forge creates matching scene stills automatically when enabled. For motion workflows, render short clips per scene and Ghostline will assemble them with narration.
+        </div>
+        <div id="videoScenes" class="library-grid" style="margin-top:16px;"></div>
+      </div>
+
+      <h2 style="margin-top:32px;">Auto timeline</h2>
+      <p class="hint" style="margin-top:0;">
+        Match a saved video plan to narration audio. Ghostline reads the narration length, assigns exact start/end times to each scene, and saves an edit list for the final video assembly step.
+      </p>
+
+      <div class="row">
+        <div>
+          <label for="timelinePlan">Video plan</label>
+          <select id="timelinePlan"><option value="">- create a video plan first -</option></select>
+        </div>
+        <div>
+          <label for="timelineNarration">Narration audio</label>
+          <select id="timelineNarration"><option value="">- generate narration first -</option></select>
+        </div>
+      </div>
+
+      <div class="script-actions">
+        <button class="btn secondary" id="refreshTimelineAssetsBtn">Refresh choices</button>
+        <button class="btn" id="timelineBtn" style="width:auto; margin-top:0;">Build Aligned Timeline</button>
+      </div>
+
+      <div id="timelinePanel" style="display:none; margin-top:18px;">
+        <div class="status-grid">
+          <div class="stat">
+            <div class="label">Scenes</div>
+            <div class="value" id="timelineScenes">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Audio length</div>
+            <div class="value" id="timelineDuration" style="font-size:14px;">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Output</div>
+            <div class="value" style="font-size:14px;">Edit list</div>
+          </div>
+        </div>
+        <div class="script-actions">
+          <button class="btn secondary" id="timelineCopyBtn">Copy edit list</button>
+          <button class="btn secondary" id="timelineDownloadJsonBtn" disabled data-blocked-reason="Build the timeline first">Download timeline JSON</button>
+          <button class="btn secondary" id="timelineDownloadTxtBtn" disabled data-blocked-reason="Build the timeline first">Download edit list</button>
+          <button class="btn secondary" id="draftVideoBtn">Render Draft MP4</button>
+          <button class="btn secondary" id="draftVideoDownloadBtn" disabled data-blocked-reason="Render the draft video first">Download MP4</button>
+          <span class="hint" id="timelinePathHint" style="margin-left:auto;align-self:center;"></span>
+        </div>
+        <div class="hint" id="draftVideoStatus" style="margin-top:10px;"></div>
+        <div id="timelineScenesGrid" class="library-grid" style="margin-top:16px;"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="tab-music" class="tab-content">
+    <section class="panel">
+      <h2>Background music (MusicGen)</h2>
+      <div class="advanced-banner"><strong>Advanced manual tool</strong>Create Video makes a music bed automatically. Use this for standalone tracks or custom audio mixing.</div>
+      <p class="hint" style="margin-top:0;">
+        Generates a 30-second ambient track locally, then crossfade-loops it to the length you want. Designed to sit calmly under your narration without pulling focus, ideal for full audiobooks, narration videos, and long-form content.
+      </p>
+
+      <label>Music presets</label>
+      <div id="musicChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
+      <div class="hint">Click a preset to fill the prompt below. Edit freely.</div>
+
+      <label for="musicPrompt">Music prompt</label>
+      <textarea id="musicPrompt" rows="3" placeholder="calm cinematic ambient pad, distant piano, low strings, no drums, sleep-friendly"></textarea>
+
+      <div class="row">
+        <div>
+          <label for="musicMinutes">Length (minutes)</label>
+          <input type="number" id="musicMinutes" min="0.5" step="0.5" value="60" />
+        </div>
+        <div>
+          <label for="musicModelSize">Model size</label>
+          <select id="musicModelSize">
+            <option value="small" selected>small (fast, ~4 GB VRAM)</option>
+            <option value="medium">medium (better quality, ~8 GB)</option>
+            <option value="large">large (best quality, ~16 GB)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="musicFade">Crossfade (seconds)</label>
+          <input type="number" id="musicFade" min="0.5" max="8" step="0.5" value="2" />
+        </div>
+        <div>
+          <label for="musicFmt">Format</label>
+          <select id="musicFmt">
+            <option value="mp3" selected>MP3</option>
+            <option value="wav">WAV</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="musicName">Output filename</label>
+          <input type="text" id="musicName" value="music_bed" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="musicBtn" class="btn">Generate music</button>
+        </div>
+      </div>
+      <div class="hint">First run downloads the MusicGen-small model (~1.5 GB). Subsequent generations are seconds-fast on GPU, a few minutes on CPU.</div>
+
+      <div id="musicPanel" style="display:none; margin-top:18px;">
+        <div class="status-grid">
+          <div class="stat">
+            <div class="label">Status</div>
+            <div class="value" id="musicStatus" style="font-size:14px;">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Length</div>
+            <div class="value" id="musicLen" style="font-size:14px;">-</div>
+          </div>
+          <div class="stat">
+            <div class="label">Model</div>
+            <div class="value" id="musicModelStat" style="font-size:14px;">-</div>
+          </div>
+        </div>
+        <div class="progress"><div id="musicProgress"></div></div>
+        <div class="log" id="musicLog" style="height:140px;"></div>
+        <audio id="musicAudio" controls style="width:100%; margin-top:8px; display:none;"></audio>
+        <div class="script-actions">
+          <button class="btn secondary" id="musicDownloadBtn" disabled data-blocked-reason="Generate music first">Download music</button>
+          <span class="hint" id="musicPathHint" style="margin-left:auto;align-self:center;"></span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:32px;">Mix narration + music</h2>
+      <p class="hint" style="margin-top:0;">Combines a narration with the background music into a single upload-ready file. Music is automatically lowered (ducked) under the narration so the voice stays clear.</p>
+
+      <label for="mixTts">Narration</label>
+      <select id="mixTts"><option value="">- none yet -</option></select>
+
+      <label for="mixUploadFile" style="margin-top:14px;">…or upload an existing narration file</label>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <input type="file" id="mixUploadFile" accept=".mp3,.wav,.flac,.ogg,.m4a,.aac" style="flex:1; min-width:240px;" />
+        <button class="btn secondary" id="mixClearUploadBtn" style="display:none;">Clear upload</button>
+      </div>
+      <div class="hint" id="mixUploadStatus">Supports MP3, WAV, FLAC, OGG, M4A, AAC. Up to 1 GB. If a file is uploaded, it overrides the dropdown above.</div>
+
+      <label for="mixMusic" style="margin-top:14px;">Background music</label>
+      <select id="mixMusic"><option value="">- none yet -</option></select>
+      <div class="row">
+        <div>
+          <label for="mixDuck">Music level under narration: <span id="mixDuckVal">18 dB</span></label>
+          <input type="range" id="mixDuck" min="0" max="30" step="1" value="18" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="mixBtn" class="btn">Mix into final file</button>
+        </div>
+      </div>
+
+      <div id="mixPanel" style="display:none; margin-top:18px;">
+        <div class="status-grid">
+          <div class="stat">
+            <div class="label">Status</div>
+            <div class="value" id="mixStatus" style="font-size:14px;">-</div>
+          </div>
+        </div>
+        <audio id="mixAudio" controls style="width:100%; margin-top:8px; display:none;"></audio>
+        <div class="script-actions">
+          <button class="btn secondary" id="mixDownloadBtn" disabled data-blocked-reason="Generate the final mix first">Download final mix</button>
+          <span class="hint" id="mixPathHint" style="margin-left:auto;align-self:center;"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="tab-publish" class="tab-content">
+    <div class="publish-shell">
+      <div class="publish-nav">
+        <div class="publish-nav-label">Prepare</div>
+        <button class="active" data-pub-view="compose">Compose</button>
+        <div class="publish-nav-label">Schedule</div>
+        <button data-pub-view="calendar">Calendar</button>
+        <button data-pub-view="queue">Queue</button>
+        <button data-pub-view="recurring">Recurring</button>
+        <div class="publish-nav-label">Intelligence</div>
+        <button data-pub-view="seo">SEO Finder</button>
+        <button data-pub-view="analytics">Analytics</button>
+        <div class="publish-nav-label">Library</div>
+        <button data-pub-view="media">Media</button>
+        <button data-pub-view="templates">Templates</button>
+        <div class="publish-nav-label">Settings</div>
+        <button data-pub-view="connections">Connections</button>
+      </div>
+      <section class="panel">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:16px;">
+          <div>
+            <h2 style="margin-bottom:4px;">Publish Studio</h2>
+            <p class="hint" style="margin:0;">Cadence tools inside Ghostline: package, schedule, queue, and publish finished videos.</p>
+          </div>
+          <button id="publishNewPostBtn" class="btn secondary" type="button">+ New post</button>
+        </div>
+
+        <div id="pubView-compose" class="publish-view">
+          <div class="publish-grid">
+            <div>
+              <div class="publish-card">
+                <div class="make-section-title"><strong>Media</strong><span id="publishDraftSaved">Draft saved locally</span></div>
+                <label for="publishVideoProject">Finished Ghostline video</label>
+                <select id="publishVideoProject"><option value="">- choose a rendered MP4 -</option></select>
+                <div class="hint">When Make Video finishes, Ghostline auto-selects the new MP4 here.</div>
+              </div>
+              <div class="publish-card">
+                <div class="make-section-title"><strong>Caption / Description</strong><span><span id="publishCaptionCount">0</span> / 5000</span></div>
+                <textarea id="publishCaption" rows="7" placeholder="Video description, CTA, disclosure, and hashtags..."></textarea>
+                <div class="publish-pill-row" id="publishHashtagPills">
+                  <button class="publish-pill" type="button">#shorts</button>
+                  <button class="publish-pill" type="button">#storytime</button>
+                  <button class="publish-pill" type="button">#viralshorts</button>
+                  <button class="publish-pill" type="button">#plotwist</button>
+                  <button class="publish-pill" type="button">#facelessyoutube</button>
+                </div>
+              </div>
+              <div class="publish-card">
+                <div class="make-section-title"><strong>YouTube details</strong><span>Auto-filled from Make Video</span></div>
+                <label for="publishTitle">Title</label>
+                <input id="publishTitle" type="text" maxlength="100" placeholder="Clickable YouTube title" />
+                <div class="row">
+                  <div>
+                    <label for="publishTags">Tags</label>
+                    <input id="publishTags" type="text" placeholder="shorts storytime plot twist" />
+                  </div>
+                  <div>
+                    <label for="publishPinnedComment">Pinned comment</label>
+                    <input id="publishPinnedComment" type="text" placeholder="What would you do?" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div>
+                    <label for="publishPrivacy">Privacy</label>
+                    <select id="publishPrivacy">
+                      <option value="private" selected>Private</option>
+                      <option value="unlisted">Unlisted</option>
+                      <option value="public">Public</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="publishCategory">Category</label>
+                    <select id="publishCategory">
+                      <option value="24" selected>Entertainment</option>
+                      <option value="22">People & Blogs</option>
+                      <option value="20">Gaming</option>
+                      <option value="27">Education</option>
+                      <option value="26">Howto & Style</option>
+                      <option value="28">Science & Technology</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="publish-card">
+                <div class="make-section-title"><strong>Platforms</strong><span id="publishConnectionStatus">checking...</span></div>
+                <button id="publishConnectYouTubeBtn" class="btn secondary" type="button" style="width:100%;">Connect YouTube</button>
+                <div class="publish-pill-row">
+                  <span class="publish-pill">Instagram not connected</span>
+                  <span class="publish-pill">Facebook not connected</span>
+                  <span class="publish-pill">TikTok not connected</span>
+                </div>
+              </div>
+              <div class="publish-card">
+                <div class="make-section-title"><strong>Schedule</strong><span>local time</span></div>
+                <input id="publishScheduledAt" type="datetime-local" />
+                <div class="publish-pill-row">
+                  <button class="publish-pill" type="button" data-schedule-quick="now">Now</button>
+                  <button class="publish-pill" type="button" data-schedule-quick="1h">+1h</button>
+                  <button class="publish-pill" type="button" data-schedule-quick="tonight">Tonight 7pm</button>
+                  <button class="publish-pill" type="button" data-schedule-quick="tomorrow">Tomorrow 9am</button>
+                </div>
+                <div class="readiness-checklist" id="publishReadinessChecklist"></div>
+                <button id="publishScheduleBtn" class="btn" type="button">Schedule post</button>
+                <button id="publishSaveTemplateBtn" class="btn secondary" type="button" style="width:100%; margin-top:10px;">Save as template</button>
+                <div class="hint" id="publishStatusLine"></div>
+              </div>
+              <div class="publish-card">
+                <div class="make-section-title"><strong>Preview</strong><span>YouTube</span></div>
+                <div class="publish-preview" id="publishPreviewBox"><div class="empty">No media selected</div></div>
+                <h3 id="publishPreviewTitle" style="font-size:15px; margin:12px 0 4px;">Untitled video</h3>
+                <div class="hint" id="publishPreviewCaption">Description preview</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="pubView-calendar" class="publish-view" style="display:none;">
+          <div class="publish-card"><div class="make-section-title"><strong>Calendar</strong><span>Scheduled Ghostline posts</span></div><div class="calendar-grid" id="publishCalendar"></div></div>
+        </div>
+        <div id="pubView-queue" class="publish-view" style="display:none;">
+          <div class="publish-card"><div class="make-section-title"><strong>Queue</strong><span>Due posts upload automatically</span></div><div class="publish-list" id="publishQueue"></div></div>
+        </div>
+        <div id="pubView-recurring" class="publish-view" style="display:none;">
+          <div class="publish-card">
+            <div class="make-section-title"><strong>Recurring</strong><span>Posting slots</span></div>
+            <div class="row"><input id="recurringName" type="text" placeholder="Daily Shorts slot" /><input id="recurringTime" type="time" value="09:00" /></div>
+            <button id="recurringSaveBtn" class="btn secondary" type="button">Save recurring slot</button>
+            <div class="publish-list" id="recurringList"></div>
+          </div>
+        </div>
+        <div id="pubView-templates" class="publish-view" style="display:none;">
+          <div class="publish-card"><div class="make-section-title"><strong>Templates</strong><span>Reusable post packages</span></div><div class="publish-list" id="templateList"></div></div>
+        </div>
+        <div id="pubView-analytics" class="publish-view" style="display:none;">
+          <div class="publish-card">
+            <div class="make-section-title"><strong>Analytics</strong><span>Posted links and channel learning</span></div>
+            <div class="status-grid">
+              <div class="stat"><div class="label">Scheduled</div><div class="value" id="anaScheduled">0</div></div>
+              <div class="stat"><div class="label">Posted</div><div class="value" id="anaPosted">0</div></div>
+              <div class="stat"><div class="label">Failed</div><div class="value" id="anaFailed">0</div></div>
+            </div>
+          </div>
+          <div class="publish-card">
+            <div class="make-section-title"><strong>YouTube Analytics Import</strong><span>CSV / TSV export</span></div>
+            <p class="hint" style="margin-top:0;">Export a table from YouTube Studio Analytics, upload it here, and Ollama will turn it into rules for better hooks, titles, topics, captions, and posting tests.</p>
+            <input type="file" id="analyticsUploadFile" accept=".csv,.tsv,.txt" />
+            <button id="analyticsAnalyzeBtn" class="btn secondary" type="button" style="margin-top:12px;">Analyze with Ollama</button>
+            <div class="hint" id="analyticsUploadStatus"></div>
+            <div id="analyticsResult" class="publish-list" style="margin-top:12px;">
+              <div class="empty-state" style="padding:22px 14px;">
+                <h3>No analytics imported yet</h3>
+                <p>Upload a YouTube Studio CSV to turn real channel performance into hook, title, SEO, and posting rules.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="pubView-seo" class="publish-view" style="display:none;">
+          <div class="publish-card">
+            <div class="make-section-title"><strong>SEO Opportunity Finder</strong><span>Any niche or product</span></div>
+            <p class="hint" style="margin-top:0;">Type any niche, product, tool, or topic. Ghostline expands search phrases, checks YouTube demand and competition when your API key is available, then keeps only the strongest opportunities.</p>
+            <label for="seoNicheInput">Niche / product / topic</label>
+            <div class="row">
+              <input id="seoNicheInput" type="text" placeholder="makko.ai, AI video editor, survival tips, faceless Reddit stories..." />
+              <button id="seoResearchBtn" class="btn" type="button" style="margin-top:0;">Find best keywords</button>
+            </div>
+            <label class="checkline" style="margin-top:12px;">
+              <input type="checkbox" id="seoUseAnalyticsContext" disabled data-blocked-reason="Import channel analytics in Publish first" />
+              <span>Use latest analytics import as channel-fit context</span>
+            </label>
+            <div class="hint" id="seoAnalyticsContextStatus">Upload analytics first if you want SEO ranked against your channel's proven winners.</div>
+            <div class="hint" id="seoResearchStatus"></div>
+          </div>
+          <div id="seoResult" class="publish-list">
+            <div class="empty-state" style="padding:22px 14px;">
+              <h3>Find a ranking angle</h3>
+              <p>Type any niche, product, or topic. Use analytics context when you want keywords ranked against your actual channel winners.</p>
+            </div>
+          </div>
+        </div>
+        <div id="pubView-media" class="publish-view" style="display:none;">
+          <div class="publish-card"><div class="make-section-title"><strong>Media</strong><span>Rendered MP4 library</span></div><div class="publish-list" id="publishMediaList"><div class="empty-state" style="padding:22px 14px;"><h3>No rendered videos yet</h3><p>Create Video will place finished MP4s here automatically.</p></div></div></div>
+        </div>
+        <div id="pubView-connections" class="publish-view" style="display:none;">
+          <div class="publish-card"><div class="make-section-title"><strong>Connections</strong><span>OAuth accounts</span></div><p id="connectionsText" class="hint"></p><button id="connectionsYoutubeBtn" class="btn" type="button">Connect YouTube</button></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="tab-settings" class="tab-content">
+    <section class="panel">
+      <h2>Settings</h2>
+      <p class="hint" style="margin-top:0;">Central defaults for the main Create Video workflow. These apply to the visible creator flow without making users hunt through Advanced tools.</p>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="make-section-title"><strong>Local AI</strong><span>Ollama</span></div>
+          <label for="settingsModel">Default Ollama model</label>
+          <select id="settingsModel"></select>
+          <div class="hint">Used for ideas, titles, scripts, descriptions, analytics, and SEO guidance.</div>
+        </div>
+        <div class="settings-card">
+          <div class="make-section-title"><strong>Video defaults</strong><span>short-form safe</span></div>
+          <div class="row">
+            <div>
+              <label for="settingsAspect">Default ratio</label>
+              <select id="settingsAspect">
+                <option value="9:16">9:16 Shorts / TikTok</option>
+                <option value="16:9">16:9 YouTube</option>
+                <option value="1:1">1:1 square</option>
+              </select>
+            </div>
+            <div>
+              <label for="settingsCaptionStyle">Caption style</label>
+              <select id="settingsCaptionStyle">
+                <option value="tiktok">TikTok bold</option>
+                <option value="clean">Clean lower-third</option>
+                <option value="horror">Mystery / horror</option>
+                <option value="kids">Kids cartoon</option>
+                <option value="documentary">Documentary</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="make-section-title"><strong>Voice and audio</strong><span>local</span></div>
+          <label for="settingsVoice">Default voice</label>
+          <select id="settingsVoice"></select>
+          <label for="settingsMusicLevel">Music under narration</label>
+          <select id="settingsMusicLevel">
+            <option value="18">18 dB quieter - default</option>
+            <option value="20">20 dB quieter - softer</option>
+            <option value="15">15 dB quieter - louder</option>
+          </select>
+        </div>
+        <div class="settings-card">
+          <div class="make-section-title"><strong>Local image generation</strong><span>Forge / FLUX</span></div>
+          <label for="settingsForgeUrl">Forge URL</label>
+          <input id="settingsForgeUrl" type="text" value="http://127.0.0.1:7861" />
+          <label for="settingsForgeCheckpoint">Checkpoint</label>
+          <input id="settingsForgeCheckpoint" type="text" value="flux1-dev-bnb-nf4-v2.safetensors" />
+        </div>
+        <div class="settings-card">
+          <div class="make-section-title"><strong>Interface</strong><span>show only what you need</span></div>
+          <label class="toggle-row">
+            <input id="settingsSimpleMode" type="checkbox" checked />
+            <span><strong>Simple mode</strong> — hide Advanced tools (Long Story, Short Script, Narrate Text, Music &amp; Mix, Video Studio, SEO Finder, Analytics, Optimize) from the sidebar. Toggle off when you want every tool visible.</span>
+          </label>
+          <label class="toggle-row">
+            <input id="settingsTelemetry" type="checkbox" checked />
+            <span><strong>Anonymous diagnostics</strong> — send error reports and render outcomes so issues are caught fast. No content, no identifiers.</span>
+          </label>
+        </div>
+        <div class="settings-card" id="settingsEngineCard">
+          <div class="make-section-title">
+            <strong>AI engine</strong>
+            <span id="settingsEngineStatus">Loading…</span>
+          </div>
+          <div class="hint" style="margin:0 0 10px;">Pick where script generation runs. Server uses your Ollama install (fast, full-quality, requires PC). This device runs Llama 3.2 1B in your browser via WebGPU — works on mobile, downloads once (~1 GB), no PC needed afterward.</div>
+          <label class="toggle-row">
+            <input type="radio" name="ghEngine" value="server" id="engineServer" />
+            <span><strong>Local server (Ollama)</strong> — desktop default. 8B model quality. Requires the Ghostline Python server running on this machine.</span>
+          </label>
+          <label class="toggle-row">
+            <input type="radio" name="ghEngine" value="device" id="engineDevice" />
+            <span><strong>This device (WebGPU + Llama 3.2 1B)</strong> — mobile/PWA path. First use downloads ~1 GB, then runs offline forever. Lower quality than 8B but no backend needed.</span>
+          </label>
+          <div id="engineLoadProgress" class="hint" style="margin-top:8px; display:none;"></div>
+          <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+            <strong style="font-size:13px;">Stock video API (optional)</strong>
+            <div class="hint" style="margin:4px 0 8px;">For mobile rendering when the server's image gen isn't reachable. Free API, sign up at <a href="https://www.pexels.com/api/" target="_blank" rel="noopener" style="color:var(--accent);">pexels.com/api</a>. Stays in your browser — never sent to our server.</div>
+            <input id="settingsPexelsKey" type="password" placeholder="Pexels API key" autocomplete="off" />
+            <div class="script-actions" style="margin-top:8px;">
+              <button id="settingsPexelsSaveBtn" class="btn secondary" type="button" style="width:auto;">Save key</button>
+              <button id="settingsPexelsTestBtn" class="btn secondary" type="button" style="width:auto;">Test search</button>
+            </div>
+            <div class="hint" id="settingsPexelsStatus" style="margin-top:6px;"></div>
+          </div>
+        </div>
+        <div class="settings-card" id="settingsLicenseCard">
+          <div class="make-section-title">
+            <strong>License</strong>
+            <span id="settingsLicenseTier">Loading...</span>
+          </div>
+          <div class="hint" id="settingsLicenseStatus">Free tier active.</div>
+          <div class="hint" id="settingsUsageStatus" style="margin-top:6px;"></div>
+          <div id="settingsPricingGrid" class="settings-pricing-grid" style="margin-top:14px;"></div>
+          <label for="settingsLicenseKey" style="margin-top:14px; display:block;">Got a license key?</label>
+          <input id="settingsLicenseKey" type="text" placeholder="GHL1.…" autocomplete="off" spellcheck="false" />
+          <div class="script-actions" style="margin-top:10px;">
+            <button id="settingsLicenseApplyBtn" class="btn secondary" type="button">Apply key</button>
+            <button id="settingsLicenseClearBtn" class="btn secondary" type="button">Clear license</button>
+          </div>
+        </div>
+      </div>
+      <div class="script-actions" style="margin-top:16px;">
+        <button id="settingsApplyBtn" class="btn" type="button">Apply defaults</button>
+        <button id="settingsOpenConnectionsBtn" class="btn secondary" type="button">YouTube connections</button>
+        <button id="settingsReplayWalkBtn" class="btn secondary" type="button">Replay walkthrough</button>
+        <button id="settingsInstallAppBtn" class="btn secondary" type="button" style="display:none;" data-blocked-reason="Install prompt only appears in supported browsers (Chrome, Edge, Safari on iOS 16+).">Install as app</button>
+        <button id="settingsOpenCreateBtn" class="btn secondary" type="button">Back to Create Video</button>
+      </div>
+      <div class="hint" id="settingsStatus"></div>
+    </section>
+  </div>
+
+  <div id="tab-library" class="tab-content">
+    <section class="panel">
+      <h2>Project library</h2>
+      <p class="hint" style="margin-top:0;">
+        Every story, narration, music bed, and mix you create is saved here. Survives restarts.
+      </p>
+
+      <div class="library-toolbar">
+        <button class="filter-btn active" data-filter="bundle">Videos</button>
+        <button class="filter-btn" data-filter="all">All artifacts</button>
+        <button class="filter-btn" data-filter="story">Long stories</button>
+        <button class="filter-btn" data-filter="short_script">Shorts</button>
+        <button class="filter-btn" data-filter="narration">Narrations</button>
+        <button class="filter-btn" data-filter="music">Music beds</button>
+        <button class="filter-btn" data-filter="mix">Mixes</button>
+        <button class="filter-btn" data-filter="video_plan">Video plans</button>
+        <button class="filter-btn" data-filter="timeline">Timelines</button>
+        <button class="filter-btn" data-filter="video">Raw MP4s</button>
+        <button class="filter-btn" data-filter="upload">Uploads</button>
+        <span style="margin-left:auto; color:var(--muted); font-size:12px;" id="libCount"></span>
+      </div>
+
+      <div id="libGrid" class="library-grid"></div>
+    </section>
+  </div>
+
+  <div id="tab-optimize" class="tab-content">
+    <section class="panel">
+      <h2>Optimize Library</h2>
+      <p class="hint" style="margin-top:0;">
+        Pull every video on your connected channel, then deep-analyze them one at a time. Ghostline grades each video against your channel insights and proposes a single tightly-scoped repackaging. Phase 1 is read-only — suggestions only, no writes back to YouTube yet.
+      </p>
+
+      <div id="optimizeConnect" class="ip-empty" style="margin-bottom:14px;">
+        Connecting to YouTube is required. Open the <button type="button" class="ip-link" data-go-tab="publish">Publish tab</button> to connect a channel, then return here.
+      </div>
+
+      <div id="optimizeWorkspace" style="display:none;">
+        <div class="optimize-toolbar">
+          <button id="optimizeRefreshBtn" type="button" class="btn secondary" style="width:auto; margin-top:0;">Refresh videos</button>
+          <span id="optimizeChannelLabel" class="hint" style="align-self:center;"></span>
+          <span id="optimizeCount" class="hint" style="margin-left:auto; align-self:center;"></span>
+        </div>
+
+        <div class="optimize-filter-row">
+          <button class="filter-btn active" data-vfilter="all" type="button">All</button>
+          <button class="filter-btn" data-vfilter="winner" type="button">Winners</button>
+          <button class="filter-btn" data-vfilter="mid" type="button">Mid-tier</button>
+          <button class="filter-btn" data-vfilter="underperformer" type="button">Underperformers</button>
+          <input id="optimizeSearch" placeholder="Search title..." class="optimize-search" />
+        </div>
+
+        <div class="optimize-layout">
+          <div id="optimizeList" class="optimize-list">
+            <div class="ip-empty" style="padding:30px 12px;">No videos loaded yet. Click <strong>Refresh videos</strong>.</div>
+          </div>
+          <div id="optimizeDetail" class="optimize-detail">
+            <div class="ip-empty" style="padding:60px 18px; text-align:center;">
+              <div style="font-size:36px; opacity:0.45; margin-bottom:12px;">🎯</div>
+              <h3 style="margin:0 0 4px;">Pick a video</h3>
+              <p style="margin:0; font-size:13px;">Select a video from the list to deep-analyze with Ollama.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="footer">
+    Ghostline runs on your machine via Ollama, Kokoro, MusicGen, and optional local Forge. No paid APIs required.
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<aside id="genTray" class="gen-tray" aria-live="polite">
+  <div class="gt-head">
+    <span><span class="gt-dot"></span>Generating</span>
+    <button id="gtClose" class="gt-close" title="Hide">×</button>
+  </div>
+  <div id="gtList" class="gt-list"></div>
+</aside>
+
+<script>
+window.GHOSTLINE_DEFAULTS = {
+  topic: {{ defaults.topic | tojson }},
+  genre: {{ defaults.genre | tojson }},
+  tone: {{ defaults.tone | tojson }},
+  words: {{ defaults.words | tojson }},
+  model: {{ defaults.model | tojson }},
+};
+</script>
+<script src="{{ '/static/ghostline.js' | versioned }}" defer></script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Ghostline - Local faceless video studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="Ghostline creates faceless videos locally with ideas, scripts, narration, captions, music, visual layers, scheduling, and YouTube publishing." />
+<meta name="theme-color" content="#090b0c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ghostline" />
+<meta property="og:title" content="Ghostline — local AI video studio" />
+<meta property="og:description" content="Faceless videos without the tool chaos. Local, no paid APIs." />
+<meta property="og:image" content="/static/ghostline-logo-wordmark.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
+<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/">
+      <img src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Ghostline" />
+    </a>
+    <div class="navlinks">
+      <a href="#workflow">Workflow</a>
+      <a href="#mobile">Mobile</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a class="cta" href="/">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-scene" aria-hidden="true"><canvas id="heroThree"></canvas></div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <img class="hero-logo" src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Ghostline" />
+          <div class="eyebrow">Local AI video studio</div>
+          <h1>Faceless videos <span>without the tool chaos.</span></h1>
+          <p class="lede">
+            Ghostline turns ideas into scripts, narration, captions, music, visual layers, SEO packages, and scheduled YouTube posts on your own PC.
+          </p>
+          <div class="hero-actions">
+            <a class="cta" href="/">Open Studio</a>
+            <a class="cta secondary" href="#workflow">See workflow</a>
+          </div>
+          <div class="proof">
+            <div><strong>Desktop + Mobile</strong><span>PC studio &amp; PWA on phone</span></div>
+            <div><strong>Local AI</strong><span>Llama, Kokoro, MusicGen, ffmpeg</span></div>
+            <div><strong>Publish</strong><span>Queue, calendar, YouTube</span></div>
+            <div><strong>No paid APIs</strong><span>Runs on your machine</span></div>
+          </div>
+        </div>
+        <div class="hero-device-stage" aria-label="Animated product preview">
+          <div class="phone-stack">
+            <div class="phone-shell">
+              <div class="phone-screen">
+                <img class="phone-logo" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+                <div class="platform-ui">
+                  <div class="tabs"><span>Following</span><strong>For You</strong></div>
+                  <div class="actions"><span>♡</span><span>↗</span><span>●</span></div>
+                </div>
+                <div class="hero-caption">I checked his phone<br><span>and saw my name</span></div>
+                <div class="creator-meta">
+                  <strong>@your_channel</strong>
+                  Reddit-style story. Local voice, captions, music, and post package.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="floating-card card-a">
+            <strong>Video readiness</strong>
+            <span>Hook, title, captions, and platform fit checked before render.</span>
+            <em class="status-pill">Checked</em>
+          </div>
+          <div class="floating-card card-b">
+            <strong>Publish package</strong>
+            <span>Title, description, tags, pinned comment, and schedule draft ready.</span>
+            <em class="status-pill">Draft ready</em>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="workflow">
+      <div class="section-head">
+        <h2>The whole faceless channel workflow.</h2>
+        <p>Ghostline is not just a script writer. It moves from content idea to finished MP4 to scheduled upload without making creators stitch six tools together.</p>
+      </div>
+      <div class="workflow">
+        <div class="step"><b>1</b><strong>Pick a format</strong><p>Choose Reddit story, viral tension, survival tips, mystery, education, finance, horror, or your own niche.</p></div>
+        <div class="step"><b>2</b><strong>Generate the package</strong><p>Ollama creates ideas, hooks, titles, pinned comments, hashtags, and a script direction.</p></div>
+        <div class="step"><b>3</b><strong>Render the video</strong><p>Use local scene images or retention footage with narration, music, captions, title overlay, and ratio controls.</p></div>
+        <div class="step"><b>4</b><strong>Schedule the post</strong><p>Ghostline auto-fills your publishing draft so you can set the date, review details, and queue it.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="product-band">
+        <div class="mock">
+          <div class="mock-top"><span>Make Video</span><span>Ready score 92</span></div>
+          <div class="mock-grid">
+            <div class="mock-panel">
+              <h3>Video package</h3>
+              <div class="package-list">
+                <span>Hook and title</span>
+                <span>Captions and music</span>
+                <span>SEO publish draft</span>
+              </div>
+              <p style="color:var(--muted); margin:14px 0 0;">Hook, title, captions, music, and visual layer generated together.</p>
+            </div>
+            <div class="mock-panel">
+              <div class="mini-phone">
+                <img src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+                <div class="caption">I checked his phone<br><span>and saw my name</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mock">
+          <div class="mock-top"><span>What it replaces</span><span>One local flow</span></div>
+          <div class="feature"><strong>Script generator</strong><p>Ideas, hooks, voiceover, and platform package.</p></div>
+          <div class="feature" style="margin-top:10px;"><strong>Audio studio</strong><p>Local narration, background music, and mixed final audio.</p></div>
+          <div class="feature" style="margin-top:10px;"><strong>Posting assistant</strong><p>Calendar, queue, templates, recurring slots, and YouTube upload.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="formats">
+      <div class="section-head">
+        <h2>Built for channels people actually run.</h2>
+        <p>Click a format, generate ideas, choose one, then let the title and publishing details follow the selected concept.</p>
+      </div>
+      <div class="formats">
+        <div class="format"><strong>Viral story shorts</strong><p>Confessions, betrayal, rule horror, impossible situations, loop endings, and big captions.</p></div>
+        <div class="format"><strong>Reddit-style stories</strong><p>Use parkour or retention footage while Ghostline creates the script, narration, and post package.</p></div>
+        <div class="format"><strong>Survival tips</strong><p>Recurring host or character, practical steps, animated or cinematic visual style.</p></div>
+        <div class="format"><strong>Mystery docs</strong><p>Questions, theories, unresolved clues, dark ambience, and longer narration workflows.</p></div>
+        <div class="format"><strong>Education channels</strong><p>Friendly explainer scripts, clean visuals, voiceover, and repeatable topic templates.</p></div>
+        <div class="format"><strong>Custom niches</strong><p>Finance, history, motivation, scary stories, listicles, and whatever the creator wants to test.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="publish">
+      <div class="section-head">
+        <h2>Publishing is part of the product.</h2>
+        <p>When the video finishes encoding, Ghostline prepares the post instead of leaving creators with a lonely MP4 file.</p>
+      </div>
+      <div class="publish-preview">
+        <div class="mock">
+          <div class="mock-top"><span>Scheduler</span><span>YouTube</span></div>
+          <div class="calendar">
+            <div class="day">Mon<div class="dot"></div></div><div class="day">Tue</div><div class="day">Wed<div class="dot"></div></div><div class="day">Thu</div><div class="day">Fri<div class="dot"></div></div><div class="day">Sat</div><div class="day">Sun</div>
+            <div class="day">8</div><div class="day">9<div class="dot"></div></div><div class="day">10</div><div class="day">11</div><div class="day">12<div class="dot"></div></div><div class="day">13</div><div class="day">14</div>
+          </div>
+        </div>
+        <div class="mock">
+          <div class="mock-top"><span>Auto-filled details</span><span>Review first</span></div>
+          <div class="mock-panel"><h3>Title</h3><p style="color:var(--text); margin:0;">I Opened His Second Phone</p></div>
+          <div class="mock-panel" style="margin-top:10px;"><h3>Description</h3><p style="color:var(--muted); margin:0;">Hook, CTA, hashtags, disclosure, and pinned comment ready to edit.</p></div>
+          <div class="mock-panel" style="margin-top:10px;"><h3>Analytics + SEO</h3><p style="color:var(--muted); margin:0;">Import YouTube Studio exports and let SEO Finder rank keywords against your actual winners.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>What creators get.</h2>
+        <p>A practical studio for repeated output, not a demo toy.</p>
+      </div>
+      <div class="features">
+        <div class="feature"><strong>Little typing</strong><p>Buttons generate ideas, titles, captions, scripts, music, and post details.</p></div>
+        <div class="feature"><strong>Local privacy</strong><p>Runs on localhost with local AI tools and no required paid API pipeline.</p></div>
+        <div class="feature"><strong>Quality gates</strong><p>Readiness checks push better hooks, formats, captions, visuals, and upload packages.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="mobile">
+      <div class="section-head">
+        <h2>Desktop, web, mobile, Android.</h2>
+        <p>Same studio, three places to use it. Mobile runs in the browser as a PWA — no Play Store fight, installs to your home screen in two taps. The full Android APK ships when you want a Play Store listing.</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <strong>Desktop (full power)</strong>
+          <p>Llama 3.1 8B, Kokoro TTS, MusicGen, FLUX image gen, the entire pipeline. The serious creator workspace.</p>
+        </div>
+        <div class="feature">
+          <strong>Mobile PWA (zero install)</strong>
+          <p>Llama 3.2 1B in your browser via WebGPU. Web Speech narration. Bundled royalty-free music pack. ffmpeg.wasm renders the MP4. Works offline after first load.</p>
+        </div>
+        <div class="feature">
+          <strong>Android APK</strong>
+          <p>Same PWA wrapped in a Capacitor shell for Play Store distribution. Push notifications, share targets, and the rest of the native integration.</p>
+        </div>
+      </div>
+      <div class="features" style="margin-top:14px;">
+        <div class="feature">
+          <strong>Royalty-free music — bundled</strong>
+          <p>Eight mood-tagged tracks (cinematic, mystery, horror, uplifting, chill, dark, hopeful, tense) ship with the app. Public domain — no licensing footnote on your YouTube channel.</p>
+        </div>
+        <div class="feature">
+          <strong>No paid APIs anywhere</strong>
+          <p>Optional: free Pexels key for stock B-roll. Optional: free Pixabay key for extra music. Everything else runs on your hardware.</p>
+        </div>
+        <div class="feature">
+          <strong>Your data, your machine</strong>
+          <p>Scripts, narrations, and rendered videos never leave your device unless you publish them. License keys validate offline.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pricing">
+      <div class="section-head">
+        <h2>One-time license. Local AI forever.</h2>
+        <p>Free tier covers casual use. Creator Pro is $15/month. The Founding Lifetime is the launch deal — pay once, never pay again.</p>
+      </div>
+      {% if pricing and pricing.tiers %}
+      <div class="pricing-grid">
+        {% for tier in pricing.tiers %}
+        <div class="pricing-card{% if tier.id == 'founding' %} pricing-card--founding{% endif %}{% if tier.id == 'pro' %} pricing-card--featured{% endif %}">
+          {% if tier.id == 'pro' %}<div class="pricing-badge">Most popular</div>{% endif %}
+          {% if tier.id == 'founding' %}<div class="pricing-badge pricing-badge--accent">Launch only · 200 seats</div>{% endif %}
+          <h3>{{ tier.name }}</h3>
+          <p class="pricing-tagline">{{ tier.tagline }}</p>
+          <div class="pricing-price">
+            {% if tier.price_lifetime %}
+              <span class="pricing-price-num">${{ tier.price_lifetime }}</span>
+              <span class="pricing-price-unit">once</span>
+            {% elif tier.price_monthly %}
+              <span class="pricing-price-num">${{ tier.price_monthly }}</span>
+              <span class="pricing-price-unit">/mo</span>
+              {% if tier.price_yearly %}
+                <span class="pricing-price-alt">or ${{ tier.price_yearly }}/yr</span>
+              {% endif %}
+            {% else %}
+              <span class="pricing-price-num">$0</span>
+            {% endif %}
+          </div>
+          <ul class="pricing-features">
+            {% for f in tier.features %}<li>{{ f }}</li>{% endfor %}
+          </ul>
+          {% if tier.checkout_url %}
+            <a class="cta {% if tier.id == 'founding' or tier.id == 'pro' %}signal{% else %}secondary{% endif %}" href="{{ tier.checkout_url }}" target="_blank" rel="noopener">{{ tier.cta }}</a>
+          {% else %}
+            <a class="cta secondary" href="/">{{ tier.cta }}</a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <p class="pricing-fineprint">All paid tiers include unlimited renders, no watermark, scheduler, SEO Finder, Optimize Library, and analytics ingest. Lifetime is locked-in pricing forever — even when monthly tiers go up. License keys work offline; no recurring DRM check.</p>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="section-head">
+        <h2>Real questions, real answers.</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Do I need a fancy PC?</summary>
+          <p>For the full desktop experience: 16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. For mobile-only use: any flagship phone from the last 3 years works (Pixel 7+, Galaxy S22+, iPhone 13+). The mobile PWA uses Llama 3.2 1B which fits in 2 GB RAM.</p>
+        </details>
+        <details>
+          <summary>Does this actually work on a phone with no PC running?</summary>
+          <p>Yes. Pick "This device" as the AI engine in Settings. Llama 3.2 1B downloads once (~1 GB, cached forever). After that: scripts generate via WebGPU, narration uses your phone's built-in TTS, music comes from the bundled pack, and ffmpeg.wasm renders the MP4 in your browser. Airplane mode safe.</p>
+        </details>
+        <details>
+          <summary>What's free vs Pro?</summary>
+          <p>Free tier: 5 video renders per month, all local AI features, project library. Pro: unlimited renders, no watermark, publish scheduler, SEO Finder, Optimize Library (vidIQ-aware repackaging), channel analytics ingest, brand presets, multi-channel.</p>
+        </details>
+        <details>
+          <summary>What does Founding Lifetime get me?</summary>
+          <p>Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 200 buyers. Locked-in price even if monthly tiers go up later. After the 200 are sold, the founding deal is gone.</p>
+        </details>
+        <details>
+          <summary>Is my data sent anywhere?</summary>
+          <p>No. Scripts, audio, video, channel analytics — all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in.</p>
+        </details>
+        <details>
+          <summary>Can I use this commercially?</summary>
+          <p>Yes. Any video you make is yours. The bundled music pack is procedurally generated and public-domain. Generated narration belongs to you. Generated visuals belong to you. Ghostline charges for the tool, not for what you make with it.</p>
+        </details>
+        <details>
+          <summary>Does it run on Mac and Linux?</summary>
+          <p>The desktop app is Python — runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS.</p>
+        </details>
+        <details>
+          <summary>Will my license expire?</summary>
+          <p>Founding Lifetime: never. Creator Pro and Studio yearly: one year from purchase, renews. Monthly: 31 days, renews. Free tier: never expires. License validation is offline — losing internet doesn't lock you out.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="final">
+      <div>
+        <h2>Build the channel, not just the video.</h2>
+        <p>Open Ghostline, generate a complete video package, render it, and schedule it from the same workspace.</p>
+      </div>
+      <a class="cta signal" href="/">Open Studio</a>
+    </section>
+  </main>
+
+  <footer>
+    Ghostline runs on your own hardware. Desktop uses Ollama, Kokoro, MusicGen, and optional FLUX image generation.
+    Mobile/PWA uses WebLLM, Web Speech, ffmpeg.wasm, and a bundled royalty-free music pack — public domain, ship anywhere.
+    No paid APIs required. License keys validate offline.
+  </footer>
+</div>
+
+<script type="module" src="{{ '/static/landing.js' | versioned }}"></script>
+</body>
+</html>

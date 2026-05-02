@@ -1,0 +1,33 @@
+# Render.com declarative deploy config.
+# Connect your GitHub repo at render.com → "New" → "Blueprint" → pick this repo.
+# Render reads this file and provisions the service on first push.
+#
+# After the service is up, go to its dashboard → Environment → and set
+# GHOSTLINE_LICENSE_SECRET to the value you have in your local .env.
+# That value is intentionally NOT in this file (sync: false below).
+services:
+  - type: web
+    name: phantomline
+    runtime: python
+    plan: starter        # $7/mo, always-on, 512 MB RAM. Free tier sleeps after 15 min idle.
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    healthCheckPath: /
+    autoDeploy: true     # auto-deploy on every push to main branch
+    disk:
+      name: ghostline-data
+      mountPath: /opt/render/project/src/output
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: GHOSTLINE_LICENSE_SECRET
+        sync: false      # paste this in the Render dashboard, never in git
+      - key: YOUTUBE_API_KEY_2
+        sync: false
+      - key: YOUTUBE_CLIENT_ID
+        sync: false
+      - key: YOUTUBE_CLIENT_SECRET
+        sync: false
+      - key: GHOSTLINE_TELEMETRY_URL
+        sync: false      # optional — your Supabase function URL
