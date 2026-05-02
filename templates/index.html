@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
 <link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
-<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
 <link rel="preconnect" href="https://unpkg.com" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js" defer></script>
@@ -22,7 +22,10 @@
 <div class="wrap">
   <header>
     <a class="brand" href="/landing" title="Open landing page">
-      <img class="brand-logo" src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Phantomline" />
+      <span class="brand-mark">
+        <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+        <span class="brand-name">Phantomline</span>
+      </span>
       <small class="brand-tagline">local AI videos without showing your face</small>
     </a>
     <div class="header-actions">

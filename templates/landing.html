@@ -11,19 +11,26 @@
 <meta name="apple-mobile-web-app-title" content="Phantomline" />
 <meta property="og:title" content="Phantomline — local AI video studio" />
 <meta property="og:description" content="Faceless videos without the tool chaos. Local, no paid APIs." />
-<meta property="og:image" content="/static/ghostline-logo-wordmark.png" />
+<!-- og:image points at the icon SVG until we re-render a Phantomline wordmark
+     PNG. Most social platforms accept SVG og:images; the few that don't will
+     fall back to no preview image rather than show stale Ghostline branding. -->
+<meta property="og:image" content="/static/ghostline-logo.svg" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
 <link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
-<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" />
+<!-- apple-touch-icon ideally is a PNG, but the existing PNGs have the old
+     wordmark text rasterized in. Fall back to the SVG icon (iOS Safari can
+     consume SVG here on recent versions) until new PNGs are exported. -->
+<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
 </head>
 <body>
 <div class="wrap">
   <nav class="top">
     <a class="brand" href="/">
-      <img src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Phantomline" />
+      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+      <span class="brand-name">Phantomline</span>
     </a>
     <div class="navlinks">
       <a href="#workflow">Workflow</a>
@@ -39,7 +46,10 @@
       <div class="hero-scene" aria-hidden="true"><canvas id="heroThree"></canvas></div>
       <div class="hero-grid">
         <div class="hero-copy">
-          <img class="hero-logo" src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Phantomline" />
+          <div class="hero-logo">
+            <img class="hero-logo-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+            <span class="hero-logo-name">Phantomline</span>
+          </div>
           <div class="eyebrow">Local AI video studio</div>
           <h1>Faceless videos <span>without the tool chaos.</span></h1>
           <p class="lede">

@@ -57,17 +57,28 @@
   .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     font-weight: 850;
     font-size: 18px;
-    line-height: 0;
+    line-height: 1;
+    text-decoration: none;
   }
-  .brand img {
-    height: 64px;
-    width: auto;
-    max-width: 220px;
+  .brand .brand-icon {
+    height: 44px;
+    width: 44px;
     object-fit: contain;
     filter: drop-shadow(0 0 18px rgba(38,231,245,0.45));
+    flex: 0 0 auto;
+  }
+  .brand .brand-name {
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: 0.6px;
+    background: linear-gradient(110deg, #baffff 0%, #22e7f5 55%, #1ee8f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
   .navlinks {
     display: flex;
@@ -142,13 +153,28 @@
     align-items: center;
   }
   .hero-logo {
-    display: block;
-    width: clamp(280px, 38vw, 460px);
-    max-width: 100%;
-    height: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
     margin: 0 0 26px;
     user-select: none;
-    -webkit-user-drag: none;
+  }
+  .hero-logo-icon {
+    height: clamp(64px, 9vw, 96px);
+    width: auto;
+    flex: 0 0 auto;
+    filter: drop-shadow(0 6px 28px rgba(94, 234, 255, 0.18));
+  }
+  .hero-logo-name {
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(46px, 6.4vw, 72px);
+    letter-spacing: 0.8px;
+    line-height: 1;
+    background: linear-gradient(110deg, #baffff 0%, #22e7f5 55%, #1ee8f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     filter: drop-shadow(0 6px 28px rgba(94, 234, 255, 0.18));
   }
   .eyebrow {

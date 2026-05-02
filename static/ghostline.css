@@ -67,6 +67,29 @@
     filter: drop-shadow(0 0 14px rgba(34,231,245,0.45));
     flex: 0 0 auto;
   }
+  /* Brand mark (icon + wordmark text) — replaces the legacy single-PNG wordmark
+     so the brand renders as live HTML/CSS and we don't have to re-export a PNG
+     every time we tweak naming. */
+  .brand .brand-mark {
+    display: inline-flex; align-items: center; gap: 10px;
+    line-height: 1;
+  }
+  .brand .brand-icon {
+    height: 40px; width: 40px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 14px rgba(34,231,245,0.45));
+    flex: 0 0 auto;
+  }
+  .brand .brand-name {
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: 0.5px;
+    background: linear-gradient(110deg, #baffff 0%, #22e7f5 55%, #1ee8f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
   .brand h1 { font-size: 18px; margin: 0; font-weight: 600; }
   .brand small,
   .brand .brand-tagline { color: var(--muted); font-weight: 400; font-size: 12px; letter-spacing: 0.3px; }

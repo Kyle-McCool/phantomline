@@ -484,6 +484,14 @@ async function apiJson(url, options) {
 async function refreshOllama() {
   const badge = $('ollamaBadge');
   const text = $('ollamaText');
+  // On the hosted PWA there is no local Ollama — inference runs in-browser via
+  // WebLLM. Showing "ollama offline" with a red dot makes the app look broken
+  // to first-time visitors. Detect hosted mode via hostname and surface a
+  // neutral "browser mode" badge instead.
+  const host = (window.location && window.location.hostname) || '';
+  const isHosted = /\.onrender\.com$/i.test(host)
+    || /(^|\.)phantomline\.(xyz|com|app)$/i.test(host)
+    || (host && host !== 'localhost' && host !== '127.0.0.1');
   try {
     const r = await fetch('/api/models');
     const d = await r.json();
@@ -497,13 +505,21 @@ async function refreshOllama() {
     } else if (d.ok) {
       badge.classList.add('bad'); badge.classList.remove('ok');
       text.textContent = 'ollama · no models installed';
+    } else if (isHosted) {
+      badge.classList.remove('bad'); badge.classList.remove('ok');
+      text.textContent = 'browser mode';
     } else {
       badge.classList.add('bad'); badge.classList.remove('ok');
       text.textContent = 'ollama offline';
     }
   } catch (e) {
-    badge.classList.add('bad'); badge.classList.remove('ok');
-    text.textContent = 'ollama offline';
+    if (isHosted) {
+      badge.classList.remove('bad'); badge.classList.remove('ok');
+      text.textContent = 'browser mode';
+    } else {
+      badge.classList.add('bad'); badge.classList.remove('ok');
+      text.textContent = 'ollama offline';
+    }
   }
 }
 
