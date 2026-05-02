@@ -8,7 +8,11 @@
  *
  * Bumping CACHE_VERSION invalidates the previous cache on the next visit.
  */
-const CACHE_VERSION = "ghostline-v1";
+// Bumped on 2026-05-02 to invalidate the legacy "ghostline" branded
+// wordmark PNG that lingered in client SW caches after the Phantomline
+// rebrand. Bumping this string forces the activate handler below to
+// drop every old cache entry on next visit.
+const CACHE_VERSION = "phantomline-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 
