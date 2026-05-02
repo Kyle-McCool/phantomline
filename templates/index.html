@@ -2,13 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Phantomline - Local AI videos without showing your face</title>
+<title>Phantomline Studio</title>
+<meta name="description" content="Phantomline Studio — workspace for generating faceless YouTube videos with local AI." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Phantomline" />
 <meta name="mobile-web-app-capable" content="yes" />
+<!-- The studio is a workspace, not a content page. Tell crawlers to skip
+     it so SEO authority concentrates on /, /pricing, and future content
+     pages. Without this Google would try to index the empty workspace
+     and dilute our ranking signals. -->
+<meta name="robots" content="noindex, nofollow" />
+<link rel="canonical" href="{{ canonical_url }}" />
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
 <link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/ghostline-logo.svg' | versioned }}" />

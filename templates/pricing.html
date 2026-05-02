@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Phantomline Pricing | Local AI Video Tool With No Subscription</title>
+<meta name="description" content="Compare Phantomline plans for faceless YouTube creators. Free renders, Creator Pro, Studio workflows, and a founding lifetime tier — local-first AI video with no per-render API costs." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Phantomline Pricing — Local AI Video Tool With No Subscription" />
+<meta property="og:description" content="Free, Creator Pro, Studio, and Founding Lifetime. Local-first faceless YouTube workflow." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta property="og:site_name" content="Phantomline" />
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Phantomline Pricing — Local AI Video Tool With No Subscription" />
+<meta name="twitter:description" content="Free, Creator Pro, Studio, and Founding Lifetime. Local-first faceless YouTube workflow." />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+
+<link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
+<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+
+<!-- JSON-LD: BreadcrumbList for nav context -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Pricing", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<!-- JSON-LD: Product + Offers (real prices from PRICING). No AggregateRating
+     until we have actual verified reviews. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Phantomline",
+  "description": "Local-first AI video studio for faceless YouTube creators. Generate scripts, narration, captions, music, visuals, MP4 exports, and YouTube publishing drafts on your own machine.",
+  "brand": {"@type": "Brand", "name": "Phantomline"},
+  "url": "{{ canonical_url }}",
+  "image": "{{ site_url }}/static/phantomline-wordmark.svg",
+  "offers": [
+    {% for tier in pricing.tiers %}
+    {
+      "@type": "Offer",
+      "name": "{{ tier.name }}",
+      "price": "{{ tier.price_lifetime if tier.price_lifetime is not none else (tier.price_monthly if tier.price_monthly is not none else 0) }}",
+      "priceCurrency": "{{ pricing.currency }}",
+      "availability": "https://schema.org/InStock",
+      "url": "{{ canonical_url }}#tier-{{ tier.id }}",
+      "category": "{% if tier.price_lifetime %}lifetime{% elif tier.price_monthly %}subscription{% else %}free{% endif %}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+
+<!-- JSON-LD: FAQPage — mirror the visible FAQ below verbatim. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does Phantomline require a subscription?",
+      "acceptedAnswer": {"@type": "Answer", "text": "No. Phantomline offers a free tier, monthly and yearly Creator Pro plans, a Studio plan, and a one-time Founding Lifetime tier. The local AI pipeline does not charge per render — there are no usage-based API fees."}
+    },
+    {
+      "@type": "Question",
+      "name": "What is the founding lifetime tier?",
+      "acceptedAnswer": {"@type": "Answer", "text": "A one-time payment that unlocks Creator Pro permanently for the first 200 buyers. Lifetime updates included."}
+    },
+    {
+      "@type": "Question",
+      "name": "Can I cancel any time?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Yes. Monthly and yearly Creator Pro and Studio plans cancel any time. Founding Lifetime is a single payment with no recurring charge."}
+    },
+    {
+      "@type": "Question",
+      "name": "Is Phantomline an alternative to Submagic, OpusClip, or Pictory?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Phantomline is a local-first alternative for creators who want private rendering, no per-render API costs, and a faceless YouTube workflow under one roof. Cloud-only tools have their place; Phantomline is built for creators tired of subscription stacking."}
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/">
+      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+      <span class="brand-name">Phantomline</span>
+    </a>
+    <div class="navlinks">
+      <a href="/#workflow">Workflow</a>
+      <a href="/#mobile">Mobile</a>
+      <a href="/pricing" aria-current="page">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section" style="padding-top: 48px;">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Pricing</div>
+          <h1>Local AI video without the subscription tax.</h1>
+          <p>Phantomline runs the whole faceless YouTube pipeline on your machine. There are no per-render API costs and no usage caps on paid plans. Pick the plan that matches your volume — or buy once and skip subscriptions entirely with the Founding Lifetime tier.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pricing">
+      {% if pricing and pricing.tiers %}
+      <div class="pricing-grid">
+        {% for tier in pricing.tiers %}
+        <div class="pricing-card{% if tier.id == 'founding' %} pricing-card--founding{% endif %}{% if tier.id == 'pro' %} pricing-card--featured{% endif %}" id="tier-{{ tier.id }}">
+          {% if tier.id == 'pro' %}<div class="pricing-badge">Most popular</div>{% endif %}
+          {% if tier.id == 'founding' %}<div class="pricing-badge pricing-badge--accent">Launch only · 200 seats</div>{% endif %}
+          <h3>{{ tier.name }}</h3>
+          <p class="pricing-tagline">{{ tier.tagline }}</p>
+          <div class="pricing-price">
+            {% if tier.price_lifetime %}
+              <span class="pricing-price-num">${{ tier.price_lifetime }}</span>
+              <span class="pricing-price-unit">once</span>
+            {% elif tier.price_monthly %}
+              <span class="pricing-price-num">${{ tier.price_monthly }}</span>
+              <span class="pricing-price-unit">/mo</span>
+              {% if tier.price_yearly %}
+                <span class="pricing-price-alt">or ${{ tier.price_yearly }}/yr</span>
+              {% endif %}
+            {% else %}
+              <span class="pricing-price-num">$0</span>
+            {% endif %}
+          </div>
+          <ul class="pricing-features">
+            {% for f in tier.features %}<li>{{ f }}</li>{% endfor %}
+          </ul>
+          {% if tier.checkout_url %}
+            <a class="cta {% if tier.id == 'founding' or tier.id == 'pro' %}signal{% else %}secondary{% endif %}" href="{{ tier.checkout_url }}" target="_blank" rel="noopener">{{ tier.cta }}</a>
+          {% else %}
+            <a class="cta secondary" href="/app">{{ tier.cta }}</a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <p class="pricing-fineprint">All paid tiers include unlimited renders, no watermark, scheduler, SEO Finder, Optimize Library, and analytics ingest. Lifetime is locked-in pricing forever — even when monthly tiers go up. License keys work offline; no recurring DRM check.</p>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">FAQ</div>
+          <h2>Pricing questions, answered honestly.</h2>
+        </div>
+      </div>
+
+      <details>
+        <summary>Does Phantomline require a subscription?</summary>
+        <p>No. Phantomline offers a free tier, monthly and yearly Creator Pro plans, a Studio plan, and a one-time Founding Lifetime tier. The local AI pipeline does not charge per render — there are no usage-based API fees.</p>
+      </details>
+      <details>
+        <summary>What is the founding lifetime tier?</summary>
+        <p>A one-time payment that unlocks Creator Pro permanently for the first 200 buyers. Lifetime updates included.</p>
+      </details>
+      <details>
+        <summary>Can I cancel any time?</summary>
+        <p>Yes. Monthly and yearly Creator Pro and Studio plans cancel any time. Founding Lifetime is a single payment with no recurring charge.</p>
+      </details>
+      <details>
+        <summary>Is Phantomline an alternative to Submagic, OpusClip, or Pictory?</summary>
+        <p>Phantomline is a local-first alternative for creators who want private rendering, no per-render API costs, and a faceless YouTube workflow under one roof. Cloud-only tools have their place; Phantomline is built for creators tired of subscription stacking.</p>
+      </details>
+    </section>
+
+    <section class="final">
+      <div>
+        <h2>Open the studio when you're ready.</h2>
+        <p>Free tier needs no card. Creator Pro and Founding Lifetime unlock the full pipeline.</p>
+      </div>
+      <a class="cta signal" href="/app">Open Studio</a>
+    </section>
+  </main>
+</div>
+</body>
+</html>

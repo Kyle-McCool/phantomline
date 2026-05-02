@@ -2,22 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Phantomline - Local faceless video studio</title>
+<title>Local AI Video Studio for Faceless YouTube | Phantomline</title>
+<meta name="description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, and built for Reddit stories, horror narration, mystery docs, and creator workflows." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Phantomline creates faceless videos locally with ideas, scripts, narration, captions, music, visual layers, scheduling, and YouTube publishing." />
 <meta name="theme-color" content="#090b0c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Phantomline" />
-<meta property="og:title" content="Phantomline — local AI video studio" />
-<meta property="og:description" content="Faceless videos without the tool chaos. Local, no paid APIs." />
-<meta property="og:image" content="/static/phantomline-wordmark.svg" />
+<link rel="canonical" href="{{ canonical_url }}" />
+
+<!-- Open Graph -->
 <meta property="og:type" content="website" />
+<meta property="og:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
+<meta property="og:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta property="og:site_name" content="Phantomline" />
+
+<!-- Twitter card -->
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
+<meta name="twitter:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
 <link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+
+<!-- JSON-LD: Organization. Identifies Phantomline as a brand entity to
+     search engines and AI crawlers. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Phantomline",
+  "url": "{{ site_url }}",
+  "logo": "{{ site_url }}/static/phantomline-wordmark.svg",
+  "description": "Local-first AI video studio for faceless YouTube creators."
+}
+</script>
+
+<!-- JSON-LD: WebSite. Lets Google show a search box in SERPs once the
+     site is established (the SearchAction below is forward-looking; we
+     don't have site search yet but the schema is harmless to ship). -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Phantomline",
+  "url": "{{ site_url }}"
+}
+</script>
+
+<!-- JSON-LD: SoftwareApplication. Tells Google this is a multi-platform
+     creator tool with a free tier. Real prices below — no fake reviews. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Phantomline",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Windows, macOS, Linux, Android, Web",
+  "description": "Local-first AI video studio for faceless YouTube creators. Generate scripts, narration, captions, music, visuals, MP4 exports, and YouTube publishing drafts on your own machine.",
+  "url": "{{ site_url }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+
+<!-- JSON-LD: FAQPage. Mirrors the visible <details> block lower in the
+     page verbatim. Google penalizes FAQPage schema where the schema
+     answers don't match the rendered text — keep these in sync. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Do I need a fancy PC?",
+     "acceptedAnswer": {"@type": "Answer", "text": "For the full desktop experience: 16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. For mobile-only use: any flagship phone from the last 3 years works (Pixel 7+, Galaxy S22+, iPhone 13+). The mobile PWA uses Llama 3.2 1B which fits in 2 GB RAM."}},
+    {"@type": "Question", "name": "Does this actually work on a phone with no PC running?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Pick 'This device' as the AI engine in Settings. Llama 3.2 1B downloads once (~1 GB, cached forever). After that: scripts generate via WebGPU, narration uses your phone's built-in TTS, music comes from the bundled pack, and ffmpeg.wasm renders the MP4 in your browser. Airplane mode safe."}},
+    {"@type": "Question", "name": "What's free vs Pro?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Free tier: 5 video renders per month, all local AI features, project library. Pro: unlimited renders, no watermark, publish scheduler, SEO Finder, Optimize Library (vidIQ-aware repackaging), channel analytics ingest, brand presets, multi-channel."}},
+    {"@type": "Question", "name": "What does Founding Lifetime get me?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 200 buyers. Locked-in price even if monthly tiers go up later. After the 200 are sold, the founding deal is gone."}},
+    {"@type": "Question", "name": "Is my data sent anywhere?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Scripts, audio, video, channel analytics — all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in."}},
+    {"@type": "Question", "name": "Can I use this commercially?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Any video you make is yours. The bundled music pack is procedurally generated and public-domain. Generated narration belongs to you. Generated visuals belong to you. Phantomline charges for the tool, not for what you make with it."}},
+    {"@type": "Question", "name": "Does it run on Mac and Linux?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The desktop app is Python — runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS."}},
+    {"@type": "Question", "name": "Will my license expire?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Founding Lifetime: never. Creator Pro and Studio yearly: one year from purchase, renews. Monthly: 31 days, renews. Free tier: never expires. License validation is offline — losing internet doesn't lock you out."}}
+  ]
+}
+</script>
 </head>
 <body>
 <div class="wrap">
@@ -29,7 +113,7 @@
     <div class="navlinks">
       <a href="#workflow">Workflow</a>
       <a href="#mobile">Mobile</a>
-      <a href="#pricing">Pricing</a>
+      <a href="/pricing">Pricing</a>
       <a href="#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>
