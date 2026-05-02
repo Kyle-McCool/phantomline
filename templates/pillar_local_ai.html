@@ -11,9 +11,11 @@
 <meta property="og:title" content="Local AI Video Generator for Faceless YouTube | Phantomline" />
 <meta property="og:description" content="Local-first AI video generator. Private workflow, no API costs, no subscription lock-in." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
 
@@ -40,9 +42,9 @@
   "publisher": {
     "@type": "Organization",
     "name": "Phantomline",
-    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-wordmark.svg"}
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-wordmark.svg",
+  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -69,9 +71,8 @@
 <body>
 <div class="wrap">
   <nav class="top">
-    <a class="brand" href="/">
-      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
-      <span class="brand-name">Phantomline</span>
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
     </a>
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>

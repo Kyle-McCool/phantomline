@@ -2,7 +2,7 @@
   "name": "Phantomline",
   "short_name": "Phantomline",
   "description": "Phantomline — local AI video studio. Idea to script to narration to MP4, on your own machine.",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
@@ -11,30 +11,36 @@
   "categories": ["productivity", "creativity", "video"],
   "icons": [
     {
-      "src": "/static/ghostline-logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/static/phantomline-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/static/ghostline-logo-wordmark.png",
-      "sizes": "882x373",
+      "src": "/static/phantomline-logo-square.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/phantomline-logo-square.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     }
   ],
   "shortcuts": [
     {
-      "name": "Create Video",
-      "short_name": "Create",
-      "url": "/?tab=make",
-      "description": "Open the create-video workflow"
+      "name": "Open Studio",
+      "short_name": "Studio",
+      "url": "/app",
+      "description": "Open the Phantomline workspace"
     },
     {
-      "name": "Library",
-      "short_name": "Library",
-      "url": "/?tab=library",
-      "description": "Open saved video bundles"
+      "name": "Pricing",
+      "short_name": "Pricing",
+      "url": "/pricing",
+      "description": "See plans and pricing"
     }
   ]
 }

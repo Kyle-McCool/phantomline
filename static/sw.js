@@ -12,8 +12,10 @@
 // drop stale caches. v2 cleared the lingering ghostline-branded wordmark
 // PNG; v3 invalidates the now-stale "/" cache entry that pointed at
 // the studio (it now points at the marketing landing instead);
-// v4 adds /pricing to the offline shell pre-warm.
-const CACHE_VERSION = "phantomline-v4";
+// v4 adds /pricing to the offline shell pre-warm; v5 invalidates the
+// old icon-plus-CSS-text brand mark in favor of the real designed
+// primary logo PNG (and the new favicon + apple-touch-icon).
+const CACHE_VERSION = "phantomline-v5";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 
