@@ -1,10 +1,10 @@
 {
-  "appId": "fun.ghostline.studio",
-  "appName": "Ghostline",
+  "appId": "xyz.phantomline.app",
+  "appName": "Phantomline",
   "webDir": "static",
   "bundledWebRuntime": false,
   "server": {
-    "url": "https://YOUR-PWA-DOMAIN-HERE.com",
+    "url": "https://phantomline.xyz",
     "cleartext": false
   },
   "android": {
@@ -18,7 +18,7 @@
     }
   },
   "ios": {
-    "scheme": "Ghostline",
+    "scheme": "Phantomline",
     "contentInset": "automatic"
   },
   "plugins": {

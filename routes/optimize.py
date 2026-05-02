@@ -50,7 +50,7 @@ def _optimize_analyze_prompt(*, title_text, description_excerpt, tags,
     references to the route's local scope."""
     tags_count = len(tags or [])
     return f"""
-You are Ghostline's per-video YouTube SEO doctor. Diagnose ONE video against vidIQ's Actionable scoring axes AND the channel's actual data, then propose a tightly-scoped repackaging.
+You are Phantomline's per-video YouTube SEO doctor. Diagnose ONE video against vidIQ's Actionable scoring axes AND the channel's actual data, then propose a tightly-scoped repackaging.
 
 CURRENT VIDEO METADATA:
 title: {title_text}
@@ -233,7 +233,7 @@ def api_optimize_analyze():
         model,
         prompt,
         system=(
-            "You are Ghostline's strict-JSON YouTube SEO doctor. You reason in vidIQ "
+            "You are Phantomline's strict-JSON YouTube SEO doctor. You reason in vidIQ "
             "Actionable scoring axes (keywords-in-title, tripled-keyword, tag-count, "
             "tag-volume, keywords-in-description) and ground every recommendation in "
             "the provided axis facts and channel insights. No generic advice, no "

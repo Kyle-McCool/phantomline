@@ -160,8 +160,8 @@ def api_launch_test_render():
             wf.setframerate(sample_rate)
             wf.writeframes(b"\x00\x00" * sample_rate * seconds)
         timeline = {
-            "title": "Ghostline Test Render",
-            "source_plan_title": "Ghostline Test Render",
+            "title": "Phantomline Test Render",
+            "source_plan_title": "Phantomline Test Render",
             "aspect": "9:16",
             "scenes": [
                 {
@@ -169,7 +169,7 @@ def api_launch_test_render():
                     "start": "00:00",
                     "end": "00:04",
                     "duration_seconds": 4,
-                    "narration": "Ghostline local render check.",
+                    "narration": "Phantomline local render check.",
                     "video_prompt": "premium faceless video studio preview, local render check, teal glow, no text",
                 },
                 {
@@ -185,7 +185,7 @@ def api_launch_test_render():
         video_assembler.render_draft_video(timeline, tmp_audio, tmp_video, fps=24)
         proj = PROJECTS.create(
             kind=project_store.KIND_VIDEO,
-            title="Ghostline Test Render",
+            title="Phantomline Test Render",
             params={"source": "launch_readiness_test", "aspect": "9:16"},
         )
         PROJECTS.attach_file(proj["id"], "video", tmp_video)

@@ -151,7 +151,7 @@ def _security_headers(response):
         "geolocation=(), microphone=(), camera=(), interest-cohort=(), payment=()",
     )
     # Hide the Flask/werkzeug version string.
-    response.headers["Server"] = "Ghostline"
+    response.headers["Server"] = "Phantomline"
     return response
 
 
@@ -3561,7 +3561,7 @@ if __name__ == "__main__":
     else:
         host = "127.0.0.1"
         port = 5000
-        print("Ghostline - open http://localhost:5000 in your browser.")
+        print("Phantomline - open http://localhost:5000 in your browser.")
     # threaded=True so a generation thread does not block the status polling.
     app.run(host=host, port=port, debug=False, threaded=True)
 

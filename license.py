@@ -1,9 +1,9 @@
-"""License key validation for Ghostline.
+"""License key validation for Phantomline.
 
 Design goals:
 
 - **Offline-verifiable**: a license key is a self-contained string that
-  Ghostline can validate without phoning home. Users can run the app
+  Phantomline can validate without phoning home. Users can run the app
   fully air-gapped. (The auth flow that *issues* keys is online — that's
   Supabase's job — but the *check* is local.)
 - **Tamper-evident**: changing any field in the payload breaks the HMAC.

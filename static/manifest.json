@@ -1,7 +1,7 @@
 {
-  "name": "Ghostline",
-  "short_name": "Ghostline",
-  "description": "Local AI video studio. Idea to script to narration to MP4 — on your own machine.",
+  "name": "Phantomline",
+  "short_name": "Phantomline",
+  "description": "Phantomline — local AI video studio. Idea to script to narration to MP4, on your own machine.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,6 +1,6 @@
-# Ghostline
+# Phantomline
 
-Ghostline creates local AI videos without showing your face. Write stories from scratch,
+Phantomline creates local AI videos without showing your face. Write stories from scratch,
 narrate any book or script with a local TTS, score the result with
 ambient music, and mix everything into a single upload-ready file.
 Everything runs on your own machine via Ollama, Kokoro, and MusicGen.

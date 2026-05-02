@@ -1,17 +1,17 @@
-# Building the Ghostline mobile app
+# Building the Phantomline mobile app
 
 This doc covers two paths from the existing PWA to a real shippable app:
 
 1. **PWA-only** (zero build): users install from your domain on Android Chrome or iOS Safari home-screen.
 2. **APK / AAB on Google Play** via Capacitor: wraps the same PWA in a native shell so it lists on Play Store with notifications, share targets, etc.
 
-The PWA path is what Ghostline ships first. APK comes later, after PWA usage validates demand.
+The PWA path is what Phantomline ships first. APK comes later, after PWA usage validates demand.
 
 ---
 
 ## Path 1: PWA distribution (no build step)
 
-The site is already a fully functional installable PWA. Customers on Android Chrome or iOS Safari just visit `https://yourdomain.com`, tap "Add to Home Screen," and Ghostline behaves like an app.
+The site is already a fully functional installable PWA. Customers on Android Chrome or iOS Safari just visit `https://yourdomain.com`, tap "Add to Home Screen," and Phantomline behaves like an app.
 
 What's already wired:
 - `static/manifest.json` with shortcuts, icons, theme color
@@ -42,21 +42,21 @@ Capacitor (https://capacitorjs.com/) is the modern descendant of Cordova. It bun
 # From the project root
 npm init -y
 npm install --save-dev @capacitor/cli @capacitor/core @capacitor/android
-npx cap init Ghostline fun.ghostline.studio --web-dir=static
+npx cap init Phantomline fun.phantomline.studio --web-dir=static
 ```
 
 `capacitor.config.json` is already in this repo with the right settings — you just need to:
 
 1. Replace `YOUR-PWA-DOMAIN-HERE.com` in `server.url` with your live PWA domain.
 2. Generate a release keystore (see below).
-3. Update the `appId` if you don't own `fun.ghostline.studio`.
+3. Update the `appId` if you don't own `fun.phantomline.studio`.
 
 ### Generate a release keystore
 
 ```bash
 mkdir -p keys
 keytool -genkey -v -keystore keys/release.keystore \
-  -alias ghostline-release \
+  -alias phantomline-release \
   -keyalg RSA -keysize 4096 -validity 10000 \
   -storepass <your-store-password> -keypass <your-key-password>
 ```
@@ -93,8 +93,8 @@ The Capacitor app launches a WebView that loads `https://yourdomain.com` (the sa
 1. Create a Google Play Console account ($25 one-time)
 2. Set up an "Internal testing" track first — push the AAB there
 3. Create the listing: title, short description, full description, screenshots (mandatory: 2 phone screenshots), feature graphic, app icon, privacy policy URL
-4. Privacy policy: Ghostline collects telemetry (opt-out in Settings). Mention this in the policy. List the data collected: anonymous error events, render outcomes, optional feedback messages.
-5. Content rating: complete the IARC questionnaire (Ghostline = "All ages" likely, since it's a creator tool with no user-facing media)
+4. Privacy policy: Phantomline collects telemetry (opt-out in Settings). Mention this in the policy. List the data collected: anonymous error events, render outcomes, optional feedback messages.
+5. Content rating: complete the IARC questionnaire (Phantomline = "All ages" likely, since it's a creator tool with no user-facing media)
 6. Release type: Closed testing → Open testing → Production. Don't skip closed testing.
 
 ### Costs

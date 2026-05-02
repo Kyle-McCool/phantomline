@@ -1,11 +1,11 @@
-# Ghostline mobile roadmap
+# Phantomline mobile roadmap
 
 This doc captures the contract that mobile builds (PWA, then APK) target.
 Update it whenever the API or workflow changes.
 
 ## Scope decisions
 
-Mobile Ghostline is a **lighter sibling** of desktop, not a port. These
+Mobile Phantomline is a **lighter sibling** of desktop, not a port. These
 decisions are deliberate; bring them up before changing.
 
 ### IN scope for mobile (PWA + APK)
@@ -66,12 +66,12 @@ decisions are deliberate; bring them up before changing.
 
 The PWA reuses the existing JSON API. The APK will use the same endpoints
 once we expose a configurable `GHOSTLINE_API_BASE` so it can target either
-the user's home Ghostline (over Tailscale) OR the cloud version (future).
+the user's home Phantomline (over Tailscale) OR the cloud version (future).
 
 ### Endpoints mobile MUST be able to call
 
 These are the endpoints mobile clients depend on. Breaking any of these
-breaks mobile. Versioning bumps go in `Accept: application/vnd.ghostline.v2+json`
+breaks mobile. Versioning bumps go in `Accept: application/vnd.phantomline.v2+json`
 header, not URL paths.
 
 | Endpoint | Method | Used by mobile for |
@@ -120,7 +120,7 @@ header, not URL paths.
 - ❌ **WebLLM integration** for browser-side inference. Currently calls `sg.generate` which hits Ollama on the desktop. Mobile PWA needs an adapter that runs Llama 3.2 in WebGPU.
 - ❌ **Engine adapters** in JS — `makeVideoWorkflow` is hardcoded to call server endpoints. Refactor to `makeVideoWorkflow({ engine: ServerEngine | WebLLMEngine })`.
 - ❌ **Bundled music + B-roll library** — assets to source/license and ship in `/static/library/`.
-- ❌ **Mobile share-target manifest** so other apps can share text/video into Ghostline.
+- ❌ **Mobile share-target manifest** so other apps can share text/video into Phantomline.
 - ❌ **APK build pipeline** — separate codebase decision (Kotlin vs Flutter).
 - ❌ **Cloud-or-local toggle** for the APK if we ever do option C (companion app).
 

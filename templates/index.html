@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Ghostline - Local AI videos without showing your face</title>
+<title>Phantomline - Local AI videos without showing your face</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Ghostline" />
+<meta name="apple-mobile-web-app-title" content="Phantomline" />
 <meta name="mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
 <link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
@@ -22,7 +22,7 @@
 <div class="wrap">
   <header>
     <a class="brand" href="/landing" title="Open landing page">
-      <img class="brand-logo" src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Ghostline" />
+      <img class="brand-logo" src="{{ '/static/ghostline-logo-wordmark.png' | versioned }}" alt="Phantomline" />
       <small class="brand-tagline">local AI videos without showing your face</small>
     </a>
     <div class="header-actions">
@@ -112,7 +112,7 @@
     <div class="launch-shell">
       <section class="panel launch-hero">
         <div class="make-eyebrow">First-run setup</div>
-        <h2>Get Ghostline ready to ship videos.</h2>
+        <h2>Get Phantomline ready to ship videos.</h2>
         <p class="hint">Run one local readiness check, load a proven demo workflow, then create your first faceless short with almost no typing.</p>
         <div class="launch-score-card">
           <div>
@@ -273,7 +273,7 @@
         <div class="make-stage" id="makeViralStage" style="display:none;">
           <div class="make-stage-title">
             <strong>Story engine</strong>
-            <span>Ghostline uses this to shape the hook, twist, captions, and loop.</span>
+            <span>Phantomline uses this to shape the hook, twist, captions, and loop.</span>
           </div>
           <div class="choice-grid" id="makeTensionCards">
             <button class="choice-card active" type="button" data-tension="betrayal_drama"><strong>Betrayal / Drama</strong><span>Wrong screenshots, hidden phones, secrets.</span></button>
@@ -580,7 +580,7 @@
         <button id="makeVideoBtn" class="btn">5. Render Video</button>
         <button id="makeCancelBtn" class="btn secondary" type="button" style="display:none; margin-left:8px;" data-blocked-reason="No render in progress">Stop watching</button>
         <div class="hint" style="margin-top:10px;">
-          For 20+ minute videos, Ghostline writes the script in sections, then narrates, scores, mixes, and timelines the full audio. Draft renders now use scene motion clips when present, then still images, and only fall back to cards for missing scenes.
+          For 20+ minute videos, Phantomline writes the script in sections, then narrates, scores, mixes, and timelines the full audio. Draft renders now use scene motion clips when present, then still images, and only fall back to cards for missing scenes.
         </div>
       </section>
 
@@ -614,7 +614,7 @@
                 </div>
                 <div class="caption-safe-guide"></div>
               </div>
-              <div class="preview-title" id="makePreviewTitle">Ghostline short</div>
+              <div class="preview-title" id="makePreviewTitle">Phantomline short</div>
               <div class="preview-caption" id="makePreviewCaption">Pick a <span>hook</span></div>
               <div class="preview-meta">
                 <span id="makePreviewRatio">9:16</span>
@@ -1039,14 +1039,14 @@
       <h2>Video Studio</h2>
       <div class="advanced-banner"><strong>Advanced manual tool</strong>Create Video handles the normal end-to-end path. Use Video Studio when you want to edit plans, timelines, or render settings by hand.</div>
       <p class="hint" style="margin-top:0;">
-        Turn a finished narration script into a timed visual plan. Ghostline will use matching scene motion clips or still images when you render the draft MP4, and only use fallback cards for scenes with no media yet.
+        Turn a finished narration script into a timed visual plan. Phantomline will use matching scene motion clips or still images when you render the draft MP4, and only use fallback cards for scenes with no media yet.
       </p>
 
       <label for="videoTitle">Video title</label>
       <input type="text" id="videoTitle" placeholder="The Silent Watchers in the Darkening Skies" />
 
       <label for="videoScript">Narration script</label>
-      <textarea id="videoScript" class="paste-text" placeholder="Paste a Ghostline script here, or send one from Long Story / Short Script."></textarea>
+      <textarea id="videoScript" class="paste-text" placeholder="Paste a Phantomline script here, or send one from Long Story / Short Script."></textarea>
       <div class="hint" id="videoCount" style="margin-top:6px;">0 words</div>
 
       <div class="row">
@@ -1156,14 +1156,14 @@
           <span class="hint" id="videoPathHint" style="margin-left:auto;align-self:center;"></span>
         </div>
         <div class="hint" style="margin-top:10px;">
-          Local Forge creates matching scene stills automatically when enabled. For motion workflows, render short clips per scene and Ghostline will assemble them with narration.
+          Local Forge creates matching scene stills automatically when enabled. For motion workflows, render short clips per scene and Phantomline will assemble them with narration.
         </div>
         <div id="videoScenes" class="library-grid" style="margin-top:16px;"></div>
       </div>
 
       <h2 style="margin-top:32px;">Auto timeline</h2>
       <p class="hint" style="margin-top:0;">
-        Match a saved video plan to narration audio. Ghostline reads the narration length, assigns exact start/end times to each scene, and saves an edit list for the final video assembly step.
+        Match a saved video plan to narration audio. Phantomline reads the narration length, assigns exact start/end times to each scene, and saves an edit list for the final video assembly step.
       </p>
 
       <div class="row">
@@ -1353,7 +1353,7 @@
         <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:16px;">
           <div>
             <h2 style="margin-bottom:4px;">Publish Studio</h2>
-            <p class="hint" style="margin:0;">Cadence tools inside Ghostline: package, schedule, queue, and publish finished videos.</p>
+            <p class="hint" style="margin:0;">Cadence tools inside Phantomline: package, schedule, queue, and publish finished videos.</p>
           </div>
           <button id="publishNewPostBtn" class="btn secondary" type="button">+ New post</button>
         </div>
@@ -1363,9 +1363,9 @@
             <div>
               <div class="publish-card">
                 <div class="make-section-title"><strong>Media</strong><span id="publishDraftSaved">Draft saved locally</span></div>
-                <label for="publishVideoProject">Finished Ghostline video</label>
+                <label for="publishVideoProject">Finished Phantomline video</label>
                 <select id="publishVideoProject"><option value="">- choose a rendered MP4 -</option></select>
-                <div class="hint">When Make Video finishes, Ghostline auto-selects the new MP4 here.</div>
+                <div class="hint">When Make Video finishes, Phantomline auto-selects the new MP4 here.</div>
               </div>
               <div class="publish-card">
                 <div class="make-section-title"><strong>Caption / Description</strong><span><span id="publishCaptionCount">0</span> / 5000</span></div>
@@ -1450,7 +1450,7 @@
         </div>
 
         <div id="pubView-calendar" class="publish-view" style="display:none;">
-          <div class="publish-card"><div class="make-section-title"><strong>Calendar</strong><span>Scheduled Ghostline posts</span></div><div class="calendar-grid" id="publishCalendar"></div></div>
+          <div class="publish-card"><div class="make-section-title"><strong>Calendar</strong><span>Scheduled Phantomline posts</span></div><div class="calendar-grid" id="publishCalendar"></div></div>
         </div>
         <div id="pubView-queue" class="publish-view" style="display:none;">
           <div class="publish-card"><div class="make-section-title"><strong>Queue</strong><span>Due posts upload automatically</span></div><div class="publish-list" id="publishQueue"></div></div>
@@ -1492,7 +1492,7 @@
         <div id="pubView-seo" class="publish-view" style="display:none;">
           <div class="publish-card">
             <div class="make-section-title"><strong>SEO Opportunity Finder</strong><span>Any niche or product</span></div>
-            <p class="hint" style="margin-top:0;">Type any niche, product, tool, or topic. Ghostline expands search phrases, checks YouTube demand and competition when your API key is available, then keeps only the strongest opportunities.</p>
+            <p class="hint" style="margin-top:0;">Type any niche, product, tool, or topic. Phantomline expands search phrases, checks YouTube demand and competition when your API key is available, then keeps only the strongest opportunities.</p>
             <label for="seoNicheInput">Niche / product / topic</label>
             <div class="row">
               <input id="seoNicheInput" type="text" placeholder="makko.ai, AI video editor, survival tips, faceless Reddit stories..." />
@@ -1593,7 +1593,7 @@
           <div class="hint" style="margin:0 0 10px;">Pick where script generation runs. Server uses your Ollama install (fast, full-quality, requires PC). This device runs Llama 3.2 1B in your browser via WebGPU — works on mobile, downloads once (~1 GB), no PC needed afterward.</div>
           <label class="toggle-row">
             <input type="radio" name="ghEngine" value="server" id="engineServer" />
-            <span><strong>Local server (Ollama)</strong> — desktop default. 8B model quality. Requires the Ghostline Python server running on this machine.</span>
+            <span><strong>Local server (Ollama)</strong> — desktop default. 8B model quality. Requires the Phantomline Python server running on this machine.</span>
           </label>
           <label class="toggle-row">
             <input type="radio" name="ghEngine" value="device" id="engineDevice" />
@@ -1668,7 +1668,7 @@
     <section class="panel">
       <h2>Optimize Library</h2>
       <p class="hint" style="margin-top:0;">
-        Pull every video on your connected channel, then deep-analyze them one at a time. Ghostline grades each video against your channel insights and proposes a single tightly-scoped repackaging. Phase 1 is read-only — suggestions only, no writes back to YouTube yet.
+        Pull every video on your connected channel, then deep-analyze them one at a time. Phantomline grades each video against your channel insights and proposes a single tightly-scoped repackaging. Phase 1 is read-only — suggestions only, no writes back to YouTube yet.
       </p>
 
       <div id="optimizeConnect" class="ip-empty" style="margin-bottom:14px;">
@@ -1707,7 +1707,7 @@
   </div>
 
   <div class="footer">
-    Ghostline runs on your machine via Ollama, Kokoro, MusicGen, and optional local Forge. No paid APIs required.
+    Phantomline runs on your machine via Ollama, Kokoro, MusicGen, and optional local Forge. No paid APIs required.
   </div>
 </div>
 

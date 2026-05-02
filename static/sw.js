@@ -1,5 +1,5 @@
 /**
- * Ghostline service worker.
+ * Phantomline service worker.
  *
  * Strategy:
  *  - Cache-first for /static/* (CSS, JS, images, fonts).

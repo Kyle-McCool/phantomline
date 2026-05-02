@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ghostline story engine (local, Ollama-powered).
+Phantomline story engine (local, Ollama-powered).
 
 Generates a long-form, calm, slow-burn narration script in sections,
 keeping a rolling summary so a local LLM can stay coherent across
@@ -74,7 +74,7 @@ GENRE_HINTS = [
 # System prompt used for every Ollama call. Kept short on purpose - the
 # per-task prompts carry the heavy instructions.
 SYSTEM_PROMPT = (
-    "You are Ghostline's senior YouTube script strategist for faceless channels. "
+    "You are Phantomline's senior YouTube script strategist for faceless channels. "
     "You write spoken narration that is built for retention, captions, and visual production. "
     "For Shorts, you prioritize first-frame clarity, unresolved tension, fast payoff, and loopable endings. "
     "For long-form, you prioritize promise, progression, proof, examples, and clean section-to-section momentum. "
@@ -499,7 +499,7 @@ def collect_inputs(args):
             "model": args.model or DEFAULT_MODEL,
         }
 
-    print("\n=== Ghostline story engine ===")
+    print("\n=== Phantomline story engine ===")
     print("Press Enter on any prompt to accept the default in [brackets].\n")
     print("Suggested genres:", ", ".join(GENRE_HINTS), "\n")
 

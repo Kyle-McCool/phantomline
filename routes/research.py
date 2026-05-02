@@ -248,7 +248,7 @@ def api_youtube_seo_research():
             raw = sg.generate(
                 model,
                 prompt,
-                system="You are Ghostline's YouTube SEO keyword strategist. Output strict JSON only. Generate search phrases, not generic tags.",
+                system="You are Phantomline's YouTube SEO keyword strategist. Output strict JSON only. Generate search phrases, not generic tags.",
                 label="seo keyword candidates",
                 show_progress=False,
                 temperature=0.75,

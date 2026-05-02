@@ -1,5 +1,5 @@
 /**
- * Ghostline license issuer.
+ * Phantomline license issuer.
  *
  * Stripe webhook -> this function -> signed license key emailed to customer.
  *
@@ -7,7 +7,7 @@
  *   supabase functions deploy issue-license --project-ref <your-ref>
  *
  * Required env vars (set in Supabase dashboard):
- *   GHOSTLINE_LICENSE_SECRET   - the same hex secret in your Flask .env
+ *   GHOSTLINE_LICENSE_SECRET   - the same hex secret in your Phantomline server .env
  *   STRIPE_SECRET_KEY          - sk_live_... or sk_test_...
  *   STRIPE_WEBHOOK_SECRET      - whsec_... from Stripe dashboard
  *   RESEND_API_KEY             - or any other email provider you prefer
@@ -85,22 +85,22 @@ async function issueLicenseKey(opts: {
 }
 
 async function sendLicenseEmail(email: string, key: string, tier: string) {
-  const subject = `Your Ghostline ${tier} license`;
+  const subject = `Your Phantomline ${tier} license`;
   const text = `
-Welcome to Ghostline ${tier}!
+Welcome to Phantomline ${tier}!
 
 Your license key:
 
 ${key}
 
 To activate it:
-1. Open Ghostline → Settings
+1. Open Phantomline → Settings
 2. Paste the key into the License field
 3. Click "Apply key"
 
 Save this email — you'll need the key if you reinstall.
 
-— Ghostline
+— Phantomline
 `.trim();
 
   const res = await fetch("https://api.resend.com/emails", {

@@ -1,8 +1,8 @@
 """
-Channel Insights — persistent analytics + SEO state for Ghostline.
+Channel Insights — persistent analytics + SEO state for Phantomline.
 
 Bridges YouTube Analytics (what's working) with SEO research (what people
-search for) so every idea, title, and script Ghostline generates is informed
+search for) so every idea, title, and script Phantomline generates is informed
 by the user's actual channel data instead of generic niche prompts.
 
 Stored at output/insights/channel_insights.json. Atomic writes.
@@ -28,7 +28,7 @@ Schema:
   "gap_keywords": [...],           # search terms NOT in any current title
   "seo_keywords": [...],           # keywords the channel should target
   "content_angles": [...],         # video ideas anchored to data
-  "next_video_rules": [...],       # rules Ghostline should follow when generating
+  "next_video_rules": [...],       # rules Phantomline should follow when generating
   "hook_guidance": [...],          # hook patterns, with examples
   "title_guidance": [...],         # title patterns, with rewrites
 }

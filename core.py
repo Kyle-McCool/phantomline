@@ -1,4 +1,4 @@
-"""Shared module-level state for Ghostline.
+"""Shared module-level state for Phantomline.
 
 server.py and the route Blueprints under routes/ all import from here.
 This module imports nothing from the rest of the project, so the import
