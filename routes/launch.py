@@ -19,8 +19,17 @@ from flask import Blueprint, jsonify, request
 import channel_insights
 import projects as project_store
 import story_generator as sg
-import tts as tts_mod
-import video_assembler
+# Heavy ML modules are optional on the hosted tier. Routes that need them
+# guard with `if tts_mod is None: return 503`. See server.py for the same
+# pattern in the main app.
+try:
+    import tts as tts_mod
+except Exception:
+    tts_mod = None
+try:
+    import video_assembler
+except Exception:
+    video_assembler = None
 import youtube_research
 
 from core import (

@@ -26,10 +26,24 @@ from flask import Flask, jsonify, redirect, render_template, request, send_file
 from PIL import Image, ImageStat
 
 import story_generator as sg
-import tts as tts_mod
-import music as music_mod
+# Heavy ML modules are imported defensively so the hosted (Render) tier can
+# boot without kokoro / transformers / pytorch installed. When these are
+# None, any route that needs server-side TTS or music generation returns
+# 503 — see _require_local_ai() below. The desktop install pulls in
+# requirements-desktop.txt and gets the real modules.
+try:
+    import tts as tts_mod
+except Exception as _tts_import_err:
+    tts_mod = None
+try:
+    import music as music_mod
+except Exception as _music_import_err:
+    music_mod = None
 import projects as project_store
-import video_assembler
+try:
+    import video_assembler
+except Exception:
+    video_assembler = None
 import youtube_publish
 import youtube_research
 import channel_insights
