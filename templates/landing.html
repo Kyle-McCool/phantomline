@@ -16,18 +16,18 @@
 <meta property="og:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
 <meta property="og:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
 <meta property="og:site_name" content="Phantomline" />
 
 <!-- Twitter card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
 <meta name="twitter:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-wordmark.svg" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
 
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
-<link rel="icon" type="image/svg+xml" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
-<link rel="apple-touch-icon" href="{{ '/static/ghostline-logo.svg' | versioned }}" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
 
 <!-- JSON-LD: Organization. Identifies Phantomline as a brand entity to
@@ -38,7 +38,7 @@
   "@type": "Organization",
   "name": "Phantomline",
   "url": "{{ site_url }}",
-  "logo": "{{ site_url }}/static/phantomline-wordmark.svg",
+  "logo": "{{ site_url }}/static/phantomline-logo-primary.png",
   "description": "Local-first AI video studio for faceless YouTube creators."
 }
 </script>
@@ -106,9 +106,8 @@
 <body>
 <div class="wrap">
   <nav class="top">
-    <a class="brand" href="/">
-      <img class="brand-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
-      <span class="brand-name">Phantomline</span>
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
     </a>
     <div class="navlinks">
       <a href="#workflow">Workflow</a>
@@ -124,10 +123,7 @@
       <div class="hero-scene" aria-hidden="true"><canvas id="heroThree"></canvas></div>
       <div class="hero-grid">
         <div class="hero-copy">
-          <div class="hero-logo">
-            <img class="hero-logo-icon" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
-            <span class="hero-logo-name">Phantomline</span>
-          </div>
+          <img class="hero-logo-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
           <div class="eyebrow">Local AI video studio</div>
           <h1>Faceless videos <span>without the tool chaos.</span></h1>
           <p class="lede">
@@ -148,7 +144,7 @@
           <div class="phone-stack">
             <div class="phone-shell">
               <div class="phone-screen">
-                <img class="phone-logo" src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+                <img class="phone-logo" src="{{ '/static/phantomline-favicon.png' | versioned }}" alt="" />
                 <div class="platform-ui">
                   <div class="tabs"><span>Following</span><strong>For You</strong></div>
                   <div class="actions"><span>♡</span><span>↗</span><span>●</span></div>
@@ -204,7 +200,7 @@
             </div>
             <div class="mock-panel">
               <div class="mini-phone">
-                <img src="{{ '/static/ghostline-logo.svg' | versioned }}" alt="" />
+                <img src="{{ '/static/phantomline-favicon.png' | versioned }}" alt="" />
                 <div class="caption">The lighthouse keeper<br><span>found a second one</span></div>
               </div>
             </div>

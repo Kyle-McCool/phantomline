@@ -55,30 +55,19 @@
     box-shadow: 0 18px 70px rgba(0,0,0,0.24);
   }
   .brand {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    font-weight: 850;
-    font-size: 18px;
-    line-height: 1;
+    line-height: 0;
     text-decoration: none;
   }
-  .brand .brand-icon {
+  /* The new primary logo PNG includes both icon + wordmark, so the
+     entire brand mark is one image instead of icon-plus-CSS-text. */
+  .brand .brand-img {
     height: 44px;
-    width: 44px;
+    width: auto;
+    max-width: min(60vw, 220px);
     object-fit: contain;
-    filter: drop-shadow(0 0 18px rgba(38,231,245,0.45));
-    flex: 0 0 auto;
-  }
-  .brand .brand-name {
-    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-    font-weight: 600;
-    font-size: 30px;
-    letter-spacing: 0.6px;
-    background: linear-gradient(110deg, #baffff 0%, #22e7f5 55%, #1ee8f6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    filter: drop-shadow(0 0 18px rgba(38,231,245,0.30));
   }
   .navlinks {
     display: flex;
@@ -152,30 +141,16 @@
     gap: 44px;
     align-items: center;
   }
-  .hero-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    margin: 0 0 26px;
+  /* Hero logo on landing — single primary-logo image at hero scale.
+     Replaces the old inline-flex of icon + CSS-gradient-text. */
+  .hero-logo-img {
+    display: block;
+    width: clamp(280px, 38vw, 460px);
+    height: auto;
+    margin: 0 0 22px;
+    filter: drop-shadow(0 8px 32px rgba(38,231,245,0.22));
     user-select: none;
-  }
-  .hero-logo-icon {
-    height: clamp(64px, 9vw, 96px);
-    width: auto;
-    flex: 0 0 auto;
-    filter: drop-shadow(0 6px 28px rgba(94, 234, 255, 0.18));
-  }
-  .hero-logo-name {
-    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-    font-weight: 600;
-    font-size: clamp(46px, 6.4vw, 72px);
-    letter-spacing: 0.8px;
-    line-height: 1;
-    background: linear-gradient(110deg, #baffff 0%, #22e7f5 55%, #1ee8f6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    filter: drop-shadow(0 6px 28px rgba(94, 234, 255, 0.18));
+    -webkit-user-drag: none;
   }
   .eyebrow {
     display: inline-flex;
@@ -919,12 +894,10 @@
       gap: 16px;
     }
     .hero-copy { text-align: left; }
-    .hero-logo {
-      gap: 10px;
+    .hero-logo-img {
+      width: clamp(200px, 70vw, 320px);
       margin: 0 0 14px;
     }
-    .hero-logo-icon { height: 48px; width: 48px; }
-    .hero-logo-name { font-size: 38px; letter-spacing: 0.4px; }
     h1 {
       font-size: clamp(34px, 9.4vw, 48px);
       line-height: 1.05;
@@ -954,8 +927,7 @@
       gap: 10px;
       top: 6px;
     }
-    .brand .brand-icon { height: 36px; width: 36px; }
-    .brand .brand-name { font-size: 22px; }
+    .brand .brand-img { height: 36px; max-width: 70vw; }
     .section { padding: 18px 14px; }
     /* Section headings + body text get more breathing room and tighter
        sizes so paragraphs don't push past viewport on iOS Safari. */
@@ -982,10 +954,9 @@
 
   /* Extra-narrow phones (≤380px — older iPhone SE, Galaxy A series) */
   @media (max-width: 380px) {
-    .hero-logo-name { font-size: 32px; }
-    .hero-logo-icon { height: 42px; width: 42px; }
+    .hero-logo-img { width: min(86vw, 280px); }
     h1 { font-size: clamp(30px, 9vw, 40px); }
-    .brand .brand-name { font-size: 19px; }
+    .brand .brand-img { height: 30px; }
   }
 
   /* ----------------------------------------------------------------------
@@ -1011,28 +982,15 @@
     font-size: 14px;
     line-height: 1.6;
     max-width: 320px;
-    margin: 12px 0 0;
+    margin: 14px 0 0;
   }
-  .site-footer-brand .brand-mark {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    line-height: 1;
-  }
-  .site-footer-brand .brand-icon {
-    height: 36px;
-    width: 36px;
-    flex: 0 0 auto;
-    filter: drop-shadow(0 0 14px rgba(34,231,245,0.40));
-  }
-  .site-footer-brand .brand-name {
-    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-    font-weight: 600;
-    font-size: 26px;
-    background: linear-gradient(110deg, #baffff 0%, #22e7f5 55%, #1ee8f6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .site-footer-brand a { display: inline-block; line-height: 0; }
+  .site-footer-brand .footer-brand-img {
+    height: 40px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 14px rgba(34,231,245,0.30));
   }
   .site-footer-col h4 {
     margin: 0 0 14px;
