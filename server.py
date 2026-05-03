@@ -246,6 +246,9 @@ _SITEMAP_ROUTES = [
     ("/pricing",                       "0.9", "monthly"),
     ("/local-ai-video-generator",      "0.85", "monthly"),
     ("/faceless-youtube",              "0.85", "monthly"),
+    ("/ai-voice-generator",            "0.85", "monthly"),
+    ("/youtube-scheduler",             "0.85", "monthly"),
+    ("/youtube-seo-tool",              "0.85", "monthly"),
     ("/alternatives",                  "0.8", "monthly"),
     ("/about",                         "0.7", "monthly"),
     ("/privacy",                       "0.4", "yearly"),
@@ -1864,6 +1867,39 @@ def pillar_faceless_youtube():
     Internal-links to: /local-ai-video-generator (sibling pillar),
     /alternatives + per-competitor pages, /pricing, /about, /app."""
     return render_template("pillar_faceless_youtube.html")
+
+
+@app.route("/ai-voice-generator")
+def pillar_voice_generator():
+    """Pillar page for the 'AI voice generator' / 'free TTS' / 'AI narration'
+    wedge. Targets the category query rather than the brand-comparison query
+    (alternatives/elevenlabs and alternatives/murf cover the brand wedges).
+    ~1800 words covering Kokoro, faceless-niche delivery styles, the
+    economics vs cloud TTS, and honest limitations (no voice cloning, thin
+    multilingual)."""
+    return render_template("pillar_voice_generator.html")
+
+
+@app.route("/youtube-scheduler")
+def pillar_youtube_scheduler():
+    """Pillar page for the 'YouTube scheduler' / 'auto-publish YouTube'
+    wedge. The category is huge but most schedulers (Buffer, Hootsuite)
+    are multi-platform; Phantomline's angle is YouTube-native + bundled
+    with the creation pipeline. ~1900 words on OAuth, queue mechanics,
+    metadata bundle push, and the upload-twice problem standalone
+    schedulers create."""
+    return render_template("pillar_youtube_scheduler.html")
+
+
+@app.route("/youtube-seo-tool")
+def pillar_youtube_seo():
+    """Pillar page for the 'YouTube SEO tool' / 'YouTube keyword research'
+    wedge. Direct head-to-head with vidIQ + TubeBuddy at the category
+    level. ~2000 words covering the research module, channel-insights
+    ingest, and the Optimize Library — Phantomline's differentiator (we
+    rebuild underperformers automatically; vidIQ tells you they need
+    fixing)."""
+    return render_template("pillar_youtube_seo.html")
 
 
 @app.route("/app")

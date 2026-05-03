@@ -698,6 +698,843 @@ COMPETITORS: list[dict] = [
              "loses the local-first advantage on the narration step."),
         ],
     },
+
+    # -------------------------------------------------------------------
+    # vidIQ — YouTube SEO + analytics. ~$10-79/mo by tier.
+    # -------------------------------------------------------------------
+    {
+        "slug": "vidiq",
+        "name": "vidIQ",
+        "tagline": "YouTube SEO + keyword research + analytics",
+        "primary_keyword": "vidIQ alternative",
+        "title_tag": "vidIQ Alternative for Faceless YouTube Creators | Phantomline",
+        "meta_description": "Looking for a vidIQ alternative? Phantomline includes YouTube research, keyword scoring, channel insights, and an Optimize Library — bundled with the script and render pipeline, no separate subscription.",
+        "h1": "vidIQ Alternative for Faceless YouTube Creators",
+        "intro": (
+            "vidIQ is the household name in YouTube SEO. Keyword scoring, search-volume estimates, "
+            "competitor tracking, and a Chrome extension that lays it all over the YouTube UI — it's "
+            "useful, and the data is generally accurate. The catch is that it's a research tool, not "
+            "a creation tool. After vidIQ tells you what to make, you still have to make it: a "
+            "separate script tool, a separate voice tool, a separate editor, a separate scheduler. "
+            "And the upper-tier plans get expensive fast once you actually use the AI features."
+            "\n\n"
+            "Phantomline takes the opposite shape. The research and SEO surface (keyword finder, "
+            "channel insights ingest, vidIQ-aware Optimize Library that repackages your existing "
+            "winners) is bundled into the same tool that generates the script, narration, music, "
+            "captions, and final MP4. One workflow, one purchase, no Chrome-extension dependency."
+        ),
+        "competitor_strengths": [
+            "Industry-standard keyword and search-volume database — broad coverage, fresh data.",
+            "Chrome extension overlays scores directly on YouTube and competitor channel pages.",
+            "AI Coach surfaces channel-specific suggestions based on your actual analytics.",
+            "Trend Alerts catch rising topics in your niche before they fully break out.",
+            "Competitor tracking is well-developed — easy to monitor channels you care about.",
+        ],
+        "phantomline_advantages": [
+            "Research + creation in one tool — no context-switch from 'what to make' to 'now actually make it'.",
+            "Optimize Library repackages your past winners (re-titling, re-thumbnailing, re-cutting) — vidIQ tells you to do this; Phantomline does it.",
+            "Local channel-analytics ingest — paste your YouTube Studio CSV exports, never upload to a third party.",
+            "No per-render or per-AI-suggestion meter. Run keyword research as often as you want.",
+            "One-time Founding Lifetime tier ($79) covers research + script + voice + render + publish for life.",
+            "Privacy: your niche-research queries don't get logged on a third-party SaaS.",
+        ],
+        "comparison_rows": [
+            ["Tool",                       "Phantomline",                          "vidIQ"],
+            ["Best for",                   "Faceless YouTube end-to-end",          "YouTube research + SEO"],
+            ["Keyword research",           "Yes (built-in research module)",       "Yes (their core feature)"],
+            ["Channel analytics",          "Yes (local CSV ingest)",               "Yes (account-linked)"],
+            ["Generates the script",       "Yes (local Llama 3.1)",                "Limited (AI Coach hints)"],
+            ["Generates narration",        "Yes (Kokoro local TTS)",               "No"],
+            ["Generates the final video",  "Yes (ffmpeg local render)",            "No"],
+            ["Repackage past winners",     "Yes (Optimize Library)",               "Suggested, not done"],
+            ["Local-first / private",      "Yes",                                   "Cloud-only"],
+            ["Subscription required?",     "Free tier + optional Pro",             "Subscription required"],
+            ["One-time lifetime tier?",    "Yes ($79 founding, first 500)",        "No"],
+        ],
+        "when_competitor_wins": (
+            "vidIQ is the right pick if you're a face-on-camera or talking-head creator who already has "
+            "a film/edit pipeline you like, and the only thing you need is research and metadata help. "
+            "The Chrome extension is genuinely valuable on its own — pulling vidIQ-style data over every "
+            "YouTube video you watch creates a research habit that's hard to replicate elsewhere. The "
+            "competitor-tracking dashboard is also better-developed than what most local tools offer."
+            "\n\n"
+            "It's also a fair pick if you primarily care about the keyword and trend database, and you're "
+            "okay with the subscription. vidIQ has scale and data partnerships that no local-first tool "
+            "can match for the breadth of search-volume coverage."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline is the better fit when SEO research is just one stage of a larger pipeline. "
+            "Faceless creators often get stuck in tool-stack hell: vidIQ for research, ChatGPT for "
+            "scripts, ElevenLabs for voice, CapCut for edits, Buffer or TubeBuddy for scheduling — five "
+            "tools, five subscriptions, five sets of credentials. Phantomline collapses that to one."
+            "\n\n"
+            "The Optimize Library is the specific feature where Phantomline pulls ahead of vidIQ for "
+            "high-volume creators. vidIQ tells you 'this video could rank better with a different "
+            "title' — useful but you still have to do the work. Phantomline takes your past videos, "
+            "rewrites the titles, regenerates the thumbnails, re-cuts the hook, and queues the "
+            "republish. The decision and the execution are in the same tool."
+            "\n\n"
+            "Privacy is the other axis. vidIQ logs every search, every competitor you stalk, every "
+            "channel you track. For creators researching unique niches, that's a leak — your "
+            "competitive research becomes vidIQ's training data and aggregate trend reports. "
+            "Phantomline's research module ingests YouTube Data API responses locally and never sends "
+            "them to a third party."
+        ),
+        "feature_comparison": [
+            ("Keyword research",      "Built-in research module + Optimize Library", "Strong (their core feature)"),
+            ("Search volume data",    "YouTube Data API (free tier) + heuristics",   "Proprietary database"),
+            ("Channel analytics",     "Local CSV ingest from YouTube Studio",        "Account-linked, cloud-stored"),
+            ("Trend alerts",          "Optimize Library surfaces repackage targets", "Trend Alerts feature"),
+            ("Script generation",     "Local Llama 3.1, full long-form output",      "AI Coach hints only"),
+            ("Voice generation",      "Kokoro TTS, 16 voices, fully local",          "Not included"),
+            ("Video render",          "ffmpeg local, no cap",                         "Not included"),
+            ("Privacy",               "Research stays on your device",                "Cloud-logged"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month (research and Optimize Library are unlimited "
+            "on free). Creator Pro is $15/month or $99/year. Founding Lifetime is $79 one-time for the "
+            "first 500 customers, locked in for life — covers research, scripting, voice, render, and "
+            "publishing forever."
+        ),
+        "pricing_comparison_competitor": (
+            "vidIQ uses tiered subscription pricing. The Plus and Boost tiers add the AI features and "
+            "competitor-tracking that most serious creators end up wanting. Check vidiq.com for current "
+            "pricing — the higher tiers can run several times Phantomline's monthly cost."
+        ),
+        "who_picks_competitor": (
+            "Pick vidIQ if YouTube research is your primary need, you already have a creation pipeline "
+            "you're happy with, and the Chrome extension's overlay-style research workflow is genuinely "
+            "central to how you work. The keyword database is mature and the competitor-tracking is "
+            "well-developed."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if research is just one stage of a faceless YouTube pipeline that also "
+            "needs scripts, narration, music, captions, video render, and publishing — and you'd "
+            "rather have one tool covering all of it locally than a stack of five subscriptions. The "
+            "Optimize Library is also a deciding feature: vidIQ tells you what to repackage; "
+            "Phantomline actually repackages it."
+        ),
+        "faq": [
+            ("Is Phantomline a vidIQ alternative?",
+             "For the faceless YouTube workflow, yes. vidIQ is purely research + SEO suggestions; "
+             "Phantomline is research + script + voice + render + publish. If you only need research, "
+             "vidIQ is purpose-built for that. If you want one tool for the whole pipeline, Phantomline "
+             "covers strictly more surface."),
+            ("Does Phantomline have a Chrome extension like vidIQ?",
+             "No. Phantomline is a desktop and PWA app rather than a browser-overlay tool. The trade-off "
+             "is that all your research data stays local instead of being logged by a SaaS. If the "
+             "Chrome-overlay workflow is critical for you, vidIQ wins on that specific axis."),
+            ("Can Phantomline see search volume data?",
+             "Yes, via the YouTube Data API (free tier with a personal API key). Phantomline's research "
+             "module pulls live data on suggested keywords, competitor video performance, and rising "
+             "topics in your niche. The data is YouTube-direct rather than a proprietary aggregator."),
+            ("How does the Optimize Library compare to vidIQ Trend Alerts?",
+             "Trend Alerts tells you a topic is rising; Optimize Library tells you which of your "
+             "existing videos can be repackaged to capture the rise — and then helps you rebuild the "
+             "title, thumbnail, hook, and metadata in the same tool. It's actionable, not just "
+             "informational."),
+            ("Is the data as good as vidIQ?",
+             "vidIQ has a larger proprietary keyword database with longer historical baselines. "
+             "Phantomline relies on the YouTube Data API plus heuristics, which is fresh and direct "
+             "but covers less long-tail volume than vidIQ's aggregator. For most faceless niches the "
+             "YouTube-direct data is enough; for hyper-competitive verticals vidIQ's database may "
+             "still surface long-tail terms Phantomline misses."),
+        ],
+    },
+
+    # -------------------------------------------------------------------
+    # TubeBuddy — YouTube channel manager + SEO. ~$5-50/mo.
+    # -------------------------------------------------------------------
+    {
+        "slug": "tubebuddy",
+        "name": "TubeBuddy",
+        "tagline": "YouTube channel manager + bulk SEO tools",
+        "primary_keyword": "TubeBuddy alternative",
+        "title_tag": "TubeBuddy Alternative for Faceless YouTube Creators | Phantomline",
+        "meta_description": "Looking for a TubeBuddy alternative? Phantomline bundles channel insights, keyword research, and bulk-publish scheduling with a local AI script + render pipeline.",
+        "h1": "TubeBuddy Alternative for Faceless YouTube Creators",
+        "intro": (
+            "TubeBuddy is positioned as a channel-management Swiss army knife: bulk operations on "
+            "video metadata, A/B title testing, end-screen templates, comment moderation, plus a "
+            "research and SEO surface. It's been around longer than vidIQ and tends to be the pick "
+            "for creators who want operational tooling for an established channel rather than pure "
+            "research. The recurring question for faceless creators is the same one TubeBuddy users "
+            "have asked for years: when does the value of all those features beat the recurring fee?"
+            "\n\n"
+            "Phantomline solves a different — and bigger — problem. Instead of managing a channel "
+            "you're already running, Phantomline runs the whole creation pipeline: scripts, narration, "
+            "music, captions, video render, and the YouTube publish draft, all locally. Channel "
+            "insights, keyword research, and bulk-publish scheduling are bundled in. One tool, no "
+            "subscription required."
+        ),
+        "competitor_strengths": [
+            "Mature bulk operations (find/replace tags, copy descriptions across videos).",
+            "A/B title testing with statistically meaningful auto-resolution.",
+            "Comment-moderation tools (filter, batch-approve, auto-reply rules).",
+            "End-screen and card templates that apply across many videos at once.",
+            "Long-running brand familiarity inside the YouTube creator community.",
+        ],
+        "phantomline_advantages": [
+            "Generates the script, voice, and video — TubeBuddy assumes you already made them.",
+            "No per-AI-action meter; run keyword research, repackaging, and bulk operations as often as needed.",
+            "Local channel-analytics ingest (CSV from YouTube Studio) — never uploaded to a third party.",
+            "Optimize Library auto-repackages winners (titles, thumbnails, hooks) — TubeBuddy is a tool to do this manually, Phantomline is automation.",
+            "One-time Founding Lifetime ($79) covers everything; TubeBuddy is subscription-only.",
+            "Browser-mode PWA on phones for the same workflow without installing anything.",
+        ],
+        "comparison_rows": [
+            ["Tool",                       "Phantomline",                          "TubeBuddy"],
+            ["Best for",                   "Creating + managing faceless content", "Managing established channels"],
+            ["Generates videos from prompt","Yes",                                 "No"],
+            ["Generates narration",        "Yes (local TTS)",                       "No"],
+            ["Bulk metadata operations",   "Yes (Optimize Library)",                "Yes (their core feature)"],
+            ["A/B title testing",          "No (replaced by Optimize repackage)",   "Yes"],
+            ["Keyword research",           "Yes (research module)",                 "Yes"],
+            ["Channel analytics",          "Local CSV ingest",                      "Account-linked, cloud-stored"],
+            ["Local-first / private",      "Yes",                                   "Cloud-only"],
+            ["One-time lifetime tier?",    "Yes ($79 founding)",                    "No"],
+        ],
+        "when_competitor_wins": (
+            "TubeBuddy is the right pick if you already have a faceless or face-on channel publishing "
+            "consistently and your bottleneck is operations: managing 200+ videos' metadata, running "
+            "title A/B tests on existing content, moderating a large comment volume, or applying "
+            "end-screen templates at scale. The bulk-edit tooling and comment moderation are mature "
+            "and TubeBuddy has been polishing them for years."
+            "\n\n"
+            "It's also a reasonable pick for creators who specifically want A/B title testing as a "
+            "first-class feature. Phantomline's Optimize Library does something different "
+            "(re-publishing repackaged versions instead of split-testing titles in place), so if "
+            "in-place A/B testing is core to your strategy, TubeBuddy is purpose-built for that."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline is the better fit if you're starting a faceless channel or scaling one where "
+            "the bottleneck is creation, not management. TubeBuddy is built around the assumption that "
+            "you already have the videos. A faceless creator publishing 30-90 videos a month doesn't "
+            "have a 'manage existing videos' problem — they have a 'how do I make 30 videos this "
+            "month without going broke or insane' problem. Phantomline's pipeline is the answer."
+            "\n\n"
+            "The comment-moderation and A/B testing features TubeBuddy is known for are also less "
+            "valuable for faceless niches than for personality-driven channels. Reddit storytime and "
+            "horror narration channels usually have lighter comment culture, and the title-style "
+            "patterns are well-established enough that Optimize Library's repackage-the-winner "
+            "approach beats split-testing every video."
+            "\n\n"
+            "Pricing is the third axis. TubeBuddy's higher tiers, where the AI features and bulk tools "
+            "get unlocked, run several times Phantomline's monthly cost. The $79 Founding Lifetime is "
+            "less than a year of TubeBuddy's mid-tier."
+        ),
+        "feature_comparison": [
+            ("Channel-management bulk ops", "Optimize Library + bulk publish", "Strong (their core feature)"),
+            ("A/B title testing",           "No (replaced by repackage publish)", "Yes (in-place split test)"),
+            ("Keyword research",            "Built-in research module", "Yes"),
+            ("Comment moderation",          "Not included",             "Yes"),
+            ("Generates the video",         "Yes",                      "No"),
+            ("Generates voice",             "Yes",                      "No"),
+            ("Schedule + auto-publish",     "Built-in publish queue",   "Yes"),
+            ("Local / private",             "Yes",                      "Cloud-only"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month. Creator Pro is $15/month or $99/year. "
+            "Founding Lifetime is $79 one-time for the first 500 customers, locked in for life."
+        ),
+        "pricing_comparison_competitor": (
+            "TubeBuddy uses tiered subscription pricing. The Pro and Legend tiers unlock the AI and "
+            "bulk-edit tools most serious creators want. Check tubebuddy.com for current pricing."
+        ),
+        "who_picks_competitor": (
+            "Pick TubeBuddy if you're managing an established channel with a back catalog of 100+ "
+            "videos, you need bulk metadata ops and in-place A/B title testing, and you have a "
+            "comment-moderation workload that justifies a dedicated tool. The mature operational "
+            "tooling is genuinely good for that profile."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if your bottleneck is creation rather than management — you're starting "
+            "or scaling a faceless YouTube channel and you want one tool that generates scripts, "
+            "narration, music, captions, video, and publishing drafts locally, with channel insights "
+            "and keyword research bundled in. The $79 Founding Lifetime is lower than a year of "
+            "TubeBuddy's middle tier."
+        ),
+        "faq": [
+            ("Is Phantomline a TubeBuddy alternative?",
+             "For faceless creators, yes — and a superset, since Phantomline also handles scripts, "
+             "voice, and video render that TubeBuddy doesn't. If your need is purely managing a "
+             "channel you already run, TubeBuddy is purpose-built for that. For end-to-end creation, "
+             "Phantomline covers more."),
+            ("Does Phantomline have A/B title testing?",
+             "Not in the in-place-split-test sense TubeBuddy offers. Phantomline's Optimize Library "
+             "takes a different approach: identify videos that underperformed their topic potential, "
+             "repackage them with new titles/thumbnails/hooks, and republish as a fresh asset. The "
+             "outcome is similar (find what wins), the mechanism is different."),
+            ("Can Phantomline do bulk metadata edits?",
+             "Yes, through the Optimize Library and bulk-publish queue. You can apply title patterns, "
+             "tag sets, and description templates across many videos at once. The bulk ops are scoped "
+             "to publish-side workflows rather than retroactive edits on already-published videos."),
+            ("Does Phantomline include comment moderation?",
+             "No. Comment moderation is one feature TubeBuddy has that Phantomline doesn't — it's "
+             "outside the scope of what we build. For faceless niches with lighter comment culture, "
+             "this is usually a non-issue. For high-engagement channels, you'd still want a separate "
+             "moderation tool."),
+            ("Is the SEO data as good as TubeBuddy?",
+             "Different shape. TubeBuddy has a proprietary keyword database with historical baselines "
+             "and a Chrome extension that overlays scores on YouTube. Phantomline pulls direct from "
+             "the YouTube Data API plus heuristics — fresher and more direct, but covers less long-tail "
+             "volume than the proprietary aggregator. For most faceless niches the YouTube-direct data "
+             "is sufficient."),
+        ],
+    },
+
+    # -------------------------------------------------------------------
+    # Buffer — Social media scheduler. ~$6-120/mo.
+    # -------------------------------------------------------------------
+    {
+        "slug": "buffer",
+        "name": "Buffer",
+        "tagline": "Social media scheduler + analytics",
+        "primary_keyword": "Buffer alternative for YouTube",
+        "title_tag": "Buffer Alternative for YouTube Creators | Phantomline",
+        "meta_description": "Looking for a Buffer alternative for YouTube? Phantomline includes a YouTube publishing scheduler that pushes title, description, tags, and thumbnail directly — bundled with the AI script and render pipeline.",
+        "h1": "Buffer Alternative for YouTube Creators",
+        "intro": (
+            "Buffer is a social media scheduler. Cross-post to Twitter, LinkedIn, Instagram, Facebook, "
+            "Pinterest, and YouTube on a calendar, then track engagement across platforms. It's "
+            "well-loved in the social-media-manager world because it's clean, reliable, and broad. "
+            "For YouTube-only creators, though — especially faceless creators publishing 30-90 videos "
+            "a month — paying for a multi-platform scheduler when YouTube is the only platform that "
+            "matters is overpaying for surface area you don't use."
+            "\n\n"
+            "Phantomline is YouTube-native. The publish queue takes your rendered MP4, the title, the "
+            "description, the tags, and the thumbnail, then schedules it directly through the YouTube "
+            "Data API. There's no cross-platform overhead, no per-channel pricing, no third-party "
+            "intermediary touching your video file. And the scheduler is bundled with the script + "
+            "voice + render pipeline that produced the video in the first place — one tool, one "
+            "workflow."
+        ),
+        "competitor_strengths": [
+            "Mature multi-platform scheduling — Twitter, LinkedIn, Instagram, Pinterest, Facebook, YouTube.",
+            "Clean calendar UI for visualizing a publishing schedule across channels.",
+            "Cross-platform analytics dashboard with consistent metrics.",
+            "Team collaboration features (drafts, approvals, multi-user permissions).",
+            "Long-running reliability and broad integrations.",
+        ],
+        "phantomline_advantages": [
+            "YouTube-native publishing — title + description + tags + thumbnail + chapters in one push.",
+            "No per-channel pricing; schedule unlimited videos to your YouTube channel.",
+            "Direct YouTube Data API integration — your MP4 isn't hosted on a third party in transit.",
+            "Bundled with script generation, narration, music, and the actual video render.",
+            "Founding Lifetime ($79) covers scheduling forever; Buffer is subscription-only.",
+            "Local + private: scripts, drafts, and analytics never leave your machine until the publish moment.",
+        ],
+        "comparison_rows": [
+            ["Tool",                          "Phantomline",                       "Buffer"],
+            ["Best for",                      "YouTube-only creators",             "Multi-platform social"],
+            ["YouTube scheduling",            "Yes (native)",                      "Yes (one of many)"],
+            ["Twitter / LinkedIn / IG sched", "No",                                "Yes (their core feature)"],
+            ["Generates the video",           "Yes",                               "No"],
+            ["Generates the title/desc",      "Yes (AI metadata draft)",           "No (bring your own)"],
+            ["Bulk schedule a queue",         "Yes",                               "Yes"],
+            ["Per-channel pricing?",          "No",                                "Yes (priced per channel)"],
+            ["Local-first / private",         "Yes",                               "Cloud-only"],
+            ["One-time lifetime tier?",       "Yes ($79 founding)",                "No"],
+        ],
+        "when_competitor_wins": (
+            "Buffer is the right pick if YouTube is one of multiple platforms you need to schedule. "
+            "Cross-posting threads, posts, and videos across Twitter, LinkedIn, Instagram, Pinterest, "
+            "Facebook, and YouTube from one calendar is genuinely Buffer's specialty, and they've "
+            "been refining that flow for over a decade. For social-media managers running a brand or "
+            "agency across multiple channels, Buffer's surface area is the value."
+            "\n\n"
+            "It's also the right pick if you have a team that needs collaboration features: drafts, "
+            "approval workflows, multi-user permissions, content libraries shared across roles. "
+            "Phantomline is single-creator-shaped; Buffer is team-shaped."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline is the better fit if YouTube is your primary platform and the cross-platform "
+            "surface Buffer charges for is overhead you don't need. Faceless YouTube creators "
+            "typically don't have a parallel Twitter/LinkedIn/Instagram presence — the channel itself "
+            "is the entire publishing surface. Paying Buffer's per-channel scheduler fee for a feature "
+            "you use 1/6th of is a bad ratio."
+            "\n\n"
+            "More importantly, Phantomline's scheduler is wired into the same tool that generated the "
+            "video, the title, the description, the tags, and the thumbnail. There's no copy-paste "
+            "step between 'I rendered the MP4' and 'I scheduled it'. The publish queue takes the "
+            "Phantomline project bundle and pushes the lot through the YouTube Data API directly. "
+            "Buffer can't do that — it's a generic scheduler that takes a finished asset and a "
+            "user-typed caption."
+            "\n\n"
+            "Privacy is the third axis. Buffer's pipeline routes your video through their servers in "
+            "transit, which means another copy of every faceless asset you publish lives somewhere "
+            "you don't control. Phantomline pushes directly from your machine to YouTube — no "
+            "intermediate copy."
+        ),
+        "feature_comparison": [
+            ("YouTube scheduling",         "Yes (native, direct API)",   "Yes (one of multiple)"),
+            ("Multi-platform support",     "YouTube-only by design",     "Twitter, LI, IG, Pinterest, FB, YT"),
+            ("Generates the video itself", "Yes (full pipeline)",        "No"),
+            ("Generates title/description","Yes (AI metadata)",          "No"),
+            ("Bulk scheduling",            "Yes (queue with auto-publish)", "Yes"),
+            ("Calendar visualization",     "Built-in publish queue",     "Strong (their core UX)"),
+            ("Team collaboration",         "Single-creator shape",       "Yes (drafts, approvals)"),
+            ("Per-channel pricing",        "No, single flat tier",       "Yes"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month. Creator Pro is $15/month or $99/year, "
+            "covering scheduling + everything else. Founding Lifetime is $79 one-time for the first "
+            "500 customers."
+        ),
+        "pricing_comparison_competitor": (
+            "Buffer uses tiered subscription pricing with per-channel multipliers. A YouTube-only "
+            "creator pays for a single channel; multi-platform creators pay per channel. Check "
+            "buffer.com for current pricing."
+        ),
+        "who_picks_competitor": (
+            "Pick Buffer if you're managing a brand or agency across 4+ social platforms, you need "
+            "team collaboration features, and the cross-platform calendar UI is core to how your team "
+            "works. Buffer is purpose-built for that workflow."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if YouTube is your primary platform — especially as a faceless creator "
+            "who doesn't have a parallel Twitter/LinkedIn presence to coordinate. Bundling scheduling "
+            "with script generation, narration, render, and metadata drafting in one tool is "
+            "materially faster than a separate Buffer subscription riding on top of five other tools."
+        ),
+        "faq": [
+            ("Is Phantomline a Buffer alternative?",
+             "For YouTube-only workflows, yes. Phantomline schedules direct to YouTube and bundles the "
+             "creation pipeline. For multi-platform social management (Twitter, LinkedIn, etc.), Buffer "
+             "is purpose-built for that and Phantomline doesn't compete."),
+            ("Does Phantomline schedule to platforms other than YouTube?",
+             "No. Phantomline is YouTube-native by design. The trade-off for that focus is a tighter "
+             "integration with YouTube's metadata model (chapters, end-screens, playlist handling) "
+             "than a generic multi-platform scheduler can offer."),
+            ("How does the YouTube publish queue work?",
+             "Connect your YouTube channel via OAuth. Phantomline takes the rendered MP4, the title, "
+             "the description, the tags, and the thumbnail from your project bundle, then queues "
+             "them through the YouTube Data API on a schedule you set. No third-party intermediary "
+             "stores the video."),
+            ("Can I see scheduling analytics like Buffer's dashboard?",
+             "Phantomline ingests YouTube Studio CSV exports for channel analytics, but the "
+             "cross-platform engagement dashboard Buffer offers isn't part of our scope. For "
+             "multi-platform engagement tracking, you'd still want Buffer or similar."),
+            ("Is bulk scheduling supported?",
+             "Yes. The publish queue supports a backlog with auto-publish at intervals. For high-volume "
+             "faceless channels (30-90 videos/month), this is the same pattern as Buffer's queue but "
+             "without the per-channel fee."),
+        ],
+    },
+
+    # -------------------------------------------------------------------
+    # Hootsuite — Enterprise social media management. ~$99-739/mo.
+    # -------------------------------------------------------------------
+    {
+        "slug": "hootsuite",
+        "name": "Hootsuite",
+        "tagline": "Enterprise social media management platform",
+        "primary_keyword": "Hootsuite alternative for YouTube",
+        "title_tag": "Hootsuite Alternative for YouTube Creators | Phantomline",
+        "meta_description": "Looking for a Hootsuite alternative built for YouTube? Phantomline schedules videos directly through the YouTube Data API and bundles the AI script + render pipeline — no enterprise pricing.",
+        "h1": "Hootsuite Alternative for YouTube Creators",
+        "intro": (
+            "Hootsuite is the enterprise end of the social-media-management market. It scales to "
+            "agencies and brands managing dozens of channels with a team of social-media managers, "
+            "and the pricing reflects that. For an individual creator running a single faceless "
+            "YouTube channel, Hootsuite is dramatically over-engineered and over-priced. The "
+            "approval workflows, the team-permission tiers, the cross-platform analytics — none of "
+            "those map to a one-person faceless creation operation."
+            "\n\n"
+            "Phantomline is the inverse: built for the individual creator who needs the entire "
+            "creation-and-publishing pipeline in one tool, not a dashboard for managing other people's "
+            "social posts. The publish queue handles YouTube directly, the script and render pipeline "
+            "handles everything upstream of the publish, and the pricing is creator-tier instead of "
+            "agency-tier."
+        ),
+        "competitor_strengths": [
+            "Genuinely scales to agencies — multi-team, multi-brand, multi-platform from one console.",
+            "Approval workflows and audit trails for regulated industries (finance, healthcare).",
+            "Cross-platform analytics with consistent metrics across 35+ networks.",
+            "Listening + sentiment tooling on top of scheduling.",
+            "Long-running enterprise integrations (Salesforce, Adobe, Microsoft).",
+        ],
+        "phantomline_advantages": [
+            "Built for the individual creator — no team-tier pricing trap.",
+            "YouTube-native scheduling pushes title + description + tags + thumbnail directly.",
+            "Bundled with script + voice + render — Hootsuite assumes the asset already exists.",
+            "Local channel-analytics ingest, never uploaded to a third party.",
+            "Founding Lifetime ($79) covers everything; Hootsuite Enterprise tiers run thousands per month.",
+            "No approval workflow overhead for a single creator.",
+        ],
+        "comparison_rows": [
+            ["Tool",                          "Phantomline",                          "Hootsuite"],
+            ["Best for",                      "Individual faceless YouTube creators",  "Agencies + enterprise brands"],
+            ["YouTube scheduling",            "Yes (native)",                          "Yes (one of many)"],
+            ["Multi-platform scheduling",     "No (YouTube-only)",                     "Yes (35+ networks)"],
+            ["Team approval workflows",       "No",                                    "Yes (their core feature)"],
+            ["Generates the video",           "Yes",                                   "No"],
+            ["Local-first / private",         "Yes",                                   "Cloud-only"],
+            ["Pricing tier",                  "Solo creator",                          "Enterprise / agency"],
+            ["One-time lifetime tier?",       "Yes ($79 founding)",                    "No"],
+        ],
+        "when_competitor_wins": (
+            "Hootsuite is the right pick at agency scale: 5+ team members managing 10+ brand channels "
+            "across 5+ platforms, with approval workflows and audit trails required for compliance "
+            "(regulated industries especially). The pricing is brutal for a solo creator but "
+            "appropriate for a team operation. The cross-platform listening tools and CRM integrations "
+            "are also genuinely valuable for brands doing social-listening or unified marketing."
+            "\n\n"
+            "It's also reasonable for organizations that already standardized on Hootsuite for other "
+            "reasons (compliance, team training, vendor consolidation). Switching costs are real."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline is the better fit for the individual creator scenario Hootsuite isn't shaped "
+            "for. Faceless YouTube creators are usually one-person operations: write, render, "
+            "publish, repeat. The team-permission tiers, approval workflows, and multi-brand "
+            "consoles Hootsuite charges for are pure overhead in that workflow."
+            "\n\n"
+            "More importantly, the value Phantomline adds isn't a better scheduler — it's that the "
+            "scheduler is part of the same tool that generated the script, narration, music, "
+            "captions, and final MP4. Hootsuite assumes the video exists. Phantomline produces it. "
+            "For a faceless creator publishing 30-90 videos a month, that consolidation is the "
+            "actual win, not the publish step itself."
+            "\n\n"
+            "And the pricing math is stark. Hootsuite's solo-creator-adjacent tiers run several times "
+            "Phantomline's monthly cost. The Founding Lifetime ($79 one-time) is less than a single "
+            "month of Hootsuite's mid-tier. For an individual creator, that's not a close call."
+        ),
+        "feature_comparison": [
+            ("YouTube scheduling",         "Yes (native, direct API)",       "Yes (generic)"),
+            ("Multi-platform support",     "YouTube-only",                    "35+ networks"),
+            ("Team approval workflows",    "Not applicable",                  "Yes (their core feature)"),
+            ("Generates the video",        "Yes",                             "No"),
+            ("Generates title/description","Yes (AI metadata)",               "No"),
+            ("Listening + sentiment",      "Not included",                    "Yes"),
+            ("Enterprise integrations",    "No",                              "Salesforce, Adobe, Microsoft"),
+            ("Solo-creator pricing",       "$15/mo or $79 lifetime",          "Enterprise tiers"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month. Creator Pro is $15/month or $99/year. "
+            "Founding Lifetime is $79 one-time for the first 500 customers."
+        ),
+        "pricing_comparison_competitor": (
+            "Hootsuite is enterprise-tier priced. The lower tiers are still significantly above "
+            "Phantomline's monthly, and the higher tiers (Team, Business, Enterprise) run into the "
+            "hundreds or thousands per month. Check hootsuite.com for current pricing."
+        ),
+        "who_picks_competitor": (
+            "Pick Hootsuite if you're an agency or brand running multi-team multi-platform social at "
+            "scale, with approval workflows or compliance requirements. Their tooling is purpose-built "
+            "for that and the price is fair for that profile."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if you're an individual creator running a faceless YouTube channel, you "
+            "need the whole creation pipeline (not just the publish step), and you'd rather pay "
+            "creator-tier pricing or one-time lifetime than enterprise SaaS fees."
+        ),
+        "faq": [
+            ("Is Phantomline a Hootsuite alternative?",
+             "For solo YouTube creators, yes. The match isn't perfect because Hootsuite is shaped for "
+             "agencies and Phantomline is shaped for individuals — different problems, different "
+             "tools. For the solo creator profile, Phantomline does what Hootsuite does (YouTube "
+             "scheduling) plus a lot more (script + voice + video) at creator-tier pricing."),
+            ("Does Phantomline support multiple platforms like Hootsuite?",
+             "No. Phantomline is YouTube-only by design. Hootsuite covers 35+ networks. If you need "
+             "true multi-platform scheduling, Hootsuite or Buffer is the better tool."),
+            ("Are there team features in Phantomline?",
+             "Studio tier includes multi-channel management for creators running several faceless "
+             "channels, but Phantomline isn't built for true team workflows with approvals and "
+             "permissions. For team-based publishing, Hootsuite is the better fit."),
+            ("How does scheduling cost compare?",
+             "Phantomline's full creator pipeline (research + script + voice + render + schedule) is "
+             "$15/month or $79 lifetime. Hootsuite's scheduling-only pricing starts well above that "
+             "and rises sharply for team and business tiers. For a solo creator, the math is "
+             "decisively in Phantomline's favor."),
+            ("Can I migrate from Hootsuite to Phantomline?",
+             "If YouTube is the only Hootsuite channel you actually use, yes — Phantomline replaces "
+             "the YouTube scheduling surface and adds the creation pipeline you currently lack. If "
+             "Hootsuite is scheduling Twitter/LinkedIn/Instagram in addition to YouTube, you'd need "
+             "to keep something for the non-YouTube platforms."),
+        ],
+    },
+
+    # -------------------------------------------------------------------
+    # Murf — AI voice generator. ~$19-79/mo.
+    # -------------------------------------------------------------------
+    {
+        "slug": "murf",
+        "name": "Murf",
+        "tagline": "AI voice generator for studio-quality narration",
+        "primary_keyword": "Murf alternative",
+        "title_tag": "Murf Alternative for AI Narration | Phantomline",
+        "meta_description": "Looking for a Murf alternative? Phantomline runs Kokoro TTS locally with no per-character meter — bundled with the AI script and faceless YouTube render pipeline.",
+        "h1": "Murf Alternative for AI Narration",
+        "intro": (
+            "Murf is positioned as the studio-quality AI voice tool: 120+ voices across 20+ "
+            "languages, polished pronunciation controls, and a workflow built around scripted "
+            "narration for explainer videos, e-learning, and corporate marketing. It's well-loved in "
+            "the corporate-training space. For faceless YouTube creators publishing 30-90 videos a "
+            "month, the friction is the per-character meter and the recurring fee on top of every "
+            "other tool the workflow already needs."
+            "\n\n"
+            "Phantomline ships Kokoro TTS locally. Sixteen voices that fit the faceless YouTube "
+            "delivery style — calm narrators, mystery storytellers, news-style hosts. Unlimited "
+            "character count because the model runs on your CPU/GPU. Bundled with the script "
+            "generator, the music engine, the captioning step, and the video render. One purchase, "
+            "no recurring per-character fee."
+        ),
+        "competitor_strengths": [
+            "Studio-grade voice quality — particularly strong on multilingual delivery.",
+            "120+ voices across 20+ languages, broader than any local model.",
+            "Pronunciation editor (phonetic overrides, emphasis, pauses) is industry-leading.",
+            "Built-in pacing controls and emotional inflection options.",
+            "Mature integrations with corporate-training and e-learning platforms.",
+        ],
+        "phantomline_advantages": [
+            "Local Kokoro TTS — unlimited character count, no per-render meter.",
+            "Sixteen voices tuned for faceless YouTube delivery (narrators, story voices, hosts).",
+            "Bundled with the AI script generator — no copy-paste between a script tool and a voice tool.",
+            "Bundled with the video render — narration goes directly into the MP4 timeline with caption sync.",
+            "Local + private — narration audio stays on your machine until you publish.",
+            "Founding Lifetime ($79) covers narration forever; Murf is subscription-only.",
+        ],
+        "comparison_rows": [
+            ["Tool",                       "Phantomline",                          "Murf"],
+            ["Best for",                   "Faceless YouTube end-to-end",          "Corporate / e-learning narration"],
+            ["Voice quality",              "Solid (Kokoro, faceless-tuned)",       "Studio-grade"],
+            ["Voice count",                "16 (faceless niches)",                  "120+"],
+            ["Languages",                  "Primarily English",                     "20+"],
+            ["Per-character meter?",       "No (unlimited local)",                  "Yes (subscription)"],
+            ["Pronunciation editor",       "Basic",                                 "Industry-leading"],
+            ["Generates the script",       "Yes",                                   "No"],
+            ["Bundled with video render",  "Yes",                                   "No"],
+            ["Local-first / private",      "Yes",                                   "Cloud-only"],
+            ["One-time lifetime tier?",    "Yes ($79 founding)",                    "No"],
+        ],
+        "when_competitor_wins": (
+            "Murf is the right pick when voice quality is the absolute top priority — corporate "
+            "explainer videos, e-learning courses, audiobook prototypes, multilingual marketing "
+            "where a single mispronunciation looks unprofessional. The pronunciation editor is "
+            "industry-leading and the multilingual coverage is broader than any local model can "
+            "currently match. For high-stakes corporate narration, Murf is purpose-built for that."
+            "\n\n"
+            "It's also the right pick if you need 50+ voices to give every narrator a distinct "
+            "identity, or if your workflow needs Polish, Portuguese, Hindi, or another language "
+            "where the open-weight TTS ecosystem is still thin. Murf has scale advantages in voice "
+            "library breadth that local models don't yet match."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline is the better fit when narration is one stage of a larger pipeline rather "
+            "than the whole product. Faceless YouTube narration has a different shape than corporate "
+            "explainer voiceover: longer scripts (5-15 minute videos vs 90-second explainers), "
+            "looser pronunciation tolerance (storytime audiences forgive a tonal beat that an "
+            "e-learning audience wouldn't), and much higher volume (30-90 narrations per month vs a "
+            "few per quarter)."
+            "\n\n"
+            "On that profile, the per-character meter Murf charges is the wrong economic shape. A "
+            "faceless creator publishing 60 videos a month easily hits hundreds of thousands of "
+            "characters. Local Kokoro on Phantomline runs that volume free per render, and the "
+            "narration is wired directly into the same project bundle that holds the script, the "
+            "captions, the music, and the rendered MP4. There's no copy-paste step between 'voice "
+            "tool' and 'video tool'."
+            "\n\n"
+            "Privacy matters here too. Faceless creators researching unique niches don't want their "
+            "scripts sitting in a cloud TTS service's logs. Local Kokoro generation never leaves the "
+            "machine."
+        ),
+        "feature_comparison": [
+            ("Voice quality",           "Solid for narration delivery",     "Studio-grade"),
+            ("Voice count",             "16 faceless-tuned voices",         "120+ across many use cases"),
+            ("Languages",               "Primarily English",                 "20+"),
+            ("Pronunciation editor",    "Basic (SSML-style markers)",        "Industry-leading"),
+            ("Per-character cost",      "None (local)",                      "Subscription tiers"),
+            ("Script generation",       "Yes (local Llama 3.1)",             "Not included"),
+            ("Video render integration","Yes (timeline + captions)",         "Export-only"),
+            ("Privacy",                 "Local, never uploaded",             "Cloud-processed"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month, with unlimited narration on every render. "
+            "Creator Pro is $15/month or $99/year. Founding Lifetime is $79 one-time for the first 500 "
+            "customers. No per-character meter at any tier."
+        ),
+        "pricing_comparison_competitor": (
+            "Murf uses tiered subscription pricing with monthly character caps. The Creator and Pro "
+            "tiers tend to be where serious users land. Check murf.ai for current pricing — the "
+            "character caps are usually the binding constraint."
+        ),
+        "who_picks_competitor": (
+            "Pick Murf if voice quality is the headline requirement — corporate explainer videos, "
+            "e-learning courses, multilingual narration where the pronunciation editor is "
+            "non-negotiable. The voice library breadth and multilingual coverage are genuinely "
+            "industry-leading."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if narration is part of a high-volume faceless YouTube pipeline where "
+            "per-character pricing is the bottleneck, and you'd rather have script + voice + music + "
+            "render in one local tool than a stack of subscriptions. The Founding Lifetime ($79) is "
+            "less than a few months of Murf's mid-tier."
+        ),
+        "faq": [
+            ("Is Phantomline a Murf alternative?",
+             "For faceless YouTube narration, yes — and a superset, since Phantomline also generates "
+             "the script and renders the final video. For corporate-grade multilingual narration "
+             "where Murf's voice library breadth and pronunciation editor are critical, Murf is "
+             "still the right pick."),
+            ("Is Kokoro as good as Murf's voices?",
+             "Different shape. Kokoro produces clean, natural-sounding narration well-suited for "
+             "faceless YouTube delivery (storytime, mystery, listicle). Murf's voices have more "
+             "polish for corporate-explainer pacing and broader multilingual coverage. For most "
+             "faceless niches Kokoro is sufficient; for high-stakes corporate work Murf is still a "
+             "level up."),
+            ("Can I clone a voice in Phantomline?",
+             "No. The open-weight TTS ecosystem doesn't yet have a production-quality cloning model "
+             "that runs locally. If voice cloning is required, Murf or ElevenLabs is the right tool. "
+             "We expect the gap to close as open-weight models improve."),
+            ("How many characters can I narrate per month?",
+             "Unlimited. Kokoro runs on your hardware, so there's no per-character meter. The only "
+             "limit is rendering time on your machine — typically a few seconds of compute per minute "
+             "of narration on any modern laptop."),
+            ("Does Phantomline support multiple languages?",
+             "Kokoro's English coverage is strong; multilingual support is more limited. For non-"
+             "English narration where Murf's library shines, you'd want Murf or ElevenLabs. The "
+             "Phantomline team is tracking the open-weight multilingual TTS frontier."),
+        ],
+    },
+
+    # -------------------------------------------------------------------
+    # Descript — Audio + video editor with TTS + transcription. ~$15-50/mo.
+    # -------------------------------------------------------------------
+    {
+        "slug": "descript",
+        "name": "Descript",
+        "tagline": "Text-based audio + video editor with AI voice cloning",
+        "primary_keyword": "Descript alternative",
+        "title_tag": "Descript Alternative for Faceless YouTube | Phantomline",
+        "meta_description": "Looking for a Descript alternative? Phantomline generates the entire faceless YouTube video locally — script, narration, music, captions, MP4 — with no subscription and no upload to a cloud service.",
+        "h1": "Descript Alternative for Faceless YouTube Creators",
+        "intro": (
+            "Descript pioneered the text-based video editing pattern: edit a video by editing its "
+            "transcript, with AI handling the cuts and the voice fills. Combined with their Overdub "
+            "voice cloning and a competent multitrack editor, Descript is genuinely useful for "
+            "podcasters, talking-head YouTubers, and creators repurposing recorded content. For "
+            "faceless YouTube — where there's no source recording to transcribe and edit — most of "
+            "Descript's value props don't apply. You're paying for an editor of footage that doesn't "
+            "exist."
+            "\n\n"
+            "Phantomline is shaped for the no-source-footage workflow. Start with a topic prompt; the "
+            "local Llama 3.1 model writes the script. Kokoro generates the narration. MusicGen "
+            "composes the backing track. Pexels (or a local library) supplies B-roll. ffmpeg renders "
+            "the final MP4 — all on your own machine. No transcript-editing step because there's "
+            "nothing to transcribe; the script and narration are generated together from the start."
+        ),
+        "competitor_strengths": [
+            "Industry-defining text-based video editing — fastest podcast and talking-head workflow.",
+            "Overdub voice cloning is high-quality with consent-managed voice models.",
+            "Multitrack audio editor with studio-grade noise reduction and leveling.",
+            "Mature transcription accuracy across accents and recording qualities.",
+            "Strong screen-recording integration for tutorial and explainer content.",
+        ],
+        "phantomline_advantages": [
+            "Generates the script + narration + video from a topic prompt — no source recording needed.",
+            "Local Kokoro TTS with no per-character meter (vs Descript's word-count caps).",
+            "Local MusicGen + bundled royalty-free music pack — no external sound library needed.",
+            "Faceless-niche workflow tuned for Reddit storytime, horror narration, mystery docs, listicles.",
+            "Local + private — your scripts and footage never leave the machine.",
+            "Founding Lifetime ($79) — Descript is subscription-only.",
+        ],
+        "comparison_rows": [
+            ["Tool",                          "Phantomline",                         "Descript"],
+            ["Best for",                      "Faceless YouTube (no source footage)", "Podcasts + talking-head editing"],
+            ["Generates the script",          "Yes",                                   "No (you record/write it)"],
+            ["Generates narration from text", "Yes (Kokoro local)",                    "Yes (Overdub, cloud)"],
+            ["Voice cloning",                 "No",                                    "Yes (Overdub)"],
+            ["Text-based video editing",      "No (different workflow)",               "Yes (their core feature)"],
+            ["Music generation",              "Yes (MusicGen + bundled)",              "No (bring your own)"],
+            ["Local-first / private",         "Yes",                                   "Cloud-only"],
+            ["Per-word / per-character meter","No",                                    "Yes (subscription tiers)"],
+            ["One-time lifetime tier?",       "Yes ($79 founding)",                    "No"],
+        ],
+        "when_competitor_wins": (
+            "Descript is the right pick if you record video or audio and edit it. Podcasters, "
+            "interview-style YouTubers, screen-recording tutorial creators, talking-head vloggers — "
+            "Descript's text-based editing is faster than any timeline editor for that profile. The "
+            "Overdub voice cloning lets you fix mistakes in your own voice without re-recording, "
+            "which is genuinely transformative for podcast post-production."
+            "\n\n"
+            "It's also the right pick if voice cloning matters to your workflow. Phantomline doesn't "
+            "do voice cloning (the local TTS ecosystem doesn't yet have a production-quality cloning "
+            "model), so any workflow that requires a specific person's voice — yours, a guest's — "
+            "needs Descript or ElevenLabs."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline is the better fit if you don't have source footage. Faceless YouTube "
+            "creators don't record anything; they generate the entire video from a topic prompt. "
+            "Descript's text-based editor assumes a transcript to edit — but there's nothing to "
+            "transcribe when the entire video is AI-generated from scratch. You'd be paying for an "
+            "editor of an asset you don't have."
+            "\n\n"
+            "Phantomline's pipeline is shaped around that no-source workflow: prompt -> script -> "
+            "narration -> music -> captions -> MP4, all in one tool, all locally. The script and "
+            "narration are generated together so they're already in sync — no editing pass needed. "
+            "The captions are generated from the narration timing — also no editing. The render is "
+            "ffmpeg local, no upload. The whole flow is 5-15 minutes for a 5-minute video."
+            "\n\n"
+            "Privacy is the third axis. Descript routes everything through their cloud — the audio, "
+            "the transcript, the AI processing, the rendered video. For faceless creators "
+            "researching unique niches, that's a leak. Phantomline keeps everything local until the "
+            "publish moment."
+        ),
+        "feature_comparison": [
+            ("Source footage required",   "No (generates from prompt)",         "Yes (you record it)"),
+            ("Script generation",          "Yes (local Llama 3.1)",              "Not included"),
+            ("Voice generation",           "Yes (Kokoro local)",                 "Yes (Overdub cloud)"),
+            ("Voice cloning",              "Not supported",                      "Yes (Overdub)"),
+            ("Text-based editing",         "Different workflow",                  "Yes (their core feature)"),
+            ("Multitrack audio editor",    "Light",                              "Strong"),
+            ("Music",                      "MusicGen + bundled pack",            "Bring your own"),
+            ("Render + export",            "ffmpeg local, no cap",               "Cloud render, capped"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month. Creator Pro is $15/month or $99/year. "
+            "Founding Lifetime is $79 one-time for the first 500 customers, locked in for life."
+        ),
+        "pricing_comparison_competitor": (
+            "Descript uses tiered subscription pricing with monthly transcription, Overdub, and "
+            "export caps. The Creator and Pro tiers are where most serious users land. Check "
+            "descript.com for current pricing."
+        ),
+        "who_picks_competitor": (
+            "Pick Descript if you record video or audio (podcasts, talking-head YouTube, screen "
+            "recordings, interviews) and edit it. The text-based editing pattern is genuinely "
+            "transformative for that profile, and Overdub voice cloning is industry-leading."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if you don't record source footage — faceless YouTube creators "
+            "generating videos from prompts rather than editing recordings. The whole workflow "
+            "(script, voice, music, captions, render, publish) lives in one local tool with no "
+            "subscription required."
+        ),
+        "faq": [
+            ("Is Phantomline a Descript alternative?",
+             "For the faceless-YouTube use case, yes. For podcast editing, talking-head video "
+             "editing, or any workflow that starts from recorded source footage, Descript is "
+             "purpose-built for that and Phantomline doesn't compete."),
+            ("Does Phantomline have voice cloning like Overdub?",
+             "No. The local TTS ecosystem doesn't yet have a production-quality voice cloning model "
+             "that runs offline. If voice cloning is required, Descript or ElevenLabs is the right "
+             "tool. The gap should close as open-weight models mature."),
+            ("Can Phantomline edit existing videos?",
+             "Phantomline's pipeline is generation-shaped rather than editing-shaped. You can import "
+             "narration audio or B-roll clips into a Phantomline project, but it's not a substitute "
+             "for a timeline editor or Descript's text-based editor on existing footage. For "
+             "editing-heavy workflows, keep a separate editor."),
+            ("Does Phantomline transcribe audio?",
+             "Phantomline generates captions from narration timing rather than transcribing recorded "
+             "audio. If you need to transcribe a podcast or recorded interview, Descript or a "
+             "dedicated transcription tool is the better pick."),
+            ("How does Phantomline's narration compare to Overdub?",
+             "Different shape. Overdub clones a specific voice (yours, with consent) and produces "
+             "studio-grade results. Kokoro is a fixed library of 16 voices tuned for faceless "
+             "YouTube delivery — calm narrators, story voices, news-style hosts. For faceless niches "
+             "Kokoro is sufficient; for cloned-voice workflows Overdub remains the standard."),
+        ],
+    },
 ]
 
 
