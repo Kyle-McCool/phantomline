@@ -9,10 +9,11 @@
  * Bumping CACHE_VERSION invalidates the previous cache on the next visit.
  */
 // Bump on every breaking SW change so the activate handler below can
-// drop stale caches. v8 invalidates the cached studio JS so the brand
-// rename (visible "Ghostline" -> "Phantomline" in notifications, status
-// messages, default titles) reaches existing installs immediately.
-const CACHE_VERSION = "phantomline-v8";
+// drop stale caches. v9 invalidates the cached /account assets so the
+// rebuilt account portal (tabs: overview/licenses/billing/settings,
+// robust error handling, /api/account/me + /invoices wiring) reaches
+// existing visitors immediately on next page load.
+const CACHE_VERSION = "phantomline-v9";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 

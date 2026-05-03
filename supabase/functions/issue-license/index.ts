@@ -16,6 +16,11 @@
  * Stripe price metadata drives tier resolution:
  *   tier=pro / tier=studio          -> subscription tier
  *   lifetime=true                   -> never expires; treated as a Founding seat
+ *
+ * Email casing: every email is lowercased before it's signed, stored, or
+ * looked up. Stripe sometimes returns "Kyle.Mc@Gmail.com" while Supabase Auth
+ * returns "kyle.mc@gmail.com" — without normalization the /account page can't
+ * find the license.
  */
 
 // deno-lint-ignore-file no-explicit-any
@@ -24,21 +29,18 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4?target=deno";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
-  apiVersion: "2024-06-20",
-  httpClient: Stripe.createFetchHttpClient(),
-});
+function requireEnv(name: string): string {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing required env var: ${name}`);
+  return v;
+}
 
-const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
-const LICENSE_SECRET = Deno.env.get("GHOSTLINE_LICENSE_SECRET")!;
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
-const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ?? "licenses@phantomline.xyz";
-
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  { auth: { persistSession: false } },
-);
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 function b64url(bytes: Uint8Array): string {
   return btoa(String.fromCharCode(...bytes))
@@ -72,6 +74,7 @@ async function issueLicenseKey(opts: {
   email: string;
   lifetime: boolean;
   durationDays?: number;
+  licenseSecret: string;
 }): Promise<IssuedKey> {
   const now = Math.floor(Date.now() / 1000);
   const expires = opts.lifetime
@@ -89,7 +92,7 @@ async function issueLicenseKey(opts: {
     issuer: "ghostline-supabase",
   };
   const body_b64 = b64url(new TextEncoder().encode(JSON.stringify(payload)));
-  const sig = await hmacSha256(LICENSE_SECRET, body_b64);
+  const sig = await hmacSha256(opts.licenseSecret, body_b64);
   const sig_b64 = b64url(sig);
   return {
     key: `GHL1.${body_b64}.${sig_b64}`,
@@ -99,17 +102,24 @@ async function issueLicenseKey(opts: {
   };
 }
 
-async function sendLicenseEmail(email: string, key: string, tier: string, foundingSeat: number | null) {
-  const subject = `Your Phantomline ${tier} license`;
-  const seatLine = foundingSeat
-    ? `\nFounding member #${foundingSeat} of 500 — thank you for being early.\n`
+async function sendLicenseEmail(opts: {
+  apiKey: string;
+  fromEmail: string;
+  toEmail: string;
+  key: string;
+  tier: string;
+  foundingSeat: number | null;
+}) {
+  const subject = `Your Phantomline ${opts.tier} license`;
+  const seatLine = opts.foundingSeat
+    ? `\nFounding member #${opts.foundingSeat} of 500 — thank you for being early.\n`
     : "";
   const text = `
-Welcome to Phantomline ${tier}!
+Welcome to Phantomline ${opts.tier}!
 ${seatLine}
 Your license key:
 
-${key}
+${opts.key}
 
 To activate it:
 1. Open Phantomline → Settings
@@ -118,16 +128,18 @@ To activate it:
 
 Save this email — you'll need the key if you reinstall.
 
+Manage your account: https://phantomline.xyz/account
+
 — Phantomline
 `.trim();
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
+      Authorization: `Bearer ${opts.apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from: FROM_EMAIL, to: email, subject, text }),
+    body: JSON.stringify({ from: opts.fromEmail, to: opts.toEmail, subject, text }),
   });
   if (!res.ok) {
     const errBody = await res.text();
@@ -141,7 +153,7 @@ Save this email — you'll need the key if you reinstall.
  * checkouts that race for the same seat will hit the unique constraint; the loser
  * retries once. Subscription rows skip the seat math entirely.
  */
-async function insertLicense(row: {
+async function insertLicense(supabase: any, row: {
   key: string;
   licenseId: string;
   email: string;
@@ -188,8 +200,6 @@ async function insertLicense(row: {
 
     if (!error) return { foundingSeat };
 
-    // 23505 = unique_violation. If it's stripe_session_id, the webhook is being retried — bail.
-    // If it's founding_seat, two founding checkouts raced; recompute and retry once.
     const code = (error as any)?.code;
     if (code === "23505" && /founding_seat/.test(error.message) && attempt === 0) {
       continue;
@@ -204,77 +214,135 @@ serve(async (req: Request) => {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
+  // Validate env at request time so a missing secret returns a clear message
+  // instead of a generic 500. Cheaper than failing at module-load and easier to
+  // reason about in the Supabase logs.
+  let stripeKey: string;
+  let webhookSecret: string;
+  let licenseSecret: string;
+  let supabaseUrl: string;
+  let serviceRoleKey: string;
+  let resendKey: string;
+  let fromEmail: string;
+  try {
+    stripeKey = requireEnv("STRIPE_SECRET_KEY");
+    webhookSecret = requireEnv("STRIPE_WEBHOOK_SECRET");
+    licenseSecret = requireEnv("GHOSTLINE_LICENSE_SECRET");
+    supabaseUrl = requireEnv("SUPABASE_URL");
+    serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+    resendKey = requireEnv("RESEND_API_KEY");
+    fromEmail = Deno.env.get("FROM_EMAIL") ?? "licenses@phantomline.xyz";
+  } catch (err) {
+    const msg = (err as Error).message;
+    console.error("[issue-license] env error:", msg);
+    return jsonResponse({ ok: false, error: msg }, 500);
+  }
+
+  const stripe = new Stripe(stripeKey, {
+    apiVersion: "2024-06-20",
+    httpClient: Stripe.createFetchHttpClient(),
+  });
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
+
   const body = await req.text();
   const sig = req.headers.get("Stripe-Signature");
-  if (!sig) return new Response("Missing signature", { status: 400 });
+  if (!sig) {
+    console.error("[issue-license] missing Stripe-Signature header");
+    return jsonResponse({ ok: false, error: "Missing signature" }, 400);
+  }
 
   let event;
   try {
-    event = await stripe.webhooks.constructEventAsync(body, sig, WEBHOOK_SECRET);
+    event = await stripe.webhooks.constructEventAsync(body, sig, webhookSecret);
   } catch (err) {
-    return new Response(`Webhook verification failed: ${(err as Error).message}`, { status: 400 });
+    const msg = (err as Error).message;
+    console.error("[issue-license] webhook verify failed:", msg);
+    return jsonResponse({ ok: false, error: `Webhook verify failed: ${msg}` }, 400);
   }
 
   if (event.type !== "checkout.session.completed") {
-    return new Response("Ignored", { status: 200 });
+    return jsonResponse({ ok: true, ignored: event.type });
   }
 
-  const session = event.data.object as Stripe.Checkout.Session;
-  const email = session.customer_details?.email ?? session.customer_email ?? null;
-  if (!email) {
-    return new Response("No customer email on session", { status: 400 });
-  }
-
-  // Idempotency: if we've already issued for this session, no-op.
-  const { data: existing, error: lookupErr } = await supabase
-    .from("licenses")
-    .select("id")
-    .eq("stripe_session_id", session.id)
-    .maybeSingle();
-  if (lookupErr) {
-    return new Response(`License lookup failed: ${lookupErr.message}`, { status: 500 });
-  }
-  if (existing) {
-    return new Response(JSON.stringify({ ok: true, dedup: true }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const expanded = await stripe.checkout.sessions.retrieve(session.id, {
-    expand: ["line_items.data.price.product"],
-  });
-  const lineItem = expanded.line_items?.data?.[0];
-  const price = lineItem?.price;
-  const meta = price?.metadata ?? {};
-  const tier = (meta.tier as "pro" | "studio") ?? "pro";
-  const lifetime = meta.lifetime === "true";
-  const durationDays = price?.recurring?.interval === "month" ? 31 : 365;
-
-  const issued = await issueLicenseKey({ tier, email, lifetime, durationDays });
-  const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
-
-  const { foundingSeat } = await insertLicense({
-    key: issued.key,
-    licenseId: issued.licenseId,
-    email,
-    tier,
-    lifetime,
-    isFounding: lifetime,           // only the Founding Lifetime product is lifetime
-    issuedAt: issued.issuedAt,
-    expiresAt: issued.expiresAt,
-    stripeCustomerId: customerId,
-    stripeSessionId: session.id,
-    stripePriceId: price?.id ?? null,
-  });
-
-  // Email is best-effort; license is already persisted, so we can resend later if this fails.
   try {
-    await sendLicenseEmail(email, issued.key, tier === "studio" ? "Studio" : "Pro", foundingSeat);
-  } catch (err) {
-    console.error("Email send failed; license is in DB and can be resent:", (err as Error).message);
-  }
+    const session = event.data.object as Stripe.Checkout.Session;
+    const rawEmail = session.customer_details?.email ?? session.customer_email ?? null;
+    if (!rawEmail) {
+      console.error("[issue-license] no email on session", session.id);
+      return jsonResponse({ ok: false, error: "No customer email on session" }, 400);
+    }
+    // Lowercase before any storage / signing so Supabase Auth lookups match.
+    const email = rawEmail.trim().toLowerCase();
 
-  return new Response(JSON.stringify({ ok: true, founding_seat: foundingSeat }), {
-    headers: { "Content-Type": "application/json" },
-  });
+    // Idempotency: if we've already issued for this session, no-op.
+    const { data: existing, error: lookupErr } = await supabase
+      .from("licenses")
+      .select("id")
+      .eq("stripe_session_id", session.id)
+      .maybeSingle();
+    if (lookupErr) {
+      console.error("[issue-license] dedup lookup failed:", lookupErr.message);
+      return jsonResponse({ ok: false, error: `License lookup failed: ${lookupErr.message}` }, 500);
+    }
+    if (existing) {
+      console.log("[issue-license] dedup hit for session", session.id);
+      return jsonResponse({ ok: true, dedup: true });
+    }
+
+    const expanded = await stripe.checkout.sessions.retrieve(session.id, {
+      expand: ["line_items.data.price.product"],
+    });
+    const lineItem = expanded.line_items?.data?.[0];
+    const price = lineItem?.price;
+    const meta = price?.metadata ?? {};
+    const tier = (meta.tier as "pro" | "studio") ?? "pro";
+    const lifetime = meta.lifetime === "true";
+    const durationDays = price?.recurring?.interval === "month" ? 31 : 365;
+
+    const issued = await issueLicenseKey({ tier, email, lifetime, durationDays, licenseSecret });
+    const customerId = typeof session.customer === "string"
+      ? session.customer
+      : session.customer?.id ?? null;
+
+    const { foundingSeat } = await insertLicense(supabase, {
+      key: issued.key,
+      licenseId: issued.licenseId,
+      email,
+      tier,
+      lifetime,
+      isFounding: lifetime, // only the Founding Lifetime product is lifetime
+      issuedAt: issued.issuedAt,
+      expiresAt: issued.expiresAt,
+      stripeCustomerId: customerId,
+      stripeSessionId: session.id,
+      stripePriceId: price?.id ?? null,
+    });
+
+    console.log(
+      `[issue-license] issued ${tier} for ${email} (session=${session.id} seat=${foundingSeat})`,
+    );
+
+    // Email is best-effort; license is already persisted, so we can resend later if this fails.
+    try {
+      await sendLicenseEmail({
+        apiKey: resendKey,
+        fromEmail,
+        toEmail: email,
+        key: issued.key,
+        tier: tier === "studio" ? "Studio" : "Pro",
+        foundingSeat,
+      });
+    } catch (err) {
+      console.error("[issue-license] email send failed (license is in DB):", (err as Error).message);
+    }
+
+    return jsonResponse({ ok: true, founding_seat: foundingSeat });
+  } catch (err) {
+    const msg = (err as Error).message;
+    const stack = (err as Error).stack;
+    console.error("[issue-license] handler failed:", msg, stack);
+    return jsonResponse({ ok: false, error: msg }, 500);
+  }
 });
