@@ -60,7 +60,7 @@ COMPETITORS: list[dict] = [
             ["Captioning + styling",    "Yes (built into render)",      "Yes (their core feature)"],
             ["Local-first?",            "Yes",                           "Cloud-only"],
             ["Subscription required?",  "Free tier + optional Pro",     "Subscription required"],
-            ["One-time lifetime tier?", "Yes ($79 founding, first 200)", "No"],
+            ["One-time lifetime tier?", "Yes ($79 founding, first 500)", "No"],
             ["YouTube publishing draft","Yes",                           "Limited"],
             ["Per-render API costs?",   "No",                            "Bundled, but capped"],
         ],
@@ -107,7 +107,7 @@ COMPETITORS: list[dict] = [
         ],
         "pricing_comparison_phantomline": (
             "Phantomline is free for up to 5 renders/month. Creator Pro is $15/month or $99/year. "
-            "Founding Lifetime is $79 one-time for the first 200 customers, locked in for life."
+            "Founding Lifetime is $79 one-time for the first 500 customers, locked in for life."
         ),
         "pricing_comparison_competitor": (
             "Submagic uses subscription-based pricing with monthly minute caps that scale with the "
@@ -243,7 +243,7 @@ COMPETITORS: list[dict] = [
         ],
         "pricing_comparison_phantomline": (
             "Free tier (5 renders/month). Creator Pro $15/month or $99/year. Founding Lifetime "
-            "$79 one-time for the first 200 customers."
+            "$79 one-time for the first 500 customers."
         ),
         "pricing_comparison_competitor": (
             "OpusClip uses subscription-based pricing with tiered upload-minute caps. Check "
@@ -378,7 +378,7 @@ COMPETITORS: list[dict] = [
         ],
         "pricing_comparison_phantomline": (
             "Free tier renders 5 videos/month. Creator Pro is $15/month or $99/year. Founding "
-            "Lifetime is $79 one-time for the first 200 customers."
+            "Lifetime is $79 one-time for the first 500 customers."
         ),
         "pricing_comparison_competitor": (
             "Pictory uses subscription pricing with tiered monthly minute and project caps. Check "
@@ -511,7 +511,7 @@ COMPETITORS: list[dict] = [
         ],
         "pricing_comparison_phantomline": (
             "Free tier (5 renders/month). Creator Pro $15/month or $99/year. Founding Lifetime "
-            "$79 one-time for the first 200 customers."
+            "$79 one-time for the first 500 customers."
         ),
         "pricing_comparison_competitor": (
             "VEED uses subscription-based pricing with tiered export limits. Check veed.io for "
@@ -651,7 +651,7 @@ COMPETITORS: list[dict] = [
         "pricing_comparison_phantomline": (
             "Free tier (5 video renders/month, with narration unlimited inside those). Creator Pro "
             "$15/month or $99/year covers unlimited renders and narration. Founding Lifetime $79 "
-            "one-time for the first 200 customers."
+            "one-time for the first 500 customers."
         ),
         "pricing_comparison_competitor": (
             "ElevenLabs uses subscription-based pricing with tiered monthly character caps. Free, "

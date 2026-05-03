@@ -90,7 +90,7 @@
     {"@type": "Question", "name": "What's free vs Pro?",
      "acceptedAnswer": {"@type": "Answer", "text": "Free tier: 5 video renders per month, all local AI features, project library. Pro: unlimited renders, no watermark, publish scheduler, SEO Finder, Optimize Library (vidIQ-aware repackaging), channel analytics ingest, brand presets, multi-channel."}},
     {"@type": "Question", "name": "What does Founding Lifetime get me?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 200 buyers. Locked-in price even if monthly tiers go up later. After the 200 are sold, the founding deal is gone."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 500 buyers. Locked-in price even if monthly tiers go up later. After the 500 are sold, the founding deal is gone."}},
     {"@type": "Question", "name": "Is my data sent anywhere?",
      "acceptedAnswer": {"@type": "Answer", "text": "No. Scripts, audio, video, channel analytics — all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in."}},
     {"@type": "Question", "name": "Can I use this commercially?",
@@ -114,6 +114,7 @@
       <a href="#mobile">Mobile</a>
       <a href="/pricing">Pricing</a>
       <a href="#faq">FAQ</a>
+      <a href="/account">Account</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>
   </nav>
@@ -308,7 +309,7 @@
         {% for tier in pricing.tiers %}
         <div class="pricing-card{% if tier.id == 'founding' %} pricing-card--founding{% endif %}{% if tier.id == 'pro' %} pricing-card--featured{% endif %}">
           {% if tier.id == 'pro' %}<div class="pricing-badge">Most popular</div>{% endif %}
-          {% if tier.id == 'founding' %}<div class="pricing-badge pricing-badge--accent">Launch only · 200 seats</div>{% endif %}
+          {% if tier.id == 'founding' %}<div class="pricing-badge pricing-badge--accent">Launch only · 500 seats</div>{% endif %}
           <h3>{{ tier.name }}</h3>
           <p class="pricing-tagline">{{ tier.tagline }}</p>
           <div class="pricing-price">
@@ -359,7 +360,7 @@
         </details>
         <details>
           <summary>What does Founding Lifetime get me?</summary>
-          <p>Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 200 buyers. Locked-in price even if monthly tiers go up later. After the 200 are sold, the founding deal is gone.</p>
+          <p>Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 500 buyers. Locked-in price even if monthly tiers go up later. After the 500 are sold, the founding deal is gone.</p>
         </details>
         <details>
           <summary>Is my data sent anywhere?</summary>
