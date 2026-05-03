@@ -139,7 +139,22 @@ def _security_headers(response):
     """Defense-in-depth headers. CSP keeps scripts and styles to the same
     origin (we already self-host every asset; only wavesurfer is a CDN).
     X-Frame-Options stops other sites from embedding Ghostline in an
-    iframe to clickjack the user."""
+    iframe to clickjack the user.
+
+    Skip the HTML-oriented headers (CSP, X-Frame-Options) on utility
+    responses (sitemap.xml, robots.txt, IndexNow + GSC verification
+    files). CSP doesn't apply to XML/plain-text and a 700-char policy
+    header on a sitemap response confused Google Search Console's parser
+    into 'Sitemap could not be read' — even though the body is valid."""
+    ctype = (response.headers.get("Content-Type") or "").lower()
+    is_html = ctype.startswith("text/html")
+    # XML/plain-text utility responses get only the universal headers.
+    if not is_html:
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers["Server"] = "Phantomline"
+        return response
+
     # WebLLM (used by the mobile/PWA on-device inference path) loads its ES
     # module bundle from jsdelivr and downloads model weights from
     # Hugging Face. Both must be allow-listed even if the user never opts in,
