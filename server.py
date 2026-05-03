@@ -217,16 +217,23 @@ SITE_URL = os.environ.get("SITE_URL", "https://phantomline.xyz").rstrip("/")
 
 @app.context_processor
 def _seo_globals():
-    """Inject canonical-URL helpers into every template render. The
-    canonical_url is the production-domain URL for whatever path the
-    current request is on, with no query string and no trailing slash
-    (except for "/" itself)."""
+    """Inject canonical-URL helpers + a deploy-time `today_iso` into every
+    template render. canonical_url is the production-domain URL for the
+    current request, no query string, no trailing slash (except "/").
+
+    `today_iso` is computed at request time (cheap — strftime on UTC), so
+    Article schemas can render dateModified without hardcoding a date that
+    rots after the next deploy. Google uses dateModified for freshness
+    signals — the difference between "updated 6 months ago" and "updated
+    today" is a real ranking factor."""
+    from datetime import datetime, timezone
     path = request.path or "/"
     if path != "/" and path.endswith("/"):
         path = path.rstrip("/")
     return {
         "site_url": SITE_URL,
         "canonical_url": f"{SITE_URL}{path}",
+        "today_iso": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
     }
 
 

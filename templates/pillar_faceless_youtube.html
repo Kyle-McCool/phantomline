@@ -37,7 +37,7 @@
   "headline": "Faceless YouTube Tool for AI Video Workflows",
   "description": "Build faceless YouTube videos with AI-assisted scripts, narration, captions, music, visuals, and publishing drafts in one local-first workflow.",
   "datePublished": "2026-05-02",
-  "dateModified": "2026-05-02",
+  "dateModified": "{{ today_iso }}",
   "author": {"@type": "Organization", "name": "Phantomline"},
   "publisher": {
     "@type": "Organization",
@@ -46,6 +46,38 @@
   },
   "image": "{{ site_url }}/static/phantomline-logo-primary.png",
   "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<!-- JSON-LD: HowTo. Targets "how to make faceless YouTube videos" type
+     queries. Each step matches the visible workflow on the page; if the
+     copy is reordered, update step positions here too. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make a faceless YouTube video with AI",
+  "description": "End-to-end workflow for producing a faceless YouTube video locally — script, narration, music, visuals, captions, and the YouTube publish draft.",
+  "totalTime": "PT15M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A modern PC (16 GB RAM, any GPU from the last 5 years) or a flagship phone"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier or Creator Pro)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline local AI video studio"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Pick a niche and prompt",
+     "text": "Choose a faceless format (Reddit storytime, horror narration, listicle, mystery doc) and feed Phantomline a topic prompt. The local Llama 3.1 model returns a hook, body, retention beats, and CTA in 30-60 seconds."},
+    {"@type": "HowToStep", "position": 2, "name": "Generate AI narration",
+     "text": "Pick a Kokoro voice and let Phantomline render the voiceover offline. No ElevenLabs subscription, no per-character fees, narration in 1-3 minutes for a 5-minute script."},
+    {"@type": "HowToStep", "position": 3, "name": "Add music + visuals",
+     "text": "Phantomline ships with a procedural music pack (royalty-free, public domain) and pulls B-roll from Pexels or your own library. Captions are generated from the narration timing."},
+    {"@type": "HowToStep", "position": 4, "name": "Render to MP4",
+     "text": "ffmpeg encodes the final video locally — typically 1-10 minutes depending on length and resolution. The MP4 lives on your disk, not in someone else's cloud."},
+    {"@type": "HowToStep", "position": 5, "name": "Publish or schedule",
+     "text": "Phantomline's publish scheduler can push the MP4, title, description, tags, and thumbnail to YouTube on a schedule — replacing Buffer or Hypefury for the YouTube channel."}
+  ]
 }
 </script>
 

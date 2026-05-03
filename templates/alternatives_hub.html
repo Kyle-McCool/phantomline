@@ -49,6 +49,30 @@
   ]
 }
 </script>
+
+<!-- JSON-LD: ItemList. CollectionPage tells Google "this is a hub", but
+     ItemList is what triggers the rich list-result UI in SERPs for
+     queries like "best Submagic alternatives". Position ordering matches
+     the visible list lower in the page. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "AI Video Tool Alternatives for Faceless YouTube",
+  "url": "{{ canonical_url }}",
+  "numberOfItems": {{ competitors|length }},
+  "itemListElement": [
+    {% for c in competitors %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "url": "{{ site_url }}/alternatives/{{ c.slug }}",
+      "name": "{{ c.h1 }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
 </head>
 <body>
 <div class="wrap">
