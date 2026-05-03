@@ -57,6 +57,27 @@ function tierLabel(t) {
 }
 
 // ---------------------------------------------------------------------------
+// Sign-in card copy override — shown regardless of whether Supabase config
+// is present so the user always sees the right reason for being here. The
+// /app auth gate redirects here with ?next=<path>; that's a different
+// motivation than the default "look up your license" flow.
+// ---------------------------------------------------------------------------
+function safeNextPathTopLevel() {
+  try {
+    const raw = new URLSearchParams(location.search).get("next");
+    if (!raw) return null;
+    if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+    return raw;
+  } catch (_) { return null; }
+}
+if (safeNextPathTopLevel()) {
+  const heading = document.querySelector("#signin-card h2");
+  if (heading) heading.textContent = "Sign in to open Studio";
+  const sub = document.querySelector("#signin-card .meta");
+  if (sub) sub.textContent = "Phantomline saves your projects to your account so they survive across browsers and devices.";
+}
+
+// ---------------------------------------------------------------------------
 // Hard-fail short-circuit if Supabase config is missing on the server. Show
 // the signin card with a clear status so the user knows what to fix.
 // ---------------------------------------------------------------------------
@@ -280,13 +301,29 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     $("#billing-portal-btn").addEventListener("click", openPortal);
 
     // -----------------------------------------------------------------------
+    // ?next= handling — when the auth gate on /app bounces an unauthed user
+    // here, it appends ?next=<original path>. Once a session is detected,
+    // refresh() forwards them there. Sanitized to same-origin paths only
+    // so a crafted link can't redirect to attacker.com after sign-in.
+    // -----------------------------------------------------------------------
+    // Local alias for the top-level safeNextPathTopLevel — kept inside the
+    // closure so the OAuth redirectTo and refresh() forwarding can call it
+    // by the shorter name without leaking a global.
+    const safeNextPath = safeNextPathTopLevel;
+
+    // -----------------------------------------------------------------------
     // Sign in / out
     // -----------------------------------------------------------------------
     $("#google-btn").addEventListener("click", async () => {
       setStatus("Redirecting to Google…");
+      // Preserve ?next= across the OAuth round-trip so we can forward the
+      // user after Google bounces them back here.
+      const next = safeNextPath();
+      const redirectTo = window.location.origin + "/account" +
+        (next ? "?next=" + encodeURIComponent(next) : "");
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin + "/account" },
+        options: { redirectTo },
       });
       if (error) setStatus("Sign-in failed: " + error.message, "error");
     });
@@ -326,6 +363,15 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       if (!session) {
         $("#signin-card").hidden = false;
         $("#signed-in").hidden = true;
+        return;
+      }
+
+      // Forward to the deep-link target if the user landed here via the
+      // /app auth gate. Skips self-redirects (?next=/account) so we don't
+      // bounce in a loop.
+      const next = safeNextPath();
+      if (next && next !== "/account" && !next.startsWith("/account?")) {
+        location.replace(next);
         return;
       }
 
