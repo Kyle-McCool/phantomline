@@ -229,6 +229,7 @@ _SITEMAP_ROUTES = [
     ("/",                              "1.0", "weekly"),
     ("/pricing",                       "0.9", "monthly"),
     ("/local-ai-video-generator",      "0.85", "monthly"),
+    ("/faceless-youtube",              "0.85", "monthly"),
     ("/alternatives",                  "0.8", "monthly"),
     ("/about",                         "0.7", "monthly"),
     ("/privacy",                       "0.4", "yearly"),
@@ -1815,6 +1816,19 @@ def pillar_local_ai_video_generator():
     /alternatives/opus-clip, /pricing, /about. Those interior links pass
     SEO authority back to the comparison and pricing pages."""
     return render_template("pillar_local_ai.html")
+
+
+@app.route("/faceless-youtube")
+def pillar_faceless_youtube():
+    """Pillar page for the 'faceless YouTube tool' wedge — angled at the
+    workflow rather than the tech. Walks through the 6-step pipeline
+    (script, narration, captions, visuals, music, publish), prices out
+    the standard subscription stack, and shows how Phantomline collapses
+    it into one local install. ~2200 words.
+
+    Internal-links to: /local-ai-video-generator (sibling pillar),
+    /alternatives + per-competitor pages, /pricing, /about, /app."""
+    return render_template("pillar_faceless_youtube.html")
 
 
 @app.route("/app")

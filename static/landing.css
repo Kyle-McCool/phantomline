@@ -186,7 +186,7 @@
     font-weight: 650;
     text-wrap: balance;
   }
-  h1 span { color: var(--signal); text-shadow: 0 0 34px rgba(138,180,255,0.2); }
+  h1 span { color: var(--cyan); text-shadow: 0 0 34px rgba(38,231,245,0.22); }
   .lede {
     max-width: 720px;
     margin: 0;
