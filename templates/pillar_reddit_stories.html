@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Reddit Stories Video Tool — AI Reddit Storytime Generator | Phantomline</title>
+<meta name="description" content="Turn Reddit posts into faceless YouTube videos automatically. AI script + narration + captions + B-roll + render — all local, no per-video fees. Built for r/AmItheAsshole, r/relationships, r/MaliciousCompliance, and the rest of the Reddit storytime niches." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Reddit Stories Video Tool — AI Reddit Storytime Generator | Phantomline" />
+<meta property="og:description" content="AI-driven Reddit storytime pipeline. Local, faceless, no subscription, no per-video fees." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Reddit Stories Video Tool", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Reddit Stories Video Tool: AI Reddit Storytime Generator",
+  "description": "Turn Reddit posts into faceless YouTube videos with AI scripts, narration, captions, B-roll, and rendering — all local, no subscription, no per-video fees.",
+  "datePublished": "2026-05-03",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make a Reddit storytime YouTube video with AI",
+  "description": "Generate a Reddit-style storytime video — narration, captions, B-roll, music, MP4 — locally on your own machine.",
+  "totalTime": "PT8M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A Reddit post URL or pasted story text"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier or Creator Pro)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline local AI video studio"},
+    {"@type": "HowToTool", "name": "Llama 3.1 (script reformatting)"},
+    {"@type": "HowToTool", "name": "Kokoro TTS (narration)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Paste the Reddit story",
+     "text": "Paste a Reddit post URL or the post text directly into Phantomline. The script generator handles AITA, AmItheAsshole, ProRevenge, MaliciousCompliance, EntitledParents, relationships, and other storytime subreddits natively."},
+    {"@type": "HowToStep", "position": 2, "name": "Pick a storytime preset",
+     "text": "Choose the genre preset that matches the post — petty drama, satisfying revenge, family conflict, AITA judgment, etc. Each preset tunes the rewrite for retention beats and pacing."},
+    {"@type": "HowToStep", "position": 3, "name": "Generate the rewrite + narration",
+     "text": "Llama 3.1 rewrites the post for storytime delivery (hook, beats, satisfying conclusion). Kokoro narrates in a calm storyteller voice. 1-3 minutes for a 5-minute video on a modern laptop."},
+    {"@type": "HowToStep", "position": 4, "name": "Add B-roll + captions + music",
+     "text": "Phantomline pulls Minecraft parkour or subway-surfer-style B-roll from Pexels (or your own library), generates synced captions from the narration, and lays an ambient backing track underneath."},
+    {"@type": "HowToStep", "position": 5, "name": "Render + publish",
+     "text": "ffmpeg encodes the MP4 locally. Phantomline's YouTube scheduler queues the upload with a Reddit-style thumbnail and auto-generated title."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Can AI turn a Reddit post into a YouTube video?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. The AI rewrite loop does three things: cleans the post text into clean script form (removing 'edit:' updates, formatting artifacts, and excessive disclaimers), restructures it for retention (clearer hook, satisfying middle beats, payoff at the end), and generates a narrator-friendly cadence. Phantomline runs the whole pipeline — rewrite, narration, captions, B-roll, music, MP4 — locally, in 5-15 minutes per video."}},
+    {"@type": "Question", "name": "Which Reddit subs work best for storytime?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The proven storytime subs are r/AmItheAsshole, r/EntitledParents, r/MaliciousCompliance, r/ProRevenge, r/relationships, r/raisedbynarcissists, r/JUSTNOMIL, r/idontworkherelady, r/talesfromtechsupport, and r/BestofRedditorUpdates. AITA in particular dominates because the format (story + verdict prompt) maps cleanly onto YouTube's commentary structure."}},
+    {"@type": "Question", "name": "Is it legal to make YouTube videos from Reddit posts?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Generally yes for your own commentary on public posts, but with caveats. Reddit's content licensing allows third-party reuse with attribution. Posters retain copyright over their submission text — you should rewrite the post substantively (which Phantomline does as part of the storytime adaptation) rather than reading it word-for-word. Many creators add explicit attribution in the description. Get legal advice for your specific channel and jurisdiction; this isn't legal advice."}},
+    {"@type": "Question", "name": "What's the typical render time for a Reddit story video?",
+     "acceptedAnswer": {"@type": "Answer", "text": "On a modern laptop (16 GB RAM, mid-range GPU): script rewrite 30-60s, narration 1-3 minutes, music 30s, ffmpeg render 1-5 minutes. Total: 5-10 minutes for a 5-minute video. The PWA on a flagship phone is slower (10-20 minutes total) but works without a desktop."}},
+    {"@type": "Question", "name": "How does Phantomline compare to using ChatGPT + ElevenLabs separately?",
+     "acceptedAnswer": {"@type": "Answer", "text": "ChatGPT + ElevenLabs + a separate editor + a separate scheduler is a workable stack, but each tool meters separately. ElevenLabs alone runs a Reddit channel out of its character cap fast. Phantomline collapses the whole pipeline into one local tool with no per-character or per-render fees, and the pieces are wired together (rewrite output feeds narration directly, narration timing feeds caption sync) instead of needing manual copy-paste."}}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article" style="max-width: 820px;">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <span class="current">Reddit Stories Video Tool</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Use case</div>
+        <h1>Reddit Stories Video Tool</h1>
+        <p class="article-lede">Phantomline's storytime preset turns a Reddit post into a faceless YouTube video automatically — AI rewrite tuned for retention, calm narrator voice, synced captions, gameplay B-roll, ambient music, MP4 render, and the YouTube publish draft. Local, free per render, built specifically for the AITA / MaliciousCompliance / ProRevenge / EntitledParents loop.</p>
+        <p class="article-meta">Published May 3, 2026 · Updated <time datetime="{{ today_iso }}">{{ today_iso }}</time></p>
+      </header>
+
+      <h2>The Reddit storytime niche on YouTube</h2>
+      <p>Reddit storytime is one of the most established faceless YouTube formats. The structure is reliable: open with a punchy line that frames the story (the "hook"), narrate the post over Minecraft parkour or subway-surfer gameplay B-roll for retention, deliver the satisfying turn or AITA verdict near the end, ask the audience for their take in the comments. Channels in this space publish daily — the niche rewards volume, and the production bar is low enough that one creator can sustain a 30-video-a-month schedule.</p>
+      <p>The tool stack typically used: ChatGPT or Claude for the rewrite, ElevenLabs for the narration, CapCut for the timeline, a stock-footage subscription for B-roll, a thumbnail tool, vidIQ for SEO, and Buffer or TubeBuddy for scheduling. Six to eight subscriptions, each metered, each requiring its own learning curve.</p>
+      <p>Phantomline is built specifically for this loop. The script engine has presets for the major storytime subreddits. The narrator voices are tuned for calm storytelling delivery. The B-roll integration knows about the Minecraft/parkour/subway pattern. The caption system uses the storytime-friendly word-by-word style. And every step runs locally on hardware you already own — no per-render meter to burn through at 30 videos a month.</p>
+
+      <h2>Storytime subreddit presets</h2>
+      <p>Each of these subs has a distinct narrative shape. Phantomline's storytime presets adapt the rewrite tone, hook style, and pacing accordingly:</p>
+      <ul>
+        <li><strong>r/AmItheAsshole (AITA):</strong> classic dilemma + verdict structure. The rewrite frames the question, walks through the conflict, ends with "AITA?" and an invitation to weigh in. Narrator voice: calm, neutral, asking the audience to judge.</li>
+        <li><strong>r/EntitledParents:</strong> villain-of-the-week structure. The rewrite emphasizes the entitled person's escalating demands and the satisfying refusal or comeuppance. Narrator voice: slightly amused, narrating-events tone.</li>
+        <li><strong>r/MaliciousCompliance:</strong> setup-payoff structure. The rewrite establishes the rule that's about to be exploited, builds to the literal-interpretation moment, lands the comeuppance. Narrator voice: deadpan satisfaction.</li>
+        <li><strong>r/ProRevenge / r/PettyRevenge:</strong> wronged-protagonist + revenge structure. Longer setup, satisfying execution, retrospective tone. Narrator voice: storyteller-recounting-old-stories.</li>
+        <li><strong>r/relationships:</strong> conflict + dynamics structure. Lighter on revenge, heavier on emotional beats. Narrator voice: empathetic, measured.</li>
+        <li><strong>r/raisedbynarcissists:</strong> trauma-survival structure. Most sensitive of the storytime niches; the preset adds content warnings and avoids editorialized framing. Narrator voice: gentle, supportive.</li>
+        <li><strong>r/JUSTNOMIL / r/JUSTNOFAMILY:</strong> family-conflict structure. Recurring villain, episodic format. Narrator voice: knowing, supportive of the OP.</li>
+        <li><strong>r/talesfromtechsupport / r/talesfromretail:</strong> workplace-comedy structure. Setup, customer absurdity, punchline. Narrator voice: amused, conversational.</li>
+        <li><strong>r/BestofRedditorUpdates:</strong> long-form serialization structure. Original post + updates + final outcome, often 15-25 minutes. Narrator voice: documentary-style.</li>
+      </ul>
+      <p>The custom-genre option lets you write your own preset for any niche storytime sub Phantomline doesn't ship — the rewrite engine adapts based on the prompt structure you provide.</p>
+
+      <h2>Why creators leave the standard Reddit storytime stack</h2>
+      <p>Three reasons surface repeatedly when faceless creators audit their tool stack:</p>
+
+      <h3>1. ElevenLabs character caps</h3>
+      <p>A 5-minute Reddit story video is roughly 750 words / 4,500 characters. At 30 videos a month, that's 135,000 characters — well into ElevenLabs' Creator tier territory and approaching the next bump. Add iteration (re-rendering with a different voice or pacing) and the cap binds fast. Phantomline's Kokoro TTS runs locally with no character meter at all.</p>
+
+      <h3>2. Tool-stack switching cost</h3>
+      <p>Reddit story → ChatGPT rewrite → copy → ElevenLabs narration → download MP3 → CapCut import → caption tool → Pexels for B-roll → thumbnail tool → metadata tool → upload to YouTube. That's 10 context-switches per video. At daily publishing pace, the switching cost dominates the actual creative work. Phantomline's pipeline runs all of those steps inside the same project bundle — paste the post, hit generate, walk away, come back to a finished MP4.</p>
+
+      <h3>3. Privacy on competitive niche research</h3>
+      <p>Many faceless storytime channels research underexplored subs (smaller communities with proven formats but no major channel covering them yet). Standard tools log every prompt, every keyword search, every channel viewed. For creators in competitive niches, that research becomes someone else's training data. Phantomline keeps everything local.</p>
+
+      <h2>The Phantomline storytime workflow, end-to-end</h2>
+      <ol>
+        <li><strong>Paste the Reddit post.</strong> URL or raw text. Phantomline strips Reddit-formatting artifacts (edit/update timestamps, deleted comments, irrelevant context).</li>
+        <li><strong>Pick the preset.</strong> AITA, EntitledParents, MaliciousCompliance, etc., or write a custom one. Each tunes hook style, pacing, and narrator tone.</li>
+        <li><strong>Generate the rewrite.</strong> Llama 3.1 produces a storytime-shaped script with a punchy hook, retention beats, and the satisfying landing. 30-60 seconds on a modern GPU.</li>
+        <li><strong>Render narration.</strong> Pick a Kokoro voice (calm storyteller, slightly-amused, gentle, deadpan-satisfaction). 1-3 minutes for a 5-minute script.</li>
+        <li><strong>Auto-pull B-roll.</strong> Phantomline queries Pexels for Minecraft/parkour/subway-surfer-style footage and queues it on the timeline. Or import your own clips.</li>
+        <li><strong>Generate captions.</strong> Word-by-word storytime captions, sync'd to the narration timeline automatically.</li>
+        <li><strong>Lay music.</strong> Bundled royalty-free ambient track or MusicGen procedural composition under the narration. Auto-ducks during dialogue.</li>
+        <li><strong>Render the MP4.</strong> ffmpeg encodes locally. 1-5 minutes for a 5-minute output.</li>
+        <li><strong>Publish or schedule.</strong> Phantomline's YouTube scheduler pushes the MP4 + title + description + tags + thumbnail directly through the YouTube Data API.</li>
+      </ol>
+      <p>End-to-end: 5-15 minutes per video on a modern laptop. The whole flow is local — no per-render fee, no third-party storing your script.</p>
+
+      <h2>Reddit storytime channel economics</h2>
+      <p>A faceless Reddit channel publishing daily produces 30 videos a month. At standard cloud-tool stack rates (~$2/video render across all subscriptions plus ~$25/month in fixed subscriptions), that's $720 + $300 = $1,020 in year one for a single channel.</p>
+      <p>Phantomline's Founding Lifetime is $79 one-time. Year one savings: ~$940 per channel. Multi-channel operators (a Reddit channel, a horror channel, a mystery channel) compound the savings linearly — at 3 channels publishing daily, year one savings exceed $2,800.</p>
+
+      <h2>Honest limitations</h2>
+      <ul>
+        <li><strong>Voice cloning isn't supported.</strong> If your channel uses a specific cloned voice (yours, a well-known narrator's), Phantomline can't do that. The Kokoro voice library covers the storytime delivery styles but isn't an arbitrary cloning system.</li>
+        <li><strong>The script rewrite isn't ChatGPT-class on edge cases.</strong> For 90%+ of typical AITA/storytime posts, Llama 3.1 produces fluent, retention-tuned scripts. For unusually long, dense, or emotionally complex posts, a frontier model may still outperform the open-weight option. Some creators run frontier-tier rewrites manually for their highest-investment videos.</li>
+        <li><strong>B-roll matching is good, not perfect.</strong> Pexels-based stock footage works well for the Minecraft-parkour storytime style, but doesn't match every creative direction. Importing your own clip library covers the gap.</li>
+        <li><strong>Hardware required for the desktop install.</strong> 16 GB RAM and any modern GPU. The PWA on phones works for prototyping but the desktop install is materially faster.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Can AI turn a Reddit post into a YouTube video?</summary>
+          <p>Yes. Phantomline rewrites the post for storytime delivery, narrates it locally with Kokoro TTS, generates captions and B-roll, lays music, and renders the final MP4 — all in one tool, all locally. 5-15 minutes per video on modern hardware.</p>
+        </details>
+        <details>
+          <summary>Which Reddit subs work best for storytime?</summary>
+          <p>r/AmItheAsshole, r/EntitledParents, r/MaliciousCompliance, r/ProRevenge, r/relationships, r/raisedbynarcissists, r/JUSTNOMIL, r/talesfromtechsupport, r/BestofRedditorUpdates. Phantomline ships presets for each.</p>
+        </details>
+        <details>
+          <summary>Is it legal to make YouTube videos from Reddit posts?</summary>
+          <p>Generally yes when you rewrite substantively rather than reading word-for-word. Posters retain copyright; the rewrite + storytime adaptation Phantomline does is what most channels rely on. Get legal advice for your specific channel and jurisdiction — this isn't legal advice.</p>
+        </details>
+        <details>
+          <summary>What's the typical render time?</summary>
+          <p>5-15 minutes per video on a modern laptop. Script rewrite is 30-60s, narration is 1-3 minutes, ffmpeg encode is 1-5 minutes for the final MP4.</p>
+        </details>
+        <details>
+          <summary>How does this compare to ChatGPT + ElevenLabs?</summary>
+          <p>The same outputs, but bundled into one local pipeline with no per-character or per-render fees and no copy-paste between tools. The pieces are wired together so the rewrite, narration, captions, and timing all stay in sync automatically.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin: 36px 0 24px;" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/faceless-youtube">Faceless YouTube tool pillar</a></li>
+        <li><a href="/local-ai-video-generator">Local AI video generator pillar</a></li>
+        <li><a href="/ai-voice-generator">AI voice generator pillar</a></li>
+        <li><a href="/horror-narration-tool">Horror narration tool</a></li>
+        <li><a href="/mystery-docs-tool">Mystery docs creation tool</a></li>
+        <li><a href="/youtube-scheduler">YouTube scheduler pillar</a></li>
+        <li><a href="/alternatives/elevenlabs">ElevenLabs alternative</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
