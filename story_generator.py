@@ -100,6 +100,82 @@ Style and rules for the narration:
 - Output narration prose only. No markdown, no bullet points, no headings, no timestamps, no scene labels, no author notes."""
 
 
+# Per-format overrides layered ON TOP OF STYLE_RULES. Each override
+# tightens the voice for a specific format so a "tutorial" doesn't read
+# like a "horror documentary." Detection is keyword-based on the
+# genre/tone string passed by the caller — see _detect_format() below.
+# Keep these short — they're appended verbatim to the prompt.
+STYLE_OVERRIDES = {
+    "story": (
+        "STORY-FORMAT OVERRIDE:\n"
+        "- Treat the script as a single narrative arc with one protagonist and one stake.\n"
+        "- Sensory detail beats exposition: name the room, the smell, the sound, then move.\n"
+        "- Keep dialogue rare; when used, attribute by action, not 'said' tags.\n"
+        "- The reversal lands no later than 60% of the way through. The ending must echo a phrase or image from the opening minute."
+    ),
+    "tutorial": (
+        "TUTORIAL-FORMAT OVERRIDE:\n"
+        "- Open with the outcome the viewer will leave with, in concrete terms.\n"
+        "- Each step gets one sentence stating the action and one stating the verifiable result.\n"
+        "- Name specific tools, settings, file paths, or numbers — not 'a button somewhere.'\n"
+        "- Skip motivational filler. The viewer hit play to learn, not to be inspired."
+    ),
+    "listicle": (
+        "LISTICLE-FORMAT OVERRIDE:\n"
+        "- Each item starts with a 4-9 word punchy claim, then 2-3 sentences of proof.\n"
+        "- Order items by escalating surprise — the most counterintuitive item lands second-to-last.\n"
+        "- Do NOT count down or up by number out loud unless the title explicitly references the count.\n"
+        "- The final item must land like a punchline, not a recap."
+    ),
+    "documentary": (
+        "DOCUMENTARY-FORMAT OVERRIDE:\n"
+        "- Anchor every claim in a specific date, place, name, document, or recording.\n"
+        "- Reveal information chronologically when possible; use 'meanwhile' / 'six months earlier' to jump.\n"
+        "- The narrator never speculates without flagging it ('the most plausible reading is...').\n"
+        "- End with a question the historical record cannot yet answer."
+    ),
+    "explainer": (
+        "EXPLAINER-FORMAT OVERRIDE:\n"
+        "- Open with the misconception or knot the viewer arrived holding.\n"
+        "- Each paragraph either retires a wrong assumption or introduces a load-bearing analogy.\n"
+        "- Use one running analogy throughout — don't switch metaphors mid-script.\n"
+        "- End with the cleanest one-sentence version of the answer, then one implication."
+    ),
+}
+
+
+def _detect_format(genre, tone, recipe=""):
+    """Best-effort format detection from the user-supplied genre/tone strings.
+    Order matters — a 'sci-fi documentary tutorial' should resolve to tutorial
+    (most actionable). Returns None if no override applies, in which case the
+    prompts use STYLE_RULES alone."""
+    blob = f"{genre} {tone} {recipe}".lower()
+    if "tutorial" in blob or "how to" in blob or "how-to" in blob or "guide" in blob:
+        return "tutorial"
+    if "listicle" in blob or "top " in blob or "ranked" in blob or "list of" in blob:
+        return "listicle"
+    if "documentary" in blob or "true story" in blob or "case file" in blob or "investigation" in blob:
+        return "documentary"
+    if "explainer" in blob or "explain" in blob or "why does" in blob or "how does" in blob:
+        return "explainer"
+    story_signals = (
+        "story", "narration", "horror", "mystery", "fiction", "tale",
+        "thriller", "drama", "sci-fi", "scifi", "supernatural", "cosmic",
+        "creepy", "eerie",
+    )
+    if any(sig in blob for sig in story_signals):
+        return "story"
+    return None
+
+
+def _style_block(genre, tone, recipe=""):
+    """Returns STYLE_RULES plus a format-specific override appended."""
+    fmt = _detect_format(genre, tone, recipe)
+    if fmt and fmt in STYLE_OVERRIDES:
+        return f"{STYLE_RULES}\n\n{STYLE_OVERRIDES[fmt]}"
+    return STYLE_RULES
+
+
 # ---------------------------------------------------------------------------
 # Ollama wrapper
 # ---------------------------------------------------------------------------
@@ -178,6 +254,10 @@ def generate(model, prompt, system=SYSTEM_PROMPT, label="", show_progress=True,
 # ---------------------------------------------------------------------------
 
 def title_prompt(topic, genre, tone):
+    """Single-title prompt. Kept for back-compat with anything calling this
+    directly. New code should call title_batch_prompt + pick_best_title so the
+    runner has 5 candidates to score against channel insights instead of
+    being stuck with whatever the model returned first."""
     return f"""\
 Generate ONE strong title for a YouTube voiceover video.
 
@@ -195,7 +275,156 @@ Requirements:
 Title:"""
 
 
+# Each candidate is built around a different psychological pull. Mixing
+# strategies across the 5-candidate batch dramatically increases the
+# chance one of them clicks against the user's existing audience pattern.
+# vidIQ-style title-fit scoring picks the winner downstream.
+TITLE_STRATEGIES = [
+    ("curiosity_gap", "Promise a specific revelation but withhold the key detail. Example shape: 'The lighthouse keeper found a second one — and it wasn't supposed to exist.'"),
+    ("contrarian_truth", "State a confident-sounding claim that contradicts the obvious framing. Example shape: 'Why faceless creators stopped caring about subscribers.'"),
+    ("specific_number", "Anchor on a concrete number that signals hard-won knowledge. Example shape: '7 minutes that changed how a small town remembered the war.'"),
+    ("named_artifact", "Lead with a named object/place/person tied to one strange consequence. Example shape: 'The Vermillion Tape — and the family that watched it twice.'"),
+    ("proof_or_receipts", "Lead with proof, evidence, or stakes the viewer can verify. Example shape: 'Inside the satellite log that proves the signal arrived twice.'"),
+]
+
+
+def title_batch_prompt(topic, genre, tone, count=5):
+    """Generate `count` title candidates, each built around a distinct
+    strategy. Returns a JSON array so the runner can score and rank.
+
+    Why JSON instead of newline-delimited: the model often slips in
+    explanations like 'Title 1:' or trailing notes that wreck regex parsing.
+    Strict JSON with a hard rule has been more reliable across Llama 3.1,
+    3.2, Mistral, and Qwen in our local tests.
+    """
+    strategies_to_use = TITLE_STRATEGIES[: max(3, min(count, len(TITLE_STRATEGIES)))]
+    strategy_block = "\n".join(
+        f"- {name}: {desc}" for name, desc in strategies_to_use
+    )
+    return f"""\
+Generate {count} title candidates for a YouTube voiceover video. Each candidate must use a DIFFERENT strategy from the list below — diversity is the goal so we have real options to score, not five rewrites of the same idea.
+
+Story idea: {topic}
+Genre: {genre}
+Tone: {tone}
+
+STRATEGIES (use a different one for each title):
+{strategy_block}
+
+Return ONLY valid JSON. No markdown. No preface.
+Schema:
+[
+  {{"title": "the title", "strategy": "one of: {", ".join(name for name, _ in strategies_to_use)}", "why": "one short sentence on the angle"}}
+]
+
+Hard rules:
+- 4 to 10 words per title.
+- No quotes around titles. No emojis. No subtitles. No "Part 1".
+- Each title must use a DIFFERENT strategy. Do not repeat a strategy.
+- "why" stays under 18 words.
+- Output the JSON array only. Nothing before or after."""
+
+
+def parse_title_batch(raw):
+    """Parse the JSON array returned by title_batch_prompt. Falls back to a
+    single-title list if the model returned a plain string instead of JSON
+    — this keeps backward compat with older models that don't reliably emit
+    structured output."""
+    if not raw or not raw.strip():
+        return []
+    text = raw.strip()
+    # Strip code fences the model occasionally adds despite the rule.
+    text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*```\s*$", "", text)
+    try:
+        data = json.loads(text)
+    except ValueError:
+        # Try to find the first [...] block — handles models that prefix
+        # explanations despite the prompt's "no preface" rule.
+        match = re.search(r"\[[\s\S]*\]", text)
+        if not match:
+            return [{"title": clean_title(text), "strategy": "fallback", "why": ""}]
+        try:
+            data = json.loads(match.group(0))
+        except ValueError:
+            return [{"title": clean_title(text), "strategy": "fallback", "why": ""}]
+    if not isinstance(data, list):
+        return [{"title": clean_title(str(data)), "strategy": "fallback", "why": ""}]
+    out = []
+    for item in data:
+        if isinstance(item, str):
+            t = clean_title(item)
+            if t:
+                out.append({"title": t, "strategy": "unspecified", "why": ""})
+            continue
+        if not isinstance(item, dict):
+            continue
+        title = clean_title(str(item.get("title") or ""))
+        if not title:
+            continue
+        out.append({
+            "title": title,
+            "strategy": str(item.get("strategy") or "unspecified")[:40],
+            "why": str(item.get("why") or "")[:200],
+        })
+    return out
+
+
+def _load_insights_safely():
+    """Best-effort load of channel insights for title scoring.
+
+    Returns the insights dict if available, None otherwise. Wrapped in
+    try/except so the CLI entrypoint (which runs in a fresh process with
+    no project wiring) doesn't crash when channel_insights or BASE_DIR
+    aren't importable. The runner already falls back to "first candidate"
+    when insights are absent."""
+    try:
+        import channel_insights as _ci
+        from core import BASE_DIR as _BASE_DIR
+        return _ci.load(_BASE_DIR) or None
+    except Exception:
+        return None
+
+
+def pick_best_title(candidates, insights=None):
+    """Pick the strongest title from a batch.
+
+    If channel insights are loaded, use channel_insights.title_fit to score
+    each and return the highest verdict-rank winner. Otherwise fall back to
+    the first candidate (which the model implicitly orders by its own
+    confidence — usually fine for fresh channels with no insights yet).
+
+    Returns (title_str, all_scored_candidates). The list is exposed so the
+    caller can show the runner-up titles in the UI.
+    """
+    if not candidates:
+        return "Untitled Story", []
+    if not insights:
+        return candidates[0]["title"], candidates
+
+    # Lazy import: channel_insights pulls Path/json — fine, but story_generator
+    # is also CLI-runnable and we don't want a hard dep at import time.
+    try:
+        import channel_insights as _ci
+    except ImportError:
+        return candidates[0]["title"], candidates
+
+    verdict_rank = {"strong_fit": 0, "good_fit": 1, "stretch": 2, "neutral": 3, "risky": 4}
+    scored = []
+    for c in candidates:
+        fit = _ci.title_fit(c["title"], insights)
+        scored.append({**c, "fit": fit})
+    scored.sort(
+        key=lambda c: (
+            verdict_rank.get(c["fit"].get("verdict", "neutral"), 3),
+            -1 * (c["fit"].get("score") or 0),
+        )
+    )
+    return scored[0]["title"], scored
+
+
 def plan_prompt(topic, genre, tone, title, target_words):
+    fmt = _detect_format(genre, tone) or "story"
     return f"""\
 Plan a long-form YouTube voiceover of approximately {target_words} words.
 
@@ -203,6 +432,7 @@ Title: {title}
 Story idea: {topic}
 Genre: {genre}
 Tone: {tone}
+Detected format: {fmt}
 
 Write a compact internal plan with these labelled sections:
 HOOK: the vivid opening promise, problem, mystery, mistake, or story moment (one sentence).
@@ -211,6 +441,23 @@ VISUAL LANGUAGE: recurring images, actions, settings, host moments, or visual me
 STRUCTURE: the format to follow, such as story, tutorial, listicle, documentary, or explainer.
 BEATS: 8 to 12 numbered beats in order. Each beat is one sentence and must introduce a new scene-worthy action, fact, example, discovery, step, reversal, or unanswered question.
 ENDING: the memorable final thought, lesson, image, or unresolved question.
+
+EXAMPLE (study the shape, do not copy the content — your topic is different):
+HOOK: A small-town librarian receives a return slip for a book that was never checked out and has been missing for forty years.
+AUDIENCE: Curious viewers who like slow-burn mysteries grounded in real-feeling small-town texture.
+VISUAL LANGUAGE: Rain-streaked library windows, the librarian's index finger tracing card-catalog drawers, the missing book's empty slot, a Polaroid found between pages.
+STRUCTURE: Story (mystery), with a single protagonist and a slow reveal across nine beats.
+BEATS:
+1. The return slip arrives in Monday's mail addressed to a librarian who's only worked there six months.
+2. The slip cites a book the catalog confirms was logged out in 1984 and never returned.
+3. She finds the original record card initialled by a librarian who died in 1991.
+4. The town's oldest patron remembers the borrower — a teenage boy who left town that summer.
+5. She drives to the address on the slip; it's an abandoned barn now, but the mailbox is new.
+6. Inside the mailbox: the missing book, dust-free, with a Polaroid tucked into chapter seven.
+7. The Polaroid shows the dead librarian as a young woman, holding the same book, smiling at someone behind the camera.
+8. She compares handwriting on the return slip to the 1984 record card — same hand.
+9. Driving home, she sees the barn's mailbox flag is up again. She does not stop.
+ENDING: Some books only get returned when the right reader notices they were missing — and some readers are still circling.
 
 Output the plan only. No commentary before or after."""
 
@@ -262,7 +509,7 @@ Total story target: ~{target_words} words. Approximately {total_words} words wri
 
 {position_guidance}
 
-{STYLE_RULES}
+{_style_block(genre, tone)}
 
 Hard rules for THIS section:
 - Output narration prose only. Plain text. No markdown, no headings, no scene labels, no chapter titles, no "Section X", no "Part X", no timestamps, no author notes, no asterisks for emphasis.
@@ -271,6 +518,13 @@ Hard rules for THIS section:
 - Do NOT write the title again.
 - Do NOT begin with "Here is", "In this section", "Continuing", or any meta phrasing.
 - Begin immediately with narration.
+
+EXAMPLES of opening sentences for narration sections (study the texture, never copy the words):
+- GOOD opening (concrete, sensory, forward): "She found the second key on the back of the door, taped behind a photograph she didn't remember being taken."
+- GOOD opening (mid-action): "By the time the second voicemail played, two things were already true that he could not undo."
+- BAD opening (worldbuilding filler): "It was a quiet evening in the small town of Millhaven, where the autumn leaves drifted slowly to the ground."
+- BAD opening (meta): "In this section we'll continue the story and find out what happened next to our heroes."
+Begin like the GOOD examples — straight into something a viewer can see.
 
 Begin the narration now:"""
 
@@ -556,19 +810,20 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
               f"across {len(sections)} sections.\n")
         emit("resume", title=title, words=total_words, target=target_words, sections=len(sections))
     else:
-        # Step 1: title
-        print("\n[1/3] Generating title...")
-        emit("status", message="Generating title...")
-        raw_title = generate(
+        # Step 1: title (batch + best-fit pick)
+        print("\n[1/3] Generating title candidates...")
+        emit("status", message="Generating title candidates...")
+        raw_titles = generate(
             model,
-            title_prompt(topic, inputs["genre"], inputs["tone"]),
-            label="title",
+            title_batch_prompt(topic, inputs["genre"], inputs["tone"], count=5),
+            label="titles",
             temperature=0.9,
-            num_predict=60,
+            num_predict=420,
         )
-        title = clean_title(raw_title)
-        print(f"      Title: {title}")
-        emit("title", title=title)
+        candidates = parse_title_batch(raw_titles)
+        title, scored = pick_best_title(candidates, insights=_load_insights_safely())
+        print(f"      Title: {title}  ({len(candidates)} candidate(s))")
+        emit("title", title=title, candidates=scored or candidates)
 
         # Step 2: plan
         print("\n[2/3] Generating internal story plan...")
@@ -720,15 +975,16 @@ def generate_short_script(inputs, out_dir, progress_cb=None):
 
     print(f"\n[short] Generating {target_words}-word script via {model}...")
 
-    emit("status", message="Generating title...")
-    raw_title = generate(
+    emit("status", message="Generating title candidates...")
+    raw_titles = generate(
         model,
-        title_prompt(inputs["topic"], inputs["genre"], inputs["tone"]),
-        label="title", temperature=0.9, num_predict=60,
+        title_batch_prompt(inputs["topic"], inputs["genre"], inputs["tone"], count=5),
+        label="titles", temperature=0.9, num_predict=420,
     )
-    title = clean_title(raw_title)
-    print(f"        Title: {title}")
-    emit("title", title=title)
+    candidates = parse_title_batch(raw_titles)
+    title, scored = pick_best_title(candidates, insights=_load_insights_safely())
+    print(f"        Title: {title}  ({len(candidates)} candidate(s))")
+    emit("title", title=title, candidates=scored or candidates)
 
     safe = sanitize_filename(title)
     final_path = out_dir / f"{safe}.txt"
