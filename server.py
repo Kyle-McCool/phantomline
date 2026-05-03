@@ -154,11 +154,18 @@ def _security_headers(response):
         "media-src 'self' blob: https://*.pexels.com https://cdn.pixabay.com; "
         "font-src 'self' data:; "
         "style-src 'self' 'unsafe-inline'; "  # inline styles still used in places
-        "script-src 'self' 'wasm-unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; "
+        # esm.sh: dynamic-import target for the /account page's Supabase JS
+        # bundle. supabase-js is the standard auth/REST client and shipping it
+        # ourselves would duplicate ~80 KB on every visit.
+        "script-src 'self' 'wasm-unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://esm.sh; "
         "worker-src 'self' blob:; "
+        # *.supabase.co: account portal sign-in flow + license queries hit the
+        # Supabase REST + auth endpoints. Browser-side API calls only — server
+        # side traffic is unrestricted.
         "connect-src 'self' https://huggingface.co https://*.huggingface.co "
         "https://raw.githubusercontent.com https://cdn.jsdelivr.net "
-        "https://api.pexels.com https://*.pexels.com https://pixabay.com https://cdn.pixabay.com; "
+        "https://api.pexels.com https://*.pexels.com https://pixabay.com https://cdn.pixabay.com "
+        "https://*.supabase.co https://esm.sh; "
         "frame-ancestors 'none'; "
         "base-uri 'self'; "
         "form-action 'self'"
