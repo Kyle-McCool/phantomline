@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>YouTube SEO Tool for Faceless Channels | Phantomline</title>
+<meta name="description" content="YouTube SEO tool that does keyword research, channel insights, and metadata optimization — bundled with the AI script and render pipeline. A vidIQ / TubeBuddy alternative built into the creation tool." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="YouTube SEO Tool for Faceless Channels | Phantomline" />
+<meta property="og:description" content="YouTube SEO research + metadata optimization + Optimize Library that repackages winners. Bundled with the AI creation pipeline, no separate subscription." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "YouTube SEO Tool", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "YouTube SEO Tool for Faceless Channels",
+  "description": "A YouTube SEO and keyword-research tool bundled with the AI script and render pipeline. Includes channel-insights ingest and an Optimize Library that automatically repackages your winning videos.",
+  "datePublished": "2026-05-03",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to do YouTube SEO research with Phantomline",
+  "description": "Run keyword research, ingest your channel analytics, and surface repackage targets — without leaving the same tool that produces your videos.",
+  "totalTime": "PT10M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A YouTube channel (any size; the tool works for new channels too)"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier covers research; Optimize Library is Pro)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline research module"},
+    {"@type": "HowToTool", "name": "YouTube Data API"},
+    {"@type": "HowToTool", "name": "Phantomline Optimize Library"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Add a YouTube Data API key (optional but recommended)",
+     "text": "In Settings → Integrations, paste a personal YouTube Data API key. Free quota is plenty for individual creators. Without a key, Phantomline runs research on heuristics-only mode."},
+    {"@type": "HowToStep", "position": 2, "name": "Type a niche or topic to research",
+     "text": "Enter a topic ('reddit storytime relationships', 'horror narration WW2'). Phantomline returns suggested keywords, search-volume estimates, top competing channels, and rising-trend signals."},
+    {"@type": "HowToStep", "position": 3, "name": "Ingest your channel analytics",
+     "text": "Export your YouTube Studio analytics CSV and drop it into Phantomline. The data stays local — never uploaded to a third party — and powers retention, CTR, and topic-fit analysis."},
+    {"@type": "HowToStep", "position": 4, "name": "Open the Optimize Library",
+     "text": "The Optimize Library identifies videos in your back catalog that underperformed their topic potential — strong opener, weak middle, mismatched title — and queues them for repackaging."},
+    {"@type": "HowToStep", "position": 5, "name": "Repackage and republish",
+     "text": "Phantomline rewrites the title, regenerates the thumbnail, re-cuts the hook, and queues the republish through the YouTube scheduler. Optimization decision and execution stay in the same tool."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "What is a YouTube SEO tool?",
+     "acceptedAnswer": {"@type": "Answer", "text": "A YouTube SEO tool helps creators research keywords, optimize metadata (titles, descriptions, tags, thumbnails), track competitor channels, and identify trending topics in their niche. Examples include vidIQ, TubeBuddy, and Phantomline. Each takes a slightly different shape — vidIQ leans toward keyword research with a Chrome extension, TubeBuddy toward channel-management bulk operations, Phantomline toward integrating SEO directly into the creation pipeline."}},
+    {"@type": "Question", "name": "Is Phantomline a vidIQ or TubeBuddy alternative?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes, for creators who want SEO research bundled with the rest of the creation pipeline. vidIQ and TubeBuddy are pure SEO/management tools — they tell you what to make and how to optimize, but you still need separate tools for scripts, voice, render, and publishing. Phantomline includes all of those plus the SEO research, in one local-first tool."}},
+    {"@type": "Question", "name": "Where does Phantomline get its keyword data?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Direct from the YouTube Data API (with a free personal API key) plus a heuristics layer for trend detection and competitor scoring. The data is YouTube-direct and fresh, but covers less long-tail volume than vidIQ's proprietary aggregator. For most faceless niches the YouTube-direct data is sufficient."}},
+    {"@type": "Question", "name": "What is the Optimize Library?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Phantomline's Optimize Library identifies videos in your back catalog that underperformed their topic potential and queues them for repackaging. It rewrites the title, regenerates the thumbnail, re-cuts the hook, and republishes through the scheduler. Where vidIQ tells you a video could rank better, Phantomline rebuilds the video so it does."}},
+    {"@type": "Question", "name": "Are my channel analytics uploaded to a third party?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Phantomline ingests YouTube Studio CSV exports locally — the data stays on your machine. vidIQ and TubeBuddy upload your channel data to their servers via OAuth. For competitive niches or any creator nervous about analytics logging, the local approach is materially different."}}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article" style="max-width: 820px;">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <span class="current">YouTube SEO Tool</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Pillar</div>
+        <h1>YouTube SEO Tool for Faceless Channels</h1>
+        <p class="article-lede">Phantomline's SEO surface — keyword research, channel-insights ingest, and an Optimize Library that automatically repackages your winners — is bundled into the same tool that writes the script, generates the narration, and renders the MP4. Replace vidIQ, TubeBuddy, and the spreadsheet you've been keeping with one local-first workflow.</p>
+        <p class="article-meta">Published May 3, 2026 · Updated <time datetime="{{ today_iso }}">{{ today_iso }}</time></p>
+      </header>
+
+      <h2>What a YouTube SEO tool actually does</h2>
+      <p>YouTube SEO tools sit at the intersection of three workflows: <strong>research</strong> (what topic should I make next? which keywords are gaining? who's my competition?), <strong>optimization</strong> (does this title score well? are the tags correct? is the thumbnail clickable?), and <strong>analysis</strong> (what's my back catalog actually doing? which videos beat their topic? which under-delivered?). Tools differ in how much weight they put on each axis.</p>
+      <p>vidIQ leans research-and-optimization-heavy with a polished Chrome extension that overlays scores directly on YouTube and competitor channels. TubeBuddy leans management-and-bulk-ops-heavy with A/B title testing and comment moderation. Phantomline leans creation-and-execution-heavy: research and optimization are inputs to the same pipeline that produces the next video, and the Optimize Library closes the loop by rebuilding underperformers automatically.</p>
+
+      <h2>Why faceless creators need SEO tooling integrated with creation</h2>
+      <p>The standalone-SEO-tool model has a friction problem that gets worse with volume. The pattern looks like this:</p>
+      <ol>
+        <li>Open vidIQ. Research keywords for a topic.</li>
+        <li>Copy promising terms to a notes app or spreadsheet.</li>
+        <li>Switch to ChatGPT or Claude. Generate a script using those terms.</li>
+        <li>Switch to ElevenLabs. Render narration.</li>
+        <li>Switch to a video editor. Assemble the MP4.</li>
+        <li>Switch to TubeBuddy. Optimize the title, tags, description.</li>
+        <li>Switch to Buffer. Schedule the publish.</li>
+      </ol>
+      <p>That's seven tool-switches per video. At 30 videos a month, that's 210 context-switches plus the cognitive overhead of keeping each tool's state aligned. Faceless creators rarely have a bottleneck in research quality — the bottleneck is operational throughput. Compressing the pipeline into one tool with one project bundle eliminates the switching tax.</p>
+      <p>Phantomline's research module hands keyword suggestions directly to the script generator. The script generator includes the keywords naturally in the hook and body. The narration uses the same script. The metadata draft pulls keywords back as tags and description copy. The Optimize Library tracks how the published video performs and queues a repackage if the topic outperformed the asset. There's no copy-paste between research and execution — they're the same workflow.</p>
+
+      <h2>How Phantomline's YouTube SEO surface works</h2>
+
+      <h3>Research module</h3>
+      <p>Type a topic, get suggested keywords with search-volume estimates, top competing videos, niche-specific trend signals, and a basic difficulty score. Data source: YouTube Data API plus a heuristics layer. Free with a personal API key (free YouTube Data API quota is generous enough for individual creators).</p>
+
+      <h3>Channel-insights ingest</h3>
+      <p>Export your YouTube Studio analytics CSV (videos, traffic sources, retention, demographics) and drop it into Phantomline. The data is parsed locally and powers per-video performance scoring, retention curve analysis, and click-through-rate tracking. It never gets uploaded to a third party — the privacy difference vs vidIQ/TubeBuddy is structural, not just polish.</p>
+
+      <h3>Metadata optimization</h3>
+      <p>The metadata draft (title, description, tags, chapters, thumbnail concept) generates alongside the script. It's not a post-hoc optimization layer; it's part of the same generation pass. The AI titles a video the same way the script frames it — keyword density and hook alignment fall out of the writing, not a separate scoring step.</p>
+
+      <h3>Optimize Library</h3>
+      <p>The killer feature, where Phantomline pulls ahead of vidIQ. Optimize Library analyzes your published catalog for under-performers — videos where the topic potential was strong but the asset's CTR, retention, or watch-time underdelivered. For each, it suggests a repackage: new title, new thumbnail, recut hook, fresh description. With one click, Phantomline regenerates the assets and queues the republish through the scheduler.</p>
+      <p>vidIQ tells you "this video could rank better with a different title." Phantomline rebuilds the video so it does. The decision and the execution live in the same tool.</p>
+
+      <h2>YouTube SEO tool comparison</h2>
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>Phantomline</th><th>vidIQ</th><th>TubeBuddy</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Keyword research</td><td>YouTube Data API + heuristics</td><td>Proprietary database (broader)</td><td>Proprietary database</td></tr>
+          <tr><td>Chrome extension overlay</td><td>No</td><td>Yes (their hallmark)</td><td>Yes</td></tr>
+          <tr><td>Channel analytics</td><td>Local CSV ingest (private)</td><td>Account-linked (cloud-stored)</td><td>Account-linked (cloud-stored)</td></tr>
+          <tr><td>A/B title testing</td><td>No (replaced by repackage)</td><td>Limited</td><td>Yes (their core feature)</td></tr>
+          <tr><td>Bulk metadata operations</td><td>Optimize Library + scheduler</td><td>Limited</td><td>Strong</td></tr>
+          <tr><td>Comment moderation</td><td>No</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Generates scripts/voice/video</td><td>Yes</td><td>No (research only)</td><td>No</td></tr>
+          <tr><td>Bundled with publishing scheduler</td><td>Yes</td><td>No</td><td>Yes (separate feature)</td></tr>
+          <tr><td>Local-first / private analytics</td><td>Yes</td><td>No</td><td>No</td></tr>
+          <tr><td>One-time lifetime tier</td><td>Yes ($79 founding)</td><td>No</td><td>No</td></tr>
+        </tbody>
+      </table>
+
+      <h2>When to use which tool</h2>
+      <ul>
+        <li><strong>vidIQ</strong>: you want the broadest keyword database with the Chrome-extension overlay habit, and you have a creation pipeline you're happy with. Research is the headline need.</li>
+        <li><strong>TubeBuddy</strong>: you're managing an established channel with 100+ videos in the back catalog and need bulk ops, A/B title testing, and comment moderation. Operational scale is the headline need.</li>
+        <li><strong>Phantomline</strong>: research and optimization are stages of a creation pipeline you also need built. Or: privacy is non-negotiable. Or: you'd rather pay $79 once than $20-30/month forever for an SEO tool that only solves one piece of the workflow.</li>
+        <li><strong>All three</strong>: a few creators stack them — vidIQ for research depth, Phantomline for creation + Optimize Library, TubeBuddy for back-catalog management. Defensible if your channel scale justifies it; unnecessary for most creators.</li>
+      </ul>
+
+      <h2>Privacy: why it matters more than people think</h2>
+      <p>vidIQ and TubeBuddy log every keyword you research and every channel you stalk. That data feeds their aggregate trend reports and (in vidIQ's case) is part of how the keyword database stays fresh. For most creators that's a fair trade. For creators researching unique niches — investigative-style commentary, original true-crime topics, niche communities not yet trending — it's a structural leak. Your competitive research becomes someone else's product.</p>
+      <p>Phantomline's research module hits the YouTube Data API with your personal key, processes the response locally, and never uploads it. The query is between your machine and Google. Aggregate trend reports don't exist because we don't collect the data to make them. For creators where research privacy matters, that's a real difference.</p>
+
+      <h2>Honest limitations</h2>
+      <ul>
+        <li><strong>Smaller keyword database.</strong> YouTube Data API + heuristics is fresh and direct, but vidIQ's proprietary aggregator covers more long-tail terms with deeper historical baselines. For most faceless niches the Phantomline data is sufficient; for hyper-competitive verticals vidIQ may surface terms we miss.</li>
+        <li><strong>No Chrome extension.</strong> The overlay-style research workflow is a vidIQ-specific habit some creators love. Phantomline is desktop + PWA only; the trade-off is that all research stays local.</li>
+        <li><strong>No A/B title testing.</strong> The Optimize Library replaces it (republish a repackaged version) but the in-place split-test pattern TubeBuddy offers isn't part of Phantomline's scope.</li>
+        <li><strong>No comment moderation.</strong> Outside Phantomline's scope.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>What is a YouTube SEO tool?</summary>
+          <p>Software for keyword research, metadata optimization, competitor tracking, and channel-analytics analysis. Examples: vidIQ, TubeBuddy, Phantomline. Each takes a different shape; Phantomline integrates SEO directly into the creation pipeline.</p>
+        </details>
+        <details>
+          <summary>Is Phantomline a vidIQ alternative?</summary>
+          <p>For faceless creators who want research bundled with creation, yes. vidIQ has a broader proprietary database and the Chrome extension; Phantomline pulls live data from the YouTube Data API and integrates with the script + render pipeline.</p>
+        </details>
+        <details>
+          <summary>What is the Optimize Library?</summary>
+          <p>A feature that identifies under-performing videos in your back catalog and rebuilds them — new title, regenerated thumbnail, recut hook — then republishes through the scheduler. Closes the gap between "this could rank better" and "it does now."</p>
+        </details>
+        <details>
+          <summary>Are my channel analytics uploaded to a third party?</summary>
+          <p>No. Phantomline ingests YouTube Studio CSV exports locally. The data stays on your machine. vidIQ and TubeBuddy account-link their analytics, which means your performance data is on their servers.</p>
+        </details>
+        <details>
+          <summary>Does Phantomline have a Chrome extension?</summary>
+          <p>No. The overlay-style research vidIQ pioneered is genuinely useful but requires sending data to a SaaS. Phantomline trades it for full privacy.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. Research is unlimited on free; Optimize Library is a Pro feature. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin: 36px 0 24px;" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/local-ai-video-generator">Local AI video generator pillar</a></li>
+        <li><a href="/faceless-youtube">Faceless YouTube tool pillar</a></li>
+        <li><a href="/ai-voice-generator">AI voice generator pillar</a></li>
+        <li><a href="/youtube-scheduler">YouTube scheduler pillar</a></li>
+        <li><a href="/alternatives/vidiq">vidIQ alternative</a></li>
+        <li><a href="/alternatives/tubebuddy">TubeBuddy alternative</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
