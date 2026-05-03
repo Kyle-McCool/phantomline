@@ -4,6 +4,11 @@
 <meta charset="utf-8" />
 <title>Phantomline Studio</title>
 <meta name="description" content="Phantomline Studio — workspace for generating faceless YouTube videos with local AI." />
+<!-- Auth gate. Synchronous so it can redirect anonymous visitors to
+     /account before any studio HTML/CSS paints. Skips on localhost (the
+     desktop install) and inside the Capacitor Android shell. See
+     static/auth-gate.js for the full rationale. -->
+<script src="{{ '/static/auth-gate.js' | versioned }}"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
