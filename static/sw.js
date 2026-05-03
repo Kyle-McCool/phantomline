@@ -98,7 +98,7 @@ self.addEventListener("fetch", (event) => {
         const shell = await caches.match("/");
         if (shell) return shell;
         return new Response(
-          "<h1>Offline</h1><p>Ghostline is offline. Reconnect to continue.</p>",
+          "<h1>Offline</h1><p>Phantomline is offline. Reconnect to continue.</p>",
           { status: 503, headers: { "Content-Type": "text/html" } }
         );
       }
