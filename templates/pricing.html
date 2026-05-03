@@ -80,7 +80,7 @@
     {
       "@type": "Question",
       "name": "What is the founding lifetime tier?",
-      "acceptedAnswer": {"@type": "Answer", "text": "A one-time payment that unlocks Creator Pro permanently for the first 200 buyers. Lifetime updates included."}
+      "acceptedAnswer": {"@type": "Answer", "text": "A one-time payment that unlocks Creator Pro permanently for the first 500 buyers. Lifetime updates included."}
     },
     {
       "@type": "Question",
@@ -107,6 +107,7 @@
       <a href="/#mobile">Mobile</a>
       <a href="/pricing" aria-current="page">Pricing</a>
       <a href="/#faq">FAQ</a>
+      <a href="/account">Account</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>
   </nav>
@@ -128,7 +129,7 @@
         {% for tier in pricing.tiers %}
         <div class="pricing-card{% if tier.id == 'founding' %} pricing-card--founding{% endif %}{% if tier.id == 'pro' %} pricing-card--featured{% endif %}" id="tier-{{ tier.id }}">
           {% if tier.id == 'pro' %}<div class="pricing-badge">Most popular</div>{% endif %}
-          {% if tier.id == 'founding' %}<div class="pricing-badge pricing-badge--accent">Launch only · 200 seats</div>{% endif %}
+          {% if tier.id == 'founding' %}<div class="pricing-badge pricing-badge--accent">Launch only · 500 seats</div>{% endif %}
           <h3>{{ tier.name }}</h3>
           <p class="pricing-tagline">{{ tier.tagline }}</p>
           <div class="pricing-price">
@@ -174,7 +175,7 @@
       </details>
       <details>
         <summary>What is the founding lifetime tier?</summary>
-        <p>A one-time payment that unlocks Creator Pro permanently for the first 200 buyers. Lifetime updates included.</p>
+        <p>A one-time payment that unlocks Creator Pro permanently for the first 500 buyers. Lifetime updates included.</p>
       </details>
       <details>
         <summary>Can I cancel any time?</summary>

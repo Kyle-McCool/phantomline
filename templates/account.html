@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Your account | Phantomline</title>
+<meta name="description" content="Sign in with Google to view your Phantomline license keys, resend them by email, and manage subscriptions." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<meta name="robots" content="noindex" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+<style>
+  .account-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin: 14px 0;
+  }
+  .account-card h3 { margin: 0 0 6px; font-size: 18px; }
+  .account-card .meta { color: var(--ink-muted, #9aa0a6); font-size: 13px; margin: 0 0 14px; }
+  .account-card .pill {
+    display: inline-block; font-size: 11px; padding: 2px 8px;
+    border-radius: 999px; background: rgba(120,200,140,0.12);
+    color: #7fd49d; margin-left: 8px; vertical-align: middle;
+  }
+  .account-card .pill.expired { background: rgba(220,120,120,0.14); color: #e08f8f; }
+  .account-card .pill.founding { background: rgba(180,140,220,0.14); color: #c5a8e8; }
+  .key-box {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; word-break: break-all;
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 10px 12px; margin: 8px 0 12px;
+    color: #d8e6e8;
+  }
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row-actions .cta { padding: 8px 14px; font-size: 13px; }
+  #signin-card { text-align: center; padding: 36px 24px; }
+  #signin-card .gbtn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-radius: 10px;
+    background: #fff; color: #1a1a1a;
+    font-weight: 600; cursor: pointer; border: 0;
+  }
+  #signin-card .gbtn:hover { filter: brightness(0.96); }
+  #signin-card .gbtn svg { width: 18px; height: 18px; }
+  #status { color: var(--ink-muted, #9aa0a6); font-size: 13px; margin: 12px 0; min-height: 18px; }
+  .signed-in-bar { display: flex; justify-content: space-between; align-items: center; margin: 18px 0; }
+  .signed-in-bar .who { color: var(--ink-muted, #9aa0a6); font-size: 13px; }
+  .ghost-btn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.16);
+    color: var(--ink, #e6ebe9); padding: 7px 14px; border-radius: 8px;
+    font-size: 12px; cursor: pointer;
+  }
+  .ghost-btn:hover { border-color: rgba(255,255,255,0.32); }
+  .empty {
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 22px 24px; text-align: center;
+    color: var(--ink-muted, #9aa0a6); font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/pricing">Pricing</a>
+      <a href="/account" aria-current="page">Account</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article">
+      <header class="article-head">
+        <div class="eyebrow">Account</div>
+        <h1>Your Phantomline account</h1>
+        <p class="article-lede">View and resend your license keys, manage subscriptions. Optional — Phantomline works offline without an account.</p>
+      </header>
+
+      <div id="status"></div>
+
+      <!-- Signed-out state: Google button -->
+      <section id="signin-card" class="account-card" hidden>
+        <h2 style="margin: 0 0 6px;">Sign in to see your licenses</h2>
+        <p class="meta" style="margin: 0 0 22px;">We use the email on file from your Stripe purchase to look up your keys.</p>
+        <button class="gbtn" id="google-btn" type="button">
+          <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.72v2.26h2.9c1.7-1.57 2.69-3.88 2.69-6.62Z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.46-.81 5.95-2.18l-2.9-2.26c-.8.54-1.84.86-3.05.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/>
+            <path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33Z"/>
+            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"/>
+          </svg>
+          Continue with Google
+        </button>
+      </section>
+
+      <!-- Signed-in state: licenses list + manage button -->
+      <section id="signed-in" hidden>
+        <div class="signed-in-bar">
+          <div class="who">Signed in as <strong id="who-email"></strong></div>
+          <button class="ghost-btn" id="signout-btn" type="button">Sign out</button>
+        </div>
+
+        <div id="licenses-list"></div>
+
+        <div style="margin: 22px 0 8px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="cta secondary" id="portal-btn" type="button">Manage subscription</button>
+          <a class="cta secondary" href="/pricing">See pricing</a>
+        </div>
+        <p class="meta" style="margin-top: 18px;">
+          Bought with a different email? Email <a href="mailto:support@phantomline.xyz">support@phantomline.xyz</a> with your Stripe receipt and we'll move the license over.
+        </p>
+      </section>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+
+  const SUPABASE_URL = {{ supabase_url | tojson }};
+  const SUPABASE_ANON_KEY = {{ supabase_anon_key | tojson }};
+
+  const $ = (sel) => document.querySelector(sel);
+  const status = $("#status");
+  const setStatus = (msg) => { status.textContent = msg || ""; };
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    setStatus("Account portal isn't configured yet — Supabase env vars are missing on the server.");
+  } else {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    });
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "—";
+      try { return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }
+      catch { return iso; }
+    }
+
+    function tierLabel(t) {
+      if (t === "studio") return "Studio";
+      if (t === "pro") return "Creator Pro";
+      return t;
+    }
+
+    function renderLicenses(licenses) {
+      const list = $("#licenses-list");
+      if (!licenses || !licenses.length) {
+        list.innerHTML = `<div class="empty">No licenses on this email yet. After a Stripe purchase, your key arrives by email and shows up here within a minute.</div>`;
+        return;
+      }
+      list.innerHTML = licenses.map(l => {
+        const expiry = l.lifetime ? "Never expires" : `Expires ${formatDate(l.expires_at)}`;
+        const activePill = l.active
+          ? `<span class="pill">Active</span>`
+          : `<span class="pill expired">Expired</span>`;
+        const foundingPill = l.is_founding && l.founding_seat
+          ? `<span class="pill founding">Founding #${l.founding_seat}</span>`
+          : "";
+        return `
+          <div class="account-card">
+            <h3>${escapeHtml(tierLabel(l.tier))}${activePill}${foundingPill}</h3>
+            <p class="meta">Issued ${formatDate(l.issued_at)} · ${escapeHtml(expiry)}</p>
+            <div class="key-box" data-key="${escapeHtml(l.key)}">${escapeHtml(l.key)}</div>
+            <div class="row-actions">
+              <button class="cta signal copy-btn" type="button" data-key="${escapeHtml(l.key)}">Copy key</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      list.querySelectorAll(".copy-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const key = e.currentTarget.dataset.key;
+          try { await navigator.clipboard.writeText(key); setStatus("Copied license key to clipboard."); }
+          catch { setStatus("Couldn't copy — your browser blocked clipboard access. Select the key manually."); }
+        });
+      });
+    }
+
+    async function refresh() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        $("#signin-card").hidden = false;
+        $("#signed-in").hidden = true;
+        return;
+      }
+      $("#signin-card").hidden = true;
+      $("#signed-in").hidden = false;
+      $("#who-email").textContent = session.user.email || "(no email)";
+      setStatus("Loading licenses…");
+      try {
+        const res = await fetch("/api/account/licenses", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const body = await res.json();
+        if (!body.ok) throw new Error(body.error || "Failed to load licenses");
+        renderLicenses(body.licenses);
+        setStatus("");
+      } catch (err) {
+        setStatus("Couldn't load licenses: " + err.message);
+      }
+    }
+
+    $("#google-btn").addEventListener("click", async () => {
+      setStatus("Redirecting to Google…");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + "/account" },
+      });
+      if (error) setStatus("Sign-in failed: " + error.message);
+    });
+
+    $("#signout-btn").addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      setStatus("Signed out.");
+      refresh();
+    });
+
+    $("#portal-btn").addEventListener("click", async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      setStatus("Opening Stripe Customer Portal…");
+      try {
+        const res = await fetch("/api/account/portal", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        const body = await res.json();
+        if (!body.ok) throw new Error(body.error || "Portal unavailable");
+        window.location.href = body.url;
+      } catch (err) {
+        setStatus(err.message);
+      }
+    });
+
+    supabase.auth.onAuthStateChange(() => refresh());
+    refresh();
+  }
+</script>
+
+</body>
+</html>

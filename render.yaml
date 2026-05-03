@@ -22,6 +22,17 @@ services:
         value: "3.12.6"
       - key: GHOSTLINE_LICENSE_SECRET
         sync: false      # paste this in the Render dashboard, never in git
+      # Account portal (Google sign-in via Supabase) — needed for /account.
+      # SUPABASE_URL is the only one that's safe to embed in this file; the
+      # anon key is publishable too but we keep it dashboard-only for symmetry.
+      - key: SUPABASE_URL
+        value: "https://vdzydhrgazqeyaalguuy.supabase.co"
+      - key: SUPABASE_ANON_KEY
+        sync: false      # publishable, but rotate independently of code
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false      # server-only — used to query licenses for any email
+      - key: STRIPE_SECRET_KEY
+        sync: false      # used for Customer Portal sessions
       - key: YOUTUBE_API_KEY_2
         sync: false
       - key: YOUTUBE_CLIENT_ID

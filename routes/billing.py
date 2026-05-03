@@ -42,21 +42,12 @@ FREE_TIER_LIMITS = {
 # unlocks. Treat this as copy + amounts; the checkout_url field on each tier
 # is the Stripe Payment Link.
 #
-# STRIPE WIRING STATUS (live mode, account: acct_1TSrCcCl8kpxrM1k):
-#   Products + prices are created. Payment links are blocked until at least
-#   one payment method is activated in the Stripe dashboard:
-#   https://dashboard.stripe.com/settings/payment_methods
-#
-#   Stripe IDs for reference when generating payment links:
-#     Pro Monthly  ($15/mo): price_1TSs6bCl8kpxrM1kApS5Kqxd
-#     Pro Yearly   ($99/yr): price_1TSs6dCl8kpxrM1knEtswCs9
-#     Studio Monthly ($29):  price_1TSs6hCl8kpxrM1k5PjiqCQg
-#     Studio Yearly ($249):  price_1TSs6jCl8kpxrM1kA4UUHBHY
-#     Founding ($79 once):   price_1TSs6nCl8kpxrM1kUTaSzhrx
-#
-#   Once payment links are generated, swap each tier's checkout_url below
-#   with the buy.stripe.com/... URL. The default CTA on each card uses the
-#   monthly price for Pro/Studio and the one-time price for Founding.
+# Stripe live mode (account acct_1TSrCcCl8kpxrM1k). Each tier carries the
+# monthly Pro/Studio buy link or the one-time Founding link as its primary
+# CTA; checkout_url_yearly holds the annual Pro/Studio link for an upsell
+# toggle if the UI ever wants one. Price metadata `tier` and `lifetime` is
+# what the Supabase webhook reads to decide which license tier to issue,
+# so don't rename keys without updating supabase/functions/issue-license.
 PRICING = {
     "currency": "USD",
     "tiers": [
@@ -94,7 +85,8 @@ PRICING = {
                 "Brand presets",
             ],
             "cta": "Upgrade to Pro",
-            "checkout_url": "https://example.com/replace-with-your-stripe-checkout/pro",
+            "checkout_url": "https://buy.stripe.com/aFadR8gT9amQa4v4mm2Nq00",
+            "checkout_url_yearly": "https://buy.stripe.com/6oU5kC1YffHa2C30662Nq01",
         },
         {
             "id": "studio",
@@ -111,12 +103,13 @@ PRICING = {
                 "Priority support",
             ],
             "cta": "Upgrade to Studio",
-            "checkout_url": "https://example.com/replace-with-your-stripe-checkout/studio",
+            "checkout_url": "https://buy.stripe.com/bJeaEW1Yf66AccDcSS2Nq02",
+            "checkout_url_yearly": "https://buy.stripe.com/14A28qauL9iMekL7yy2Nq03",
         },
         {
             "id": "founding",
             "name": "Founding Lifetime",
-            "tagline": "Pay once, keep forever — limited to first 200",
+            "tagline": "Pay once, keep forever — limited to first 500",
             "price_monthly": None,
             "price_yearly": None,
             "price_lifetime": 79,
@@ -126,10 +119,10 @@ PRICING = {
                 "One-time payment, lifetime updates",
                 "Locked-in price even if Pro raises later",
                 "Founding member badge",
-                "First 200 buyers only",
+                "First 500 buyers only",
             ],
             "cta": "Get founding lifetime",
-            "checkout_url": "https://example.com/replace-with-your-stripe-checkout/founding",
+            "checkout_url": "https://buy.stripe.com/9B63cuauL9iM90rf102Nq04",
         },
     ],
 }
