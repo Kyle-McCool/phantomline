@@ -283,6 +283,25 @@ def robots_txt():
     return response
 
 
+# Search-engine ownership-verification files. Each engine wants a tiny
+# plain-text response at a specific URL; serving from a discrete Flask
+# route keeps them out of /static/ (where they'd be at the wrong path) and
+# documents them in code instead of as orphan files.
+GOOGLE_VERIFICATION_TOKEN = "googleb4a45914f974c6ff"
+
+
+@app.route(f"/{GOOGLE_VERIFICATION_TOKEN}.html")
+def google_site_verification():
+    """Serve Google Search Console's HTML-file ownership proof at the
+    root domain so URL-prefix verification for https://phantomline.xyz/
+    succeeds. The body must be the literal "google-site-verification:
+    <filename>" line — Google fetches by exact path and compares."""
+    body = f"google-site-verification: {GOOGLE_VERIFICATION_TOKEN}.html\n"
+    response = app.response_class(body, mimetype="text/html")
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
 @app.route("/sitemap.xml")
 def sitemap_xml():
     """Generate sitemap.xml from the static route registry plus the
