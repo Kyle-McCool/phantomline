@@ -16,14 +16,14 @@
 <meta property="og:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
 <meta property="og:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta property="og:site_name" content="Phantomline" />
 
 <!-- Twitter card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
 <meta name="twitter:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
@@ -43,15 +43,26 @@
 }
 </script>
 
-<!-- JSON-LD: WebSite. Lets Google show a search box in SERPs once the
-     site is established (the SearchAction below is forward-looking; we
-     don't have site search yet but the schema is harmless to ship). -->
+<!-- JSON-LD: WebSite. SearchAction lets Google offer a sitelinks
+     searchbox in SERPs that points at /alternatives?q= as a fallback
+     until we ship real site search. Google's spec requires a string
+     placeholder ({search_term_string}) — present tense, no fake
+     promises about the destination beyond "phantomline-shaped results". -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Phantomline",
-  "url": "{{ site_url }}"
+  "url": "{{ site_url }}",
+  "inLanguage": "en-US",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "{{ site_url }}/alternatives?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
 }
 </script>
 
@@ -62,6 +73,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Phantomline",
+  "inLanguage": "en-US",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Windows, macOS, Linux, Android, Web",
   "description": "Local-first AI video studio for faceless YouTube creators. Generate scripts, narration, captions, music, visuals, MP4 exports, and YouTube publishing drafts on your own machine.",
@@ -82,6 +94,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": ["#faq summary", "#faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "Do I need a fancy PC?",
      "acceptedAnswer": {"@type": "Answer", "text": "For the full desktop experience: 16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. For mobile-only use: any flagship phone from the last 3 years works (Pixel 7+, Galaxy S22+, iPhone 13+). The mobile PWA uses Llama 3.2 1B which fits in 2 GB RAM."}},

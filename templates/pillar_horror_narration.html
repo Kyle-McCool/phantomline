@@ -11,9 +11,9 @@
 <meta property="og:title" content="Horror Narration Tool — AI Horror Story Video Generator | Phantomline" />
 <meta property="og:description" content="AI horror narration tool tuned for faceless YouTube. Calm narrator voices, atmospheric music, slow pacing. No subscription, no per-render fees." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
@@ -45,7 +45,7 @@
     "name": "Phantomline",
     "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -86,6 +86,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "What is a horror narration channel on YouTube?",
      "acceptedAnswer": {"@type": "Answer", "text": "Horror narration channels publish faceless videos where a calm narrator reads or recounts horror stories — paranormal accounts, supposedly-true experiences, ghost-story adaptations, analog horror, deep-sea horror, liminal-space horror — over atmospheric visuals and ambient music. Examples: Mr. Nightmare, Lazy Masquerade, Top5s. The format relies on voice atmosphere and pacing more than visual production value, which makes it well-suited for AI-driven faceless workflows."}},

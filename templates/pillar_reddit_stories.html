@@ -11,9 +11,9 @@
 <meta property="og:title" content="Reddit Stories Video Tool — AI Reddit Storytime Generator | Phantomline" />
 <meta property="og:description" content="AI-driven Reddit storytime pipeline. Local, faceless, no subscription, no per-video fees." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
@@ -45,7 +45,7 @@
     "name": "Phantomline",
     "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -85,6 +85,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "Can AI turn a Reddit post into a YouTube video?",
      "acceptedAnswer": {"@type": "Answer", "text": "Yes. The AI rewrite loop does three things: cleans the post text into clean script form (removing 'edit:' updates, formatting artifacts, and excessive disclaimers), restructures it for retention (clearer hook, satisfying middle beats, payoff at the end), and generates a narrator-friendly cadence. Phantomline runs the whole pipeline — rewrite, narration, captions, B-roll, music, MP4 — locally, in 5-15 minutes per video."}},
