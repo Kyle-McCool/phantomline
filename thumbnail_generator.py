@@ -47,7 +47,7 @@ from io import BytesIO
 from pathlib import Path
 
 import requests
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 
 # ---------------------------------------------------------------------------
@@ -94,6 +94,64 @@ BRAND_BG = (9, 11, 12)            # #090b0c — site theme-color
 BRAND_ACCENT = (52, 211, 219)     # phantomline cyan
 TEXT_PRIMARY = (255, 255, 255)
 TEXT_MUTED = (180, 195, 200)
+
+
+# ---------------------------------------------------------------------------
+# Post-processing pipeline. Applied to every AI-generated background
+# before the composition layer overlays text. The goal is the
+# "professional 4K polish" finish that ChatGPT thumbnails have over
+# raw FLUX/SDXL output: punchier colors, sharper edges, slight contrast
+# bump, subtle vignette. The values are tuned conservatively — too much
+# saturation pushes thumbnails into "AI obvious" territory.
+# ---------------------------------------------------------------------------
+
+
+def post_process_background(img_bytes: bytes, *, preset_name: str = "faceless_story",
+                            sharpen: float = 1.18,
+                            contrast: float = 1.10,
+                            saturation: float = 1.12,
+                            vignette_strength: float = 0.18) -> bytes:
+    """Apply the polish pass: unsharp mask + contrast + saturation +
+    subtle vignette. Returns PNG bytes. Idempotent if you pass the
+    same input — same seed, same output."""
+    with Image.open(BytesIO(img_bytes)) as img:
+        img = img.convert("RGB")
+        width, height = img.size
+
+        # Unsharp mask is more flattering than .SHARPEN — adds local
+        # contrast at edges without making everything look crispy.
+        if sharpen and sharpen != 1.0:
+            img = img.filter(
+                ImageFilter.UnsharpMask(radius=1.6, percent=int((sharpen - 1.0) * 200), threshold=2)
+            )
+
+        if contrast and contrast != 1.0:
+            img = ImageEnhance.Contrast(img).enhance(contrast)
+
+        if saturation and saturation != 1.0:
+            img = ImageEnhance.Color(img).enhance(saturation)
+
+        # Subtle vignette pulls the eye to center. We bake it in PIL
+        # using a radial gradient mask blended over the image.
+        if vignette_strength > 0:
+            mask = Image.new("L", (width, height), 0)
+            mdraw = ImageDraw.Draw(mask)
+            # Larger inner radius = subtler effect
+            cx, cy = width // 2, height // 2
+            max_r = int(math.hypot(width, height) * 0.55)
+            for r in range(max_r, 0, -8):
+                t = 1.0 - (r / max_r)
+                mdraw.ellipse(
+                    (cx - r, cy - r, cx + r, cy + r),
+                    fill=int(255 * (1 - t * vignette_strength)),
+                )
+            mask = mask.filter(ImageFilter.GaussianBlur(40))
+            dim = Image.new("RGB", (width, height), (0, 0, 0))
+            img = Image.composite(img, dim, mask)
+
+        out = BytesIO()
+        img.save(out, "PNG", optimize=True)
+        return out.getvalue()
 
 
 # ---------------------------------------------------------------------------
@@ -489,75 +547,205 @@ def generate_forge_background(title: str, *, aspect: str = "16:9",
 
 _POLLINATIONS_BASE = "https://image.pollinations.ai/prompt/"
 
+# Pollinations model priority. We try the highest-quality endpoint first
+# and fall through to the next on HTTP failure. `gptimage` is OpenAI's
+# GPT-Image-1 mirror (when Pollinations has capacity); `flux` is
+# FLUX-schnell which is always available. `flux-realism` adds extra
+# photography fine-tuning and produces materially better thumbnail
+# imagery — it's the quality baseline we should ship as default.
+_POLLINATIONS_MODEL_PRIORITY = ["flux-realism", "flux", "turbo"]
+
 
 def pollinations_available() -> bool:
     """Pollinations is always available unless explicitly disabled."""
     return os.getenv("PHANTOMLINE_DISABLE_POLLINATIONS", "").lower() not in ("1", "true", "yes")
 
 
+# ---------------------------------------------------------------------------
+# Ollama-driven prompt enhancement.
+#
+# When a user types "EREBUS detective evidence wall" and ChatGPT silently
+# turns it into a 70-word cinematography-rich description before sending
+# to DALL-E, that's why ChatGPT thumbnails look more polished than ours
+# from the same raw prompt. This function does that step locally with
+# llama3.1 — no paid API. The result feeds into Pollinations/Forge as a
+# much richer prompt and the output quality jumps materially.
+#
+# We *only* enhance when local Ollama is reachable. If it's not, we
+# fall through to the raw prompt — quality is still fine, just less
+# cinematic.
+# ---------------------------------------------------------------------------
+
+_ENHANCE_SYSTEM_PROMPT = (
+    "You are a professional cinematographer + YouTube thumbnail art director. "
+    "Given a thumbnail concept, output ONE dense 50-90 word visual description "
+    "for an AI image generator. Include: camera and lens (e.g. Arri Alexa 35, "
+    "anamorphic, 35mm), lighting (motivated source, time of day, color "
+    "temperature), atmosphere (dust, fog, rain, particles), composition "
+    "(framing, depth, focal point, negative space for title overlay), color "
+    "grading (palette in concrete terms — teal/orange, Kodak Portra, etc.), "
+    "and texture (film grain, subtle imperfections). Output the description "
+    "ONLY — no preface, no bullet points, no quotes, no markdown. Plain prose. "
+    "Never include any text/letters/words/captions IN the image — they are "
+    "composited on top later."
+)
+
+
+def _ollama_reachable() -> bool:
+    """Quick liveness check. Reuses story_generator's tags endpoint."""
+    try:
+        import story_generator as _sg
+        return _sg.check_ollama() is not None
+    except Exception:
+        return False
+
+
+def enhance_prompt_with_ollama(title: str, *, preset_name: str = "faceless_story",
+                               subject_hint: str = "",
+                               model: str = "llama3.1",
+                               timeout: float = 30.0) -> str | None:
+    """Use a local Ollama model to expand a thumbnail concept into a
+    cinematography-rich prompt. Returns the enhanced prompt string, or
+    None if Ollama is unreachable / the model fails.
+
+    The output replaces the raw `forge_thumbnail_prompt` positive output
+    when the AI image backend runs — but the negative prompt is still
+    appended downstream, so we don't need to enhance that too.
+    """
+    if not _ollama_reachable():
+        return None
+    try:
+        import story_generator as _sg
+    except Exception:
+        return None
+
+    preset = get_preset(preset_name)
+    user_prompt = (
+        f"Thumbnail concept: {title.strip()}\n"
+        f"Niche: {preset['label']}\n"
+        f"Subject placement direction: {preset['subject_placement']}\n"
+        f"Atmosphere/composition baseline: {preset['composition_inject']}\n"
+    )
+    if subject_hint.strip():
+        user_prompt += f"User-supplied subject hint (must respect): {subject_hint.strip()}\n"
+    user_prompt += "\nWrite the enhanced prompt now."
+
+    try:
+        raw = _sg.generate(
+            model,
+            user_prompt,
+            system=_ENHANCE_SYSTEM_PROMPT,
+            label="enhance",
+            show_progress=False,
+            temperature=0.65,
+            num_predict=240,
+        )
+    except Exception:
+        return None
+
+    text = (raw or "").strip()
+    if not text:
+        return None
+    # Strip common model meta artifacts.
+    text = re.sub(r"^(here'?s?|sure|okay)[,:\s]+.*?$", "", text, flags=re.IGNORECASE | re.MULTILINE).strip()
+    text = text.strip().strip('"').strip("'")
+    # Cap length so URL encoding stays under route limits.
+    if len(text) > 1400:
+        text = text[:1400].rsplit(" ", 1)[0]
+    return text or None
+
+
 def generate_pollinations_background(title: str, *, aspect: str = "16:9",
                                      preset_name: str = "faceless_story",
                                      subject_hint: str = "",
                                      seed: int | None = None,
-                                     timeout: float = 45.0) -> bytes:
+                                     enhance_prompt: bool = True,
+                                     timeout: float = 60.0) -> bytes:
     """Hit Pollinations.ai's free FLUX endpoint. Returns PNG bytes resized
     to the canonical thumbnail size. Raises RuntimeError on transport/HTTP
     failure so the caller can fall back to fal.ai or PIL.
 
-    The prompt encoding is URL-safe but we keep it under ~2KB to avoid
-    truncation by Pollinations' route handling. Seeding lets us reproduce
-    a specific generation in the batch endpoint."""
+    Quality stack:
+      1. If `enhance_prompt` is True and Ollama is reachable, expand the
+         raw thumbnail concept into a cinematography-rich description
+         (matches what ChatGPT does silently before DALL-E).
+      2. Try models in priority order (flux-realism → flux → turbo).
+         The first one to return a valid image wins.
+      3. Caller applies post-processing for the final polish step.
+
+    The prompt is URL-encoded and kept under ~2KB to avoid Pollinations'
+    route truncation. Seeding lets us reproduce a specific generation in
+    the batch endpoint."""
     from urllib.parse import quote
 
     width, height = THUMBNAIL_SIZES.get(aspect, THUMBNAIL_SIZES["16:9"])
-    positive, _negative = forge_thumbnail_prompt(
-        title, preset_name=preset_name, subject_hint=subject_hint
-    )
-    # Pollinations doesn't accept negative prompts via URL params, so we
-    # inline an "avoid X" suffix instead. FLUX models respond to negative
-    # *guidance* even when delivered as positive text saying "no X".
-    full_prompt = positive[:1500] + ", no text, no captions, no logos, no watermarks"
+
+    enhanced = None
+    if enhance_prompt:
+        enhanced = enhance_prompt_with_ollama(
+            title, preset_name=preset_name, subject_hint=subject_hint
+        )
+
+    if enhanced:
+        full_prompt = enhanced + ", no text, no captions, no logos, no watermarks"
+    else:
+        positive, _ = forge_thumbnail_prompt(
+            title, preset_name=preset_name, subject_hint=subject_hint
+        )
+        full_prompt = positive[:1500] + ", no text, no captions, no logos, no watermarks"
 
     encoded = quote(full_prompt, safe="")
-    params = {
-        "width": str(min(width, 1920)),  # Pollinations caps at 1920×1920
-        "height": str(min(height, 1920)),
-        "model": "flux",
-        "nologo": "true",
-        "enhance": "false",   # don't auto-rewrite our prompt
-        "safe": "true",
-    }
-    if seed is not None:
-        params["seed"] = str(int(seed))
 
-    url = _POLLINATIONS_BASE + encoded + "?" + "&".join(f"{k}={v}" for k, v in params.items())
+    last_error = None
+    for model_name in _POLLINATIONS_MODEL_PRIORITY:
+        params = {
+            "width": str(min(width, 1920)),
+            "height": str(min(height, 1920)),
+            "model": model_name,
+            "nologo": "true",
+            "enhance": "false",
+            "safe": "true",
+        }
+        if seed is not None:
+            params["seed"] = str(int(seed))
 
-    try:
-        res = requests.get(url, timeout=timeout, stream=True)
-    except requests.RequestException as exc:
-        raise RuntimeError(f"Pollinations request failed: {exc}") from exc
+        url = _POLLINATIONS_BASE + encoded + "?" + "&".join(f"{k}={v}" for k, v in params.items())
 
-    if res.status_code != 200:
-        raise RuntimeError(f"Pollinations returned HTTP {res.status_code}: {res.text[:200]}")
+        try:
+            res = requests.get(url, timeout=timeout, stream=True)
+        except requests.RequestException as exc:
+            last_error = f"{model_name}: transport — {exc}"
+            continue
 
-    # Cap download size to prevent abuse — 25 MB.
-    chunks = []
-    total = 0
-    for chunk in res.iter_content(chunk_size=64 * 1024):
-        chunks.append(chunk)
-        total += len(chunk)
-        if total > 25 * 1024 * 1024:
-            raise RuntimeError("Pollinations response exceeded 25 MB cap.")
-    raw = b"".join(chunks)
+        if res.status_code != 200:
+            last_error = f"{model_name}: HTTP {res.status_code}"
+            continue
 
-    try:
-        with Image.open(BytesIO(raw)) as img:
-            img = img.convert("RGB").resize((width, height), Image.LANCZOS)
-            out = BytesIO()
-            img.save(out, "PNG", optimize=True)
-            return out.getvalue()
-    except Exception as exc:
-        raise RuntimeError(f"Pollinations returned non-image: {exc}") from exc
+        # Cap download size to prevent abuse — 25 MB.
+        chunks = []
+        total = 0
+        try:
+            for chunk in res.iter_content(chunk_size=64 * 1024):
+                chunks.append(chunk)
+                total += len(chunk)
+                if total > 25 * 1024 * 1024:
+                    raise RuntimeError("Response exceeded 25 MB cap.")
+        except Exception as exc:
+            last_error = f"{model_name}: download — {exc}"
+            continue
+        raw = b"".join(chunks)
+
+        try:
+            with Image.open(BytesIO(raw)) as img:
+                img = img.convert("RGB").resize((width, height), Image.LANCZOS)
+                out = BytesIO()
+                img.save(out, "PNG", optimize=True)
+                return out.getvalue()
+        except Exception as exc:
+            last_error = f"{model_name}: decode — {exc}"
+            continue
+
+    raise RuntimeError(f"Pollinations: all models failed — {last_error}")
 
 
 # ---------------------------------------------------------------------------
@@ -1568,6 +1756,18 @@ def generate_thumbnail(title: str, *, aspect: str = "16:9",
         bg_bytes = generate_pil_background(title, aspect=aspect, preset_name=preset_name)
         if not fallback_reason:
             fallback_reason = "No AI image backend configured (Forge or FAL_KEY)."
+
+    # Post-process AI-generated backgrounds for the "professional 4K
+    # polish" finish — sharpen, contrast, saturation, vignette. We skip
+    # this for the typography-only PIL fallback (already designed) and
+    # for user-supplied images (assume the user already curated them).
+    if bg_is_ai_image and used_mode in ("forge", "pollinations", "falai"):
+        try:
+            bg_bytes = post_process_background(bg_bytes, preset_name=preset_name)
+        except Exception:
+            # Don't fail the whole request if post-processing crashes —
+            # original AI image is still better than nothing.
+            pass
 
     composed = compose_thumbnail(
         title, bg_bytes, aspect=aspect,
