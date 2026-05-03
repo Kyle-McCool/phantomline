@@ -284,7 +284,7 @@ def api_youtube_seo_research():
             "niche": niche,
             "api_available": False,
             "analytics_context_used": bool(analytics_context),
-            "message": "YouTube API key is not available, so Ghostline generated candidate phrases without live ranking metrics.",
+            "message": "YouTube API key is not available, so Phantomline generated candidate phrases without live ranking metrics.",
             "keywords": keyword_rows,
             "content_angles": seo_content_angles,
         })

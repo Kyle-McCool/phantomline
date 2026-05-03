@@ -379,7 +379,7 @@ def upload_video(
     metadata: dict[str, Any],
 ) -> tuple[dict[str, str], dict[str, Any]]:
     token, updated = refresh_if_needed(base_dir, connection)
-    title = (metadata.get("title") or video_path.stem or "Ghostline video").strip()[:100]
+    title = (metadata.get("title") or video_path.stem or "Phantomline video").strip()[:100]
     description = (metadata.get("description") or "").strip()
     privacy = metadata.get("privacy") or "private"
     if privacy not in {"private", "unlisted", "public"}:
