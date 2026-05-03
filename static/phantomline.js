@@ -81,7 +81,7 @@ function showDesktopNotification(title, body, url) {
   try {
     const note = new Notification(title, {
       body,
-      icon: '/static/ghostline-logo.svg',
+      icon: '/static/phantomline-logo.svg',
       tag: title + body,
     });
     if (url) note.onclick = () => window.open(url, '_blank');
@@ -4823,6 +4823,15 @@ window.addEventListener('unhandledrejection', (e) => {
 // =============================================================================
 const GH_ONBOARDING_KEY = 'ghostline.onboarding.seen.v2';
 
+// Steps 2–4 live inside the Make tab panel; if that tab isn't active the
+// targets exist in the DOM but have zero size, so getBoundingClientRect()
+// returns (0,0,0,0) and the highlight renders in the page's top-left corner.
+// `before` runs ahead of measurement to make the target visible.
+const ghActivateMakeTab = () => {
+  const btn = document.querySelector('.tab-btn[data-tab="make"]');
+  if (btn && !btn.classList.contains('active')) btn.click();
+};
+
 const GH_WALK_STEPS = [
   {
     targetId: 'tab-btn-make',
@@ -4833,18 +4842,21 @@ const GH_WALK_STEPS = [
   },
   {
     targetId: 'makeShuffleIdeaBtn',
+    before: ghActivateMakeTab,
     title: '2. Generate ideas',
     body: 'Click here to ask the local AI for fresh angles. You pick one and the rest of the form fills in.',
     side: 'top',
   },
   {
     targetId: 'makeTitleIdeasBtn',
+    before: ghActivateMakeTab,
     title: '3. Get title options',
     body: 'After picking an idea, generate twelve clickable titles. Strong-fit titles for your channel rise to the top.',
     side: 'top',
   },
   {
     targetId: 'makeVideoBtn',
+    before: ghActivateMakeTab,
     title: '4. Render the video',
     body: 'One click runs the full local pipeline: script, narration, captions, music, visuals, MP4.',
     side: 'top',
@@ -4898,51 +4910,93 @@ function ghStartWalkthrough() {
     return null;
   }
 
-  function positionFor(step) {
-    const target = targetElement(step);
-    if (!target) {
-      // Fallback: center tooltip, hide highlight.
-      highlight.style.display = 'none';
-      tooltip.style.left = '50%';
-      tooltip.style.top = '50%';
-      tooltip.style.transform = 'translate(-50%, -50%)';
+  function centerFallback() {
+    highlight.style.display = 'none';
+    tooltip.style.left = '50%';
+    tooltip.style.top = '50%';
+    tooltip.style.transform = 'translate(-50%, -50%)';
+  }
+
+  function applyPositioning(target, step) {
+    const rect = target.getBoundingClientRect();
+    // Hidden targets (display:none, inside an inactive tab, etc.) report
+    // a zero-size rect — bail out to the centered fallback rather than
+    // pinning the highlight to the page's top-left corner.
+    if (rect.width === 0 && rect.height === 0) {
+      centerFallback();
       return;
     }
-    target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-    requestAnimationFrame(() => {
-      const rect = target.getBoundingClientRect();
-      const pad = 8;
-      highlight.style.display = '';
-      highlight.style.top = `${rect.top - pad}px`;
-      highlight.style.left = `${rect.left - pad}px`;
-      highlight.style.width = `${rect.width + pad * 2}px`;
-      highlight.style.height = `${rect.height + pad * 2}px`;
+    const pad = 8;
+    highlight.style.display = '';
+    highlight.style.top = `${rect.top - pad}px`;
+    highlight.style.left = `${rect.left - pad}px`;
+    highlight.style.width = `${rect.width + pad * 2}px`;
+    highlight.style.height = `${rect.height + pad * 2}px`;
 
-      const tipW = tooltip.offsetWidth || 360;
-      const tipH = tooltip.offsetHeight || 160;
-      const margin = 18;
-      let top, left;
-      const side = step.side || 'bottom';
-      if (side === 'top') {
-        top = rect.top - tipH - margin;
-        left = rect.left + rect.width / 2 - tipW / 2;
-      } else if (side === 'bottom') {
-        top = rect.bottom + margin;
-        left = rect.left + rect.width / 2 - tipW / 2;
-      } else if (side === 'left') {
-        top = rect.top + rect.height / 2 - tipH / 2;
-        left = rect.left - tipW - margin;
-      } else { // right
-        top = rect.top + rect.height / 2 - tipH / 2;
-        left = rect.right + margin;
+    const tipW = tooltip.offsetWidth || 360;
+    const tipH = tooltip.offsetHeight || 160;
+    const margin = 18;
+    let top, left;
+    const side = step.side || 'bottom';
+    if (side === 'top') {
+      top = rect.top - tipH - margin;
+      left = rect.left + rect.width / 2 - tipW / 2;
+    } else if (side === 'bottom') {
+      top = rect.bottom + margin;
+      left = rect.left + rect.width / 2 - tipW / 2;
+    } else if (side === 'left') {
+      top = rect.top + rect.height / 2 - tipH / 2;
+      left = rect.left - tipW - margin;
+    } else { // right
+      top = rect.top + rect.height / 2 - tipH / 2;
+      left = rect.right + margin;
+    }
+    // Keep on-screen.
+    top = Math.max(12, Math.min(top, window.innerHeight - tipH - 12));
+    left = Math.max(12, Math.min(left, window.innerWidth - tipW - 12));
+    tooltip.style.transform = '';
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+  }
+
+  // Each positionFor schedules late re-positioning passes; clearReposition
+  // cancels them when the user advances or dismisses, so an old step's
+  // late timeout doesn't fire after we've moved on.
+  let positionTimers = [];
+  function clearReposition() {
+    positionTimers.forEach((id) => clearTimeout(id));
+    positionTimers = [];
+  }
+
+  function positionFor(step) {
+    clearReposition();
+    try { step.before?.(); } catch {}
+    const target = targetElement(step);
+    if (!target) {
+      centerFallback();
+      return;
+    }
+    // Only scroll if the target is offscreen — re-scrolling sticky-positioned
+    // targets (like the sidebar tabs) makes them shift unpredictably. Use
+    // 'instant' so CSS scroll-behavior:smooth (set on landing pages, not the
+    // studio, but we don't trust the inheritance) doesn't turn this into a
+    // ~600ms animation that defeats rect measurement.
+    const scrollIfOffscreen = () => {
+      const r = target.getBoundingClientRect();
+      const vh = window.innerHeight;
+      if (r.bottom < 60 || r.top > vh - 60) {
+        target.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
       }
-      // Keep on-screen.
-      top = Math.max(12, Math.min(top, window.innerHeight - tipH - 12));
-      left = Math.max(12, Math.min(left, window.innerWidth - tipW - 12));
-      tooltip.style.transform = '';
-      tooltip.style.top = `${top}px`;
-      tooltip.style.left = `${left}px`;
-    });
+    };
+    scrollIfOffscreen();
+    const reposition = () => { scrollIfOffscreen(); applyPositioning(target, step); };
+    // First pass: double rAF so the before() tab switch + scroll commit
+    // before measurement.
+    requestAnimationFrame(() => requestAnimationFrame(reposition));
+    // Late passes catch async content shifts (insights panel fetching,
+    // skeleton-to-real swaps) over up to ~1.7s. CSS transition (0.25s on
+    // top/left/width/height) animates each correction smoothly.
+    [350, 900, 1700].forEach((ms) => positionTimers.push(setTimeout(reposition, ms)));
   }
 
   function renderStep() {
@@ -4965,6 +5019,7 @@ function ghStartWalkthrough() {
   }
 
   function teardown(markSeen) {
+    clearReposition();
     backdrop.remove();
     highlight.remove();
     tooltip.remove();

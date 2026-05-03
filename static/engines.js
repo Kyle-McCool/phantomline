@@ -1,5 +1,5 @@
 /**
- * Ghostline AI engine adapters.
+ * Phantomline AI engine adapters.
  *
  * The Make Video flow doesn't care WHERE inference happens — it just calls
  * `currentEngine().generate(prompt, opts)`. This file defines two engines:
@@ -13,7 +13,7 @@
  * the same workflow code runs on desktop or on a phone.
  *
  * NOTE: This file is loaded as a regular script (not module) so it can
- * coexist with the existing globals in ghostline.js. The WebLLM SDK is
+ * coexist with the existing globals in phantomline.js. The WebLLM SDK is
  * dynamically imported only when a user actually enables the device
  * engine — keeps the desktop path zero-cost.
  */
@@ -649,7 +649,7 @@
   // Apply the persisted engine on boot so CSS can react via [data-ai-engine].
   document.body.dataset.aiEngine = activeId;
 
-  // Expose on window so ghostline.js can call without imports.
+  // Expose on window so phantomline.js can call without imports.
   window.GhostlineEngines = {
     current: currentEngine,
     set: setEngine,
