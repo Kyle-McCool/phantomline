@@ -69,7 +69,7 @@ function renderNotifications() {
   }
   list.innerHTML = notifications.slice(0, 30).map(n => `
     <div class="notification-item ${n.read ? '' : 'unread'}">
-      <strong>${escapeHtml(n.title || 'Ghostline update')}</strong>
+      <strong>${escapeHtml(n.title || 'Phantomline update')}</strong>
       <p>${escapeHtml(n.body || '')}</p>
       ${n.url ? `<small><a href="${escapeHtml(n.url)}" target="_blank">Open link</a></small>` : `<small>${relativeNotificationTime(n.ts || Date.now())}</small>`}
     </div>
@@ -96,8 +96,8 @@ function addNotification({id, type='info', title, body, url, desktop=true}) {
   notifications = notifications.slice(0, 40);
   saveNotifications();
   renderNotifications();
-  toast(title || 'Ghostline update', type === 'error');
-  if (desktop) showDesktopNotification(title || 'Ghostline update', body || '', url);
+  toast(title || 'Phantomline update', type === 'error');
+  if (desktop) showDesktopNotification(title || 'Phantomline update', body || '', url);
 }
 
 async function requestDesktopNotifications() {
@@ -1300,7 +1300,7 @@ function updatePlatformPreview(platform = makePreviewPlatform) {
 }
 
 function updateStudioPreview() {
-  const title = $('makePreferredTitle')?.value.trim() || selectedCardText('#makeRecipeCards', 'Ghostline short');
+  const title = $('makePreferredTitle')?.value.trim() || selectedCardText('#makeRecipeCards', 'Phantomline short');
   const topic = $('makeTopic')?.value.trim() || '';
   const hookLine = topic.split(/[.!?\n]/).map(s => s.trim()).find(Boolean) || 'Pick a hook';
   const words = hookLine.split(/\s+/).filter(Boolean).slice(0, 4);
@@ -1407,7 +1407,7 @@ function updateMakeNextAction(score) {
       $('makeSourceVideoFile')?.click();
     });
   } else if (score >= 85) {
-    setMakeNextAction('This package is ready. Render the MP4, then Ghostline will prepare the publish draft.', 'Make video', () => {
+    setMakeNextAction('This package is ready. Render the MP4, then Phantomline will prepare the publish draft.', 'Make video', () => {
       $('makeVideoBtn')?.click();
     });
   } else {
@@ -1987,7 +1987,7 @@ async function runLaunchTestRender() {
     }
     loadLibrary();
     if (typeof loadPublishWorkspace === 'function') loadPublishWorkspace();
-    addNotification({type:'info', title:'Test render complete', body:'Ghostline successfully created a local MP4.'});
+    addNotification({type:'info', title:'Test render complete', body:'Phantomline successfully created a local MP4.'});
   } catch (e) {
     if (status) status.textContent = e.message || 'Test render failed.';
     toast(e.message || 'Test render failed', true);
@@ -2618,7 +2618,7 @@ async function waitForDraftVideo(jobId, onStatus) {
         id: `video-finished:${jobId}`,
         type: 'video',
         title: 'Video finished',
-        body: `${j.title || 'Your Ghostline video'} is ready to preview, download, or schedule.`,
+        body: `${j.title || 'Your Phantomline video'} is ready to preview, download, or schedule.`,
       });
       return j.project_id;
     }
@@ -2773,7 +2773,7 @@ async function waitForStoryJob(jobId, onStatus) {
     if (j.error) throw new Error(j.error);
     if (j.done) {
       const sd = await apiJson('/api/script/' + jobId);
-      return { text: sd.text, title: j.title || 'Ghostline video', project_id: j.project_id };
+      return { text: sd.text, title: j.title || 'Phantomline video', project_id: j.project_id };
     }
     await new Promise(resolve => setTimeout(resolve, 1500));
   }
@@ -3171,11 +3171,11 @@ $('makeOpenAdvancedBtn').addEventListener('click', () => {
 });
 
 function makeDownloadFilename() {
-  const raw = $('publishTitle')?.value || $('makePreferredTitle')?.value || $('makePreviewTitle')?.textContent || 'ghostline-video';
+  const raw = $('publishTitle')?.value || $('makePreferredTitle')?.value || $('makePreviewTitle')?.textContent || 'phantomline-video';
   const safe = raw.toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 80) || 'ghostline-video';
+    .slice(0, 80) || 'phantomline-video';
   return safe + '.mp4';
 }
 
@@ -3425,7 +3425,7 @@ async function loadPublishPosts() {
           id: `post-live:${id}`,
           type: 'publish',
           title: 'Post is live',
-          body: `${post.title || 'Your Ghostline post'} finished uploading to YouTube.`,
+          body: `${post.title || 'Your Phantomline post'} finished uploading to YouTube.`,
           url: post.externalUrl || '',
         });
       }
@@ -3522,7 +3522,7 @@ async function preparePublishDraft({videoProjectId, title, caption, scriptText, 
       tags: cleanTags,
       pinnedComment: $('publishPinnedComment').value,
     });
-    $('publishStatusLine').textContent = 'Ollama description failed, so Ghostline used a clean viewer-facing fallback.';
+    $('publishStatusLine').textContent = 'Ollama description failed, so Phantomline used a clean viewer-facing fallback.';
   }
   updatePublishPreview();
 }
@@ -3758,7 +3758,7 @@ async function analyzeYouTubeAnalyticsUpload() {
     const d = await r.json();
     if (!r.ok || d.ok === false) throw new Error(d.error || 'analysis failed');
     latestAnalyticsContext = d;
-    $('analyticsUploadStatus').textContent = 'Analysis complete. Use these findings to steer future Ghostline ideas and titles.';
+    $('analyticsUploadStatus').textContent = 'Analysis complete. Use these findings to steer future Phantomline ideas and titles.';
     renderAnalyticsAnalysis(d);
   } catch (e) {
     $('analyticsUploadStatus').textContent = '';
@@ -3811,7 +3811,7 @@ $('publishSaveTemplateBtn').addEventListener('click', async () => {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      name: $('publishTitle').value.trim() || 'Ghostline template',
+      name: $('publishTitle').value.trim() || 'Phantomline template',
       title: $('publishTitle').value.trim(),
       caption: $('publishCaption').value.trim(),
       tags: $('publishTags').value.trim(),
@@ -3857,7 +3857,7 @@ document.querySelector('.tab-btn[data-tab="publish"]').addEventListener('click',
 
 async function buildProductionKitFromShort() {
   const script = $('shortScriptText').value.trim();
-  const title = $('shortTitleDisplay').textContent || 'Ghostline video';
+  const title = $('shortTitleDisplay').textContent || 'Phantomline video';
   if (!script) {
     toast('Generate a short script first', true);
     return;

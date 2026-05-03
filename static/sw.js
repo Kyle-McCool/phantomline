@@ -9,10 +9,10 @@
  * Bumping CACHE_VERSION invalidates the previous cache on the next visit.
  */
 // Bump on every breaking SW change so the activate handler below can
-// drop stale caches. v7 invalidates the cached studio JS so the
-// first-run walkthrough fix (target-tab activation + accurate
-// positioning for steps 2-4) reaches existing installs.
-const CACHE_VERSION = "phantomline-v7";
+// drop stale caches. v8 invalidates the cached studio JS so the brand
+// rename (visible "Ghostline" -> "Phantomline" in notifications, status
+// messages, default titles) reaches existing installs immediately.
+const CACHE_VERSION = "phantomline-v8";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 
