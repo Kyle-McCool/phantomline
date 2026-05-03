@@ -249,6 +249,9 @@ _SITEMAP_ROUTES = [
     ("/ai-voice-generator",            "0.85", "monthly"),
     ("/youtube-scheduler",             "0.85", "monthly"),
     ("/youtube-seo-tool",              "0.85", "monthly"),
+    ("/reddit-stories-video-tool",     "0.8", "monthly"),
+    ("/horror-narration-tool",         "0.8", "monthly"),
+    ("/mystery-docs-tool",             "0.8", "monthly"),
     ("/alternatives",                  "0.8", "monthly"),
     ("/about",                         "0.7", "monthly"),
     ("/privacy",                       "0.4", "yearly"),
@@ -299,6 +302,12 @@ def robots_txt():
 # documents them in code instead of as orphan files.
 GOOGLE_VERIFICATION_TOKEN = "googleb4a45914f974c6ff"
 
+# IndexNow API key. Public — the value of the secret is the proof that we
+# control the host (the key file lives at /<KEY>.txt and IndexNow checks
+# the host serves it). Bing, Yandex, Seznam, Naver all consume the same
+# protocol, so a single ping reaches all of them.
+INDEXNOW_KEY = "6c739122ea404ea19895937dced6fc92"
+
 
 @app.route(f"/{GOOGLE_VERIFICATION_TOKEN}.html")
 def google_site_verification():
@@ -310,6 +319,86 @@ def google_site_verification():
     response = app.response_class(body, mimetype="text/html")
     response.headers["Cache-Control"] = "public, max-age=86400"
     return response
+
+
+@app.route(f"/{INDEXNOW_KEY}.txt")
+def indexnow_key_file():
+    """Serve the IndexNow ownership key file at the root path. The body is
+    just the key string (UTF-8, no newline required, but we include one so
+    `curl` looks clean). IndexNow fetches this file before accepting any
+    URL submission to verify we control the host."""
+    response = app.response_class(INDEXNOW_KEY + "\n", mimetype="text/plain")
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
+def _indexnow_submit_all() -> dict:
+    """Submit every public URL on the site to IndexNow in one bulk POST.
+    Returns a small status dict so the admin endpoint and the deploy hook
+    can both report what happened.
+
+    IndexNow accepts up to 10,000 URLs per submission; we're nowhere near
+    that. The endpoint is idempotent — re-submitting URLs is fine."""
+    from alternatives import COMPETITORS
+    urls: list[str] = [f"{SITE_URL}{path}" for path, _, _ in _SITEMAP_ROUTES]
+    for c in COMPETITORS:
+        urls.append(f"{SITE_URL}/alternatives/{c['slug']}")
+    payload = {
+        "host": SITE_URL.replace("https://", "").replace("http://", "").rstrip("/"),
+        "key": INDEXNOW_KEY,
+        "keyLocation": f"{SITE_URL}/{INDEXNOW_KEY}.txt",
+        "urlList": urls,
+    }
+    try:
+        res = requests.post(
+            "https://api.indexnow.org/IndexNow",
+            json=payload,
+            timeout=15,
+        )
+    except requests.RequestException as exc:
+        return {"ok": False, "error": str(exc), "submitted": 0}
+    # 200 = accepted + indexed-soon, 202 = accepted + processing.
+    return {
+        "ok": res.status_code in (200, 202),
+        "status": res.status_code,
+        "submitted": len(urls),
+        "body": res.text[:200],
+    }
+
+
+@app.route("/api/admin/indexnow-ping", methods=["POST"])
+def indexnow_admin_ping():
+    """Admin-triggered IndexNow ping. Auth via the same shared-secret
+    pattern other admin endpoints use — pass `X-Admin-Token` matching
+    PHANTOMLINE_ADMIN_TOKEN. Useful when shipping content that can't wait
+    for the deploy auto-ping (or when re-pinging after a content edit)."""
+    expected = (os.environ.get("PHANTOMLINE_ADMIN_TOKEN") or "").strip()
+    presented = (request.headers.get("X-Admin-Token") or "").strip()
+    if not expected or presented != expected:
+        return jsonify({"ok": False, "error": "Unauthorized."}), 401
+    return jsonify(_indexnow_submit_all())
+
+
+def _indexnow_deploy_ping_once() -> None:
+    """Fire IndexNow once per process startup, ~20s after boot. The delay
+    lets the worker finish coming up + the new git SHA propagate through
+    Render's edge cache so IndexNow's verification fetch hits the right
+    version of the key file. Safe to fire multiple times — IndexNow is
+    idempotent — so we don't bother coordinating across Render workers."""
+    def _runner():
+        try:
+            time.sleep(20)
+            result = _indexnow_submit_all()
+            print(f"[indexnow] deploy ping: {result}", flush=True)
+        except Exception as exc:
+            print(f"[indexnow] deploy ping failed: {exc}", flush=True)
+    # Only auto-ping in production (Render sets RENDER=true). Local dev
+    # shouldn't pollute IndexNow with localhost URLs.
+    if os.environ.get("RENDER"):
+        threading.Thread(target=_runner, daemon=True, name="indexnow-deploy-ping").start()
+
+
+_indexnow_deploy_ping_once()
 
 
 @app.route("/sitemap.xml")
@@ -1900,6 +1989,34 @@ def pillar_youtube_seo():
     rebuild underperformers automatically; vidIQ tells you they need
     fixing)."""
     return render_template("pillar_youtube_seo.html")
+
+
+@app.route("/reddit-stories-video-tool")
+def pillar_reddit_stories():
+    """Use-case pillar for the Reddit storytime niche. AITA, EntitledParents,
+    MaliciousCompliance, ProRevenge, etc. ~1900 words on the storytime
+    presets, sub-by-sub narrative shapes, why creators leave the standard
+    ChatGPT+ElevenLabs+CapCut stack, and the channel economics."""
+    return render_template("pillar_reddit_stories.html")
+
+
+@app.route("/horror-narration-tool")
+def pillar_horror_narration():
+    """Use-case pillar for the horror narration niche. Paranormal accounts,
+    nosleep adaptations, analog horror, deep-sea horror, etc. ~1900 words
+    on horror sub-genre presets, atmospheric pacing, narrator voice
+    selection, and music generation tuned for sustained dread."""
+    return render_template("pillar_horror_narration.html")
+
+
+@app.route("/mystery-docs-tool")
+def pillar_mystery_docs():
+    """Use-case pillar for the mystery-doc niche. Unsolved cases, lost
+    media, abandoned places, cryptids, internet mysteries. ~2100 words on
+    research-bundle workflow, doc-shaped script structure, editorial
+    responsibility notes for real cases, and the LEMMiNO/Wendigoon
+    long-form format economics."""
+    return render_template("pillar_mystery_docs.html")
 
 
 @app.route("/app")
