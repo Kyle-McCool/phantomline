@@ -3990,6 +3990,193 @@ def api_project_file(project_id, role):
 # (registered as system_bp at the top of this file).
 
 
+# ---------------------------------------------------------------------------
+# Thumbnail generation. Rides on the existing Forge integration when local,
+# falls back to a typographic PIL composition on the hosted slim deploy.
+# See thumbnail_generator.py for the generation logic.
+# ---------------------------------------------------------------------------
+import thumbnail_generator as thumb_gen
+
+
+@app.route("/api/thumbnail/generate", methods=["POST"])
+def api_thumbnail_generate():
+    """Generate a YouTube-grade thumbnail for a given title.
+
+    Body: {title, aspect?, style?, subject_hint?, subtitle?, prefer_forge?}
+    Returns: {ok, png_b64, mode ('forge'|'pil_fallback'), width, height,
+             fallback_reason}
+
+    The PNG is returned base64-encoded so the browser can render it inline
+    via `<img src="data:image/png;base64,...">` without needing a second
+    GET. Caller can also POST it back to /api/projects to save to library.
+    """
+    data = request.get_json(force=True) or {}
+    title = (data.get("title") or "").strip()
+    if not title:
+        return jsonify({"ok": False, "error": "Provide a title."}), 400
+    if len(title) > 200:
+        return jsonify({"ok": False, "error": "Title exceeds 200 characters."}), 400
+
+    aspect = (data.get("aspect") or "16:9").strip()
+    if aspect not in thumb_gen.THUMBNAIL_SIZES:
+        return jsonify({"ok": False,
+                        "error": f"aspect must be one of {list(thumb_gen.THUMBNAIL_SIZES)}"}), 400
+
+    # `style` is now a preset key, not a freeform string. Defaults to
+    # "auto" which detects from title/genre/recipe via detect_preset().
+    raw_style = (data.get("style") or "auto").strip().lower()
+    valid_presets = set(thumb_gen.THUMBNAIL_PRESETS) | {"auto"}
+    if raw_style not in valid_presets:
+        return jsonify({
+            "ok": False,
+            "error": f"style must be 'auto' or one of {sorted(thumb_gen.THUMBNAIL_PRESETS)}",
+        }), 400
+
+    genre = (data.get("genre") or "").strip()[:80]
+    recipe = (data.get("recipe") or "").strip()[:80]
+    subject_hint = (data.get("subject_hint") or "").strip()[:200]
+    subtitle = (data.get("subtitle") or "").strip()[:80]
+    tagline = (data.get("tagline") or "").strip()[:160]
+    category_badge = (data.get("category_badge") or "").strip()[:40]
+    brand_badge = (data.get("brand_badge") or "").strip()[:40]
+    raw_tags = data.get("feature_tags") or []
+    feature_tags = [str(t).strip()[:30] for t in raw_tags if str(t).strip()][:3]
+    subject_image_url = (data.get("subject_image_url") or "").strip()[:500]
+    text_overlay_raw = data.get("text_overlay")
+    text_overlay = None if text_overlay_raw is None else bool(text_overlay_raw)
+    prefer_forge = bool(data.get("prefer_forge", True))
+    prefer_pollinations = bool(data.get("prefer_pollinations", True))
+    prefer_falai = bool(data.get("prefer_falai", True))
+
+    try:
+        result = thumb_gen.generate_thumbnail(
+            title,
+            aspect=aspect,
+            style=raw_style,
+            genre=genre,
+            recipe=recipe,
+            subject_hint=subject_hint,
+            subtitle=subtitle,
+            tagline=tagline,
+            category_badge=category_badge,
+            brand_badge=brand_badge,
+            feature_tags=feature_tags,
+            subject_image_url=subject_image_url,
+            text_overlay=text_overlay,
+            prefer_forge=prefer_forge,
+            prefer_pollinations=prefer_pollinations,
+            prefer_falai=prefer_falai,
+        )
+    except Exception as exc:
+        app.logger.exception("Thumbnail generation failed")
+        return jsonify({"ok": False, "error": f"Thumbnail generation failed: {exc}"}), 500
+
+    return jsonify({
+        "ok": True,
+        "png_b64": base64.b64encode(result["png_bytes"]).decode("ascii"),
+        "mode": result["mode"],
+        "preset": result["preset"],
+        "width": result["width"],
+        "height": result["height"],
+        "fallback_reason": result["fallback_reason"],
+    })
+
+
+@app.route("/api/thumbnail/batch", methods=["POST"])
+def api_thumbnail_batch():
+    """Generate N thumbnail variants in one request so the user has real
+    options to pick from. Same body as /api/thumbnail/generate plus an
+    optional `count` (default 4, max 8). Returns an array of variants
+    with their own `png_b64`, `mode`, `seed`."""
+    data = request.get_json(force=True) or {}
+    title = (data.get("title") or "").strip()
+    if not title:
+        return jsonify({"ok": False, "error": "Provide a title."}), 400
+    if len(title) > 200:
+        return jsonify({"ok": False, "error": "Title exceeds 200 characters."}), 400
+
+    aspect = (data.get("aspect") or "16:9").strip()
+    if aspect not in thumb_gen.THUMBNAIL_SIZES:
+        return jsonify({"ok": False,
+                        "error": f"aspect must be one of {list(thumb_gen.THUMBNAIL_SIZES)}"}), 400
+
+    raw_style = (data.get("style") or "auto").strip().lower()
+    valid_presets = set(thumb_gen.THUMBNAIL_PRESETS) | {"auto"}
+    if raw_style not in valid_presets:
+        return jsonify({"ok": False,
+                        "error": f"style must be 'auto' or one of {sorted(thumb_gen.THUMBNAIL_PRESETS)}"}), 400
+
+    count = max(1, min(8, int(data.get("count") or 4)))
+    text_overlay_raw = data.get("text_overlay")
+    text_overlay = None if text_overlay_raw is None else bool(text_overlay_raw)
+
+    try:
+        results = thumb_gen.generate_thumbnail_batch(
+            title,
+            count=count,
+            aspect=aspect,
+            style=raw_style,
+            genre=(data.get("genre") or "").strip()[:80],
+            recipe=(data.get("recipe") or "").strip()[:80],
+            subject_hint=(data.get("subject_hint") or "").strip()[:200],
+            subtitle=(data.get("subtitle") or "").strip()[:80],
+            text_overlay=text_overlay,
+            prefer_forge=bool(data.get("prefer_forge", True)),
+            prefer_falai=bool(data.get("prefer_falai", True)),
+        )
+    except Exception as exc:
+        app.logger.exception("Thumbnail batch failed")
+        return jsonify({"ok": False, "error": f"Batch failed: {exc}"}), 500
+
+    return jsonify({
+        "ok": True,
+        "count": len(results),
+        "variants": [
+            {
+                "png_b64": base64.b64encode(r["png_bytes"]).decode("ascii"),
+                "mode": r["mode"],
+                "preset": r["preset"],
+                "seed": r.get("seed"),
+                "width": r["width"],
+                "height": r["height"],
+                "fallback_reason": r["fallback_reason"],
+            }
+            for r in results
+        ],
+    })
+
+
+@app.route("/api/thumbnail/presets")
+def api_thumbnail_presets():
+    """Surface the available thumbnail presets so the UI can render a
+    dropdown without hardcoding the list. Returns the public-facing
+    label and a few hint fields per preset; the SDXL/composition
+    internals stay server-side."""
+    return jsonify({
+        "ok": True,
+        "presets": [
+            {
+                "key": key,
+                "label": preset["label"],
+                "text_default": preset["text_default"],
+                "text_max_words": preset["text_max_words"],
+            }
+            for key, preset in thumb_gen.THUMBNAIL_PRESETS.items()
+        ],
+    })
+
+
+@app.route("/api/thumbnail/forge-status")
+def api_thumbnail_forge_status():
+    """Lightweight liveness check so the UI can pre-message which mode
+    the user will get before they hit Generate. Cached client-side."""
+    return jsonify({
+        "ok": True,
+        "available": thumb_gen.forge_available(),
+        "url": thumb_gen._forge_url(),
+    })
+
+
 if __name__ == "__main__":
     # Cloud hosts (Render, Railway, Fly, Heroku) inject PORT and expect us
     # to bind 0.0.0.0. Locally we want 127.0.0.1 so other machines on the
