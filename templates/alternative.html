@@ -11,12 +11,12 @@
 <meta property="og:title" content="{{ competitor.title_tag }}" />
 <meta property="og:description" content="{{ competitor.meta_description }}" />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta property="og:site_name" content="Phantomline" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="{{ competitor.title_tag }}" />
 <meta name="twitter:description" content="{{ competitor.meta_description }}" />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
@@ -48,7 +48,7 @@
     "name": "Phantomline",
     "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -57,6 +57,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {% for q, a in competitor.faq %}
     {

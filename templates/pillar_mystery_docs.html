@@ -11,9 +11,9 @@
 <meta property="og:title" content="Mystery Docs Tool — AI Mystery Documentary Creator | Phantomline" />
 <meta property="og:description" content="AI mystery documentary tool for faceless YouTube. Investigative narrator, slow pacing, atmospheric backing. No subscription, no per-render fees." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
@@ -45,7 +45,7 @@
     "name": "Phantomline",
     "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -85,6 +85,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "What is a mystery documentary channel on YouTube?",
      "acceptedAnswer": {"@type": "Answer", "text": "Mystery doc channels publish faceless videos investigating unsolved cases, lost media, abandoned places, cryptid lore, internet mysteries, or corporate cover-ups. The format is documentary-style: investigative narration, archival or atmospheric visuals, slow pacing, and an emphasis on 'what we know vs what's unclear' rather than committed conclusions. Examples: LEMMiNO, Wendigoon, Nexpo, Barely Sociable, Sword & Scale (audio version of the format)."}},

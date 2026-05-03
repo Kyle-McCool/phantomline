@@ -271,7 +271,6 @@ _SITEMAP_ROUTES = [
     ("/about",                         "0.7", "monthly"),
     ("/privacy",                       "0.4", "yearly"),
     ("/terms",                         "0.4", "yearly"),
-    ("/landing",                       "0.3", "monthly"),  # legacy alias
 ]
 
 
@@ -3269,11 +3268,9 @@ def api_recent_jobs():
 @app.route("/landing")
 @app.route("/landing/")
 def landing():
-    # Render pricing into the landing page server-side so the marketing
-    # tiers are SEO-indexable. routes/billing.PRICING is the single source
-    # of truth — Settings UI and this page both read from it.
-    from routes.billing import PRICING
-    return render_template("landing.html", pricing=PRICING)
+    # Legacy alias: was a duplicate of /. 301 to canonical so it doesn't
+    # split SEO authority or get indexed as a duplicate.
+    return redirect("/", code=301)
 
 
 # ---------------------------------------------------------------------------

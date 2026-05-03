@@ -11,9 +11,9 @@
 <meta property="og:title" content="YouTube SEO Tool for Faceless Channels | Phantomline" />
 <meta property="og:description" content="YouTube SEO research + metadata optimization + Optimize Library that repackages winners. Bundled with the AI creation pipeline, no separate subscription." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
@@ -45,7 +45,7 @@
     "name": "Phantomline",
     "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -85,6 +85,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "What is a YouTube SEO tool?",
      "acceptedAnswer": {"@type": "Answer", "text": "A YouTube SEO tool helps creators research keywords, optimize metadata (titles, descriptions, tags, thumbnails), track competitor channels, and identify trending topics in their niche. Examples include vidIQ, TubeBuddy, and Phantomline. Each takes a slightly different shape — vidIQ leans toward keyword research with a Chrome extension, TubeBuddy toward channel-management bulk operations, Phantomline toward integrating SEO directly into the creation pipeline."}},

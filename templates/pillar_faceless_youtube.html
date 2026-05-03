@@ -11,9 +11,9 @@
 <meta property="og:title" content="Faceless YouTube Tool for AI Video Workflows | Phantomline" />
 <meta property="og:description" content="One local-first tool replaces the six-subscription stack faceless YouTube creators usually run." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
@@ -45,7 +45,7 @@
     "name": "Phantomline",
     "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -86,6 +86,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "What is a faceless YouTube channel?",
      "acceptedAnswer": {"@type": "Answer", "text": "A faceless YouTube channel publishes videos without showing a presenter on camera. The visuals are usually a static or slow-pan backdrop, B-roll footage, or AI-generated scenes; the narration is voiceover. Reddit storytime, horror narration, mystery docs, mythology channels, listicles, and survival-tips channels are all common faceless formats."}},

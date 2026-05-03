@@ -11,9 +11,9 @@
 <meta property="og:title" content="Free AI Voice Generator for YouTube Narration | Phantomline" />
 <meta property="og:description" content="Local AI voice generator. 16 voices, unlimited characters, no per-character meter, bundled with the full faceless YouTube pipeline." />
 <meta property="og:url" content="{{ canonical_url }}" />
-<meta property="og:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="{{ site_url }}/static/phantomline-logo-primary.png" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
@@ -45,7 +45,7 @@
     "name": "Phantomline",
     "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
   },
-  "image": "{{ site_url }}/static/phantomline-logo-primary.png",
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>
@@ -85,6 +85,11 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "What is an AI voice generator?",
      "acceptedAnswer": {"@type": "Answer", "text": "An AI voice generator (also called text-to-speech or TTS) converts written text into natural-sounding spoken audio using a neural network trained on voice data. Modern AI voice generators handle pacing, emphasis, and emotional inflection well enough to use as YouTube narration, podcast voiceover, audiobook drafts, or e-learning content."}},
