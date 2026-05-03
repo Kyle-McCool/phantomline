@@ -19,7 +19,9 @@ Env vars (set on Render):
   SUPABASE_URL                  — https://<ref>.supabase.co
   SUPABASE_ANON_KEY             — publishable, used by the browser via the page
   SUPABASE_SERVICE_ROLE_KEY     — server-only, used by this module to query DB
-  STRIPE_SECRET_KEY             — for creating Customer Portal sessions
+  STRIPE_SECRET_KEY             — for Customer Portal sessions + invoice listing
+  RESEND_API_KEY (optional)     — enables the "resend license email" button
+  FROM_EMAIL    (optional)      — defaults to licenses@phantomline.xyz
 """
 
 from __future__ import annotations
@@ -80,14 +82,20 @@ def _validate_jwt(authorization: str | None) -> dict[str, Any] | None:
 def _query_licenses_by_email(email: str) -> list[dict[str, Any]]:
     """Postgrest GET against the licenses table. service_role bypasses RLS so
     the server can return licenses for any verified email without policy
-    plumbing. We never expose the raw key in this list — buyers fetch it via
-    /api/account/licenses/<id>/key once we know they're signed in."""
+    plumbing.
+
+    Email is lowercased before the eq filter — the issue-license edge function
+    lowercases on insert, but historical rows or odd Stripe casing could still
+    drift, and Postgrest eq is case-sensitive."""
     base = _supabase_url()
     key = _service_role_key()
     if not base or not key:
         return []
+    email_norm = (email or "").strip().lower()
+    if not email_norm:
+        return []
     fields = "id,license_id,tier,lifetime,is_founding,founding_seat,issued_at,expires_at,stripe_customer_id,stripe_price_id,created_at,key"
-    url = f"{base}/rest/v1/licenses?email=eq.{quote(email)}&select={fields}&order=created_at.desc"
+    url = f"{base}/rest/v1/licenses?email=eq.{quote(email_norm)}&select={fields}&order=created_at.desc"
     try:
         res = requests.get(
             url,
@@ -201,6 +209,207 @@ def api_account_portal():
         return jsonify({"ok": False, "error": f"Stripe returned {res.status_code}: {res.text[:200]}"}), 502
     body = res.json()
     return jsonify({"ok": True, "url": body.get("url")})
+
+
+@account_bp.route("/api/account/me", methods=["GET"])
+def api_account_me():
+    """Return basic profile info derived from the JWT plus a one-shot summary
+    of the buyer's status (active tier, founding seat number) so the Overview
+    tab can render without a second round-trip to /api/account/licenses."""
+    user = _validate_jwt(request.headers.get("Authorization"))
+    if not user or not user.get("email"):
+        return jsonify({"ok": False, "error": "Not signed in."}), 401
+
+    email = user["email"]
+    rows = _query_licenses_by_email(email)
+
+    now = time.time()
+    active_tier = "free"
+    is_founding = False
+    founding_seat: int | None = None
+    has_subscription = False
+    license_count = 0
+    for row in rows:
+        license_count += 1
+        expires_at_iso = row.get("expires_at")
+        is_active = bool(row.get("lifetime")) or not expires_at_iso
+        if not is_active and expires_at_iso:
+            try:
+                from datetime import datetime
+                exp = datetime.fromisoformat(expires_at_iso.replace("Z", "+00:00")).timestamp()
+                is_active = exp > now
+            except (ValueError, TypeError):
+                is_active = False
+        if is_active:
+            tier = row.get("tier") or "free"
+            # Studio outranks Pro; never downgrade once we've seen the higher tier.
+            if tier == "studio" or active_tier == "free":
+                active_tier = tier
+            if row.get("is_founding"):
+                is_founding = True
+                if founding_seat is None or (row.get("founding_seat") or 999999) < founding_seat:
+                    founding_seat = row.get("founding_seat")
+            if row.get("stripe_customer_id"):
+                has_subscription = True
+
+    metadata = user.get("user_metadata") or {}
+    return jsonify({
+        "ok": True,
+        "user": {
+            "id": user.get("id"),
+            "email": email,
+            "name": metadata.get("full_name") or metadata.get("name") or "",
+            "avatar_url": metadata.get("avatar_url") or "",
+            "provider": (user.get("app_metadata") or {}).get("provider") or "google",
+            "created_at": user.get("created_at"),
+        },
+        "summary": {
+            "license_count": license_count,
+            "active_tier": active_tier,
+            "is_founding": is_founding,
+            "founding_seat": founding_seat,
+            "has_subscription": has_subscription,
+        },
+    })
+
+
+@account_bp.route("/api/account/invoices", methods=["GET"])
+def api_account_invoices():
+    """List Stripe invoices for the signed-in user's customer record. We pick
+    the most recent license with a stripe_customer_id and call Stripe's
+    /v1/invoices endpoint. Returns an empty list (not an error) when the buyer
+    has no Stripe customer (e.g. only manually-issued licenses)."""
+    user = _validate_jwt(request.headers.get("Authorization"))
+    if not user or not user.get("email"):
+        return jsonify({"ok": False, "error": "Not signed in."}), 401
+
+    rows = _query_licenses_by_email(user["email"])
+    customer_id: str | None = None
+    for row in rows:
+        cid = row.get("stripe_customer_id")
+        if cid:
+            customer_id = cid
+            break
+    if not customer_id:
+        return jsonify({"ok": True, "invoices": []})
+
+    sk = _env("STRIPE_SECRET_KEY")
+    if not sk:
+        return jsonify({"ok": False, "error": "Stripe is not configured on the server."}), 500
+
+    try:
+        res = requests.get(
+            "https://api.stripe.com/v1/invoices",
+            params={"customer": customer_id, "limit": 24},
+            auth=(sk, ""),
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": f"Stripe call failed: {exc}"}), 502
+    if res.status_code != 200:
+        return jsonify({"ok": False, "error": f"Stripe returned {res.status_code}"}), 502
+
+    body = res.json()
+    invoices = []
+    for inv in body.get("data") or []:
+        invoices.append({
+            "id": inv.get("id"),
+            "number": inv.get("number"),
+            "status": inv.get("status"),
+            "amount_paid": inv.get("amount_paid"),
+            "amount_due": inv.get("amount_due"),
+            "currency": inv.get("currency"),
+            "created": inv.get("created"),
+            "hosted_invoice_url": inv.get("hosted_invoice_url"),
+            "invoice_pdf": inv.get("invoice_pdf"),
+            "description": inv.get("description"),
+        })
+    return jsonify({"ok": True, "invoices": invoices})
+
+
+@account_bp.route("/api/account/licenses/<license_row_id>/resend", methods=["POST"])
+def api_resend_license(license_row_id: str):
+    """Email the license key to the signed-in user's address. Useful when the
+    original purchase email got lost. Looks up the license by row id, verifies
+    it belongs to the signed-in email, then dispatches via Resend.
+
+    Resend is optional — without RESEND_API_KEY this returns a 501 so the UI
+    can hide the button gracefully."""
+    user = _validate_jwt(request.headers.get("Authorization"))
+    if not user or not user.get("email"):
+        return jsonify({"ok": False, "error": "Not signed in."}), 401
+    email = (user["email"] or "").strip().lower()
+
+    resend_key = _env("RESEND_API_KEY")
+    if not resend_key:
+        return jsonify({"ok": False, "error": "Email resend is not configured on this server."}), 501
+    from_email = _env("FROM_EMAIL") or "licenses@phantomline.xyz"
+
+    base = _supabase_url()
+    sr = _service_role_key()
+    if not base or not sr:
+        return jsonify({"ok": False, "error": "Supabase is not configured."}), 500
+
+    try:
+        res = requests.get(
+            f"{base}/rest/v1/licenses",
+            params={
+                "id": f"eq.{license_row_id}",
+                "select": "id,email,key,tier,lifetime,is_founding,founding_seat",
+            },
+            headers={"apikey": sr, "Authorization": f"Bearer {sr}"},
+            timeout=8,
+        )
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": f"License lookup failed: {exc}"}), 502
+    if res.status_code != 200:
+        return jsonify({"ok": False, "error": "License lookup failed."}), 502
+    rows = res.json() if res.text else []
+    if not rows:
+        return jsonify({"ok": False, "error": "License not found."}), 404
+    row = rows[0]
+    if (row.get("email") or "").strip().lower() != email:
+        # Don't leak the existence of someone else's license.
+        return jsonify({"ok": False, "error": "License not found."}), 404
+
+    tier_label = "Studio" if row.get("tier") == "studio" else "Pro"
+    seat_line = (
+        f"\nFounding member #{row.get('founding_seat')} of 500 — thank you for being early.\n"
+        if row.get("is_founding") and row.get("founding_seat")
+        else ""
+    )
+    text = (
+        f"Welcome back to Phantomline {tier_label}!\n"
+        f"{seat_line}\n"
+        f"Your license key:\n\n"
+        f"{row.get('key')}\n\n"
+        "To activate it:\n"
+        "1. Open Phantomline → Settings\n"
+        "2. Paste the key into the License field\n"
+        "3. Click \"Apply key\"\n\n"
+        "Manage your account: https://phantomline.xyz/account\n\n"
+        "— Phantomline"
+    )
+    try:
+        rsp = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": from_email,
+                "to": email,
+                "subject": f"Your Phantomline {tier_label} license",
+                "text": text,
+            },
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": f"Email send failed: {exc}"}), 502
+    if not rsp.ok:
+        return jsonify({"ok": False, "error": f"Resend returned {rsp.status_code}: {rsp.text[:200]}"}), 502
+    return jsonify({"ok": True, "sent_to": email})
 
 
 @account_bp.route("/api/account/founding-seats", methods=["GET"])
