@@ -22,6 +22,25 @@ system_bp = Blueprint("system", __name__)
 
 
 # ---------------------------------------------------------------------------
+# Health check — quick liveness probe for uptime monitors and Render. Returns
+# 200 with build info; never touches disk or third-party services so it can't
+# trigger false alarms during a partial outage.
+# ---------------------------------------------------------------------------
+
+_BOOT_TIME = time.time()
+
+
+@system_bp.route("/api/system/health", methods=["GET"])
+def api_system_health():
+    return jsonify({
+        "ok": True,
+        "status": "healthy",
+        "service": "phantomline",
+        "uptime_seconds": int(time.time() - _BOOT_TIME),
+    })
+
+
+# ---------------------------------------------------------------------------
 # Settings — persisted to output/settings.json so defaults survive restart.
 # ---------------------------------------------------------------------------
 

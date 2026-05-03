@@ -686,7 +686,7 @@ def _deterministic_analytics_analysis(summary, youtube_enrichment=None):
         diagnosis_parts.append(
             f"Biggest retention leak: \"{weak_retention['title']}\" at {_fmt_metric(weak_retention.get('avg_viewed'), '%')} average viewed."
         )
-    diagnosis = " ".join(diagnosis_parts) or "Analytics parsed, but Ghostline could not find enough title, CTR, view, or retention columns to produce a confident diagnosis."
+    diagnosis = " ".join(diagnosis_parts) or "Analytics parsed, but Phantomline could not find enough title, CTR, view, or retention columns to produce a confident diagnosis."
 
     winning_patterns = []
     if top_view:
@@ -723,7 +723,7 @@ def _deterministic_analytics_analysis(summary, youtube_enrichment=None):
         )
     if second_pillar and best_pillar:
         problems.append(
-            f"{second_pillar['pillar']} trails {best_pillar['pillar']} by views ({_fmt_metric(second_pillar.get('views'), decimals=0)} vs {_fmt_metric(best_pillar.get('views'), decimals=0)}), so it needs a clearer result-driven angle before Ghostline repeats it."
+            f"{second_pillar['pillar']} trails {best_pillar['pillar']} by views ({_fmt_metric(second_pillar.get('views'), decimals=0)} vs {_fmt_metric(best_pillar.get('views'), decimals=0)}), so it needs a clearer result-driven angle before Phantomline repeats it."
         )
 
     winner_topic = (top_view.get("title") or "the top video").replace('"', "")
@@ -732,7 +732,7 @@ def _deterministic_analytics_analysis(summary, youtube_enrichment=None):
         "Open with the finished visual result or surprising before/after in the first 5 seconds, then explain how it was made.",
         "Make every title promise a concrete artifact viewers can picture: sprite animation, playable prototype, game asset, character ability, or finished build.",
         "For long-form topics, cut any context that delays proof. If retention drops around the first minute, show the result before the backstory.",
-        "When Ghostline generates scripts for this channel, it should favor Build With Me / visible-progress topics over abstract explanation unless the explanation is tied to a failure viewers already feel.",
+        "When Phantomline generates scripts for this channel, it should favor Build With Me / visible-progress topics over abstract explanation unless the explanation is tied to a failure viewers already feel.",
     ]
     if best_pattern and "why" in best_pattern.get("pattern", ""):
         next_video_rules.append("Use more 'Why [specific creator group] are switching to [specific workflow/tool]' packaging, because the export shows the Why pattern outperforming other title shapes.")
@@ -861,7 +861,7 @@ def _publish_post_from_request(data):
         video_path = PROJECTS.file_path(video_project_id, "video")
     if not video_path or not video_path.exists():
         return None, "Video project not found."
-    title = (data.get("title") or video_project.get("title") or "Ghostline video").strip()
+    title = (data.get("title") or video_project.get("title") or "Phantomline video").strip()
     tags = youtube_publish.normalize_tags(data.get("tags") or data.get("hashtags") or "")
     caption = (data.get("caption") or data.get("description") or "").strip()
     pinned_comment = (data.get("pinned_comment") or "").strip()
@@ -1523,7 +1523,7 @@ def _build_timeline(plan, narration_project, narration_path, audio_duration, sou
         "assembly_notes": [
             "Put scene media in the timeline project's visuals/assets/media/scenes folder.",
             "Name motion clips or stills like scene_001.mp4 or scene_001.png.",
-            "Ghostline will use motion clips first, then still images, then fallback cards.",
+            "Phantomline will use motion clips first, then still images, then fallback cards.",
             "Each scene will be trimmed, looped, or held to match duration_seconds.",
             "Place narration audio at 00:00.",
             "Loop music underneath and duck it below narration in the Music & Mix tab.",
@@ -1863,6 +1863,17 @@ def service_worker():
     return response
 
 
+@app.route("/manifest.json")
+def manifest_root():
+    """Serve the PWA manifest at the root path too. Some browsers and crawlers
+    look for /manifest.json regardless of where the <link rel='manifest'>
+    points. Serving from both paths avoids 500s from those probes."""
+    manifest_path = BASE_DIR / "static" / "manifest.json"
+    response = send_file(str(manifest_path), mimetype="application/manifest+json")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
+
+
 @app.errorhandler(Exception)
 def api_error(exc):
     """Log full detail server-side; return a generic message to the client.
@@ -2049,7 +2060,7 @@ Rules:
     raw = sg.generate(
         model,
         prompt,
-        system="You are Ghostline's local faceless-video strategist. You generate strict JSON only and prioritize retention mechanics for short-form video.",
+        system="You are Phantomline's local faceless-video strategist. You generate strict JSON only and prioritize retention mechanics for short-form video.",
         label="video ideas",
         show_progress=False,
         temperature=1.0,
@@ -2309,7 +2320,7 @@ def api_publish_description():
     if sg.check_ollama() is None:
         return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
 
-    title = (data.get("title") or "Ghostline video").strip()
+    title = (data.get("title") or "Phantomline video").strip()
     topic = (data.get("topic") or "").strip()
     script = (data.get("script") or "").strip()
     niche = (data.get("niche") or "faceless YouTube Shorts").strip()
@@ -3425,7 +3436,7 @@ def api_youtube_callback():
         return """
         <html><body style="font-family:system-ui;background:#090b0c;color:#f4f8f5;padding:40px;">
         <h2>YouTube connected.</h2>
-        <p>You can close this tab and return to Ghostline.</p>
+        <p>You can close this tab and return to Phantomline.</p>
         <script>setTimeout(() => window.close(), 1200);</script>
         </body></html>
         """
@@ -3564,7 +3575,7 @@ def api_publish_analytics_analyze():
     youtube_enrichment = _youtube_enrich_analytics(summary)
     baseline_analysis = _deterministic_analytics_analysis(summary, youtube_enrichment)
     prompt = f"""
-You are Ghostline's YouTube growth analyst.
+You are Phantomline's YouTube growth analyst.
 
 The user uploaded a YouTube analytics table. Analyze it like a practical creator strategist who is allergic to generic advice.
 
@@ -3577,14 +3588,14 @@ YOUTUBE API ENRICHMENT:
 BASELINE ANALYSIS TO IMPROVE, NOT IGNORE:
 {json.dumps(baseline_analysis, indent=2, ensure_ascii=False)[:7000]}
 
-Give recommendations that Ghostline can act on when generating future videos.
+Give recommendations that Phantomline can act on when generating future videos.
 
 Return ONLY valid JSON with this schema:
 {{
   "diagnosis": "short direct assessment naming the biggest winner and biggest leak",
   "winning_patterns": ["specific pattern from the data with exact title or metric"],
   "problems": ["specific weakness or risk with exact title or metric"],
-  "next_video_rules": ["rule Ghostline should follow when making scripts/titles/captions"],
+  "next_video_rules": ["rule Phantomline should follow when making scripts/titles/captions"],
   "hook_guidance": ["hook pattern to use more, with example wording for this channel"],
   "title_guidance": ["title pattern to use more, including at least one rewrite example"],
   "seo_keywords": ["specific keyword/phrase this channel should target based on titles, traffic, API tags, or API descriptions"],
@@ -3602,7 +3613,7 @@ Rules:
 - Do not recommend emojis unless the data explicitly shows emoji titles outperforming non-emoji titles.
 - Do not give generic advice like "post consistently" unless dates/rows support it.
 - Prioritize retention, CTR, title/hook clarity, topic selection, SEO phrases, and repeatable formats.
-- Make the advice concrete enough that Ghostline can use it in prompts.
+- Make the advice concrete enough that Phantomline can use it in prompts.
 - If using YouTube API enrichment, mention API tags/descriptions only when they help explain keywords or positioning.
 - Improve the baseline analysis, but keep its specificity. If unsure, preserve the baseline claim.
 - Turn the data into operating rules, not a report. Each next_video_rule should be something a generator can obey.
@@ -3613,7 +3624,7 @@ Rules:
     raw = sg.generate(
         model,
         prompt,
-        system="You are a strict JSON YouTube analytics strategist for Ghostline. Every claim must be grounded in provided rows, metrics, titles, traffic sources, or YouTube API enrichment. No generic advice.",
+        system="You are a strict JSON YouTube analytics strategist for Phantomline. Every claim must be grounded in provided rows, metrics, titles, traffic sources, or YouTube API enrichment. No generic advice.",
         label="analytics strategy",
         show_progress=False,
         temperature=0.35,

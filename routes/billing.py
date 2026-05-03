@@ -39,9 +39,24 @@ FREE_TIER_LIMITS = {
 
 
 # Pricing structure surfaced in the Settings UI so users see what upgrading
-# unlocks. Treat this as copy + amounts; the actual checkout/Stripe URL is
-# wired by you in Supabase. Update CHECKOUT_URLS when you have live Stripe
-# Checkout links.
+# unlocks. Treat this as copy + amounts; the checkout_url field on each tier
+# is the Stripe Payment Link.
+#
+# STRIPE WIRING STATUS (live mode, account: acct_1TSrCcCl8kpxrM1k):
+#   Products + prices are created. Payment links are blocked until at least
+#   one payment method is activated in the Stripe dashboard:
+#   https://dashboard.stripe.com/settings/payment_methods
+#
+#   Stripe IDs for reference when generating payment links:
+#     Pro Monthly  ($15/mo): price_1TSs6bCl8kpxrM1kApS5Kqxd
+#     Pro Yearly   ($99/yr): price_1TSs6dCl8kpxrM1knEtswCs9
+#     Studio Monthly ($29):  price_1TSs6hCl8kpxrM1k5PjiqCQg
+#     Studio Yearly ($249):  price_1TSs6jCl8kpxrM1kA4UUHBHY
+#     Founding ($79 once):   price_1TSs6nCl8kpxrM1kUTaSzhrx
+#
+#   Once payment links are generated, swap each tier's checkout_url below
+#   with the buy.stripe.com/... URL. The default CTA on each card uses the
+#   monthly price for Pro/Studio and the one-time price for Founding.
 PRICING = {
     "currency": "USD",
     "tiers": [
@@ -277,7 +292,7 @@ def api_license_post():
     if not payload:
         return jsonify({
             "ok": False,
-            "error": "License key is invalid or your server's GHOSTLINE_LICENSE_SECRET is not set.",
+            "error": "License key is invalid or the server's license secret env var is not set.",
         }), 400
     if payload.get("_expired"):
         return jsonify({
