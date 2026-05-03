@@ -108,7 +108,7 @@ header, not URL paths.
 
 - ✅ **PWA manifest** at `/static/manifest.json` (installable, themed, with shortcuts)
 - ✅ **Service worker** at `/sw.js` (offline shell + static caching, scope `/`)
-- ✅ **Mobile-responsive CSS** in `static/ghostline.css` (≤960px breakpoint + ≤540px breakpoint, touch targets, safe-area-insets)
+- ✅ **Mobile-responsive CSS** in `static/phantomline.css` (≤960px breakpoint + ≤540px breakpoint, touch targets, safe-area-insets)
 - ✅ **Install prompt UI** ("Install as app" button in Settings)
 - ✅ **Theme color, Apple status bar, OG meta tags**
 - ✅ **iOS zoom-on-focus prevention** (16px input font on mobile)

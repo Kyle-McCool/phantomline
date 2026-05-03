@@ -102,14 +102,14 @@ phantomline/
 ├── license.py                   # Offline HMAC-SHA256 license validation
 │
 ├── static/
-│   ├── ghostline.css            # Studio app styles (file path preserved)
+│   ├── phantomline.css          # Studio app styles
 │   ├── landing.css              # Marketing page styles
-│   ├── ghostline.js             # Studio app JS (~5000 lines; file path preserved)
+│   ├── phantomline.js           # Studio app JS (~5000 lines)
 │   ├── engines.js               # Browser-side AI adapters (WebLLM, Web Speech,
 │   │                              ffmpeg.wasm, Pexels, bundled music library)
 │   ├── manifest.json            # PWA manifest
 │   ├── sw.js                    # Service worker (cache-first /static, network-first HTML)
-│   ├── ghostline-logo.svg       # Brand icon (vector, no text)
+│   ├── phantomline-logo.svg     # Brand icon (vector, no text)
 │   └── library/music/           # 8 royalty-free ambient tracks (~11 MB total)
 │
 ├── templates/
@@ -200,7 +200,7 @@ If any of those break, your change broke something.
 
 ### Touching the front-end
 
-The studio app's CSS is `static/ghostline.css` (~3000 lines) and JS is `static/ghostline.js` (~5000 lines). Both are intentionally not bundled — they're served as-is and cache-busted via `?v=<mtime>` (the `versioned` Jinja filter in `server.py`).
+The studio app's CSS is `static/phantomline.css` (~3000 lines) and JS is `static/phantomline.js` (~5000 lines). Both are intentionally not bundled — they're served as-is and cache-busted via `?v=<mtime>` (the `versioned` Jinja filter in `server.py`).
 
 If you add a new static asset and the browser doesn't pick it up, bump `CACHE_VERSION` in `static/sw.js` to invalidate the service worker cache.
 

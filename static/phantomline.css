@@ -1308,7 +1308,7 @@
   .gen-tray .gt-head .gt-dot {
     width: 18px; height: 18px;
     border-radius: 0;
-    background: url('/static/ghostline-logo.svg') center / contain no-repeat;
+    background: url('/static/phantomline-logo.svg') center / contain no-repeat;
     box-shadow: none;
     filter: drop-shadow(0 0 8px rgba(34,231,245,0.65));
     margin-right: 8px;
@@ -2906,17 +2906,23 @@
   .gh-feedback-card .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 
   /* ---- First-run walkthrough overlay ---- */
+  /* Backdrop is transparent — its only job is blocking click-through and
+     catching Escape. The highlight's box-shadow below creates the dim
+     overlay, with a hole-punch around the target so the highlighted
+     element stays fully readable. */
   .gh-walk-backdrop {
     position: fixed; inset: 0; z-index: 9500;
-    background: rgba(4, 7, 8, 0.62);
-    backdrop-filter: blur(2px);
+    background: transparent;
     pointer-events: auto;
   }
   .gh-walk-highlight {
     position: fixed; z-index: 9501;
     border: 2px solid var(--accent, #6ee7b7);
     border-radius: 14px;
-    box-shadow: 0 0 0 9999px rgba(4, 7, 8, 0.62), 0 0 38px rgba(110, 231, 183, 0.5);
+    /* The 9999px outer shadow is a single dim layer that fills the viewport
+       minus the highlight rectangle — so the target shows through clearly.
+       Doubling this with a backdrop background would re-dim the target. */
+    box-shadow: 0 0 0 9999px rgba(4, 7, 8, 0.72), 0 0 38px rgba(110, 231, 183, 0.5);
     pointer-events: none;
     transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
   }
