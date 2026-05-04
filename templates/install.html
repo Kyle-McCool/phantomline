@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <title>Install {{ tool.label }} for Phantomline</title>
-<meta name="description" content="One-click install for {{ tool.label }} — power up Phantomline with {{ tool.subtitle }}." />
+<meta name="description" content="One-click install for {{ tool.label }}: power up Phantomline with {{ tool.subtitle }}." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
 <meta name="robots" content="noindex" />
@@ -94,7 +94,7 @@
 <div class="install-hero">
   <a class="back-link" href="/app">&larr; Back to Phantomline Studio</a>
   <div id="mobileHint" style="display:none; margin-top:14px; padding:14px; background:#3a2f0c; border:1px solid #c9a93a; border-radius:8px; color:#fff8d4;">
-    <strong>You're on mobile.</strong> {{ tool.label }} can't be installed on a phone — it runs on your desktop or laptop. Open this page on your computer (<a href="/app" style="color:#ffe48a; text-decoration:underline;">phantomline.xyz/install/{{ tool.label.split()[0]|lower }}</a>) to continue.
+    <strong>You're on mobile.</strong> {{ tool.label }} can't be installed on a phone. It runs on your desktop or laptop. Open this page on your computer (<a href="/app" style="color:#ffe48a; text-decoration:underline;">phantomline.xyz/install/{{ tool.label.split()[0]|lower }}</a>) to continue.
   </div>
   <h1 style="margin-top:14px;">Install {{ tool.label }}</h1>
   <p class="lead">{{ tool.subtitle }}</p>
@@ -102,7 +102,7 @@
   {% if tool.downloads %}
   <div class="download-hero">
     <h2>Easiest path: download &amp; double-click<span id="osPill" class="os-detected-pill" style="display:none;">your OS detected</span></h2>
-    <p class="sub">{% if tool.downloads_note %}{{ tool.downloads_note }}{% else %}Pick the build for your OS. The installer is signed by the vendor — Windows SmartScreen / macOS Gatekeeper will let it run after a click-through.{% endif %}</p>
+    <p class="sub">{% if tool.downloads_note %}{{ tool.downloads_note }}{% else %}Pick the build for your OS. The installer is signed by the vendor, so Windows SmartScreen / macOS Gatekeeper will let it run after a click-through.{% endif %}</p>
     <div class="download-buttons" id="downloadButtons">
       {% for d in tool.downloads %}
       <a class="download-btn" data-os="{{ d.os }}" href="{{ d.url }}" target="_blank" rel="noopener">
@@ -123,13 +123,13 @@
   <!-- ONE-LINE INSTALL -->
   <div id="pane-oneline" class="install-pane">
     <div class="install-block">
-      <h3><span class="badge-os">Windows</span> PowerShell — paste & run</h3>
+      <h3><span class="badge-os">Windows</span> PowerShell. Paste &amp; run.</h3>
       <pre class="cmd" id="cmdWin">{{ tool.windows_oneliner }}</pre>
       <button class="copy-btn" data-copy="cmdWin">Copy</button>
       <div style="margin-top:8px; color:#7a96ad; font-size:12px;">Open <strong>Windows Terminal</strong> or <strong>PowerShell</strong>, paste the line above, hit Enter. The script handles Python check, install, and model download.</div>
     </div>
     <div class="install-block">
-      <h3><span class="badge-os">macOS</span> <span class="badge-os">Linux</span> Terminal — paste & run</h3>
+      <h3><span class="badge-os">macOS</span> <span class="badge-os">Linux</span> Terminal. Paste &amp; run.</h3>
       <pre class="cmd" id="cmdMac">{{ tool.unix_oneliner }}</pre>
       <button class="copy-btn" data-copy="cmdMac">Copy</button>
       <div style="margin-top:8px; color:#7a96ad; font-size:12px;">Open <strong>Terminal</strong>, paste, hit Enter.</div>
@@ -141,7 +141,7 @@
     <div class="install-block">
       <h3>Paste this into Claude Code (works in Cursor / Codex / Cline too)</h3>
       <p style="color:#cdd6df; font-size:14px; margin:0 0 12px;">
-        Open <a href="https://claude.com/download" target="_blank" rel="noopener">Claude</a> (the desktop app or web), click <strong>+ New session</strong> → switch to the <strong>Code</strong> tab, then paste the prompt below as your first message. Claude does the install, downloads, and verification for you — no terminal commands you have to type yourself.
+        Open <a href="https://claude.com/download" target="_blank" rel="noopener">Claude</a> (the desktop app or web), click <strong>+ New session</strong>, switch to the <strong>Code</strong> tab, then paste the prompt below as your first message. Claude does the install, downloads, and verification for you. No terminal commands you have to type yourself.
       </p>
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
         <a class="download-btn" href="https://claude.com/download" target="_blank" rel="noopener" style="font-size:13px; padding:10px 16px;">

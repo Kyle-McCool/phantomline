@@ -1847,13 +1847,29 @@ function renderLaunchReadiness(data) {
     ? checks.filter(c => c.required).every(c => c.status === 'ready')
     : !!data.launch_ready;
   $('launchScore').textContent = String(score ?? '--');
-  $('launchReadinessText').textContent = isHosted
-    ? (launchReady
-        ? (data.subheadline || 'Browser AI engines ready. No local install needed.')
-        : 'Your browser is missing one of the required engines. Try Chrome, Edge, or another modern Chromium.')
-    : (launchReady
-        ? 'Core local studio is ready. Optional tools can be connected when needed.'
-        : 'Finish the required setup items before charging through the full workflow.');
+  // Rename the label so the user reads the score correctly. On hosted
+  // it's BROWSER readiness only, since the page can't detect optional
+  // local installs (CORS blocks HTTPS to localhost). On local desktop
+  // it's overall studio readiness.
+  const labelEl = $('launchReadinessLabel');
+  if (labelEl) labelEl.textContent = isHosted ? 'Browser readiness' : 'Launch readiness';
+  // Make it explicit on hosted: the score is for BROWSER MODE only. Any
+  // optional power-user upgrades (Ollama, Kokoro, Forge) are local
+  // installs the hosted page genuinely cannot detect. Tell the user that
+  // instead of letting the 100 read as "everything installed".
+  if (isHosted) {
+    const optionalInstalls = checks.filter(c => !c.required && (c.actions || []).some(a => (a.value || '').startsWith('/install/')));
+    const upgradeNote = optionalInstalls.length
+      ? ` ${optionalInstalls.length} optional upgrade${optionalInstalls.length === 1 ? '' : 's'} (Ollama, Kokoro voices, Forge) can be installed on your computer for higher quality.`
+      : '';
+    $('launchReadinessText').textContent = launchReady
+      ? `Browser mode ready (${score}/100). Everything below runs in this browser, no install required.${upgradeNote}`
+      : 'Your browser is missing one of the required engines. Try Chrome, Edge, or another modern Chromium.';
+  } else {
+    $('launchReadinessText').textContent = launchReady
+      ? 'Core local studio is ready. Optional tools can be connected when needed.'
+      : 'Finish the required setup items before charging through the full workflow.';
+  }
   $('launchChecks').innerHTML = checks.map(c => {
     // 'desktop_only' renders like 'optional' — gray dot, action button shown.
     // The status label below ("desktop only") makes the gating obvious.
@@ -1911,7 +1927,7 @@ async function handleLaunchActionClick(ev) {
       await navigator.clipboard.writeText(value);
       toast(`Copied: ${value.length > 40 ? value.slice(0, 37) + '...' : value}`);
     } catch (e) {
-      toast('Copy failed — copy manually: ' + value, true);
+      toast('Copy failed. Copy manually: ' + value, true);
     }
     return;
   }
@@ -1942,7 +1958,7 @@ async function handleLaunchActionClick(ev) {
       });
       const d = await r.json();
       if (d.ok) {
-        toast(`${checkId} installed — re-checking readiness`);
+        toast(`${checkId} installed. Re-checking readiness.`);
         await runLaunchReadinessCheck();
       } else {
         toast(d.error || 'Install failed', true);
@@ -2820,7 +2836,7 @@ async function waitForMixProject(jobId, onStatus) {
 let _makeRenderAborted = false;
 function _makeRenderAbortIfNeeded() {
   if (_makeRenderAborted) {
-    const err = new Error('Render cancelled. The job is still finishing in the background — check Library.');
+    const err = new Error('Render cancelled. The job is still finishing in the background. Check Library.');
     err.cancelled = true;
     throw err;
   }
@@ -3833,56 +3849,64 @@ async function _loadThumbPresets() {
 window.selectedThumbnail = null; // {b64, mode, preset, width, height, seed}
 
 function _renderThumbVariants(variants) {
+  // Single-thumbnail mode: render the first (and only) variant full-width
+  // and auto-attach it. User clicks Regenerate to roll a new one. This
+  // beats the old 4-at-once flow because each call now gets full timeout
+  // budget against Pollinations FLUX-realism so all four don't degrade
+  // into PIL fallbacks under rate-limit pressure.
   const grid = $('thumbVariantsGrid');
-  grid.innerHTML = variants.map((v, i) => `
-    <button type="button" class="thumb-variant-btn" data-idx="${i}"
-      style="padding:0; border:2px solid transparent; border-radius:8px; cursor:pointer; background:#0a1722; overflow:hidden;">
-      <img src="data:image/png;base64,${v.png_b64}" alt="Variant ${i+1}"
+  if (!variants.length) {
+    grid.innerHTML = '<div class="hint">No image returned. Click Regenerate.</div>';
+    return;
+  }
+  const v = variants[0];
+  grid.innerHTML = `
+    <div style="border:2px solid #19e0c2; border-radius:10px; overflow:hidden; background:#0a1722;">
+      <img src="data:image/png;base64,${v.png_b64}" alt="Generated thumbnail"
         style="width:100%; height:auto; display:block;" />
-      <div style="padding:6px 8px; font-size:11px; color:#7a96ad; text-align:left;">
-        ${escapeHtml(v.preset || 'auto')} · ${escapeHtml(v.mode || '')}${v.seed ? ` · seed ${v.seed}` : ''}
+      <div style="padding:8px 12px; font-size:12px; color:#7a96ad; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <span>${escapeHtml(v.preset || 'auto')} · ${escapeHtml(v.mode || '')}${v.seed ? ` · seed ${v.seed}` : ''}</span>
+        <span style="color:${v.mode === 'pil_fallback' ? '#e0a019' : '#19e0c2'};">
+          ${v.mode === 'pil_fallback' ? 'AI image source unreachable. Text-only fallback. Try Regenerate.' : 'Attached to post'}
+        </span>
       </div>
-    </button>
-  `).join('');
-  grid.querySelectorAll('.thumb-variant-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.idx, 10);
-      const v = variants[idx];
-      window.selectedThumbnail = {
-        b64: v.png_b64, mode: v.mode, preset: v.preset,
-        width: v.width, height: v.height, seed: v.seed,
-      };
-      grid.querySelectorAll('.thumb-variant-btn').forEach(b => {
-        b.style.borderColor = b === btn ? '#19e0c2' : 'transparent';
-      });
-      $('thumbSelectedRow').style.display = '';
-      $('thumbSelectedPreview').src = `data:image/png;base64,${v.png_b64}`;
-      $('thumbSelectedMeta').textContent =
-        `${v.width}x${v.height} · ${v.preset || 'auto'} · ${v.mode}${v.fallback_reason ? ' (' + v.fallback_reason + ')' : ''}`;
-      $('thumbStatus').textContent = 'Selected';
-      toast('Thumbnail attached to post');
-    });
-  });
+    </div>
+  `;
+  // Auto-attach the rendered thumbnail
+  window.selectedThumbnail = {
+    b64: v.png_b64, mode: v.mode, preset: v.preset,
+    width: v.width, height: v.height, seed: v.seed,
+  };
+  $('thumbSelectedRow').style.display = '';
+  $('thumbSelectedPreview').src = `data:image/png;base64,${v.png_b64}`;
+  $('thumbSelectedMeta').textContent =
+    `${v.width}x${v.height} · ${v.preset || 'auto'} · ${v.mode}${v.fallback_reason ? ' (' + v.fallback_reason + ')' : ''}`;
+  $('thumbStatus').textContent = v.mode === 'pil_fallback' ? 'Fallback (regenerate)' : 'Attached';
+  // Reveal the Regenerate button now that we have something to roll over
+  const regenBtn = $('thumbRegenerateBtn');
+  if (regenBtn) regenBtn.style.display = '';
 }
 
-async function generateThumbnails() {
+async function generateThumbnails(opts) {
+  opts = opts || {};
+  const isRegen = !!opts.regenerate;
   const title = ($('publishTitle').value || '').trim();
   const projectId = ($('publishVideoProject')?.value || '').trim();
   const status = $('thumbStatusLine');
-  // Title comes from Create Video → autofills here, so missing title means
-  // no video has been selected yet. Be explicit — that's the gate.
+  // Title comes from Create Video which autofills here, so missing title
+  // also means no video has been selected. That's the gate.
   if (!projectId && !title) {
     toast('Pick a finished video above first', true);
     $('publishVideoProject')?.focus();
     return;
   }
-  const btn = $('thumbGenerateBtn');
+  const btn = isRegen ? $('thumbRegenerateBtn') : $('thumbGenerateBtn');
   btn.disabled = true;
   const originalLabel = btn.textContent;
-  btn.textContent = 'Generating...';
+  btn.textContent = isRegen ? 'Regenerating...' : 'Generating...';
   status.textContent = projectId
-    ? 'Reading your script + scenes, then rendering 4 thumbnails grounded in that story — 30-50 sec.'
-    : 'Rendering 4 variants from your title — 20-40 sec on first run.';
+    ? 'Reading your script + scenes, then rendering one full-quality thumbnail (30-60 sec).'
+    : 'Rendering one thumbnail from your title (20-50 sec).';
   try {
     const r = await fetch('/api/thumbnail/batch', {
       method: 'POST',
@@ -3891,7 +3915,7 @@ async function generateThumbnails() {
         title,
         aspect: $('thumbAspect').value || '16:9',
         style: 'auto',
-        count: 4,
+        count: 1,  // single-shot for full quality
         // Server uses this to fetch the bundle's script + scene plan and
         // build a story-specific enhanced prompt instead of guessing from
         // the title alone.
@@ -3905,8 +3929,8 @@ async function generateThumbnails() {
       toast(d.error || 'Thumbnail generation failed', true);
       return;
     }
-    const fromScript = d.script_used ? ' (specific to your video script)' : '';
-    status.textContent = `${d.count} variants ready${fromScript} — click one to attach to this post.`;
+    const fromScript = d.script_used ? ' (grounded in your script)' : '';
+    status.textContent = `Thumbnail ready${fromScript}. Don't like it? Click Regenerate.`;
     _renderThumbVariants(d.variants || []);
   } catch (e) {
     status.textContent = e.message || 'Network error.';
@@ -3916,7 +3940,8 @@ async function generateThumbnails() {
     btn.textContent = originalLabel;
   }
 }
-$('thumbGenerateBtn').addEventListener('click', generateThumbnails);
+$('thumbGenerateBtn').addEventListener('click', () => generateThumbnails());
+$('thumbRegenerateBtn')?.addEventListener('click', () => generateThumbnails({ regenerate: true }));
 $('thumbDownloadBtn').addEventListener('click', () => {
   if (!window.selectedThumbnail) return;
   const a = document.createElement('a');
@@ -4617,7 +4642,7 @@ async function reopenBundle(bundleId) {
         document.getElementById(id)?.dispatchEvent(new Event('change'));
       });
       if (typeof updateMakeReadiness === 'function') updateMakeReadiness();
-      toast('Bundle reopened — edit anything and re-render');
+      toast('Bundle reopened. Edit anything and re-render.');
     }, 200);
   } catch {
     toast('Could not reopen bundle', true);
@@ -4942,7 +4967,7 @@ window.addEventListener('unhandledrejection', (e) => {
         document.getElementById('ghFeedbackText').value = '';
         document.getElementById('ghFeedbackEmail').value = '';
         close();
-        if (typeof toast === 'function') toast('Thanks — feedback received');
+        if (typeof toast === 'function') toast('Thanks, feedback received.');
       } else {
         if (typeof toast === 'function') toast(data.error || 'Could not send', true);
       }
@@ -4999,7 +5024,7 @@ const GH_WALK_STEPS = [
   {
     targetId: 'ghFeedbackFab',
     title: '5. Stuck? Tap Feedback',
-    body: 'The Feedback button stays in the corner of every screen. Tell us what broke or what to add — we read every one.',
+    body: 'The Feedback button stays in the corner of every screen. Tell us what broke or what to add. We read every one.',
     side: 'left',
   },
 ];
@@ -5425,7 +5450,7 @@ async function refreshLicenseStatus() {
       const lines = [];
       if (info.email) lines.push(`Licensed to ${info.email}.`);
       if (tier === 'free') {
-        lines.push('Free tier — limited monthly renders, no scheduler, no Optimize Library.');
+        lines.push('Free tier: limited monthly renders, no scheduler, no Optimize Library.');
       } else if (info.expires_at) {
         const exp = new Date(info.expires_at * 1000);
         lines.push(`${TIER_LABEL[tier]} tier active. Expires ${exp.toLocaleDateString()}.`);
@@ -5518,7 +5543,7 @@ document.getElementById('settingsLicenseApplyBtn')?.addEventListener('click', as
     });
     const d = await r.json();
     if (d.ok) {
-      if (typeof toast === 'function') toast(`License applied — ${TIER_LABEL[d.license?.tier] || 'updated'}`);
+      if (typeof toast === 'function') toast(`License applied: ${TIER_LABEL[d.license?.tier] || 'updated'}`);
       if (input) input.value = '';
       await refreshLicenseStatus();
       await refreshUsageStatus();

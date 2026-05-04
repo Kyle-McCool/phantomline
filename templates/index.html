@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <title>Phantomline Studio</title>
-<meta name="description" content="Phantomline Studio — workspace for generating faceless YouTube videos with local AI." />
+<meta name="description" content="Phantomline Studio: the workspace for generating faceless YouTube videos with local AI. Script, voice, scenes, music, captions, MP4, scheduler, all in one workflow." />
 <!-- Auth gate. Synchronous so it can redirect anonymous visitors to
      /account before any studio HTML/CSS paints. Skips on localhost (the
      desktop install) and inside the Capacitor Android shell. See
@@ -128,7 +128,7 @@
         <p class="hint">Run a local readiness check, load a demo workflow, then create your first faceless short with almost no typing.</p>
         <div class="launch-score-card">
           <div>
-            <strong>Launch readiness</strong>
+            <strong id="launchReadinessLabel">Launch readiness</strong>
             <div class="hint" id="launchReadinessText">Checking your local studio...</div>
           </div>
           <div class="launch-score" id="launchScore">--</div>
@@ -1382,7 +1382,7 @@
               <div class="publish-card">
                 <div class="make-section-title"><strong>Thumbnail</strong><span id="thumbStatus">Auto from your video</span></div>
                 <div class="hint" style="margin-bottom:8px;">
-                  Reads the script + scenes of the video selected above and generates 4 thumbnails specific to that story. Click one to attach it.
+                  Reads the script + scenes of the video selected above. Generates one full-quality thumbnail at a time. Don't like it? Click Regenerate for a fresh take.
                 </div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px;">
                   <select id="thumbAspect" style="flex:0 0 auto; max-width:140px;">
@@ -1390,10 +1390,11 @@
                     <option value="9:16">9:16 (Shorts)</option>
                     <option value="1:1">1:1 (Square)</option>
                   </select>
-                  <button id="thumbGenerateBtn" class="btn secondary" type="button" style="flex:0 0 auto; margin-left:auto;">Generate 4 thumbnails</button>
+                  <button id="thumbGenerateBtn" class="btn secondary" type="button" style="flex:0 0 auto; margin-left:auto;">Generate thumbnail</button>
+                  <button id="thumbRegenerateBtn" class="btn secondary" type="button" style="flex:0 0 auto; display:none;">Regenerate</button>
                 </div>
                 <div id="thumbStatusLine" class="hint" style="margin:8px 0; min-height:1em;"></div>
-                <div id="thumbVariantsGrid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;"></div>
+                <div id="thumbVariantsGrid"></div>
                 <!-- Hidden style picker preserved so the existing JS doesn't break;
                      auto-detected from the video's genre on the server side. -->
                 <select id="thumbStyle" style="display:none;"><option value="auto" selected>Auto</option></select>
@@ -1619,11 +1620,11 @@
           <div class="make-section-title"><strong>Interface</strong><span>show only what you need</span></div>
           <label class="toggle-row">
             <input id="settingsSimpleMode" type="checkbox" checked />
-            <span><strong>Simple mode</strong> — hide Advanced tools (Long Story, Short Script, Narrate Text, Music &amp; Mix, Video Studio, SEO Finder, Analytics, Optimize) from the sidebar. Toggle off when you want every tool visible.</span>
+            <span><strong>Simple mode:</strong> hide Advanced tools (Long Story, Short Script, Narrate Text, Music &amp; Mix, Video Studio, SEO Finder, Analytics, Optimize) from the sidebar. Toggle off when you want every tool visible.</span>
           </label>
           <label class="toggle-row">
             <input id="settingsTelemetry" type="checkbox" checked />
-            <span><strong>Anonymous diagnostics</strong> — send error reports and render outcomes so issues are caught fast. No content, no identifiers.</span>
+            <span><strong>Anonymous diagnostics:</strong> send error reports and render outcomes so issues are caught fast. No content, no identifiers.</span>
           </label>
         </div>
         <div class="settings-card" id="settingsEngineCard">
@@ -1631,19 +1632,19 @@
             <strong>AI engine</strong>
             <span id="settingsEngineStatus">Loading…</span>
           </div>
-          <div class="hint" style="margin:0 0 10px;">Pick where script generation runs. Server uses your Ollama install (fast, full-quality, requires PC). This device runs Llama 3.2 1B in your browser via WebGPU — works on mobile, downloads once (~1 GB), no PC needed afterward.</div>
+          <div class="hint" style="margin:0 0 10px;">Pick where script generation runs. Server uses your Ollama install (fast, full-quality, requires PC). This device runs Llama 3.2 1B in your browser via WebGPU. Works on mobile, downloads once (~1 GB), no PC needed afterward.</div>
           <label class="toggle-row">
             <input type="radio" name="ghEngine" value="server" id="engineServer" />
-            <span><strong>Local server (Ollama)</strong> — desktop default. 8B model quality. Requires the Phantomline Python server running on this machine.</span>
+            <span><strong>Local server (Ollama):</strong> desktop default. 8B model quality. Requires the Phantomline Python server running on this machine.</span>
           </label>
           <label class="toggle-row">
             <input type="radio" name="ghEngine" value="device" id="engineDevice" />
-            <span><strong>This device (WebGPU + Llama 3.2 1B)</strong> — mobile/PWA path. First use downloads ~1 GB, then runs offline forever. Lower quality than 8B but no backend needed.</span>
+            <span><strong>This device (WebGPU + Llama 3.2 1B):</strong> mobile/PWA path. First use downloads ~1 GB, then runs offline forever. Lower quality than 8B but no backend needed.</span>
           </label>
           <div id="engineLoadProgress" class="hint" style="margin-top:8px; display:none;"></div>
           <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
             <strong style="font-size:13px;">Stock video API (optional)</strong>
-            <div class="hint" style="margin:4px 0 8px;">For mobile rendering when the server's image gen isn't reachable. Free API, sign up at <a href="https://www.pexels.com/api/" target="_blank" rel="noopener" style="color:var(--accent);">pexels.com/api</a>. Stays in your browser — never sent to our server.</div>
+            <div class="hint" style="margin:4px 0 8px;">For mobile rendering when the server's image gen isn't reachable. Free API, sign up at <a href="https://www.pexels.com/api/" target="_blank" rel="noopener" style="color:var(--accent);">pexels.com/api</a>. Stays in your browser, never sent to our server.</div>
             <input id="settingsPexelsKey" type="password" placeholder="Pexels API key" autocomplete="off" />
             <div class="script-actions" style="margin-top:8px;">
               <button id="settingsPexelsSaveBtn" class="btn secondary" type="button" style="width:auto;">Save key</button>
@@ -1709,7 +1710,7 @@
     <section class="panel">
       <h2>Optimize Library</h2>
       <p class="hint" style="margin-top:0;">
-        Pull every video on your connected channel, then deep-analyze them one at a time. Phantomline grades each video against your channel insights and proposes a single tightly-scoped repackaging. Phase 1 is read-only — suggestions only, no writes back to YouTube yet.
+        Pull every video on your connected channel, then deep-analyze them one at a time. Phantomline grades each video against your channel insights and proposes a single tightly-scoped repackaging. Phase 1 is read-only: suggestions only, no writes back to YouTube yet.
       </p>
 
       <div id="optimizeConnect" class="ip-empty" style="margin-bottom:14px;">

@@ -29,7 +29,7 @@ function escapeHtml(s) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Date(iso).toLocaleDateString(undefined, {
       year: "numeric", month: "short", day: "numeric",
@@ -38,7 +38,7 @@ function formatDate(iso) {
 }
 
 function formatCurrency(amountMinor, currency) {
-  if (typeof amountMinor !== "number") return "—";
+  if (typeof amountMinor !== "number") return "-";
   try {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
@@ -53,7 +53,7 @@ function tierLabel(t) {
   if (t === "studio") return "Studio";
   if (t === "pro") return "Creator Pro";
   if (t === "free") return "Free";
-  return t || "—";
+  return t || "-";
 }
 
 // ---------------------------------------------------------------------------
@@ -83,7 +83,7 @@ if (safeNextPathTopLevel()) {
 // ---------------------------------------------------------------------------
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   setStatus(
-    "Account portal isn't fully configured — Supabase env vars missing on the server.",
+    "Account portal isn't fully configured. Supabase env vars are missing on the server.",
     "error",
   );
   $("#signin-card").hidden = false;
@@ -171,7 +171,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       $("#ov-licenses").textContent = String(summary.license_count ?? 0);
       $("#ov-founding").textContent = summary.is_founding && summary.founding_seat
         ? `#${summary.founding_seat}`
-        : (summary.is_founding ? "Yes" : "—");
+        : (summary.is_founding ? "Yes" : "-");
     }
 
     // -----------------------------------------------------------------------
@@ -211,7 +211,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
             await navigator.clipboard.writeText(key);
             setStatus("Copied license key to clipboard.", "success");
           } catch {
-            setStatus("Couldn't copy — your browser blocked clipboard access. Select the key manually.", "error");
+            setStatus("Couldn't copy. Your browser blocked clipboard access. Select the key manually.", "error");
           }
         });
       });
@@ -249,7 +249,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       if (cachedSummary?.has_subscription) {
         subStatus.textContent = "You have an active subscription on file.";
       } else if (cachedSummary?.is_founding) {
-        subStatus.textContent = "Founding lifetime — no recurring subscription to manage.";
+        subStatus.textContent = "Founding lifetime: no recurring subscription to manage.";
       } else {
         subStatus.textContent = "No active subscription on file yet.";
       }
@@ -263,7 +263,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
         }
         list.innerHTML = invoices.map((inv) => {
           const amt = formatCurrency(inv.amount_paid || inv.amount_due || 0, inv.currency);
-          const date = inv.created ? formatDate(new Date(inv.created * 1000).toISOString()) : "—";
+          const date = inv.created ? formatDate(new Date(inv.created * 1000).toISOString()) : "-";
           const link = inv.hosted_invoice_url
             ? `<a href="${escapeHtml(inv.hosted_invoice_url)}" target="_blank" rel="noopener">View</a>`
             : (inv.invoice_pdf

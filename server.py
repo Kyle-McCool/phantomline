@@ -1935,7 +1935,7 @@ def terms_page():
 INSTALL_TOOLS = {
     "ollama": {
         "label": "Ollama",
-        "subtitle": "Local LLM runtime — unlocks bigger models (Llama 3.1 8B, Mistral, Qwen) than the in-browser Llama 3.2 1B.",
+        "subtitle": "Local LLM runtime. Unlocks bigger models (Llama 3.1 8B, Mistral, Qwen) than the in-browser Llama 3.2 1B.",
         # Direct vendor download — surfaced as the prominent top CTA on the
         # install page. Ollama ships a real signed installer per OS, so this
         # is the genuinely-easiest path (the 1-line install is for power users).
@@ -1974,7 +1974,7 @@ INSTALL_TOOLS = {
              "command": "",
              "screenshot": "ollama-1-download.png"},
             {"title": "Run the installer",
-             "body": "Double-click the .exe / .dmg, or pipe the Linux script into sh. Default options are fine. After install, Ollama runs as a background service — you'll see a small llama icon in your system tray.",
+             "body": "Double-click the .exe / .dmg, or pipe the Linux script into sh. Default options are fine. After install, Ollama runs as a background service. You'll see a small llama icon in your system tray.",
              "command": "curl -fsSL https://ollama.com/install.sh | sh",
              "screenshot": "ollama-2-installer.png"},
             {"title": "Pull the default model",
@@ -1983,12 +1983,12 @@ INSTALL_TOOLS = {
              "expected": "pulling manifest\npulling 6a0746a1ec1a... 100% ▕████████▏ 4.7 GB\npulling 4fa551d4f938... 100% ▕████████▏  12 KB\nverifying sha256 digest\nwriting manifest\nsuccess",
              "screenshot": "ollama-3-pull.png"},
         ],
-        "verify_text": "Run this in a terminal — it should list llama3.1 (size ~4.7 GB).",
+        "verify_text": "Run this in a terminal. It should list llama3.1 (size ~4.7 GB).",
         "verify_command": "ollama list",
     },
     "kokoro": {
         "label": "Kokoro voices",
-        "subtitle": "High-quality neural TTS — meaningfully better narration than Web Speech, especially for long-form.",
+        "subtitle": "High-quality neural TTS. Meaningfully better narration than Web Speech, especially for long-form.",
         # No first-party installer for Kokoro (it's a Python package). Direct
         # users to Python first, since that's the actual prerequisite.
         "downloads": [
@@ -1999,7 +1999,7 @@ INSTALL_TOOLS = {
             {"os": "Linux", "url": "https://www.python.org/downloads/source/",
              "label": "Python source / package manager", "size": "varies"},
         ],
-        "downloads_note": "Kokoro is a Python package — install Python 3.11 first, then run the 1-line install below to fetch Kokoro itself (~327 MB voice model included).",
+        "downloads_note": "Kokoro is a Python package. Install Python 3.11 first, then run the 1-line install below to fetch Kokoro itself (~327 MB voice model included).",
         "windows_oneliner": (
             "py -3.11 -m pip install --upgrade kokoro soundfile; "
             "py -3.11 -c \"from kokoro import KPipeline; KPipeline(lang_code='a')\""
@@ -2016,11 +2016,11 @@ INSTALL_TOOLS = {
             "2. Install pip packages: `pip install kokoro soundfile` (use `pip3` or "
             "`py -3.11 -m pip install` if `pip` is wrong version).\n"
             "3. On macOS, also `brew install espeak-ng`. On Debian/Ubuntu: `sudo apt install "
-            "espeak-ng`. Windows: skip — Kokoro will use its bundled phonemizer.\n"
+            "espeak-ng`. Windows: skip, Kokoro will use its bundled phonemizer.\n"
             "4. Trigger the first model download by running this Python: `from kokoro import "
-            "KPipeline; KPipeline(lang_code='a')` — pulls ~327 MB of weights from Hugging Face.\n"
+            "KPipeline; KPipeline(lang_code='a')`. Pulls ~327 MB of weights from Hugging Face.\n"
             "5. Verify by running: `python -c \"from kokoro import KPipeline; p = "
-            "KPipeline(lang_code='a'); print('Kokoro OK:', list(p.voices))\"` — should print a "
+            "KPipeline(lang_code='a'); print('Kokoro OK:', list(p.voices))\"`. Should print a "
             "list of voice IDs.\n"
             "6. Tell me when done so I can reload Phantomline and see Kokoro voices appear in "
             "the voice picker."
@@ -2030,7 +2030,7 @@ INSTALL_TOOLS = {
              "body": "Kokoro needs Python 3.10+. Check with <code>python --version</code>. If you don't have it: download from <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (Windows/macOS) or <code>sudo apt install python3.11</code> (Linux).",
              "command": "python --version"},
             {"title": "Install Kokoro and audio deps",
-             "body": "From any terminal — pip will fetch the Kokoro package and the soundfile audio writer.",
+             "body": "From any terminal. Pip will fetch the Kokoro package and the soundfile audio writer.",
              "command": "pip install kokoro soundfile"},
             {"title": "(macOS / Linux only) Install espeak-ng",
              "body": "Kokoro's phonemizer needs espeak-ng on Unix. macOS: <code>brew install espeak-ng</code>. Debian/Ubuntu: <code>sudo apt install espeak-ng</code>. <a href=\"https://brew.sh\" target=\"_blank\" rel=\"noopener\">Get Homebrew</a> if you don't have it.",
@@ -2044,7 +2044,7 @@ INSTALL_TOOLS = {
     },
     "forge": {
         "label": "Forge (Stable Diffusion)",
-        "subtitle": "Local AI image generation — full control over scene art, no rate limits, no per-image cost.",
+        "subtitle": "Local AI image generation. Full control over scene art, no rate limits, no per-image cost.",
         "downloads": [
             {"os": "Windows", "url": "https://git-scm.com/download/win",
              "label": "Download Git for Windows", "size": "~50 MB"},
@@ -2053,7 +2053,7 @@ INSTALL_TOOLS = {
             {"os": "Linux", "url": "https://git-scm.com/download/linux",
              "label": "Git for Linux (apt/dnf)", "size": "varies"},
         ],
-        "downloads_note": "Forge isn't a single .exe — it's a Python project you clone with Git. Install Git first, then run the 1-line install below. First launch downloads ~6 GB of model weights (one-time, takes 15-30 min on a typical connection).",
+        "downloads_note": "Forge isn't a single .exe. It's a Python project you clone with Git. Install Git first, then run the 1-line install below. First launch downloads ~6 GB of model weights (one-time, takes 15-30 min on a typical connection).",
         "windows_oneliner": (
             "git clone https://github.com/lllyasviel/stable-diffusion-webui-forge "
             "$HOME\\forge; cd $HOME\\forge; .\\webui-user.bat"
@@ -2072,15 +2072,15 @@ INSTALL_TOOLS = {
             "3. cd into the directory.\n"
             "4. On Windows: run `webui-user.bat`. On macOS/Linux: run `./webui.sh --api` (the "
             "--api flag is required so Phantomline can call it). First launch downloads ~4 GB of "
-            "Python deps and ~6 GB of SDXL base model — can take 15-30 min on first run.\n"
+            "Python deps and ~6 GB of SDXL base model. Can take 15-30 min on first run.\n"
             "5. Once it logs 'Running on local URL: http://127.0.0.1:7861', leave the terminal "
             "open. Forge needs to keep running for Phantomline to use it.\n"
-            "6. Verify by opening http://127.0.0.1:7861 in a browser — you should see the Forge "
+            "6. Verify by opening http://127.0.0.1:7861 in a browser. You should see the Forge "
             "UI. Then tell me so I can reload Phantomline."
         ),
         "manual_steps": [
             {"title": "Install Git and Python 3.10+",
-             "body": "Forge needs both. Git: <a href=\"https://git-scm.com/downloads\" target=\"_blank\" rel=\"noopener\">git-scm.com/downloads</a>. Python: <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (3.10 or 3.11 — NOT 3.12+, Forge has compatibility issues with 3.12).",
+             "body": "Forge needs both. Git: <a href=\"https://git-scm.com/downloads\" target=\"_blank\" rel=\"noopener\">git-scm.com/downloads</a>. Python: <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (3.10 or 3.11, NOT 3.12+, Forge has compatibility issues with 3.12).",
              "command": "git --version && python --version"},
             {"title": "Clone the Forge repo",
              "body": "Pick a folder with ~20 GB of free space (the model weights are big). Source: <a href=\"https://github.com/lllyasviel/stable-diffusion-webui-forge\" target=\"_blank\" rel=\"noopener\">github.com/lllyasviel/stable-diffusion-webui-forge</a>.",
@@ -2089,7 +2089,7 @@ INSTALL_TOOLS = {
              "body": "The <code>--api</code> flag exposes Forge's REST endpoint on port 7861, which is what Phantomline calls. Windows users just double-click <code>webui-user.bat</code> (API is on by default).",
              "command": "cd ~/forge && ./webui.sh --api   # macOS/Linux\n# Windows: just double-click webui-user.bat"},
             {"title": "Wait for first-run downloads (~6 GB)",
-             "body": "First launch downloads SDXL base + dependencies. Watch for the line <code>Running on local URL: http://127.0.0.1:7861</code> — that means it's ready.",
+             "body": "First launch downloads SDXL base + dependencies. Watch for the line <code>Running on local URL: http://127.0.0.1:7861</code>: that means it's ready.",
              "command": ""},
         ],
         "verify_text": "Open <a href=\"http://127.0.0.1:7861\" target=\"_blank\" rel=\"noopener\">http://127.0.0.1:7861</a> in your browser. You should see the Forge UI. Keep the terminal window open while you use Phantomline.",
@@ -4259,8 +4259,11 @@ def api_thumbnail_generate():
     raw_tags = data.get("feature_tags") or []
     feature_tags = [str(t).strip()[:30] for t in raw_tags if str(t).strip()][:3]
     subject_image_url = (data.get("subject_image_url") or "").strip()[:500]
+    # See /api/thumbnail/batch for the rationale: default-True keeps the
+    # text overlay always rendered (auto-slugged from the title via
+    # _shorten_for_overlay, capped per preset's text_max_words).
     text_overlay_raw = data.get("text_overlay")
-    text_overlay = None if text_overlay_raw is None else bool(text_overlay_raw)
+    text_overlay = True if text_overlay_raw is None else bool(text_overlay_raw)
     prefer_forge = bool(data.get("prefer_forge", True))
     prefer_pollinations = bool(data.get("prefer_pollinations", True))
     prefer_falai = bool(data.get("prefer_falai", True))
@@ -4415,8 +4418,16 @@ def api_thumbnail_batch():
                         "error": f"style must be 'auto' or one of {sorted(thumb_gen.THUMBNAIL_PRESETS)}"}), 400
 
     count = max(1, min(8, int(data.get("count") or 4)))
+    # text_overlay default is True. The previous behavior of `None`
+    # delegated to preset["text_default"], and the story/horror/doc presets
+    # default that to False, which produced a bare AI image with NO text
+    # at all. That's not a usable YouTube thumbnail. Per the 2026 1of10
+    # research, text-light is the right call for those niches, but
+    # text-light still means a 1-3 word slug, not zero text.
+    # _compose_minimal_text honors the per-preset text_max_words ceiling
+    # so this stays compliant with the niche rules.
     text_overlay_raw = data.get("text_overlay")
-    text_overlay = None if text_overlay_raw is None else bool(text_overlay_raw)
+    text_overlay = True if text_overlay_raw is None else bool(text_overlay_raw)
 
     # Build the script-aware subject hint. This becomes the "User-supplied
     # subject hint (must respect)" line the enhancer LLM sees.

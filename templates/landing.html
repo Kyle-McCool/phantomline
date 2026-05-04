@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <title>Local AI Video Studio for Faceless YouTube | Phantomline</title>
-<meta name="description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, and built for Reddit stories, horror narration, mystery docs, and creator workflows." />
+<meta name="description" content="Phantomline turns one-line ideas into finished faceless YouTube videos: script, voice, scenes, music, captions, MP4. AI runs locally on your machine. Free tier, Pro $15/mo, Studio $29/mo, Lifetime $79." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -14,7 +14,7 @@
 <!-- Open Graph -->
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
-<meta property="og:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
+<meta property="og:description" content="Faceless YouTube studio that runs the whole pipeline on your machine: idea, script, voice, scenes, music, MP4, scheduler. Free tier, paid Pro and Studio plans, one-time Lifetime option." />
 <meta property="og:url" content="{{ canonical_url }}" />
 <meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta property="og:site_name" content="Phantomline" />
@@ -22,7 +22,7 @@
 <!-- Twitter card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
-<meta name="twitter:description" content="Make faceless YouTube videos with local AI. No subscription. Private, fast, built for Reddit stories, horror narration, and creator workflows." />
+<meta name="twitter:description" content="Faceless YouTube studio that runs the whole pipeline on your machine: idea, script, voice, scenes, music, MP4, scheduler. Free tier plus paid plans." />
 <meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
@@ -109,13 +109,13 @@
     {"@type": "Question", "name": "What does Founding Lifetime get me?",
      "acceptedAnswer": {"@type": "Answer", "text": "Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 500 buyers. Locked-in price even if monthly tiers go up later. After the 500 are sold, the founding deal is gone."}},
     {"@type": "Question", "name": "Is my data sent anywhere?",
-     "acceptedAnswer": {"@type": "Answer", "text": "No. Scripts, audio, video, channel analytics — all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Scripts, audio, video, channel analytics, all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in."}},
     {"@type": "Question", "name": "Can I use this commercially?",
      "acceptedAnswer": {"@type": "Answer", "text": "Yes. Any video you make is yours. The bundled music pack is procedurally generated and public-domain. Generated narration belongs to you. Generated visuals belong to you. Phantomline charges for the tool, not for what you make with it."}},
     {"@type": "Question", "name": "Does it run on Mac and Linux?",
-     "acceptedAnswer": {"@type": "Answer", "text": "The desktop app is Python — runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "The desktop app is Python, so it runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS."}},
     {"@type": "Question", "name": "Will my license expire?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Founding Lifetime: never. Creator Pro and Studio yearly: one year from purchase, renews. Monthly: 31 days, renews. Free tier: never expires. License validation is offline — losing internet doesn't lock you out."}}
+     "acceptedAnswer": {"@type": "Answer", "text": "Founding Lifetime: never. Creator Pro and Studio yearly: one year from purchase, renews. Monthly: 31 days, renews. Free tier: never expires. License validation is offline, so losing internet doesn't lock you out."}}
   ]
 }
 </script>
@@ -319,7 +319,7 @@
     <section class="section" id="pricing">
       <div class="section-head">
         <h2>One-time license. Local AI forever.</h2>
-        <p>Free tier covers casual use. Creator Pro is $15/month. Founding Lifetime is a one-time $79 — pay once, never pay again.</p>
+        <p>Free tier covers casual use. Creator Pro is $15/month. Founding Lifetime is a one-time $79: pay once, never pay again.</p>
       </div>
       {% if pricing and pricing.tiers %}
       <div class="pricing-grid">
@@ -381,7 +381,7 @@
         </details>
         <details>
           <summary>Is my data sent anywhere?</summary>
-          <p>No. Scripts, audio, video, channel analytics — all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in.</p>
+          <p>No. Scripts, audio, video, channel analytics, all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in.</p>
         </details>
         <details>
           <summary>Can I use this commercially?</summary>
@@ -389,11 +389,11 @@
         </details>
         <details>
           <summary>Does it run on Mac and Linux?</summary>
-          <p>The desktop app is Python — runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS.</p>
+          <p>The desktop app is Python, so it runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS.</p>
         </details>
         <details>
           <summary>Will my license expire?</summary>
-          <p>Founding Lifetime: never. Creator Pro and Studio yearly: one year from purchase, renews. Monthly: 31 days, renews. Free tier: never expires. License validation is offline — losing internet doesn't lock you out.</p>
+          <p>Founding Lifetime: never. Creator Pro and Studio yearly: one year from purchase, renews. Monthly: 31 days, renews. Free tier: never expires. License validation is offline, so losing internet doesn't lock you out.</p>
         </details>
       </div>
     </section>
