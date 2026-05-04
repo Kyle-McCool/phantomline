@@ -732,6 +732,170 @@ def enhance_prompt_best_available(title: str, *, preset_name: str = "faceless_st
     )
 
 
+# ---------------------------------------------------------------------------
+# Thumbnail HOOK generator (2026-research-backed)
+#
+# The naive approach of slugging the literal title produces dead overlay
+# text like "THEY'RE ERASING MY MEMORIES ONE" — that's the title with
+# trailing words lopped off, not a YouTube hook. Per the 1of10 study of
+# 300K high-performing 2025 videos, thumbnails with text averaged ~19%
+# fewer views EXCEPT when the text was under 10 characters or used an
+# episode/case-tag pattern. The strongest faceless-creator examples
+# (MrBallen, Lazy Masquerade, Nick Crowley) ship hooks like
+# "FOUND FOOTAGE", "WHAT MOM HID", "PAGE 47", "CASE #12", "DON'T LOOK".
+#
+# This function takes the title + optional script context and produces
+# a single 1-3 word punchy hook grounded in the actual story moment.
+# Same Ollama → Pollinations text fallback as enhance_prompt_best_available
+# so it works on hosted (no local LLM) AND local desktop.
+# ---------------------------------------------------------------------------
+_HOOK_SYSTEM_PROMPT = (
+    "You are a YouTube thumbnail hook writer for faceless storytelling channels. "
+    "You write the SHORT TEXT OVERLAY that goes ON TOP OF the thumbnail image. "
+    "Your output goes ON the image, not in the title or description. "
+    "\n\nRULES (from 2026 thumbnail research, strictly enforce):\n"
+    "1. Output 1-3 words MAX. Never more than 3 words. Never a sentence.\n"
+    "2. Never use the words 'the', 'a', 'an', 'and', 'or', 'but', 'is', 'was'.\n"
+    "3. Reference a SPECIFIC moment, object, person, or twist from the story. "
+    "Generic words like 'mystery', 'shocking', 'unbelievable' are forbidden.\n"
+    "4. Patterns that work (pick one):\n"
+    "   - Numeric hook: 'PAGE 47', 'ROOM 4B', 'DAY 12', 'CASE #047'\n"
+    "   - Object reveal: 'THE DIARY', 'HER NOTE', 'THE TAPE'\n"
+    "   - Relationship reveal: 'MOM LIED', 'DAD KNEW', 'SHE LEFT'\n"
+    "   - Imperative: 'DON'T OPEN', 'DON'T LOOK', 'STAY OUT'\n"
+    "   - Episode tag: 'FOUND FOOTAGE', 'TRUE STORY', 'EVIDENCE 12'\n"
+    "   - Time hook: '20 YEARS LATER', 'THAT NIGHT', 'AT 3AM'\n"
+    "5. Output in ALL CAPS, no quotes, no punctuation except apostrophe and #.\n"
+    "6. NEVER repeat the literal title or first words of the title.\n"
+    "7. NEVER include the channel name or generic descriptors.\n"
+    "\nOutput the hook ONLY. No preamble, no explanation, no quotes. "
+    "Plain text, ALL CAPS, 1-3 words."
+)
+
+
+def _build_hook_user_prompt(title: str, preset_name: str,
+                            script_text: str = "", scenes_text: str = "") -> str:
+    preset = get_preset(preset_name)
+    parts = [f"Niche: {preset['label']}", f"Full title: {title.strip()}"]
+    if script_text:
+        # First 1500 chars of script: enough for the LLM to identify the
+        # specific characters, objects, and twists worth surfacing in the
+        # hook. Cap is generous because hook quality depends on context.
+        parts.append(f"Story script (excerpt):\n{script_text[:1500]}")
+    if scenes_text:
+        parts.append(f"Scene beats:\n{scenes_text[:800]}")
+    parts.append("\nWrite the 1-3 word ALL CAPS hook now. No preamble.")
+    return "\n\n".join(parts)
+
+
+def _normalize_hook(raw: str) -> str:
+    """Strip LLM artifacts and enforce the 3-word ceiling.
+
+    Robust against the common preamble patterns ("Sure, here's the hook:",
+    "The hook is:", "Hook: ..."), against trailing reasoning in parens,
+    and against the model returning the literal title slug. Final output
+    is uppercase, max 3 words, no banned filler words."""
+    if not raw:
+        return ""
+    text = raw.strip()
+    # Pull out the first line — models sometimes add a "(why this works)"
+    # trailer line.
+    text = text.split("\n")[0].strip()
+    # Drop everything after the first "(" — that's always commentary.
+    if "(" in text:
+        text = text.split("(", 1)[0].strip()
+    # Strip multi-word preambles aggressively. Run repeatedly because a
+    # model might stack ("Sure, the hook is: ...").
+    preamble_patterns = [
+        r"^sure[,!\s]+",
+        r"^okay[,!\s]+",
+        r"^here'?s?\b[^:]*?[:\-]\s*",       # "here's the hook:" / "here is:"
+        r"^the\s+hook\s*[:\-]?\s*(is\s*[:\-]?\s*)?",
+        r"^the\s+answer\s*[:\-]?\s*",
+        r"^the\s+thumbnail(\s+text)?\s*[:\-]?\s*",
+        r"^hook\s*[:=\-]\s*",
+        r"^thumbnail(\s+text)?\s*[:=\-]\s*",
+        r"^output\s*[:=\-]\s*",
+        r"^answer\s*[:=\-]\s*",
+        r"^text\s*[:=\-]\s*",
+    ]
+    for _ in range(4):  # up to 4 preamble layers
+        progressed = False
+        for pat in preamble_patterns:
+            new = re.sub(pat, "", text, flags=re.IGNORECASE).strip()
+            if new != text:
+                text = new
+                progressed = True
+        if not progressed:
+            break
+    # Drop trailing reasoning after a dash ("FOUND FOOTAGE - this works…").
+    if " - " in text or " – " in text or " — " in text:
+        text = re.split(r"\s+[-–—]\s+", text, 1)[0].strip()
+    # Strip wrapping quotes and trailing punctuation.
+    text = text.strip().strip('"').strip("'").strip()
+    text = re.sub(r"[.!?,;:\-–—]+$", "", text).strip()
+    text = text.strip().strip('"').strip("'").strip()
+    if not text:
+        return ""
+    # Filter banned filler words BEFORE the 3-word cap so "THE DIARY ROOM"
+    # becomes "DIARY ROOM" rather than getting cut to "THE DIARY".
+    banned = {"the", "a", "an", "and", "or", "but", "is", "was", "are",
+              "were", "be", "been", "of", "to", "for", "in", "on", "at"}
+    words = [w for w in text.split() if w.lower() not in banned]
+    # Hard cap: 3 words.
+    words = words[:3]
+    return " ".join(words).upper()
+
+
+def generate_thumbnail_hook(title: str, *, preset_name: str = "faceless_story",
+                            script_text: str = "", scenes_text: str = "",
+                            ollama_model: str = "llama3.1",
+                            timeout: float = 25.0) -> str | None:
+    """Generate a 1-3 word ALL CAPS hook for the thumbnail overlay.
+    Tries local Ollama first, falls back to text.pollinations.ai. Returns
+    None on total failure — caller falls back to the title slug."""
+    user_prompt = _build_hook_user_prompt(title, preset_name, script_text, scenes_text)
+
+    # Try Ollama first (free + private + no rate limit).
+    if _ollama_reachable():
+        try:
+            import story_generator as _sg
+            raw = _sg.generate(
+                ollama_model,
+                user_prompt,
+                system=_HOOK_SYSTEM_PROMPT,
+                label="thumbnail_hook",
+                show_progress=False,
+                temperature=0.55,
+                num_predict=20,  # 1-3 words = ~10 tokens, plenty
+            )
+            normalized = _normalize_hook(raw or "")
+            if normalized:
+                return normalized
+        except Exception:
+            pass
+
+    # Hosted fallback: text.pollinations.ai (free public endpoint).
+    try:
+        res = requests.post(
+            _POLLINATIONS_TEXT_BASE,
+            json={
+                "messages": [
+                    {"role": "system", "content": _HOOK_SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "model": "openai",
+                "private": "true",
+            },
+            timeout=timeout,
+        )
+        if not res.ok:
+            return None
+        return _normalize_hook(res.text or "") or None
+    except Exception:
+        return None
+
+
 def generate_pollinations_background(title: str, *, aspect: str = "16:9",
                                      preset_name: str = "faceless_story",
                                      subject_hint: str = "",
@@ -1436,7 +1600,8 @@ def compose_thumbnail(title: str, background_png: bytes, *,
                       brand_badge: str = "",
                       feature_tags: list[str] | None = None,
                       text_overlay: bool | None = None,
-                      bg_is_ai_image: bool = False) -> bytes:
+                      bg_is_ai_image: bool = False,
+                      headline_override: str = "") -> bytes:
     """Lay text on a background per the preset's rules.
 
     Composition picker:
@@ -1485,6 +1650,7 @@ def compose_thumbnail(title: str, background_png: bytes, *,
             subtitle=subtitle, tagline=tagline,
             category_badge=category_badge, brand_badge=brand_badge,
             feature_tags=feature_tags,
+            headline_override=headline_override,
         )
 
     return _compose_poster(
@@ -1661,10 +1827,17 @@ def _compose_minimal_text(bg: Image.Image, title: str, preset: dict, *,
                           tagline: str = "",
                           category_badge: str = "",
                           brand_badge: str = "",
-                          feature_tags: list[str] | None = None) -> bytes:
+                          feature_tags: list[str] | None = None,
+                          headline_override: str = "") -> bytes:
     """Minimal eyebrow-only composition used when an AI image is doing
     the heavy lifting. Just a small accent eyebrow + a barely-there
-    title slug, positioned so it doesn't fight the image subject."""
+    title slug, positioned so it doesn't fight the image subject.
+
+    `headline_override`: when set, used INSTEAD of the auto-slugged title
+    for the main overlay text. Used to inject an LLM-generated 1-3 word
+    YouTube hook (PAGE 47, WHAT MOM HID, FOUND FOOTAGE) in place of the
+    literal title slug, which produces dead text like "I FOUND A HIDDEN".
+    """
     width, height = bg.size
     draw = ImageDraw.Draw(bg)
 
@@ -1706,7 +1879,13 @@ def _compose_minimal_text(bg: Image.Image, title: str, preset: dict, *,
         sub_bbox = draw.textbbox((0, 0), sub_text, font=sub_font)
         anchor_y += (sub_bbox[3] - sub_bbox[1]) + int(height * 0.012)
 
-    slug = _shorten_for_overlay(title, preset["text_max_words"]).upper()
+    # Headline override (LLM-generated hook) wins over the title slug.
+    # Hook is already 1-3 words so we skip the shorten-with-trailing-stop
+    # cleanup and just upper-case it.
+    if headline_override.strip():
+        slug = headline_override.strip().upper()
+    else:
+        slug = _shorten_for_overlay(title, preset["text_max_words"]).upper()
     title_box_w = int(width * 0.55)
     title_box_h = int(height * 0.20)
     title_font, lines, line_h = _fit_text(
@@ -1775,7 +1954,8 @@ def generate_thumbnail(title: str, *, aspect: str = "16:9",
                        prefer_forge: bool = True,
                        prefer_pollinations: bool = True,
                        prefer_falai: bool = True,
-                       seed: int | None = None) -> dict:
+                       seed: int | None = None,
+                       headline_override: str = "") -> dict:
     """Generate a single thumbnail. Tries backends in priority order:
 
       1. `subject_image_url` if supplied (user paste-your-own-photo path)
@@ -1870,6 +2050,7 @@ def generate_thumbnail(title: str, *, aspect: str = "16:9",
         feature_tags=feature_tags,
         text_overlay=text_overlay,
         bg_is_ai_image=bg_is_ai_image,
+        headline_override=headline_override,
     )
     return {
         "png_bytes": composed,
