@@ -2158,19 +2158,95 @@ INSTALL_TOOLS = {
         "verify_text": "Open <a href=\"http://127.0.0.1:7861\" target=\"_blank\" rel=\"noopener\">http://127.0.0.1:7861</a> in your browser. You should see the Forge UI. Keep the terminal window open while you use Phantomline.",
         "verify_command": "curl http://127.0.0.1:7861/sdapi/v1/options",
     },
+    "phantomline": {
+        "label": "Phantomline desktop",
+        "subtitle": "The full studio that runs locally on your machine. Uses your own Ollama, Kokoro, and Forge for unlimited high-quality renders. License-key activated.",
+        "downloads_note": "Phantomline desktop is the full studio. It runs Python on your machine and connects to your local Ollama / Kokoro / Forge for the heavy lifting. Sign in with your license key, and your finished projects sync to your phantomline.xyz library so you can view them on any device.",
+        "downloads": [
+            {"os": "Windows", "url": "https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip",
+             "label": "Download Phantomline (ZIP)", "size": "~30 MB"},
+            {"os": "macOS", "url": "https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip",
+             "label": "Download Phantomline (ZIP)", "size": "~30 MB"},
+            {"os": "Linux", "url": "https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip",
+             "label": "Download Phantomline (ZIP)", "size": "~30 MB"},
+        ],
+        "windows_oneliner": (
+            "Invoke-WebRequest https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip "
+            "-OutFile phantomline.zip; Expand-Archive phantomline.zip -DestinationPath . -Force; "
+            "cd phantomline-main; py -3.11 -m venv .venv; .\\.venv\\Scripts\\pip install -r requirements.txt; "
+            ".\\.venv\\Scripts\\python server.py"
+        ),
+        "unix_oneliner": (
+            "curl -L https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip -o phantomline.zip && "
+            "unzip phantomline.zip && cd phantomline-main && python3 -m venv .venv && "
+            ".venv/bin/pip install -r requirements.txt && .venv/bin/python server.py"
+        ),
+        "claude_prompt": (
+            "Install Phantomline desktop on this machine so I can use my local Ollama for "
+            "high-quality video generation.\n\n"
+            "1. Verify Python 3.11+ is installed (run `python --version`). If missing, install "
+            "Python 3.11 from python.org or via Homebrew/apt. Phantomline does not work on "
+            "Python 3.12+ yet because of a Forge dependency.\n"
+            "2. Verify Git is installed (`git --version`). If missing, install from git-scm.com.\n"
+            "3. Clone the Phantomline repo: `git clone https://github.com/daculturedswine/"
+            "phantomline.git ~/phantomline` (or `%USERPROFILE%\\phantomline` on Windows).\n"
+            "4. cd into the directory.\n"
+            "5. Create a virtual environment: `python -m venv .venv` (use `py -3.11 -m venv .venv` "
+            "on Windows). Activate it: `source .venv/bin/activate` on macOS/Linux, "
+            "`.venv\\Scripts\\activate` on Windows.\n"
+            "6. Install Python dependencies: `pip install -r requirements.txt`. This takes "
+            "5-10 minutes (Pillow, Flask, requests, plus the optional ML libs for Kokoro "
+            "and ffmpeg-python).\n"
+            "7. Confirm Ollama is running: `ollama list` should show llama3.1 (or pull it "
+            "with `ollama pull llama3.1`).\n"
+            "8. Start the server: `python server.py`. It listens on http://localhost:5000.\n"
+            "9. Open http://localhost:5000/account in a browser, sign in with my Google "
+            "account, and paste my Phantomline license key when prompted.\n"
+            "10. Tell me when it's ready so I can open http://localhost:5000/app and start "
+            "making videos."
+        ),
+        "manual_steps": [
+            {"title": "Install Python 3.11 + Git",
+             "body": "Phantomline desktop runs on Python. Get Python 3.11 from <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (NOT 3.12+ yet, has Forge compatibility issues). Get Git from <a href=\"https://git-scm.com/downloads\" target=\"_blank\" rel=\"noopener\">git-scm.com/downloads</a>.",
+             "command": "python --version && git --version"},
+            {"title": "Clone Phantomline",
+             "body": "Pick a folder with ~5 GB free (Phantomline + dependencies). Source: <a href=\"https://github.com/daculturedswine/phantomline\" target=\"_blank\" rel=\"noopener\">github.com/daculturedswine/phantomline</a>.",
+             "command": "git clone https://github.com/daculturedswine/phantomline.git ~/phantomline\ncd ~/phantomline"},
+            {"title": "Install Phantomline's Python dependencies",
+             "body": "Use a virtual environment so Phantomline's libs don't collide with your system Python. Takes 5-10 min on first install.",
+             "command": "python -m venv .venv\nsource .venv/bin/activate   # macOS/Linux\n# .venv\\Scripts\\activate      # Windows\npip install -r requirements.txt"},
+            {"title": "Install Ollama if you haven't yet",
+             "body": "Phantomline uses your local Ollama for script + idea + title generation. Get the friendly install guide at <a href=\"/install/ollama\">/install/ollama</a>.",
+             "command": "ollama pull llama3.1"},
+            {"title": "Start Phantomline",
+             "body": "It runs as a local web server on port 5000. Leave the terminal open while you're using it.",
+             "command": "python server.py"},
+            {"title": "Sign in with your license",
+             "body": "Open <code>http://localhost:5000/account</code>, sign in with the same Google account you bought your license under. Your projects + library will sync to phantomline.xyz so you can view them from any device.",
+             "command": ""},
+        ],
+        "verify_text": "Open <a href=\"http://localhost:5000/app\" target=\"_blank\" rel=\"noopener\">http://localhost:5000/app</a> in your browser. You should see the Phantomline studio with your local Ollama detected. Make a quick test video to confirm everything works.",
+        "verify_command": "curl http://localhost:5000/api/health",
+    },
 }
 
 
 @app.route("/install/<tool>")
 def install_page(tool):
     """Friendly OS-detected install guide for an optional Phantomline engine
-    (Ollama, Kokoro, Forge). Replaces raw GitHub-README links from the
-    readiness checklist with a one-line install script, a Claude Code
-    paste-prompt, and manual steps as fallback."""
+    (Ollama, Kokoro, Forge) or for the Phantomline desktop app itself."""
     tool_data = INSTALL_TOOLS.get(tool.lower())
     if not tool_data:
         return jsonify({"ok": False, "error": "Unknown install target"}), 404
     return render_template("install.html", tool=tool_data)
+
+
+@app.route("/download")
+def download_page():
+    """Discoverable URL for the Phantomline desktop install. Aliases the
+    /install/phantomline page so marketing copy / CTAs / external links
+    can use the simpler name."""
+    return render_template("install.html", tool=INSTALL_TOOLS["phantomline"])
 
 
 @app.route("/alternatives")
