@@ -621,7 +621,11 @@ async function refreshOllama() {
       const t = setTimeout(() => ctrl.abort(), 1500);
       // Same-origin-style fetch (no explicit cors mode so we don't trip
       // a preflight). Hits the known-light readiness endpoint.
-      const r = await fetch('http://localhost:5000/api/launch/readiness', {
+      // /api/health responds with the Private Network Access headers
+      // Chrome needs to allow the cross-network request from HTTPS
+      // phantomline.xyz to HTTP localhost. First call may pop a one-time
+      // permission prompt; user grants, future probes work silently.
+      const r = await fetch('http://localhost:5000/api/health', {
         signal: ctrl.signal,
       });
       clearTimeout(t);

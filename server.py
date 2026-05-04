@@ -91,6 +91,91 @@ app.register_blueprint(account_bp)
 app.register_blueprint(profile_bp)
 
 
+# -----------------------------------------------------------------------
+# Render quota enforcement.
+# Free tier: 5 renders / month. Paid tiers (Pro/Studio/Lifetime): no
+# practical cap. Local desktop installs (no Supabase config) bypass
+# entirely so paying users with their own machine never see a quota
+# wall. See quota.py for the per-user state machine.
+# -----------------------------------------------------------------------
+
+def _enforce_render_quota():
+    """Call at the top of every render-spawning endpoint. Returns a
+    Flask response (429) if the user is over their monthly limit, else
+    None — caller proceeds normally and SHOULD call _record_render_used()
+    after successfully spawning the worker thread."""
+    from quota import get_quota_state, quota_blocked_response
+    from auth_helpers import validate_jwt
+    user = validate_jwt(request.headers.get("Authorization"))
+    if not user or not user.get("email"):
+        # Anonymous (local desktop install or curl) — no quota enforcement.
+        return None
+    state = get_quota_state(user["email"])
+    if state["over_limit"]:
+        body, code = quota_blocked_response(state)
+        return jsonify(body), code
+    return None
+
+
+def _record_render_used():
+    """Bump usage_meter for the signed-in user. Best-effort: any failure
+    here MUST NOT abort the render that's already kicked off."""
+    from quota import increment_render_count
+    from auth_helpers import validate_jwt
+    user = validate_jwt(request.headers.get("Authorization"))
+    if not user or not user.get("email"):
+        return
+    try:
+        increment_render_count(user["email"])
+    except Exception:
+        pass
+
+
+@app.route("/api/quota/state", methods=["GET"])
+def api_quota_state():
+    """Used by the studio header counter widget to show the user
+    'X / Y renders this month'. Returns the same shape get_quota_state
+    produces. Anonymous callers get the local-desktop permissive default
+    so the widget gracefully shows nothing on unauthed installs."""
+    from quota import get_quota_state
+    from auth_helpers import validate_jwt
+    user = validate_jwt(request.headers.get("Authorization"))
+    email = (user or {}).get("email") or ""
+    state = get_quota_state(email)
+    return jsonify({"ok": True, "quota": state})
+
+
+@app.route("/api/health", methods=["GET", "OPTIONS"])
+def api_health():
+    """Lightweight health endpoint with Private Network Access + CORS
+    headers so https://phantomline.xyz can probe http://localhost:5000
+    to detect a local install. Without these headers, Chrome silently
+    blocks the cross-network fetch and the studio header toggle can
+    never know the user has Phantomline running locally.
+
+    PNA spec: https://wicg.github.io/private-network-access/ — Chrome
+    sends the preflight, our response opts in via the
+    `Access-Control-Allow-Private-Network: true` header on the OPTIONS
+    response. The browser then asks the user once via permission popup."""
+    if request.method == "OPTIONS":
+        resp = jsonify({"ok": True})
+        resp.headers["Access-Control-Allow-Origin"] = "https://phantomline.xyz"
+        resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        resp.headers["Access-Control-Allow-Private-Network"] = "true"
+        resp.headers["Access-Control-Max-Age"] = "86400"
+        return resp
+    resp = jsonify({
+        "ok": True,
+        "service": "phantomline",
+        "mode": "local",
+        "version": "1",
+    })
+    resp.headers["Access-Control-Allow-Origin"] = "https://phantomline.xyz"
+    resp.headers["Access-Control-Allow-Private-Network"] = "true"
+    return resp
+
+
 # When Supabase-backed projects are enabled, every Flask request that
 # carries a Bearer JWT gets validated and the user_id stashed onto the
 # request context. The PROJECTS proxy in core.py reads it from there.
@@ -2989,7 +3074,11 @@ def api_start():
         return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
 
     job_id = make_job()
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        return quota_block
     spawn_user_thread(run_job, job_id, inputs).start()
+    _record_render_used()
     return jsonify({"ok": True, "job_id": job_id, "inputs": inputs})
 
 
@@ -3021,7 +3110,11 @@ def api_start_short():
             update_job(job_id, error=str(exc), status="error", done=True)
             append_log(job_id, f"ERROR: {exc}")
 
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        return quota_block
     spawn_user_thread(worker).start()
+    _record_render_used()
     return jsonify({"ok": True, "job_id": job_id, "inputs": inputs})
 
 
@@ -3185,7 +3278,11 @@ def api_tts_start():
                     j["status"] = "error"
                     j["done"] = True
 
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        return quota_block
     spawn_user_thread(worker).start()
+    _record_render_used()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3315,7 +3412,11 @@ def api_music_start():
                     j["done"] = True
                     j["log"].append({"t": time.time(), "msg": f"ERROR: {exc}"})
 
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        return quota_block
     spawn_user_thread(worker).start()
+    _record_render_used()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3444,7 +3545,11 @@ def api_mix_start():
                     j["status"] = "error"
                     j["done"] = True
 
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        return quota_block
     spawn_user_thread(worker).start()
+    _record_render_used()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3793,7 +3898,11 @@ def api_video_draft_start():
                     job["status"] = "error"
                     job["done"] = True
 
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        return quota_block
     spawn_user_thread(worker).start()
+    _record_render_used()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3932,7 +4041,11 @@ def api_video_source_start():
                     job["status"] = "error"
                     job["done"] = True
 
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        return quota_block
     spawn_user_thread(worker).start()
+    _record_render_used()
     return jsonify({"ok": True, "job_id": job_id})
 
 
