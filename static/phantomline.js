@@ -1853,7 +1853,12 @@ function renderLaunchReadiness(data) {
         ? 'Core local studio is ready. Optional tools can be connected when needed.'
         : 'Finish the required setup items before charging through the full workflow.');
   $('launchChecks').innerHTML = checks.map(c => {
-    const cls = c.status === 'ready' ? 'ready' : (c.status === 'missing' ? 'missing' : 'optional');
+    // 'desktop_only' renders like 'optional' — gray dot, action button shown.
+    // The status label below ("desktop only") makes the gating obvious.
+    const cls = c.status === 'ready' ? 'ready'
+              : c.status === 'missing' ? 'missing'
+              : c.status === 'desktop_only' ? 'optional desktop-only'
+              : 'optional';
     // Render action buttons for any non-ready item that has actions.
     // The dataset attributes carry the action's kind/value back to the
     // delegated click handler below — keeps this template free of

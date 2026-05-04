@@ -3618,10 +3618,42 @@ def api_video_source_start():
 
 @app.route("/api/youtube/connect")
 def api_youtube_connect():
+    """Begin the YouTube OAuth flow.
+
+    On the hosted server we don't ship the YOUTUBE_CLIENT_ID/SECRET — multi-
+    tenant publishing isn't wired yet (one shared connection file per server
+    process). Instead of dumping a raw JSON 500 to a user who clicked a
+    button, render an HTML page explaining publishing is desktop-only with
+    a /pricing CTA."""
     try:
         return redirect(youtube_publish.auth_url(BASE_DIR))
     except Exception as exc:
-        return jsonify({"ok": False, "error": str(exc)}), 400
+        msg = str(exc)
+        env_missing = "YOUTUBE_CLIENT_ID" in msg or "YOUTUBE_CLIENT_SECRET" in msg
+        if env_missing:
+            html = """
+            <!doctype html>
+            <html><head><title>YouTube auto-publish · Phantomline</title>
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <style>
+              body{font-family:system-ui,-apple-system,sans-serif;background:#0a0e14;color:#f0f4fa;margin:0;padding:40px;display:flex;min-height:100vh;align-items:center;justify-content:center}
+              .card{max-width:560px;background:#10141c;border:1px solid #1f2a3c;border-radius:16px;padding:40px;text-align:center}
+              h1{color:#31d7ff;margin:0 0 16px;font-size:28px}
+              p{line-height:1.55;color:#94a2b2;margin:0 0 12px}
+              .cta{display:inline-block;margin-top:24px;background:#31d7ff;color:#0a0e14;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600}
+              .cta:hover{filter:brightness(1.1)}
+              .secondary{display:block;margin-top:14px;color:#94a2b2;font-size:14px;text-decoration:none}
+            </style></head>
+            <body><div class="card">
+              <h1>YouTube auto-publish is desktop-only</h1>
+              <p>Scheduled YouTube uploads need a per-user OAuth token, which lives in the desktop install — your channel never touches our server.</p>
+              <p>You can still build, render, and download your video from the hosted preview. The desktop app handles the upload step.</p>
+              <a class="cta" href="/pricing">Get the desktop app</a>
+              <a class="secondary" href="/app">Back to Studio</a>
+            </div></body></html>
+            """
+            return html, 503
+        return jsonify({"ok": False, "error": msg}), 400
 
 
 @app.route("/api/youtube/callback")
