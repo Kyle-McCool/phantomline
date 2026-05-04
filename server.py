@@ -57,6 +57,7 @@ from core import (
     PROJECTS,
     PUBLISH_DIR,
     YOUTUBE_CONNECTION_PATH,
+    spawn_user_thread,
     _read_json_file,
     _write_json_file,
     _parse_analytics_upload,
@@ -88,6 +89,66 @@ app.register_blueprint(optimize_bp)
 app.register_blueprint(billing_bp)
 app.register_blueprint(account_bp)
 app.register_blueprint(profile_bp)
+
+
+# When Supabase-backed projects are enabled, every Flask request that
+# carries a Bearer JWT gets validated and the user_id stashed onto the
+# request context. The PROJECTS proxy in core.py reads it from there.
+# When the flag is OFF, this hook does nothing and the local file store
+# behaves exactly as before.
+#
+# Routes that touch projects (/api/projects/*, /api/start_*, etc.) are
+# 401-gated when the flag is on and the request lacks a valid JWT, so a
+# misconfigured front-end fails loudly instead of writing into a global
+# anonymous bucket.
+_PROJECT_TOUCHING_PREFIXES = (
+    "/api/projects",
+    "/api/start_",
+    "/api/scene_plan",
+    "/api/timeline",
+    "/api/render",
+    "/api/narrate",
+    "/api/music",
+    "/api/mix",
+    "/api/upload",
+    "/api/launch/test-render",
+)
+
+
+@app.before_request
+def _bind_user_context_for_projects():
+    from core import _supabase_projects_enabled, set_request_user
+    from auth_helpers import validate_jwt
+    if not _supabase_projects_enabled():
+        return None
+    auth = request.headers.get("Authorization")
+    user = validate_jwt(auth) if auth else None
+    user_id = (user or {}).get("id")
+    request.environ["phantomline.user_token"] = set_request_user(user_id)
+    # Gate project-touching routes on a valid JWT. Read-only static pages,
+    # the launch readiness check, and the public landing/pricing pages
+    # all stay reachable for anonymous visitors.
+    if user_id is None:
+        path = request.path or ""
+        for prefix in _PROJECT_TOUCHING_PREFIXES:
+            if path.startswith(prefix):
+                return jsonify({
+                    "ok": False,
+                    "error": "Sign in required to access projects.",
+                }), 401
+    return None
+
+
+@app.teardown_request
+def _release_user_context_for_projects(exc):
+    token = request.environ.pop("phantomline.user_token", None) if request else None
+    if token is not None:
+        from core import reset_request_user
+        try:
+            reset_request_user(token)
+        except (LookupError, ValueError):
+            # Token from a different context (e.g. test isolation) — safe to ignore.
+            pass
 # Stories are tiny but uploaded narration audio can be hundreds of MB
 # (an hour of WAV is ~330 MB, MP3 ~50 MB). Allow up to 1 GB.
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
@@ -2852,7 +2913,7 @@ def api_start():
         return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
 
     job_id = make_job()
-    threading.Thread(target=run_job, args=(job_id, inputs), daemon=True).start()
+    spawn_user_thread(run_job, job_id, inputs).start()
     return jsonify({"ok": True, "job_id": job_id, "inputs": inputs})
 
 
@@ -2884,7 +2945,7 @@ def api_start_short():
             update_job(job_id, error=str(exc), status="error", done=True)
             append_log(job_id, f"ERROR: {exc}")
 
-    threading.Thread(target=worker, daemon=True).start()
+    spawn_user_thread(worker).start()
     return jsonify({"ok": True, "job_id": job_id, "inputs": inputs})
 
 
@@ -3048,7 +3109,7 @@ def api_tts_start():
                     j["status"] = "error"
                     j["done"] = True
 
-    threading.Thread(target=worker, daemon=True).start()
+    spawn_user_thread(worker).start()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3178,7 +3239,7 @@ def api_music_start():
                     j["done"] = True
                     j["log"].append({"t": time.time(), "msg": f"ERROR: {exc}"})
 
-    threading.Thread(target=worker, daemon=True).start()
+    spawn_user_thread(worker).start()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3307,7 +3368,7 @@ def api_mix_start():
                     j["status"] = "error"
                     j["done"] = True
 
-    threading.Thread(target=worker, daemon=True).start()
+    spawn_user_thread(worker).start()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3656,7 +3717,7 @@ def api_video_draft_start():
                     job["status"] = "error"
                     job["done"] = True
 
-    threading.Thread(target=worker, daemon=True).start()
+    spawn_user_thread(worker).start()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -3795,7 +3856,7 @@ def api_video_source_start():
                     job["status"] = "error"
                     job["done"] = True
 
-    threading.Thread(target=worker, daemon=True).start()
+    spawn_user_thread(worker).start()
     return jsonify({"ok": True, "job_id": job_id})
 
 
@@ -4190,10 +4251,18 @@ def api_project_delete(project_id):
 @app.route("/api/projects/<project_id>/file/<role>")
 def api_project_file(project_id, role):
     """Stream a file owned by a project. role is the registered key
-    (e.g. 'audio', 'script')."""
-    # role must be a simple identifier - no path traversal.
+    (e.g. 'audio', 'script').
+
+    On hosted (Supabase backend), prefer a signed Storage URL so the
+    browser fetches the bytes directly from Supabase CDN instead of
+    proxying every MP4 through Flask. Falls back to local-disk
+    streaming when the proxy is in local mode."""
     if not role.replace("_", "").isalnum():
         return jsonify({"ok": False, "error": "bad role"}), 400
+    # Try signed URL first — only returns non-None on the Supabase store.
+    signed = PROJECTS.file_signed_url(project_id, role, expires_in=3600)
+    if signed:
+        return redirect(signed, code=302)
     full = PROJECTS.file_path(project_id, role)
     if not full or not full.exists():
         return jsonify({"ok": False, "error": "not ready"}), 404
