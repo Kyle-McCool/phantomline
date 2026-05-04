@@ -190,11 +190,69 @@ def check_ollama():
         return None
 
 
+_POLLINATIONS_TEXT_URL = "https://text.pollinations.ai/"
+
+
+def _generate_via_pollinations(prompt, system=SYSTEM_PROMPT, label="",
+                               show_progress=True, temperature=0.85,
+                               num_predict=None):
+    """Fallback text generation via the free public text.pollinations.ai
+    endpoint. Used on hosted (phantomline.xyz) where there's no local
+    Ollama daemon. Same return contract as generate(): plain string.
+
+    Pollinations mirrors several models (openai, mistral, llama, etc.).
+    We use 'openai' as the default since it has the most consistent
+    instruction-following for the prompt-engineering-heavy flows
+    Phantomline uses (script structure, JSON outputs, title batches)."""
+    if label and show_progress:
+        print(f"  [{label}/pollinations] ", end="", flush=True)
+    start = time.time()
+    body = {
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
+        "model": "openai",
+        "private": "true",
+    }
+    # Pollinations honors temperature only on some models; pass it
+    # anyway so the request shape matches the OpenAI chat completions
+    # contract that their gateway expects.
+    if temperature is not None:
+        body["temperature"] = float(temperature)
+    if num_predict is not None:
+        body["max_tokens"] = int(num_predict)
+    try:
+        # Generous timeout because long-form generations can run 60-90s.
+        # Pollinations has occasional slow responses on free tier.
+        res = requests.post(_POLLINATIONS_TEXT_URL, json=body, timeout=180)
+    except requests.RequestException as exc:
+        raise RuntimeError(f"text.pollinations.ai unreachable: {exc}")
+    if res.status_code == 429:
+        raise RuntimeError("text.pollinations.ai rate-limited (429). Try again in a minute.")
+    if not res.ok:
+        raise RuntimeError(f"text.pollinations.ai HTTP {res.status_code}: {res.text[:200]}")
+    text = (res.text or "").strip()
+    elapsed = time.time() - start
+    if show_progress:
+        print(f" done ({len(text.split())} words, {elapsed:.0f}s)")
+    return text
+
+
 def generate(model, prompt, system=SYSTEM_PROMPT, label="", show_progress=True,
              temperature=0.85, num_predict=None):
     """
     Call Ollama's /api/generate with streaming. Prints a dot every ~25 chunks
     so the user can see something is happening. Returns the full string.
+
+    Falls back to text.pollinations.ai (free public endpoint) when Ollama
+    is unreachable. This is the hosted-mode path: phantomline.xyz on Render
+    doesn't have Ollama, so without this fallback every script/title/idea
+    generation 503s and the studio is unusable.
+
+    Local desktop installs always hit Ollama first and stay on that path
+    when it's reachable, so no quality regression for users who pay for
+    the local experience.
     """
     payload = {
         "model": model,
