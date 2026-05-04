@@ -128,35 +128,36 @@ def _readiness_hosted():
     """Browser-mode readiness payload. Server doesn't know browser caps,
     so capability checks are marked status: "check_client" — the JS
     looks at navigator.gpu, window.speechSynthesis, etc. and updates
-    the dot color before render. Server-side concerns we CAN check
-    (YouTube API, channel insights, demo content) stay the same."""
-    insights = channel_insights.load(BASE_DIR)
+    the dot color before render.
+
+    On hosted, anything that requires per-user server state (YouTube
+    publishing OAuth, channel analytics, saved projects) is marked as
+    "desktop only" — the hosted server is single-tenant; sharing one
+    YouTube channel or one project list across every visitor would leak
+    state. These features live in the desktop install where each user
+    has their own server."""
     youtube_api = youtube_research.health()
-    youtube_status = _youtube_connected()
-    projects = PROJECTS.all()[:200]
-    videos = [p for p in projects if p.get("kind") == project_store.KIND_VIDEO]
-    narrations = [p for p in projects if p.get("kind") == project_store.KIND_NARRATION]
 
     checks = [
         {
             "id": "browser_ai",
-            "label": "Browser AI engine",
+            "label": "In-browser AI (WebGPU)",
             "status": "check_client",
             "client_check": "webgpu",
             "required": True,
             "detail": "Llama 3.2 1B via WebGPU. Detecting browser support…",
-            "ready_detail": "Llama 3.2 1B ready (downloads ~1 GB on first use, cached after).",
+            "ready_detail": "Your browser supports WebGPU. The Llama 3.2 1B model (~1 GB) downloads to your browser on first use, then runs locally.",
             "missing_detail": "WebGPU not detected. Try Chrome, Edge, or any Chromium-based browser. Safari support is limited.",
             "actions": [],
         },
         {
             "id": "browser_voice",
-            "label": "Browser voice engine",
+            "label": "In-browser voice (Web Speech)",
             "status": "check_client",
             "client_check": "speech_synthesis",
             "required": True,
             "detail": "System TTS via Web Speech API. Detecting voices…",
-            "ready_detail": "System TTS available — voices vary by OS and browser.",
+            "ready_detail": "Your browser exposes the Web Speech API — voices vary by OS and browser.",
             "missing_detail": "Web Speech API unavailable. Try a modern Chromium or Safari.",
             "actions": [],
         },
@@ -170,12 +171,12 @@ def _readiness_hosted():
         },
         {
             "id": "browser_video",
-            "label": "Browser MP4 renderer",
+            "label": "In-browser MP4 renderer",
             "status": "check_client",
             "client_check": "ffmpeg_wasm",
             "required": True,
             "detail": "ffmpeg.wasm renders MP4 in the browser. Detecting…",
-            "ready_detail": "ffmpeg.wasm ready. Multi-threaded rendering enabled.",
+            "ready_detail": "Your browser supports WebAssembly. ffmpeg.wasm will render MP4 locally.",
             "missing_detail": "Browser does not expose WebAssembly. Use a modern browser.",
             "actions": [],
         },
@@ -187,32 +188,33 @@ def _readiness_hosted():
             "detail": "Live keyword ranking available" if youtube_api.get("available") else "Optional. SEO works in candidate mode without a key.",
             "actions": [],
         },
+        # YouTube publishing OAuth, analytics upload, and project history are
+        # all server-side state that, on the hosted single-tenant server, would
+        # be shared across every visitor. They live in the desktop install
+        # where each user has their own local server.
         {
             "id": "youtube",
-            "label": "YouTube publishing",
-            "status": "ready" if youtube_status else "optional",
+            "label": "YouTube auto-publish",
+            "status": "desktop_only",
             "required": False,
-            "detail": "YouTube connected" if youtube_status else "Optional until you want scheduling/upload.",
-            "actions": ([] if youtube_status else
-                        [{"kind": "internal", "label": "Connect in Publish", "value": "tab:publish"}]),
+            "detail": "Scheduled YouTube uploads need a per-user OAuth token, which only the desktop install gives you. The hosted preview can build the video; the desktop app uploads it.",
+            "actions": [{"kind": "link", "label": "Get the desktop app", "value": "/pricing"}],
         },
         {
             "id": "insights",
-            "label": "Channel intelligence",
-            "status": "ready" if insights else "optional",
+            "label": "Channel analytics",
+            "status": "desktop_only",
             "required": False,
-            "detail": "Analytics are feeding ideas and titles" if insights else "Optional. Upload analytics later for smarter recommendations.",
-            "actions": ([] if insights else
-                        [{"kind": "internal", "label": "Upload analytics CSV", "value": "tab:insights"}]),
+            "detail": "Analytics CSV upload feeds personalized title and topic recommendations. Desktop-only so your channel data stays on your machine.",
+            "actions": [{"kind": "link", "label": "Get the desktop app", "value": "/pricing"}],
         },
         {
             "id": "demo",
-            "label": "Demo workflow",
-            "status": "ready" if videos else "optional",
+            "label": "Saved projects",
+            "status": "desktop_only",
             "required": False,
-            "detail": f"{len(videos)} rendered video(s), {len(narrations)} narration(s) saved" if videos or narrations else "No finished videos yet. Load the demo workflow to see what a finished package looks like.",
-            "actions": ([] if videos else
-                        [{"kind": "internal", "label": "Load demo workflow", "value": "demo:reddit"}]),
+            "detail": "Your renders save to disk on the desktop install. The hosted preview is a try-before-you-buy demo — start a render here, finish it locally.",
+            "actions": [{"kind": "link", "label": "Get the desktop app", "value": "/pricing"}],
         },
     ]
     return jsonify({
