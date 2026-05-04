@@ -4,6 +4,10 @@ function forceReadableButtons(root = document) {
     ? root.querySelectorAll('button, a.btn, a.cta, .btn, .tab-btn, .filter-btn, .dur-btn, .publish-pill, .iconbtn')
     : [];
   buttons.forEach(el => {
+    // Skip buttons that explicitly opt out of the readable-text override.
+    // .launch-action.primary uses dark text on a teal fill (CTA pattern)
+    // and the white-text default would tank its contrast.
+    if (el.classList.contains('launch-action') && el.classList.contains('primary')) return;
     const isPrimary = el.classList.contains('btn') && !el.classList.contains('secondary');
     if (isPrimary) {
       el.style.setProperty('color', '#f4f8f5', 'important');
@@ -487,11 +491,17 @@ async function refreshOllama() {
   // On the hosted PWA there is no local Ollama — inference runs in-browser via
   // WebLLM. Showing "ollama offline" with a red dot makes the app look broken
   // to first-time visitors. Detect hosted mode via hostname and surface a
-  // neutral "browser mode" badge instead.
+  // neutral "browser mode" badge instead — set this BEFORE the fetch so
+  // the word "ollama" never flashes on screen during the first paint.
   const host = (window.location && window.location.hostname) || '';
   const isHosted = /\.onrender\.com$/i.test(host)
     || /(^|\.)phantomline\.(xyz|com|app)$/i.test(host)
     || (host && host !== 'localhost' && host !== '127.0.0.1');
+  if (isHosted) {
+    badge.classList.remove('bad'); badge.classList.remove('ok');
+    text.textContent = 'browser mode';
+    return; // skip /api/models fetch entirely on hosted
+  }
   try {
     const r = await fetch('/api/models');
     const d = await r.json();
@@ -505,21 +515,13 @@ async function refreshOllama() {
     } else if (d.ok) {
       badge.classList.add('bad'); badge.classList.remove('ok');
       text.textContent = 'ollama · no models installed';
-    } else if (isHosted) {
-      badge.classList.remove('bad'); badge.classList.remove('ok');
-      text.textContent = 'browser mode';
     } else {
       badge.classList.add('bad'); badge.classList.remove('ok');
       text.textContent = 'ollama offline';
     }
   } catch (e) {
-    if (isHosted) {
-      badge.classList.remove('bad'); badge.classList.remove('ok');
-      text.textContent = 'browser mode';
-    } else {
-      badge.classList.add('bad'); badge.classList.remove('ok');
-      text.textContent = 'ollama offline';
-    }
+    badge.classList.add('bad'); badge.classList.remove('ok');
+    text.textContent = 'ollama offline';
   }
 }
 
@@ -1961,7 +1963,11 @@ async function runLaunchReadinessCheck() {
   if (btn) btn.disabled = true;
   $('launchReadinessText').textContent = 'Checking Ollama, voices, Forge, YouTube, analytics, and saved projects...';
   try {
-    const d = await apiJson('/api/launch/readiness');
+    // Forward ?mode=hosted/local from the page URL so dev can preview the
+    // hosted checklist from localhost without spoofing the host header.
+    const pageMode = new URLSearchParams(window.location.search).get('mode');
+    const url = pageMode ? `/api/launch/readiness?mode=${encodeURIComponent(pageMode)}` : '/api/launch/readiness';
+    const d = await apiJson(url);
     renderLaunchReadiness(d);
   } catch (e) {
     $('launchReadinessText').textContent = e.message || 'Readiness check failed.';
@@ -3799,6 +3805,130 @@ $('publishConnectYouTubeBtn').addEventListener('click', () => { window.open('/ap
 $('connectionsYoutubeBtn').addEventListener('click', () => { window.open('/api/youtube/connect', '_blank'); });
 $('publishVideoProject').addEventListener('change', updatePublishPreview);
 $('publishTitle').addEventListener('input', updatePublishPreview);
+
+/* -------- Thumbnail generator (Publish > Compose) ----------------------- */
+/* Generates 4 thumbnail variants from the publishTitle, lets user pick one,
+ * stores the selection on window so the publish payload can attach it.
+ * Uses /api/thumbnail/{presets,batch}; falls back to PIL composition if no
+ * AI image source is reachable (server side handles that). */
+let _thumbPresetsLoaded = false;
+async function _loadThumbPresets() {
+  if (_thumbPresetsLoaded) return;
+  try {
+    const r = await fetch('/api/thumbnail/presets');
+    const d = await r.json();
+    if (d.ok && Array.isArray(d.presets)) {
+      const sel = $('thumbStyle');
+      d.presets.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.key;
+        opt.textContent = p.label;
+        sel.appendChild(opt);
+      });
+    }
+  } catch (e) { /* keep auto-only dropdown */ }
+  _thumbPresetsLoaded = true;
+}
+
+window.selectedThumbnail = null; // {b64, mode, preset, width, height, seed}
+
+function _renderThumbVariants(variants) {
+  const grid = $('thumbVariantsGrid');
+  grid.innerHTML = variants.map((v, i) => `
+    <button type="button" class="thumb-variant-btn" data-idx="${i}"
+      style="padding:0; border:2px solid transparent; border-radius:8px; cursor:pointer; background:#0a1722; overflow:hidden;">
+      <img src="data:image/png;base64,${v.png_b64}" alt="Variant ${i+1}"
+        style="width:100%; height:auto; display:block;" />
+      <div style="padding:6px 8px; font-size:11px; color:#7a96ad; text-align:left;">
+        ${escapeHtml(v.preset || 'auto')} · ${escapeHtml(v.mode || '')}${v.seed ? ` · seed ${v.seed}` : ''}
+      </div>
+    </button>
+  `).join('');
+  grid.querySelectorAll('.thumb-variant-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx, 10);
+      const v = variants[idx];
+      window.selectedThumbnail = {
+        b64: v.png_b64, mode: v.mode, preset: v.preset,
+        width: v.width, height: v.height, seed: v.seed,
+      };
+      grid.querySelectorAll('.thumb-variant-btn').forEach(b => {
+        b.style.borderColor = b === btn ? '#19e0c2' : 'transparent';
+      });
+      $('thumbSelectedRow').style.display = '';
+      $('thumbSelectedPreview').src = `data:image/png;base64,${v.png_b64}`;
+      $('thumbSelectedMeta').textContent =
+        `${v.width}x${v.height} · ${v.preset || 'auto'} · ${v.mode}${v.fallback_reason ? ' (' + v.fallback_reason + ')' : ''}`;
+      $('thumbStatus').textContent = 'Selected';
+      toast('Thumbnail attached to post');
+    });
+  });
+}
+
+async function generateThumbnails() {
+  const title = ($('publishTitle').value || '').trim();
+  const projectId = ($('publishVideoProject')?.value || '').trim();
+  const status = $('thumbStatusLine');
+  // Title comes from Create Video → autofills here, so missing title means
+  // no video has been selected yet. Be explicit — that's the gate.
+  if (!projectId && !title) {
+    toast('Pick a finished video above first', true);
+    $('publishVideoProject')?.focus();
+    return;
+  }
+  const btn = $('thumbGenerateBtn');
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = 'Generating...';
+  status.textContent = projectId
+    ? 'Reading your script + scenes, then rendering 4 thumbnails grounded in that story — 30-50 sec.'
+    : 'Rendering 4 variants from your title — 20-40 sec on first run.';
+  try {
+    const r = await fetch('/api/thumbnail/batch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        title,
+        aspect: $('thumbAspect').value || '16:9',
+        style: 'auto',
+        count: 4,
+        // Server uses this to fetch the bundle's script + scene plan and
+        // build a story-specific enhanced prompt instead of guessing from
+        // the title alone.
+        project_id: projectId,
+        enhance_prompt: true,
+      }),
+    });
+    const d = await r.json();
+    if (!d.ok) {
+      status.textContent = d.error || 'Generation failed.';
+      toast(d.error || 'Thumbnail generation failed', true);
+      return;
+    }
+    const fromScript = d.script_used ? ' (specific to your video script)' : '';
+    status.textContent = `${d.count} variants ready${fromScript} — click one to attach to this post.`;
+    _renderThumbVariants(d.variants || []);
+  } catch (e) {
+    status.textContent = e.message || 'Network error.';
+    toast('Thumbnail request failed: ' + (e.message || e), true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+$('thumbGenerateBtn').addEventListener('click', generateThumbnails);
+$('thumbDownloadBtn').addEventListener('click', () => {
+  if (!window.selectedThumbnail) return;
+  const a = document.createElement('a');
+  a.href = `data:image/png;base64,${window.selectedThumbnail.b64}`;
+  const safeTitle = ($('publishTitle').value || 'thumbnail').replace(/[^a-z0-9_-]+/gi, '_').slice(0, 60);
+  a.download = `${safeTitle}.png`;
+  document.body.appendChild(a); a.click(); a.remove();
+});
+// Lazy-load presets when the user first opens the Publish tab.
+document.querySelector('.tab-btn[data-tab="publish"]')?.addEventListener('click', _loadThumbPresets);
+/* ------------------------------------------------------------------------ */
+
 $('publishCaption').addEventListener('input', updatePublishPreview);
 $('publishTags').addEventListener('input', updatePublishPreview);
 $('publishScheduledAt').addEventListener('input', renderPublishReadinessChecklist);

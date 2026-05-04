@@ -54,7 +54,7 @@
           <div id="notificationList" class="notification-list"></div>
         </div>
       </div>
-      <div id="ollamaBadge" class="ollama-badge"><span class="pulse"></span> <span id="ollamaText">checking ollama...</span></div>
+      <div id="ollamaBadge" class="ollama-badge"><span class="pulse"></span> <span id="ollamaText">checking…</span></div>
     </div>
   </header>
 
@@ -1378,6 +1378,35 @@
                 <label for="publishVideoProject">Finished Phantomline video</label>
                 <select id="publishVideoProject"><option value="">- choose a rendered MP4 -</option></select>
                 <div class="hint">When Make Video finishes, Phantomline auto-selects the new MP4 here.</div>
+              </div>
+              <div class="publish-card">
+                <div class="make-section-title"><strong>Thumbnail</strong><span id="thumbStatus">Auto from your video</span></div>
+                <div class="hint" style="margin-bottom:8px;">
+                  Reads the script + scenes of the video selected above and generates 4 thumbnails specific to that story. Click one to attach it.
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px;">
+                  <select id="thumbAspect" style="flex:0 0 auto; max-width:140px;">
+                    <option value="16:9" selected>16:9 (YouTube)</option>
+                    <option value="9:16">9:16 (Shorts)</option>
+                    <option value="1:1">1:1 (Square)</option>
+                  </select>
+                  <button id="thumbGenerateBtn" class="btn secondary" type="button" style="flex:0 0 auto; margin-left:auto;">Generate 4 thumbnails</button>
+                </div>
+                <div id="thumbStatusLine" class="hint" style="margin:8px 0; min-height:1em;"></div>
+                <div id="thumbVariantsGrid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;"></div>
+                <!-- Hidden style picker preserved so the existing JS doesn't break;
+                     auto-detected from the video's genre on the server side. -->
+                <select id="thumbStyle" style="display:none;"><option value="auto" selected>Auto</option></select>
+                <div id="thumbSelectedRow" style="display:none; margin-top:10px; padding:10px; border:1px solid #1f3447; border-radius:8px; background:#0a1722;">
+                  <div style="display:flex; gap:10px; align-items:center;">
+                    <img id="thumbSelectedPreview" alt="Selected thumbnail" style="width:120px; height:auto; border-radius:6px; flex:0 0 auto;" />
+                    <div style="flex:1;">
+                      <strong style="display:block; margin-bottom:4px;">Attached to this post</strong>
+                      <span class="hint" id="thumbSelectedMeta">--</span>
+                    </div>
+                    <button id="thumbDownloadBtn" class="btn secondary" type="button" style="flex:0 0 auto;">Download PNG</button>
+                  </div>
+                </div>
               </div>
               <div class="publish-card">
                 <div class="make-section-title"><strong>Caption / Description</strong><span><span id="publishCaptionCount">0</span> / 5000</span></div>

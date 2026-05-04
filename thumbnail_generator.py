@@ -655,6 +655,83 @@ def enhance_prompt_with_ollama(title: str, *, preset_name: str = "faceless_story
     return text or None
 
 
+def _build_enhance_user_prompt(title: str, preset_name: str, subject_hint: str) -> str:
+    """Shared user-side enhance prompt assembly so the Ollama and Pollinations
+    text paths stay in lockstep."""
+    preset = get_preset(preset_name)
+    user_prompt = (
+        f"Thumbnail concept: {title.strip()}\n"
+        f"Niche: {preset['label']}\n"
+        f"Subject placement direction: {preset['subject_placement']}\n"
+        f"Atmosphere/composition baseline: {preset['composition_inject']}\n"
+    )
+    if subject_hint.strip():
+        user_prompt += f"User-supplied subject hint (must respect): {subject_hint.strip()}\n"
+    user_prompt += "\nWrite the enhanced prompt now."
+    return user_prompt
+
+
+# text.pollinations.ai is the free GET-based text endpoint that mirrors
+# OpenAI's chat — same models (gpt-4o-mini, etc.), no API key required.
+# We use it as the hosted-mode fallback when Ollama is unreachable so
+# user-supplied custom prompts still get the cinematography-rich expansion.
+_POLLINATIONS_TEXT_BASE = "https://text.pollinations.ai/"
+
+
+def enhance_prompt_with_pollinations_text(title: str, *, preset_name: str = "faceless_story",
+                                          subject_hint: str = "",
+                                          model: str = "openai",
+                                          timeout: float = 25.0) -> str | None:
+    """Free hosted-mode prompt enhancer using text.pollinations.ai. Same
+    contract as enhance_prompt_with_ollama: returns enhanced text or None.
+    Used as a fallback when Ollama isn't reachable (i.e. on phantomline.xyz
+    where there is no local LLM)."""
+    from urllib.parse import quote
+    user_prompt = _build_enhance_user_prompt(title, preset_name, subject_hint)
+    # POST is more reliable than GET for prompts > a few hundred chars.
+    try:
+        res = requests.post(
+            _POLLINATIONS_TEXT_BASE,
+            json={
+                "messages": [
+                    {"role": "system", "content": _ENHANCE_SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "model": model,
+                "private": "true",
+            },
+            timeout=timeout,
+        )
+        if not res.ok:
+            return None
+        text = (res.text or "").strip()
+    except Exception:
+        return None
+    if not text:
+        return None
+    text = re.sub(r"^(here'?s?|sure|okay)[,:\s]+.*?$", "", text, flags=re.IGNORECASE | re.MULTILINE).strip()
+    text = text.strip().strip('"').strip("'")
+    if len(text) > 1400:
+        text = text[:1400].rsplit(" ", 1)[0]
+    return text or None
+
+
+def enhance_prompt_best_available(title: str, *, preset_name: str = "faceless_story",
+                                  subject_hint: str = "") -> str | None:
+    """Best-available prompt enhancement. Tries local Ollama first
+    (free + private + no rate limit), then falls back to text.pollinations.ai
+    (free public endpoint). Returns None only if both fail — caller then
+    uses the deterministic forge_thumbnail_prompt baseline."""
+    enhanced = enhance_prompt_with_ollama(
+        title, preset_name=preset_name, subject_hint=subject_hint
+    )
+    if enhanced:
+        return enhanced
+    return enhance_prompt_with_pollinations_text(
+        title, preset_name=preset_name, subject_hint=subject_hint
+    )
+
+
 def generate_pollinations_background(title: str, *, aspect: str = "16:9",
                                      preset_name: str = "faceless_story",
                                      subject_hint: str = "",
@@ -682,7 +759,10 @@ def generate_pollinations_background(title: str, *, aspect: str = "16:9",
 
     enhanced = None
     if enhance_prompt:
-        enhanced = enhance_prompt_with_ollama(
+        # Best-available chain: Ollama (local) → text.pollinations.ai (free
+        # public) → None. Hosted users without a local LLM still get prompt
+        # expansion via the free public endpoint.
+        enhanced = enhance_prompt_best_available(
             title, preset_name=preset_name, subject_hint=subject_hint
         )
 

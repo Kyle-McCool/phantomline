@@ -1925,6 +1925,191 @@ def terms_page():
     return render_template("terms.html")
 
 
+# ---------------------------------------------------------------------------
+# Friendly install pages for the optional power-user engines (Ollama, Kokoro,
+# Forge). The hosted readiness checklist links to /install/<tool> instead of
+# raw GitHub READMEs so non-technical users get OS-detected one-liners, a
+# Claude Code paste-prompt, and manual steps as fallback. Quality features
+# stay accessible without dumping users into a developer README.
+# ---------------------------------------------------------------------------
+INSTALL_TOOLS = {
+    "ollama": {
+        "label": "Ollama",
+        "subtitle": "Local LLM runtime — unlocks bigger models (Llama 3.1 8B, Mistral, Qwen) than the in-browser Llama 3.2 1B.",
+        # Direct vendor download — surfaced as the prominent top CTA on the
+        # install page. Ollama ships a real signed installer per OS, so this
+        # is the genuinely-easiest path (the 1-line install is for power users).
+        "downloads": [
+            {"os": "Windows", "url": "https://ollama.com/download/OllamaSetup.exe",
+             "label": "Download OllamaSetup.exe", "size": "~600 MB"},
+            {"os": "macOS", "url": "https://ollama.com/download/Ollama-darwin.zip",
+             "label": "Download Ollama for macOS", "size": "~250 MB"},
+            {"os": "Linux", "url": "https://ollama.com/download/linux",
+             "label": "Linux install instructions", "size": "script"},
+        ],
+        "windows_oneliner": (
+            "winget install Ollama.Ollama; "
+            "Start-Sleep -Seconds 3; ollama pull llama3.1"
+        ),
+        "unix_oneliner": (
+            "curl -fsSL https://ollama.com/install.sh | sh && "
+            "ollama pull llama3.1"
+        ),
+        "claude_prompt": (
+            "Install Ollama on this machine and pull the llama3.1 model so I can use it with "
+            "Phantomline.\n\n"
+            "1. Detect my OS (Windows / macOS / Linux).\n"
+            "2. Install Ollama using the official installer (winget on Windows, the install.sh "
+            "script on macOS/Linux, or download the .dmg/.exe if scripts aren't available).\n"
+            "3. Wait for the Ollama daemon to start (it runs at http://localhost:11434).\n"
+            "4. Run `ollama pull llama3.1` to download the default Phantomline model "
+            "(~4.7 GB).\n"
+            "5. Verify by running `ollama list` and confirming llama3.1 appears.\n"
+            "6. Tell me when it's done so I can reload http://localhost:5000/app and see it "
+            "marked READY."
+        ),
+        "manual_steps": [
+            {"title": "Download the installer",
+             "body": "Go to <a href=\"https://ollama.com/download\" target=\"_blank\" rel=\"noopener\">ollama.com/download</a> and grab the build for your OS (Windows .exe, macOS .dmg, or Linux script).",
+             "command": "",
+             "screenshot": "ollama-1-download.png"},
+            {"title": "Run the installer",
+             "body": "Double-click the .exe / .dmg, or pipe the Linux script into sh. Default options are fine. After install, Ollama runs as a background service — you'll see a small llama icon in your system tray.",
+             "command": "curl -fsSL https://ollama.com/install.sh | sh",
+             "screenshot": "ollama-2-installer.png"},
+            {"title": "Pull the default model",
+             "body": "Open a terminal/PowerShell after install and run the command below. Llama 3.1 is ~4.7 GB so this takes 5-15 min depending on your connection.",
+             "command": "ollama pull llama3.1",
+             "expected": "pulling manifest\npulling 6a0746a1ec1a... 100% ▕████████▏ 4.7 GB\npulling 4fa551d4f938... 100% ▕████████▏  12 KB\nverifying sha256 digest\nwriting manifest\nsuccess",
+             "screenshot": "ollama-3-pull.png"},
+        ],
+        "verify_text": "Run this in a terminal — it should list llama3.1 (size ~4.7 GB).",
+        "verify_command": "ollama list",
+    },
+    "kokoro": {
+        "label": "Kokoro voices",
+        "subtitle": "High-quality neural TTS — meaningfully better narration than Web Speech, especially for long-form.",
+        # No first-party installer for Kokoro (it's a Python package). Direct
+        # users to Python first, since that's the actual prerequisite.
+        "downloads": [
+            {"os": "Windows", "url": "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe",
+             "label": "Download Python 3.11 for Windows", "size": "~25 MB"},
+            {"os": "macOS", "url": "https://www.python.org/ftp/python/3.11.9/python-3.11.9-macos11.pkg",
+             "label": "Download Python 3.11 for macOS", "size": "~40 MB"},
+            {"os": "Linux", "url": "https://www.python.org/downloads/source/",
+             "label": "Python source / package manager", "size": "varies"},
+        ],
+        "downloads_note": "Kokoro is a Python package — install Python 3.11 first, then run the 1-line install below to fetch Kokoro itself (~327 MB voice model included).",
+        "windows_oneliner": (
+            "py -3.11 -m pip install --upgrade kokoro soundfile; "
+            "py -3.11 -c \"from kokoro import KPipeline; KPipeline(lang_code='a')\""
+        ),
+        "unix_oneliner": (
+            "python3 -m pip install --upgrade kokoro soundfile && "
+            "python3 -c \"from kokoro import KPipeline; KPipeline(lang_code='a')\""
+        ),
+        "claude_prompt": (
+            "Install Kokoro TTS (high-quality neural text-to-speech) so Phantomline can use it "
+            "for narration.\n\n"
+            "1. Verify Python 3.10+ is installed (run `python --version` or `py -3.11 --version` "
+            "on Windows). If missing, install Python 3.11 from python.org or via Homebrew/apt.\n"
+            "2. Install pip packages: `pip install kokoro soundfile` (use `pip3` or "
+            "`py -3.11 -m pip install` if `pip` is wrong version).\n"
+            "3. On macOS, also `brew install espeak-ng`. On Debian/Ubuntu: `sudo apt install "
+            "espeak-ng`. Windows: skip — Kokoro will use its bundled phonemizer.\n"
+            "4. Trigger the first model download by running this Python: `from kokoro import "
+            "KPipeline; KPipeline(lang_code='a')` — pulls ~327 MB of weights from Hugging Face.\n"
+            "5. Verify by running: `python -c \"from kokoro import KPipeline; p = "
+            "KPipeline(lang_code='a'); print('Kokoro OK:', list(p.voices))\"` — should print a "
+            "list of voice IDs.\n"
+            "6. Tell me when done so I can reload Phantomline and see Kokoro voices appear in "
+            "the voice picker."
+        ),
+        "manual_steps": [
+            {"title": "Install Python 3.10 or newer",
+             "body": "Kokoro needs Python 3.10+. Check with <code>python --version</code>. If you don't have it: download from <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (Windows/macOS) or <code>sudo apt install python3.11</code> (Linux).",
+             "command": "python --version"},
+            {"title": "Install Kokoro and audio deps",
+             "body": "From any terminal — pip will fetch the Kokoro package and the soundfile audio writer.",
+             "command": "pip install kokoro soundfile"},
+            {"title": "(macOS / Linux only) Install espeak-ng",
+             "body": "Kokoro's phonemizer needs espeak-ng on Unix. macOS: <code>brew install espeak-ng</code>. Debian/Ubuntu: <code>sudo apt install espeak-ng</code>. <a href=\"https://brew.sh\" target=\"_blank\" rel=\"noopener\">Get Homebrew</a> if you don't have it.",
+             "command": "brew install espeak-ng   # macOS\nsudo apt install espeak-ng   # Linux"},
+            {"title": "Pre-download the voice model",
+             "body": "First Kokoro use pulls ~327 MB of weights. Doing it once now means your first narration is instant.",
+             "command": "python -c \"from kokoro import KPipeline; KPipeline(lang_code='a')\""},
+        ],
+        "verify_text": "Should print a list of voice IDs (af_bella, af_nicole, etc.) without errors.",
+        "verify_command": "python -c \"from kokoro import KPipeline; p = KPipeline(lang_code='a'); print(list(p.voices))\"",
+    },
+    "forge": {
+        "label": "Forge (Stable Diffusion)",
+        "subtitle": "Local AI image generation — full control over scene art, no rate limits, no per-image cost.",
+        "downloads": [
+            {"os": "Windows", "url": "https://git-scm.com/download/win",
+             "label": "Download Git for Windows", "size": "~50 MB"},
+            {"os": "macOS", "url": "https://git-scm.com/download/mac",
+             "label": "Git for macOS (via brew/installer)", "size": "varies"},
+            {"os": "Linux", "url": "https://git-scm.com/download/linux",
+             "label": "Git for Linux (apt/dnf)", "size": "varies"},
+        ],
+        "downloads_note": "Forge isn't a single .exe — it's a Python project you clone with Git. Install Git first, then run the 1-line install below. First launch downloads ~6 GB of model weights (one-time, takes 15-30 min on a typical connection).",
+        "windows_oneliner": (
+            "git clone https://github.com/lllyasviel/stable-diffusion-webui-forge "
+            "$HOME\\forge; cd $HOME\\forge; .\\webui-user.bat"
+        ),
+        "unix_oneliner": (
+            "git clone https://github.com/lllyasviel/stable-diffusion-webui-forge "
+            "~/forge && cd ~/forge && ./webui.sh --api"
+        ),
+        "claude_prompt": (
+            "Install Stable Diffusion WebUI Forge so Phantomline can use it for local AI image "
+            "generation.\n\n"
+            "1. Detect my OS and confirm Git and Python 3.10+ are installed. If missing, "
+            "install them first (Git from git-scm.com, Python from python.org).\n"
+            "2. Clone the repo into ~/forge (or %USERPROFILE%\\forge on Windows): "
+            "`git clone https://github.com/lllyasviel/stable-diffusion-webui-forge ~/forge`.\n"
+            "3. cd into the directory.\n"
+            "4. On Windows: run `webui-user.bat`. On macOS/Linux: run `./webui.sh --api` (the "
+            "--api flag is required so Phantomline can call it). First launch downloads ~4 GB of "
+            "Python deps and ~6 GB of SDXL base model — can take 15-30 min on first run.\n"
+            "5. Once it logs 'Running on local URL: http://127.0.0.1:7861', leave the terminal "
+            "open. Forge needs to keep running for Phantomline to use it.\n"
+            "6. Verify by opening http://127.0.0.1:7861 in a browser — you should see the Forge "
+            "UI. Then tell me so I can reload Phantomline."
+        ),
+        "manual_steps": [
+            {"title": "Install Git and Python 3.10+",
+             "body": "Forge needs both. Git: <a href=\"https://git-scm.com/downloads\" target=\"_blank\" rel=\"noopener\">git-scm.com/downloads</a>. Python: <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (3.10 or 3.11 — NOT 3.12+, Forge has compatibility issues with 3.12).",
+             "command": "git --version && python --version"},
+            {"title": "Clone the Forge repo",
+             "body": "Pick a folder with ~20 GB of free space (the model weights are big). Source: <a href=\"https://github.com/lllyasviel/stable-diffusion-webui-forge\" target=\"_blank\" rel=\"noopener\">github.com/lllyasviel/stable-diffusion-webui-forge</a>.",
+             "command": "git clone https://github.com/lllyasviel/stable-diffusion-webui-forge ~/forge"},
+            {"title": "Launch with API enabled",
+             "body": "The <code>--api</code> flag exposes Forge's REST endpoint on port 7861, which is what Phantomline calls. Windows users just double-click <code>webui-user.bat</code> (API is on by default).",
+             "command": "cd ~/forge && ./webui.sh --api   # macOS/Linux\n# Windows: just double-click webui-user.bat"},
+            {"title": "Wait for first-run downloads (~6 GB)",
+             "body": "First launch downloads SDXL base + dependencies. Watch for the line <code>Running on local URL: http://127.0.0.1:7861</code> — that means it's ready.",
+             "command": ""},
+        ],
+        "verify_text": "Open <a href=\"http://127.0.0.1:7861\" target=\"_blank\" rel=\"noopener\">http://127.0.0.1:7861</a> in your browser. You should see the Forge UI. Keep the terminal window open while you use Phantomline.",
+        "verify_command": "curl http://127.0.0.1:7861/sdapi/v1/options",
+    },
+}
+
+
+@app.route("/install/<tool>")
+def install_page(tool):
+    """Friendly OS-detected install guide for an optional Phantomline engine
+    (Ollama, Kokoro, Forge). Replaces raw GitHub-README links from the
+    readiness checklist with a one-line install script, a Claude Code
+    paste-prompt, and manual steps as fallback."""
+    tool_data = INSTALL_TOOLS.get(tool.lower())
+    if not tool_data:
+        return jsonify({"ok": False, "error": "Unknown install target"}), 404
+    return render_template("install.html", tool=tool_data)
+
+
 @app.route("/alternatives")
 def alternatives_hub():
     """Hub page listing every competitor we have an alternatives page for.
@@ -4114,16 +4299,107 @@ def api_thumbnail_generate():
     })
 
 
+def _read_project_script_context(project_id: str) -> tuple[str, str, str]:
+    """For a given video project_id, walk to its bundle and return
+    (title, script_text, scenes_summary) — the raw material the thumbnail
+    generator should ground its image prompt in.
+
+    Returns ("", "", "") if no project / bundle / script can be found.
+    Cap script text at 4 KB and scenes summary at 2 KB to keep the
+    enhanced LLM prompt under provider context limits.
+    """
+    if not project_id:
+        return "", "", ""
+    project = PROJECTS.get(project_id)
+    if not project:
+        return "", "", ""
+    title = (project.get("title") or "").strip()
+
+    # If the user picked a video, find its parent bundle so we can pull
+    # the script + scene plan from the linked artifacts.
+    bundle = PROJECTS.bundle_for(project_id) or (
+        project if project.get("kind") == project_store.KIND_BUNDLE else None
+    )
+    script_text = ""
+    scenes_text = ""
+    if bundle:
+        expanded = PROJECTS.expand_bundle(bundle["id"]) or {}
+        children = expanded.get("children") or {}
+        # Prefer the long script if both short_script and script exist.
+        for role in ("script", "short_script"):
+            child = children.get(role)
+            if not child:
+                continue
+            script_path = PROJECTS.file_path(child["id"], role)
+            if script_path and script_path.exists():
+                try:
+                    script_text = script_path.read_text(encoding="utf-8", errors="ignore")[:4000]
+                    break
+                except OSError:
+                    pass
+        # Scene plan: includes per-scene narration + visual prompt.
+        plan_child = children.get("video_plan") or children.get("timeline")
+        if plan_child:
+            plan_path = PROJECTS.file_path(plan_child["id"], plan_child.get("kind", "video_plan"))
+            if plan_path and plan_path.exists():
+                try:
+                    import json as _json
+                    plan = _json.loads(plan_path.read_text(encoding="utf-8", errors="ignore"))
+                    scenes = plan.get("scenes") or []
+                    # Compress to "narration → visual_prompt" lines so the
+                    # enhancer LLM gets the pacing without raw JSON noise.
+                    lines = []
+                    for s in scenes[:12]:
+                        n = (s.get("narration") or "").strip()[:200]
+                        v = (s.get("video_prompt") or "").strip()[:200]
+                        if n or v:
+                            lines.append(f"- {n} | {v}")
+                    scenes_text = "\n".join(lines)[:2000]
+                except Exception:
+                    pass
+    return title, script_text, scenes_text
+
+
+def _build_subject_hint_from_script(title: str, script_text: str, scenes_text: str,
+                                    user_hint: str = "") -> str:
+    """Combine the user's optional hint with auto-extracted story context
+    so the enhancer LLM has concrete material to anchor the image on.
+    Soft-capped — the enhancer truncates to 1400 chars anyway."""
+    parts = []
+    if user_hint.strip():
+        parts.append(user_hint.strip())
+    if script_text:
+        # First 800 chars of the script captures the hook and a chunk of
+        # the rising action — enough for an image-direction LLM to pick a
+        # specific moment to depict.
+        parts.append("Story (excerpt): " + script_text[:800])
+    if scenes_text:
+        parts.append("Scene beats:\n" + scenes_text[:600])
+    return "\n\n".join(parts)[:3000]
+
+
 @app.route("/api/thumbnail/batch", methods=["POST"])
 def api_thumbnail_batch():
     """Generate N thumbnail variants in one request so the user has real
     options to pick from. Same body as /api/thumbnail/generate plus an
     optional `count` (default 4, max 8). Returns an array of variants
-    with their own `png_b64`, `mode`, `seed`."""
+    with their own `png_b64`, `mode`, `seed`.
+
+    When `project_id` is provided, the server reads the linked video's
+    script and scene plan and feeds them into the prompt enhancer so
+    every variant is grounded in the actual story (specific characters,
+    settings, dramatic moments) instead of guessing from the title."""
     data = request.get_json(force=True) or {}
-    title = (data.get("title") or "").strip()
+    project_id = (data.get("project_id") or "").strip()
+
+    # Pull script context first so we can derive title from the project
+    # if the caller didn't supply one (the publish form sometimes
+    # auto-fills async).
+    project_title, script_text, scenes_text = _read_project_script_context(project_id)
+    title = (data.get("title") or "").strip() or project_title
+
     if not title:
-        return jsonify({"ok": False, "error": "Provide a title."}), 400
+        return jsonify({"ok": False, "error": "Provide a title or pick a finished video."}), 400
     if len(title) > 200:
         return jsonify({"ok": False, "error": "Title exceeds 200 characters."}), 400
 
@@ -4142,6 +4418,13 @@ def api_thumbnail_batch():
     text_overlay_raw = data.get("text_overlay")
     text_overlay = None if text_overlay_raw is None else bool(text_overlay_raw)
 
+    # Build the script-aware subject hint. This becomes the "User-supplied
+    # subject hint (must respect)" line the enhancer LLM sees.
+    user_hint = (data.get("subject_hint") or "").strip()[:600]
+    enriched_hint = _build_subject_hint_from_script(
+        title, script_text, scenes_text, user_hint=user_hint,
+    ) if (script_text or scenes_text) else user_hint
+
     try:
         results = thumb_gen.generate_thumbnail_batch(
             title,
@@ -4150,7 +4433,7 @@ def api_thumbnail_batch():
             style=raw_style,
             genre=(data.get("genre") or "").strip()[:80],
             recipe=(data.get("recipe") or "").strip()[:80],
-            subject_hint=(data.get("subject_hint") or "").strip()[:200],
+            subject_hint=enriched_hint[:1900],  # downstream enhancer caps further
             subtitle=(data.get("subtitle") or "").strip()[:80],
             text_overlay=text_overlay,
             prefer_forge=bool(data.get("prefer_forge", True)),
@@ -4163,6 +4446,7 @@ def api_thumbnail_batch():
     return jsonify({
         "ok": True,
         "count": len(results),
+        "script_used": bool(script_text or scenes_text),
         "variants": [
             {
                 "png_b64": base64.b64encode(r["png_bytes"]).decode("ascii"),

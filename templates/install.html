@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Install {{ tool.label }} for Phantomline</title>
+<meta name="description" content="One-click install for {{ tool.label }} — power up Phantomline with {{ tool.subtitle }}." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<meta name="robots" content="noindex" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+<style>
+  .install-hero { padding:42px 24px 18px; max-width:820px; margin:0 auto; }
+  .install-hero h1 { font-size:34px; margin:0 0 6px; color:#19e0c2; }
+  .install-hero p.lead { color:#cdd6df; font-size:17px; margin:0 0 22px; }
+  .install-tabs { display:flex; gap:8px; margin:22px 0 14px; flex-wrap:wrap; }
+  .install-tabs button {
+    background:#0a1722; border:1px solid #1f3447; color:#cdd6df;
+    padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px;
+  }
+  .install-tabs button.active { background:#19e0c2; color:#0a1722; border-color:#19e0c2; font-weight:600; }
+  .install-block {
+    background:#0a1722; border:1px solid #1f3447; border-radius:10px;
+    padding:18px; margin-bottom:14px;
+  }
+  .install-block h3 { margin:0 0 8px; color:#19e0c2; font-size:16px; }
+  .install-block .step-num {
+    display:inline-block; width:24px; height:24px; border-radius:12px;
+    background:#19e0c2; color:#0a1722; text-align:center; line-height:24px;
+    font-weight:700; margin-right:8px; font-size:13px;
+  }
+  pre.cmd {
+    background:#020608; border:1px solid #1f3447; border-radius:6px;
+    padding:14px 16px; overflow-x:auto; color:#bee9d9; font-size:13px;
+    margin:10px 0; white-space:pre-wrap; word-break:break-all;
+  }
+  .copy-btn {
+    background:#19e0c2; color:#0a1722; border:none;
+    padding:6px 14px; border-radius:6px; cursor:pointer;
+    font-size:12px; font-weight:600; margin-left:6px;
+  }
+  .copy-btn:hover { background:#1ff5d4; }
+  .copy-btn.copied { background:#7ad6a8; }
+  .panel-grid { display:grid; grid-template-columns:1fr; gap:14px; }
+  @media (min-width: 720px) { .panel-grid { grid-template-columns:1fr 1fr; } }
+  .verify-row {
+    display:flex; gap:10px; align-items:center;
+    margin-top:12px; padding:10px 14px;
+    background:#06141d; border-radius:6px; border:1px solid #1f3447;
+  }
+  .back-link { color:#7a96ad; text-decoration:none; font-size:13px; }
+  .back-link:hover { color:#19e0c2; }
+  .install-options-tabs { display:flex; gap:0; border-bottom:1px solid #1f3447; margin-bottom:14px; }
+  .install-options-tabs button {
+    background:transparent; border:none; color:#7a96ad;
+    padding:10px 14px; cursor:pointer; font-size:14px; border-bottom:2px solid transparent;
+  }
+  .install-options-tabs button.active { color:#19e0c2; border-bottom-color:#19e0c2; }
+  .install-pane { display:none; }
+  .install-pane.active { display:block; }
+  .badge-os { display:inline-block; padding:2px 8px; background:#1f3447; color:#19e0c2; font-size:11px; border-radius:4px; margin-right:6px; }
+  .download-hero {
+    background:linear-gradient(180deg, #0c2a3a 0%, #07151c 100%);
+    border:1px solid #19e0c2;
+    border-radius:14px; padding:22px;
+    margin-bottom:22px;
+  }
+  .download-hero h2 { margin:0 0 4px; color:#fff; font-size:18px; }
+  .download-hero p.sub { margin:0 0 16px; color:#9bb1c1; font-size:13px; }
+  .download-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+  a.download-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:12px 20px; background:#19e0c2; color:#0a1722;
+    text-decoration:none; border-radius:8px; font-weight:700; font-size:14px;
+    transition:background 120ms, transform 60ms;
+  }
+  a.download-btn:hover { background:#1ff5d4; transform:translateY(-1px); }
+  a.download-btn.detected { box-shadow:0 0 0 3px rgba(25,224,194,0.35); }
+  a.download-btn.secondary {
+    background:transparent; border:1px solid #1f3447; color:#cdd6df;
+  }
+  a.download-btn.secondary:hover { border-color:#19e0c2; color:#19e0c2; background:rgba(25,224,194,0.05); }
+  .download-size { color:#7a96ad; font-weight:400; font-size:11px; }
+  .install-block a { color:#19e0c2; text-decoration:underline; }
+  .install-block a:hover { color:#1ff5d4; }
+  .install-block a.download-btn,
+  .install-block a.copy-btn { text-decoration:none; }
+  .install-block code { background:#020608; padding:1px 6px; border-radius:3px; color:#bee9d9; font-size:12px; }
+  .os-detected-pill { display:inline-block; padding:3px 10px; background:#19e0c2; color:#0a1722; font-size:11px; border-radius:10px; font-weight:700; margin-left:8px; }
+</style>
+</head>
+<body>
+<div class="install-hero">
+  <a class="back-link" href="/app">&larr; Back to Phantomline Studio</a>
+  <div id="mobileHint" style="display:none; margin-top:14px; padding:14px; background:#3a2f0c; border:1px solid #c9a93a; border-radius:8px; color:#fff8d4;">
+    <strong>You're on mobile.</strong> {{ tool.label }} can't be installed on a phone — it runs on your desktop or laptop. Open this page on your computer (<a href="/app" style="color:#ffe48a; text-decoration:underline;">phantomline.xyz/install/{{ tool.label.split()[0]|lower }}</a>) to continue.
+  </div>
+  <h1 style="margin-top:14px;">Install {{ tool.label }}</h1>
+  <p class="lead">{{ tool.subtitle }}</p>
+
+  {% if tool.downloads %}
+  <div class="download-hero">
+    <h2>Easiest path: download &amp; double-click<span id="osPill" class="os-detected-pill" style="display:none;">your OS detected</span></h2>
+    <p class="sub">{% if tool.downloads_note %}{{ tool.downloads_note }}{% else %}Pick the build for your OS. The installer is signed by the vendor — Windows SmartScreen / macOS Gatekeeper will let it run after a click-through.{% endif %}</p>
+    <div class="download-buttons" id="downloadButtons">
+      {% for d in tool.downloads %}
+      <a class="download-btn" data-os="{{ d.os }}" href="{{ d.url }}" target="_blank" rel="noopener">
+        <span>{{ d.label }}</span>
+        <span class="download-size">{{ d.size }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="install-options-tabs" role="tablist">
+    <button class="active" data-pane="claude">Open in Claude Code <span style="background:#19e0c2;color:#0a1722;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px;font-weight:700;">EASIEST</span></button>
+    <button data-pane="oneline">One-line install (terminal)</button>
+    <button data-pane="manual">Manual steps</button>
+  </div>
+
+  <!-- ONE-LINE INSTALL -->
+  <div id="pane-oneline" class="install-pane">
+    <div class="install-block">
+      <h3><span class="badge-os">Windows</span> PowerShell — paste & run</h3>
+      <pre class="cmd" id="cmdWin">{{ tool.windows_oneliner }}</pre>
+      <button class="copy-btn" data-copy="cmdWin">Copy</button>
+      <div style="margin-top:8px; color:#7a96ad; font-size:12px;">Open <strong>Windows Terminal</strong> or <strong>PowerShell</strong>, paste the line above, hit Enter. The script handles Python check, install, and model download.</div>
+    </div>
+    <div class="install-block">
+      <h3><span class="badge-os">macOS</span> <span class="badge-os">Linux</span> Terminal — paste & run</h3>
+      <pre class="cmd" id="cmdMac">{{ tool.unix_oneliner }}</pre>
+      <button class="copy-btn" data-copy="cmdMac">Copy</button>
+      <div style="margin-top:8px; color:#7a96ad; font-size:12px;">Open <strong>Terminal</strong>, paste, hit Enter.</div>
+    </div>
+  </div>
+
+  <!-- CLAUDE CODE PROMPT -->
+  <div id="pane-claude" class="install-pane active">
+    <div class="install-block">
+      <h3>Paste this into Claude Code (works in Cursor / Codex / Cline too)</h3>
+      <p style="color:#cdd6df; font-size:14px; margin:0 0 12px;">
+        Open <a href="https://claude.com/download" target="_blank" rel="noopener">Claude</a> (the desktop app or web), click <strong>+ New session</strong> → switch to the <strong>Code</strong> tab, then paste the prompt below as your first message. Claude does the install, downloads, and verification for you — no terminal commands you have to type yourself.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+        <a class="download-btn" href="https://claude.com/download" target="_blank" rel="noopener" style="font-size:13px; padding:10px 16px;">
+          <span>Get Claude (free)</span>
+        </a>
+        <a class="download-btn secondary" href="https://docs.claude.com/en/docs/claude-code/quickstart" target="_blank" rel="noopener" style="font-size:13px; padding:10px 16px;">
+          <span>Claude Code quickstart</span>
+        </a>
+      </div>
+      <pre class="cmd" id="cmdClaude">{{ tool.claude_prompt }}</pre>
+      <button class="copy-btn" data-copy="cmdClaude">Copy prompt</button>
+      <div style="margin-top:14px; padding:12px; background:#06141d; border-radius:6px; border:1px solid #1f3447;">
+        <strong style="color:#19e0c2; font-size:13px;">What Claude will do for you:</strong>
+        <ol style="color:#cdd6df; font-size:13px; margin:6px 0 0 18px; padding:0;">
+          <li>Detect your OS</li>
+          <li>Check whether prerequisites are installed (Python, Git, etc.)</li>
+          <li>Install anything missing</li>
+          <li>Install {{ tool.label }} and download model weights</li>
+          <li>Verify the install worked</li>
+          <li>Tell you when it's done</li>
+        </ol>
+        <div style="color:#7a96ad; font-size:12px; margin-top:6px;">
+          You'll see Claude ask for permission before running each install command. You can approve all or step through.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANUAL -->
+  <div id="pane-manual" class="install-pane">
+    {% for step in tool.manual_steps %}
+    <div class="install-block">
+      <h3><span class="step-num">{{ loop.index }}</span>{{ step.title }}</h3>
+      <p style="color:#cdd6df; font-size:14px; margin:0 0 8px;">{{ step.body | safe }}</p>
+      {% if step.command %}
+      <pre class="cmd" id="cmdManual{{ loop.index }}">{{ step.command }}</pre>
+      <button class="copy-btn" data-copy="cmdManual{{ loop.index }}">Copy</button>
+      {% endif %}
+      {% if step.expected %}
+      <details style="margin-top:10px;">
+        <summary style="cursor:pointer; color:#19e0c2; font-size:13px; padding:6px 0;">What you should see &raquo;</summary>
+        <pre class="cmd" style="background:#011018; border-color:#0d2230; color:#7adfb8;">{{ step.expected }}</pre>
+      </details>
+      {% endif %}
+      {% if step.screenshot %}
+      <div style="margin-top:10px; border:1px dashed #1f3447; border-radius:6px; padding:10px; background:#020c12;">
+        <img src="/static/install-screenshots/{{ step.screenshot }}" alt="Step {{ loop.index }} screenshot"
+             style="width:100%; max-width:540px; border-radius:4px; display:block;"
+             onerror="this.parentNode.innerHTML='<div style=&quot;color:#7a96ad; font-size:12px; text-align:center; padding:12px;&quot;>Screenshot coming soon</div>';" />
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="install-block" style="margin-top:24px; border-color:#19e0c2;">
+    <h3>Verify it worked</h3>
+    <p style="color:#cdd6df; font-size:14px; margin:0 0 10px;">{{ tool.verify_text | safe }}</p>
+    {% if tool.verify_command %}
+    <pre class="cmd" id="cmdVerify">{{ tool.verify_command }}</pre>
+    <button class="copy-btn" data-copy="cmdVerify">Copy</button>
+    {% endif %}
+    <div class="verify-row" style="margin-top:14px;">
+      <strong style="color:#19e0c2;">Then:</strong>
+      <span style="color:#cdd6df;">Reload <a href="/app" style="color:#19e0c2;">/app</a> &mdash; the readiness checklist will flip {{ tool.label }} to READY.</span>
+    </div>
+  </div>
+
+  <div style="margin-top:20px; padding:14px; background:#06141d; border-radius:8px; border:1px solid #1f3447;">
+    <strong style="color:#cdd6df;">Stuck?</strong>
+    <span style="color:#7a96ad; font-size:13px;"> Email <a href="mailto:support@phantomline.xyz" style="color:#19e0c2;">support@phantomline.xyz</a> with your OS and the error and we'll send you exact steps.</span>
+  </div>
+</div>
+
+<script src="{{ '/static/install.js' | versioned }}" defer></script>
+</body>
+</html>
