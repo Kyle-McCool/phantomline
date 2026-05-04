@@ -737,7 +737,7 @@ def generate_pollinations_background(title: str, *, aspect: str = "16:9",
                                      subject_hint: str = "",
                                      seed: int | None = None,
                                      enhance_prompt: bool = True,
-                                     timeout: float = 60.0) -> bytes:
+                                     timeout: float = 90.0) -> bytes:
     """Hit Pollinations.ai's free FLUX endpoint. Returns PNG bytes resized
     to the canonical thumbnail size. Raises RuntimeError on transport/HTTP
     failure so the caller can fall back to fal.ai or PIL.
@@ -1461,14 +1461,25 @@ def compose_thumbnail(title: str, background_png: bytes, *,
     use_text = preset["text_default"] if text_overlay is None else bool(text_overlay)
     feature_tags = list(feature_tags or [])
 
-    # Decision: if we have a real AI image AND the preset is text-light
-    # by default, use minimal-text mode. Otherwise poster mode.
-    if bg_is_ai_image and not use_text and not subtitle.strip() and not tagline.strip() and not category_badge.strip() and not brand_badge.strip() and not feature_tags:
+    # Composition routing:
+    #   text_overlay=False explicitly  → bare AI image, no overlay (escape hatch)
+    #   AI image + minimal-text preset → small slug overlay (story/horror/doc)
+    #   AI image + text-hero preset    → poster mode (listicle/explainer where text IS the hook)
+    #   No AI image                    → poster mode (text has to do all the work)
+    #
+    # The "no overlay" branch only fires when the caller explicitly opts out.
+    # Default behavior always composites at least a slug so the result is a
+    # usable YouTube thumbnail, not a bare cinematic still.
+    if text_overlay is False:
         out = BytesIO()
         bg.save(out, "PNG", optimize=True)
         return out.getvalue()
 
-    if bg_is_ai_image and not use_text:
+    if bg_is_ai_image and not preset["text_default"]:
+        # Story/horror/doc: small clean slug on top of the cinematic image.
+        # _compose_minimal_text auto-slugs the title via _shorten_for_overlay
+        # and respects preset["text_max_words"], so it stays under the 1of10
+        # research's "ultra-short text" budget.
         return _compose_minimal_text(
             bg, title, preset,
             subtitle=subtitle, tagline=tagline,

@@ -52,12 +52,12 @@
       </header>
 
       <h2>What Phantomline is</h2>
-      <p>Phantomline is a local-first AI video studio. It generates scripts, narration, captions, music beds, visual layers, MP4 exports, and YouTube publishing drafts — on your own machine. No per-render API fees. No usage caps you have to count against your project margin. License keys validate offline. The only thing on our servers is the marketing site.</p>
+      <p>Phantomline is a local-first AI video studio. It generates scripts, narration, captions, music beds, visual layers, MP4 exports, and YouTube publishing drafts, all on your own machine. No per-render API fees. No usage caps you have to count against your project margin. License keys validate offline. The only thing on our servers is the marketing site.</p>
 
       <h2>What runs locally</h2>
       <p>On the desktop install, the heavy AI work happens on your hardware:</p>
       <ul>
-        <li><strong>Ollama</strong> handles the language model — Llama 3.1 by default, but any model you can fit in your VRAM. Scripts, titles, descriptions, hooks.</li>
+        <li><strong>Ollama</strong> handles the language model: Llama 3.1 by default, but any model you can fit in your VRAM. Scripts, titles, descriptions, hooks.</li>
         <li><strong>Kokoro TTS</strong> handles narration. 16 voices ship with it. The model is ~330 MB on first run, then everything's local.</li>
         <li><strong>MusicGen</strong> generates ambient backing tracks via HuggingFace transformers. Crossfade-loops to any length you need.</li>
         <li><strong>ffmpeg</strong> assembles the final MP4. Industry standard, no Adobe license required.</li>
@@ -66,12 +66,12 @@
       <p>On the browser version (phantomline.xyz/app), the same pipeline runs in-browser via WebLLM (Llama 3.2 1B over WebGPU), Web Speech API for TTS, Web Audio for music, ffmpeg.wasm for MP4. After the first load, the whole thing is airplane-mode safe.</p>
 
       <h2>Why local-first matters</h2>
-      <p>The math on cloud-only AI video tools breaks at volume. Imagine you're shipping 30 videos a month — pretty normal for a faceless channel that wants to grow. At 4 cents a render across the script, voice, music, and caption pipeline (which is honestly cheap for a cloud stack), you're paying $1.20 per video, $36/month, on top of the subscriptions.</p>
+      <p>The math on cloud-only AI video tools breaks at volume. Imagine you're shipping 30 videos a month, which is pretty normal for a faceless channel that wants to grow. At 4 cents a render across the script, voice, music, and caption pipeline (which is honestly cheap for a cloud stack), you're paying $1.20 per video, $36/month, on top of the subscriptions.</p>
       <p>Now scale that to multi-channel. Five faceless niches, 30 videos each, and the API meter is $180/month. Pure overhead before anyone watches a video.</p>
       <p>Local AI inverts this. Once you've installed the models, every render is free. The hardware you already own does the work.</p>
 
       <h2>Why faceless YouTube specifically</h2>
-      <p>The faceless niche has a unique workflow profile. Creators ship volume — Reddit story channels can publish daily, listicle channels often post 3x a day. The bottleneck is rarely creative; it's pipeline cost and tool friction.</p>
+      <p>The faceless niche has a unique workflow profile. Creators ship volume. Reddit story channels can publish daily, listicle channels often post 3x a day. The bottleneck is rarely creative; it's pipeline cost and tool friction.</p>
       <p>General-purpose AI video tools (Pictory, InVideo, etc.) are designed for marketers making one explainer video a quarter. They're priced and shaped for that use case. Faceless creators get squeezed by per-export limits, watermark removal upcharges, and renew-or-die subscriptions.</p>
       <p>Phantomline is shaped for the volume use case from the start: render queues, schedule drafts, project bundles, channel-aware analytics, vidIQ-aware Optimize Library for republishing old uploads.</p>
 
