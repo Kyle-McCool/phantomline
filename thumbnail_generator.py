@@ -1482,16 +1482,10 @@ def _draw_text_with_stroke(draw: ImageDraw.ImageDraw,
                            stroke_fill: tuple[int, int, int] = (0, 0, 0),
                            shadow: bool = True) -> None:
     """Render text with a thick black outline + drop shadow — the YouTube
-    thumbnail typography signature. The outline keeps text readable over
-    any background; the shadow adds depth so it doesn't look pasted on.
-
-    Pillow's ImageDraw.text supports a `stroke_width` parameter that
-    handles the outline natively, which is dramatically faster than
-    manually drawing 8-direction copies."""
+    thumbnail typography signature. Used for subtitles/secondary text;
+    headlines route through _draw_text_premium for the cinematic look."""
     x, y = xy
     if shadow:
-        # Soft drop shadow — black, offset down-right, slightly larger
-        # stroke so it reads as a glow not a copy.
         shadow_offset = max(2, stroke_width // 2)
         draw.text(
             (x + shadow_offset, y + shadow_offset),
@@ -1509,6 +1503,117 @@ def _draw_text_with_stroke(draw: ImageDraw.ImageDraw,
         stroke_width=stroke_width,
         stroke_fill=stroke_fill,
     )
+
+
+def _draw_text_premium(target: "Image.Image",
+                       xy: tuple[int, int],
+                       text: str,
+                       font: ImageFont.FreeTypeFont,
+                       fill: tuple[int, int, int],
+                       stroke_width: int = 6,
+                       texture_strength: float = 0.32) -> None:
+    """Cinematic poster text: real Gaussian-blurred drop shadow +
+    procedural granite/concrete texture overlay on the letter fill +
+    edge inner-shadow. This is the EREBUS / IN THE CROWD look — text
+    that reads as carved/stamped stone rather than flat painted-on.
+
+    Key trick vs the old _draw_distressed_text: texture is applied as
+    a MULTIPLY darken on RGB channels only, with alpha untouched. So
+    letter shapes stay 100% intact (no "PAGE -> PAGF" letter-eating)
+    but the fill gets a speckled granite finish that catches the eye.
+
+    `texture_strength` 0.0 = flat fill (clean stencil); 1.0 = heavy
+    weathered look. Default 0.32 is the EREBUS-grade speckle that
+    survives at YouTube grid sizes without going noisy.
+    """
+    x, y = xy
+    bbox = ImageDraw.Draw(target).textbbox((0, 0), text, font=font)
+    text_w = bbox[2] - bbox[0]
+    text_h = bbox[3] - bbox[1]
+    pad = stroke_width * 3 + 32  # extra room for the soft shadow
+
+    layer_w = text_w + pad * 2
+    layer_h = text_h + pad * 2
+
+    # 1. SHADOW LAYER — soft Gaussian-blurred shadow under the text.
+    # Multiple blur passes give the "expensive" shadow look (close +
+    # far layers, like a CSS multi-shadow).
+    shadow_layer = Image.new("RGBA", (layer_w, layer_h), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow_layer)
+    # Far soft shadow for atmospheric depth.
+    sd.text((pad + 6, pad + 8), text, font=font, fill=(0, 0, 0, 200),
+            stroke_width=stroke_width, stroke_fill=(0, 0, 0, 200))
+    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(8))
+    # Close hard-edged shadow for definition.
+    sd2 = ImageDraw.Draw(shadow_layer)
+    sd2.text((pad + 3, pad + 4), text, font=font, fill=(0, 0, 0, 180),
+             stroke_width=stroke_width, stroke_fill=(0, 0, 0, 180))
+    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(2))
+
+    # 2. STROKE LAYER — solid dark stroke outlines the letter forms so
+    # they survive the texture pass and any background variation.
+    stroke_layer = Image.new("RGBA", (layer_w, layer_h), (0, 0, 0, 0))
+    ld = ImageDraw.Draw(stroke_layer)
+    if stroke_width > 0:
+        ld.text((pad, pad), text, font=font, fill=(0, 0, 0, 0),
+                stroke_width=stroke_width, stroke_fill=(0, 0, 0, 255))
+
+    # 3. FILL LAYER — solid color fill for the letter interiors.
+    fill_layer = Image.new("RGBA", (layer_w, layer_h), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(fill_layer)
+    fd.text((pad, pad), text, font=font, fill=fill + (255,),
+            stroke_width=0)
+
+    # 4. TEXTURE PASS — concrete/granite overlay applied ONLY where
+    # the fill exists (alpha-masked). Procedural noise generated at low
+    # res then upscaled gives larger speckle grains that look like
+    # weathered stone, not pixel noise. Multiply blend darkens random
+    # spots without erasing letter shape.
+    if texture_strength > 0:
+        noise_w, noise_h = max(8, layer_w // 6), max(8, layer_h // 6)
+        noise = Image.new("L", (noise_w, noise_h))
+        np_pixels = noise.load()
+        for ny in range(noise_h):
+            for nx in range(noise_w):
+                # Bias toward lighter values so most of the fill stays
+                # bright; only ~30% of pixels darken meaningfully.
+                v = random.randint(0, 255)
+                if v < 80:
+                    # Dark speckle — strength controls how dark it gets.
+                    np_pixels[nx, ny] = int(255 * (1 - texture_strength))
+                elif v < 160:
+                    # Mid speckle — half-strength darken.
+                    np_pixels[nx, ny] = int(255 * (1 - texture_strength * 0.4))
+                else:
+                    np_pixels[nx, ny] = 255  # untouched
+        noise = noise.resize((layer_w, layer_h), Image.BILINEAR)
+        noise = noise.filter(ImageFilter.GaussianBlur(1.2))
+        # Apply texture to RGB channels only (alpha untouched = letters
+        # keep their shape). Mask each channel by the noise plate.
+        r, g, b, a = fill_layer.split()
+        r = ImageChops.multiply(r, noise)
+        g = ImageChops.multiply(g, noise)
+        b = ImageChops.multiply(b, noise)
+        fill_layer = Image.merge("RGBA", (r, g, b, a))
+
+    # 5. COMPOSITE in order: shadow under, stroke under fill, all onto
+    # the target image at the original xy minus the padding offset.
+    target_offset = (x - pad, y - pad)
+    if target.mode != "RGBA":
+        target_rgba = target.convert("RGBA")
+    else:
+        target_rgba = target
+    # Shadow below
+    target_rgba.alpha_composite(shadow_layer, target_offset)
+    # Stroke below fill
+    target_rgba.alpha_composite(stroke_layer, target_offset)
+    # Fill on top
+    target_rgba.alpha_composite(fill_layer, target_offset)
+    # Bake back to original target
+    if target.mode != "RGBA":
+        target.paste(target_rgba.convert("RGB"))
+    else:
+        target.paste(target_rgba)
 
 
 def _wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int,
@@ -2075,18 +2180,21 @@ def _compose_minimal_text(bg: Image.Image, title: str, preset: dict, *,
 
     cur_y = title_y
     word_idx = 0
-    # Stencil-style: clean bold text with a strong stroke + shadow for
-    # readability over any AI background. Stroke survives the post-process
-    # film grain that adds the weathered feel later in the pipeline.
+    # Premium poster typography: real Gaussian-blurred multi-layer drop
+    # shadow + procedural granite/concrete texture overlay on the letter
+    # fill. Texture is multiply-blended on RGB only (alpha untouched) so
+    # letter shapes stay 100% intact — no "PAGE -> PAGF" letter-eating.
+    # Reads as carved stone rather than flat painted text.
     for line in lines:
         line_words = line.split()
         x = margin_x
         for w in line_words:
             color = headline_accent if word_idx == accent_word_idx else TEXT_PRIMARY
-            _draw_text_with_stroke(
-                draw, (x, cur_y), w,
+            _draw_text_premium(
+                bg, (x, cur_y), w,
                 title_font, fill=color,
-                stroke_width=8, shadow=True,
+                stroke_width=8,
+                texture_strength=0.32,
             )
             wb = draw.textbbox((0, 0), w, font=title_font)
             x += (wb[2] - wb[0]) + int(line_h * 0.15)
