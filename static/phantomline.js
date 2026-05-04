@@ -585,16 +585,17 @@ async function refreshOllama() {
 /* Mode toggle dropdown — clickable badge that lets the user switch
  * between hosted browser mode and their local Phantomline install.
  *
- * Two contexts:
- *   - Page is served from localhost:5000 (user IS in local mode):
- *       Local Phantomline row is marked CURRENT, marked DETECTED.
- *       Browser mode row is the alternative (link to phantomline.xyz/app).
- *   - Page is served from phantomline.xyz (user IS in browser mode):
- *       Browser mode row is marked CURRENT.
- *       Local Phantomline row probes http://localhost:5000 (may be
- *       blocked by mixed-content if browser is strict — we treat
- *       blocked-or-unreachable as "not running").
- */
+ * Why we DON'T probe localhost from hosted: Chrome / Brave block
+ * HTTPS->HTTP localhost fetches even with PNA headers in many configs,
+ * so the probe falsely reports "NOT RUNNING" for users who actually
+ * have it installed. The probe is the wrong UX pattern.
+ *
+ * New approach: trust the user. Always show "Switch to my local
+ * Phantomline" as a clickable action that opens localhost:5000/app in
+ * a new tab. If their local server is running it loads; if not, the
+ * browser's clear "site can't be reached" message tells them what to
+ * fix. We also remember whether the user has ever successfully been on
+ * localhost so the copy can adapt over time. */
 (function () {
   const badge = $('ollamaBadge');
   const menu = $('modeToggleMenu');
@@ -606,68 +607,33 @@ async function refreshOllama() {
   const isLocalContext = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
   const browserRow = menu.querySelector('[data-mode-row="browser"]');
 
-  let localProbeCache = null;
-
-  async function probeLocal() {
-    // If we ARE on localhost, we don't need to probe — by definition
-    // Phantomline local is running (we're talking to it right now).
-    if (isLocalContext) {
-      localProbeCache = true;
-      return true;
-    }
-    if (localProbeCache !== null) return localProbeCache;
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 1500);
-      // Same-origin-style fetch (no explicit cors mode so we don't trip
-      // a preflight). Hits the known-light readiness endpoint.
-      // /api/health responds with the Private Network Access headers
-      // Chrome needs to allow the cross-network request from HTTPS
-      // phantomline.xyz to HTTP localhost. First call may pop a one-time
-      // permission prompt; user grants, future probes work silently.
-      const r = await fetch('http://localhost:5000/api/health', {
-        signal: ctrl.signal,
-      });
-      clearTimeout(t);
-      localProbeCache = r.ok;
-    } catch (e) {
-      // Network error / timeout / CORS / mixed-content block — all
-      // mean "not reachable from this tab" from the UX perspective.
-      localProbeCache = false;
-    }
-    return localProbeCache;
+  // Persist "user has been on local before" once we ever load via
+  // localhost. Hosted page reads this to render confident copy
+  // ("Switch to your local install") instead of generic prompting.
+  const HAS_LOCAL_KEY = 'phantomline.has_local_install';
+  if (isLocalContext) {
+    try { localStorage.setItem(HAS_LOCAL_KEY, '1'); } catch (e) { /* private mode */ }
+  }
+  function hasLocalInstall() {
+    try { return localStorage.getItem(HAS_LOCAL_KEY) === '1'; }
+    catch (e) { return false; }
   }
 
-  function setLocalStatus(detected, current) {
-    if (!localStatus) return;
-    if (current) {
-      localStatus.textContent = 'CURRENT';
-      localStatus.classList.add('detected');
-      localStatus.classList.remove('missing');
-    } else if (detected) {
-      localStatus.textContent = 'DETECTED';
-      localStatus.classList.add('detected');
-      localStatus.classList.remove('missing');
-    } else {
-      localStatus.textContent = 'NOT RUNNING';
-      localStatus.classList.add('missing');
-      localStatus.classList.remove('detected');
-    }
-  }
-
-  // Adjust which row is the CURRENT mode and where the alternative row
-  // points. Runs once on load so the menu reflects context immediately.
   function applyContext() {
     if (isLocalContext) {
-      // We're in local mode. Local row is current; browser row is the
-      // alternative (link to phantomline.xyz/app for cross-device library).
+      // We ARE in local mode. Local row is the current state. Browser
+      // row becomes a link to phantomline.xyz/app for cross-device
+      // library viewing.
       if (localRow) {
         localRow.removeAttribute('href');
         localRow.style.cursor = 'default';
-        localRow.dataset.modeRow = 'local-current';
+      }
+      if (localStatus) {
+        localStatus.textContent = 'CURRENT';
+        localStatus.classList.add('detected');
+        localStatus.classList.remove('missing');
       }
       if (browserRow) {
-        // Make the browser row clickable as a navigation target.
         const a = document.createElement('a');
         a.href = 'https://phantomline.xyz/app';
         a.target = '_blank';
@@ -679,30 +645,40 @@ async function refreshOllama() {
         );
         browserRow.replaceWith(a);
       }
-      setLocalStatus(false, true); // "CURRENT"
     } else {
-      // Hosted (or unknown). Browser is current; local probe runs on open.
+      // Hosted. Browser row is current. Local row is "switch to local"
+      // action (no probe — we trust the user). Status pill adapts based
+      // on whether the user has previously used local Phantomline (we
+      // remember via localStorage).
       if (browserRow) {
         browserRow.querySelector('strong').innerHTML =
           'Browser mode <span class="mode-toggle-status detected">CURRENT</span>';
+      }
+      if (localStatus) {
+        if (hasLocalInstall()) {
+          localStatus.textContent = 'OPEN →';
+          localStatus.classList.add('detected');
+          localStatus.classList.remove('missing');
+        } else {
+          localStatus.textContent = 'OPEN ↗';
+          localStatus.classList.remove('missing');
+          localStatus.classList.remove('detected');
+        }
+      }
+      if (localRow) {
+        // Open in a new tab — keeps the hosted library visible while
+        // the user works in their local install.
+        localRow.target = '_blank';
+        localRow.rel = 'noopener';
       }
     }
   }
   applyContext();
 
-  badge.addEventListener('click', async (ev) => {
+  badge.addEventListener('click', (ev) => {
     ev.stopPropagation();
-    const isOpen = !menu.hidden;
-    menu.hidden = isOpen;
-    badge.setAttribute('aria-expanded', String(!isOpen));
-    // Only the hosted variant needs a fresh probe each open — the local
-    // variant is statically CURRENT.
-    if (!isOpen && !isLocalContext) {
-      localProbeCache = null;
-      setLocalStatus(false, false);
-      const detected = await probeLocal();
-      setLocalStatus(detected, false);
-    }
+    menu.hidden = !menu.hidden;
+    badge.setAttribute('aria-expanded', String(!menu.hidden));
   });
 
   document.addEventListener('click', (ev) => {
@@ -719,17 +695,12 @@ async function refreshOllama() {
     }
   });
 
-  // Hosted variant: clicking the local row when local isn't running
-  // sends user to /download instead of leaving them at a broken link.
-  if (localRow && !isLocalContext) {
-    localRow.addEventListener('click', async (ev) => {
-      const detected = await probeLocal();
-      if (!detected) {
-        ev.preventDefault();
-        location.href = '/download';
-      }
-    });
-  }
+  // On hosted, clicking the "Local Phantomline" row tries to open
+  // localhost:5000/app. If we know the user has it installed (visited
+  // before), the link just works. If we don't know, we still let them
+  // click — failure mode is "browser shows site-not-reachable", which
+  // is itself a clear signal to start their local server.
+  // The "Don't have it yet?" row goes to /download as a fallback path.
 })();
 
 document.querySelectorAll('.tag[data-g]').forEach(el => {
