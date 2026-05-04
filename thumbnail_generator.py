@@ -206,6 +206,11 @@ THUMBNAIL_PRESETS = {
         "text_default": False,
         "text_max_words": 5,
         "text_position": "lower-left",
+        # Auto-applied badges that give the thumbnail the polished
+        # poster look (BEDTIME-STORY / EREBUS reference style). Caller
+        # can override via API params; these are the defaults.
+        "genre_badge": "BASED ON TRUE EVENTS",
+        "feature_tag_defaults": ["ORIGINAL STORY", "FULL EPISODE"],
     },
     "horror_cosmic": {
         "label": "Horror / cosmic horror narration",
@@ -238,6 +243,8 @@ THUMBNAIL_PRESETS = {
         "text_default": False,
         "text_max_words": 5,
         "text_position": "lower-center",
+        "genre_badge": "ANALOG HORROR",
+        "feature_tag_defaults": ["NARRATED STORY"],
     },
     "mystery_documentary": {
         "label": "Mystery documentary / true-crime adjacent",
@@ -270,6 +277,8 @@ THUMBNAIL_PRESETS = {
         "text_default": False,
         "text_max_words": 4,
         "text_position": "lower-left",
+        "genre_badge": "TRUE CRIME",
+        "feature_tag_defaults": ["FULL CASE"],
     },
     "tutorial_explainer": {
         "label": "Tutorial / how-to / explainer (Fireship-style)",
@@ -302,6 +311,8 @@ THUMBNAIL_PRESETS = {
         "text_default": True,
         "text_max_words": 5,
         "text_position": "left-center",
+        "genre_badge": "TUTORIAL",
+        "feature_tag_defaults": [],
     },
     "listicle": {
         "label": "Listicle / Top N (text-as-hero exception)",
@@ -332,6 +343,8 @@ THUMBNAIL_PRESETS = {
         "text_default": True,
         "text_max_words": 6,
         "text_position": "center",
+        "genre_badge": "TOP LIST",
+        "feature_tag_defaults": [],
     },
 }
 
@@ -1387,24 +1400,14 @@ def _draw_distressed_text(draw: ImageDraw.ImageDraw,
         stroke_fill=(0, 0, 0, 255) if stroke_width else (0, 0, 0, 0),
     )
 
-    # Noise mask: pixels at random alpha cuts. Multiply against the
-    # layer's alpha so we punch random holes in the text.
-    layer_w, layer_h = layer.size
-    noise_w, noise_h = max(1, layer_w // 3), max(1, layer_h // 3)
-    noise_plate = Image.new("L", (noise_w, noise_h))
-    np_pixels = noise_plate.load()
-    for ny in range(noise_h):
-        for nx in range(noise_w):
-            v = random.randint(0, 255)
-            # Bias toward keeping most pixels (avoids unreadable text)
-            np_pixels[nx, ny] = v if v > 70 else 0
-    noise_plate = noise_plate.resize((layer_w, layer_h), Image.BILINEAR)
-    noise_plate = noise_plate.filter(ImageFilter.GaussianBlur(0.8))
-    # Combine the noise with the layer alpha
-    r, g, b, a = layer.split()
-    a = ImageChops.multiply(a, noise_plate)
-    distressed = Image.merge("RGBA", (r, g, b, a))
-    target.paste(distressed, (x - pad, y - pad), distressed)
+    # Noise mask is intentionally absent — the previous aggressive noise
+    # punched holes through thin letter segments ("PAGE" became "PAGF").
+    # Reference thumbnails (EREBUS, IN THE CROWD) actually use bold
+    # stencil typography with a subtle grain in the FILL, not destructive
+    # noise on the alpha channel. We render the text clean here and let
+    # the post-process polish step add a global film grain over the
+    # whole composition for the weathered feel.
+    target.paste(layer, (x - pad, y - pad), layer)
 
 
 def _draw_text_with_stroke(draw: ImageDraw.ImageDraw,
@@ -1478,6 +1481,81 @@ def _fit_text(text: str, max_width: int, max_height: int,
             return font, lines, line_h
     font = _font(min_size, family=family)
     return font, _wrap_text(text, font, max_width, draw), int(min_size * 1.05)
+
+
+def pick_contrast_accent(bg_image: "Image.Image",
+                         palette: list[tuple[int, int, int]] | None = None,
+                         sample_region: str = "left") -> tuple[int, int, int]:
+    """Sample the AI background and return an accent color from a curated
+    palette that has the highest contrast against the dominant background
+    in the region where text will land. Avoids the always-cyan branding
+    problem when one preset is shipped against many different image moods.
+
+    `sample_region` can be 'left', 'right', 'lower', or 'full' — defaults
+    to 'left' since that's where the headline text usually sits.
+
+    Curated palette options have been chosen to look polished on YouTube:
+    bold yellows, hot reds, clean cyans, warm oranges, and high-contrast
+    white. We never return a near-black or near-white-on-white — those
+    fail the contrast check naturally."""
+    if palette is None:
+        # Saturated colored options only — white is excluded because the
+        # main title text is already rendered white, so a white "accent"
+        # word would have zero visual hierarchy. The picker's job is to
+        # find the colored highlight that pops AGAINST both the bg AND
+        # the white title.
+        palette = [
+            (245, 199, 70),   # warm yellow
+            (220, 50, 60),    # hot red
+            (78, 220, 230),   # cyan
+            (255, 140, 70),   # orange
+            (240, 90, 150),   # hot pink
+            (130, 240, 130),  # lime
+            (180, 130, 255),  # purple
+        ]
+    # Resize for fast averaging. 32x18 keeps a 16:9 sample.
+    w, h = bg_image.size
+    small = bg_image.convert("RGB").resize((32, 18), Image.LANCZOS)
+    if sample_region == "left":
+        crop = small.crop((0, 0, 16, 18))
+    elif sample_region == "right":
+        crop = small.crop((16, 0, 32, 18))
+    elif sample_region == "lower":
+        crop = small.crop((0, 9, 32, 18))
+    else:
+        crop = small
+    px = list(crop.getdata())
+    if not px:
+        return palette[0]
+    avg = (
+        sum(p[0] for p in px) // len(px),
+        sum(p[1] for p in px) // len(px),
+        sum(p[2] for p in px) // len(px),
+    )
+
+    def _luminance(c):
+        # WCAG-relative luminance, perceptually weighted.
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+    def _hue_distance(a, b):
+        # Cheap HSV-ish distance: just euclidean in RGB normalized.
+        return math.sqrt(sum((a[i] - b[i]) ** 2 for i in range(3)))
+
+    bg_lum = _luminance(avg)
+    # Score each palette color by combined luminance contrast + hue distance.
+    # Avoid colors whose luminance is within 60 of bg (would blend).
+    best = palette[0]
+    best_score = -1
+    for c in palette:
+        c_lum = _luminance(c)
+        lum_delta = abs(c_lum - bg_lum)
+        if lum_delta < 60:
+            continue
+        score = lum_delta * 0.6 + _hue_distance(avg, c) * 0.4
+        if score > best_score:
+            best_score = score
+            best = c
+    return best
 
 
 def _shorten_for_overlay(title: str, max_words: int) -> str:
@@ -1829,97 +1907,158 @@ def _compose_minimal_text(bg: Image.Image, title: str, preset: dict, *,
                           brand_badge: str = "",
                           feature_tags: list[str] | None = None,
                           headline_override: str = "") -> bytes:
-    """Minimal eyebrow-only composition used when an AI image is doing
-    the heavy lifting. Just a small accent eyebrow + a barely-there
-    title slug, positioned so it doesn't fight the image subject.
+    """AI-image overlay composition matching the reference EREBUS / IN THE
+    CROWD / BEDTIME STORY thumbnails:
+      - HUGE distressed/stenciled title (~25% of frame height) on the
+        text side, with the last word OR any number rendered in the
+        preset's accent color so one word "pops"
+      - Top-left genre badge pill (BASED ON TRUE EVENTS / BEDTIME STORY /
+        TRUE CRIME / etc.) auto-supplied from preset["genre_badge"] when
+        caller doesn't override
+      - Optional subtitle line under the title in preset.secondary color
+        (italic-feeling), with subtitle keywords highlighted in accent
+        if the caller provides them via the {accent}word{/accent} marker
+      - Bottom corner feature pills (ORIGINAL STORY / NARRATED) auto-
+        supplied from preset["feature_tag_defaults"]
 
-    `headline_override`: when set, used INSTEAD of the auto-slugged title
-    for the main overlay text. Used to inject an LLM-generated 1-3 word
-    YouTube hook (PAGE 47, WHAT MOM HID, FOUND FOOTAGE) in place of the
-    literal title slug, which produces dead text like "I FOUND A HIDDEN".
+    `headline_override` (1-3 word LLM hook) wins over the title slug.
     """
     width, height = bg.size
-    draw = ImageDraw.Draw(bg)
 
     sub_font_family = preset.get("subtitle_font", "inter")
     title_font_family = preset.get("title_font", "bebas")
-
     pos = preset["text_position"]
+    # Dynamic accent: sample the AI background and pick a palette color
+    # with the strongest contrast against where the headline lands. This
+    # avoids the "every thumbnail is cyan" branding-template look. The
+    # preset's accent stays as a fallback for badges so brand recognition
+    # still survives.
+    sample_region = "left" if ("left" in pos or "center" in pos) else "lower"
+    headline_accent = pick_contrast_accent(bg, sample_region=sample_region)
+    secondary = preset.get("secondary") or preset["accent"]
 
-    # Light vignette on the side where text will live.
+    # Side-band vignette so text stays readable over any AI image. Lighter
+    # than before (alpha 90) and bigger so the title has room to breathe.
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
-    band_alpha = 100
+    band_alpha = 110
     if "lower" in pos:
-        od.rectangle((0, int(height * 0.62), width, height), fill=(0, 0, 0, band_alpha))
-    elif "left" in pos:
-        od.rectangle((0, 0, int(width * 0.55), height), fill=(0, 0, 0, band_alpha))
+        od.rectangle((0, int(height * 0.55), width, height), fill=(0, 0, 0, band_alpha))
+    elif "left" in pos or "center" in pos:
+        # Left half-band is the EREBUS / IN THE CROWD pattern.
+        od.rectangle((0, 0, int(width * 0.60), height), fill=(0, 0, 0, band_alpha))
     elif "top" in pos:
-        od.rectangle((0, 0, width, int(height * 0.40)), fill=(0, 0, 0, band_alpha))
+        od.rectangle((0, 0, width, int(height * 0.45)), fill=(0, 0, 0, band_alpha))
     bg = Image.alpha_composite(bg.convert("RGBA"), overlay).convert("RGB")
     draw = ImageDraw.Draw(bg)
 
-    margin_x = int(width * 0.05)
-    if "lower" in pos:
-        anchor_y = int(height * 0.66)
-    elif "top" in pos:
-        anchor_y = int(height * 0.06)
-    else:
-        anchor_y = int(height * 0.42)
+    margin_x = int(width * 0.04)
+    margin_y = int(height * 0.06)
+    text_box_w = int(width * 0.55)
 
-    if subtitle.strip():
-        sub_text = subtitle.strip().upper()
-        sub_size = int(height * 0.038)
-        sub_font = _font(sub_size, family=sub_font_family)
-        _draw_text_with_stroke(
-            draw, (margin_x, anchor_y), sub_text,
-            sub_font, fill=preset["accent"],
-            stroke_width=3, shadow=False,
-        )
-        sub_bbox = draw.textbbox((0, 0), sub_text, font=sub_font)
-        anchor_y += (sub_bbox[3] - sub_bbox[1]) + int(height * 0.012)
-
-    # Headline override (LLM-generated hook) wins over the title slug.
-    # Hook is already 1-3 words so we skip the shorten-with-trailing-stop
-    # cleanup and just upper-case it.
+    # Resolve the headline. Hook wins; otherwise slug the title.
     if headline_override.strip():
-        slug = headline_override.strip().upper()
+        headline = headline_override.strip().upper()
     else:
-        slug = _shorten_for_overlay(title, preset["text_max_words"]).upper()
-    title_box_w = int(width * 0.55)
-    title_box_h = int(height * 0.20)
-    title_font, lines, line_h = _fit_text(
-        slug, title_box_w, title_box_h,
-        draw, max_size=110, min_size=48, max_lines=2,
-        family=title_font_family,
-    )
-    last_line_y = anchor_y
-    for i, line in enumerate(lines):
-        _draw_text_with_stroke(
-            draw, (margin_x, anchor_y + i * line_h), line,
-            title_font, fill=TEXT_PRIMARY,
-            stroke_width=6, shadow=True,
-        )
-        last_line_y = anchor_y + (i + 1) * line_h
+        headline = _shorten_for_overlay(title, preset["text_max_words"]).upper()
 
-    # Tagline below title in accent-secondary color, smaller.
-    if tagline.strip():
-        tag_size = int(height * 0.038)
-        tag_font = _font(tag_size, family=sub_font_family)
-        tag_lines = _wrap_text(tagline.strip(), tag_font, title_box_w, draw)[:2]
-        tag_y = last_line_y + int(height * 0.012)
-        for line in tag_lines:
+    # Smart line split: 1 line if <=2 words (PAGE 47), 2 lines if 3 words
+    # (split 1+2 OR 2+1 depending on which line is longer to balance).
+    words = headline.split()
+    if len(words) <= 2:
+        lines = [headline]
+        max_lines = 1
+    elif len(words) == 3:
+        # Balance for visual weight: longer-character word on its own line.
+        if len(words[0]) >= len(words[2]):
+            lines = [words[0], " ".join(words[1:])]
+        else:
+            lines = [" ".join(words[:2]), words[2]]
+        max_lines = 2
+    else:
+        # 4+ words (rare with hook generator) — stack roughly half/half.
+        mid = len(words) // 2
+        lines = [" ".join(words[:mid]), " ".join(words[mid:])]
+        max_lines = 2
+
+    # Pick the "accent" word: a number wins; otherwise the LAST word.
+    accent_word_idx = None
+    for i, w in enumerate(words):
+        if re.search(r"\d", w):
+            accent_word_idx = i
+            break
+    if accent_word_idx is None and len(words) >= 2:
+        accent_word_idx = len(words) - 1
+
+    # Anchor Y for the title block — start near the top so the badge can
+    # sit above and the subtitle can sit below.
+    if "top" in pos:
+        title_y = margin_y + int(height * 0.10)
+    elif "lower" in pos:
+        title_y = int(height * 0.42)
+    else:
+        title_y = int(height * 0.18)
+
+    # Big distressed title. Each line is fitted independently so the
+    # accent word can be split across colored draws, and so the longer
+    # line sets the size.
+    title_box_h = int(height * (0.42 if max_lines == 2 else 0.32))
+    title_font, _fitted_lines, line_h = _fit_text(
+        max(lines, key=lambda s: len(s)),
+        text_box_w, title_box_h,
+        draw, max_size=int(height * 0.30), min_size=int(height * 0.10),
+        max_lines=1, family=title_font_family,
+    )
+
+    cur_y = title_y
+    word_idx = 0
+    # Stencil-style: clean bold text with a strong stroke + shadow for
+    # readability over any AI background. Stroke survives the post-process
+    # film grain that adds the weathered feel later in the pipeline.
+    for line in lines:
+        line_words = line.split()
+        x = margin_x
+        for w in line_words:
+            color = headline_accent if word_idx == accent_word_idx else TEXT_PRIMARY
             _draw_text_with_stroke(
-                draw, (margin_x, tag_y), line,
-                tag_font, fill=preset["accent"],
+                draw, (x, cur_y), w,
+                title_font, fill=color,
+                stroke_width=8, shadow=True,
+            )
+            wb = draw.textbbox((0, 0), w, font=title_font)
+            x += (wb[2] - wb[0]) + int(line_h * 0.15)
+            word_idx += 1
+        cur_y += int(line_h * 1.05)
+
+    # Optional subtitle under the title in secondary color.
+    sub_text = subtitle.strip() if subtitle.strip() else (
+        # Auto-derive a short subtitle from the original title only if the
+        # caller didn't supply one and the headline was overridden (so the
+        # original title isn't already on-screen).
+        _shorten_for_overlay(title, 6).upper() if headline_override.strip() else ""
+    )
+    if sub_text and headline_override.strip() and sub_text.upper() != headline.upper():
+        sub_size = max(int(height * 0.034), 22)
+        sub_font = _font(sub_size, family=sub_font_family)
+        sub_lines = _wrap_text(sub_text, sub_font, text_box_w, draw)[:2]
+        for line in sub_lines:
+            _draw_text_with_stroke(
+                draw, (margin_x, cur_y), line,
+                sub_font, fill=secondary,
                 stroke_width=2, shadow=True,
             )
-            tag_y += int(tag_size * 1.2)
+            cur_y += int(sub_size * 1.2)
+
+    # Auto-supply genre_badge + feature_tags from preset defaults when the
+    # caller didn't pass them. This is what gives the thumbnail the BEDTIME
+    # STORY / BASED ON TRUE EVENTS top-left pill from the references.
+    effective_category = category_badge.strip() or preset.get("genre_badge", "")
+    effective_features = feature_tags if feature_tags else preset.get("feature_tag_defaults", [])
 
     _apply_corner_badges(bg, preset,
-                         category_badge=category_badge,
+                         category_badge=effective_category,
                          brand_badge=brand_badge,
-                         feature_tags=feature_tags or [])
+                         feature_tags=effective_features or [])
 
     out = BytesIO()
     bg.save(out, "PNG", optimize=True)
