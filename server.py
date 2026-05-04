@@ -4436,6 +4436,35 @@ def api_thumbnail_batch():
         title, script_text, scenes_text, user_hint=user_hint,
     ) if (script_text or scenes_text) else user_hint
 
+    # Generate the 1-3 word LLM HOOK that gets composited on top of the
+    # cinematic background. This replaces the literal title-slug overlay
+    # (which produced dead text like "I FOUND A HIDDEN NOTE"). The hook
+    # is grounded in the actual script when a project is selected, so
+    # output looks like "PAGE 47" / "WHAT MOM HID" / "FOUND FOOTAGE"
+    # instead of a truncation of the title. Caller-provided subtitle
+    # still wins if explicitly set; hook only fires for the auto path.
+    headline_override = ""
+    explicit_subtitle = (data.get("subtitle") or "").strip()[:80]
+    if not explicit_subtitle:
+        # Resolve preset BEFORE the call so we pass the right niche cues.
+        resolved_preset = (
+            raw_style if raw_style != "auto"
+            else thumb_gen.detect_preset(title,
+                                         genre=(data.get("genre") or ""),
+                                         recipe=(data.get("recipe") or ""))
+        )
+        try:
+            headline_override = thumb_gen.generate_thumbnail_hook(
+                title,
+                preset_name=resolved_preset,
+                script_text=script_text,
+                scenes_text=scenes_text,
+            ) or ""
+        except Exception:
+            # Hook generation is best-effort; fall back to title slug if
+            # the LLM call errors.
+            headline_override = ""
+
     try:
         results = thumb_gen.generate_thumbnail_batch(
             title,
@@ -4445,10 +4474,11 @@ def api_thumbnail_batch():
             genre=(data.get("genre") or "").strip()[:80],
             recipe=(data.get("recipe") or "").strip()[:80],
             subject_hint=enriched_hint[:1900],  # downstream enhancer caps further
-            subtitle=(data.get("subtitle") or "").strip()[:80],
+            subtitle=explicit_subtitle,
             text_overlay=text_overlay,
             prefer_forge=bool(data.get("prefer_forge", True)),
             prefer_falai=bool(data.get("prefer_falai", True)),
+            headline_override=headline_override,
         )
     except Exception as exc:
         app.logger.exception("Thumbnail batch failed")
