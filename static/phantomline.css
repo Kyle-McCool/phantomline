@@ -161,6 +161,34 @@
   .mode-toggle-status.missing { background: rgba(255,122,122,0.15); color: #ff7a7a; }
   .mode-toggle-download { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 12px; }
 
+  /* Render-quota counter (top-right of studio header) */
+  .quota-widget {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    font-size: 12px;
+    text-decoration: none;
+    transition: border-color 120ms, background 120ms;
+  }
+  .quota-widget:hover { border-color: rgba(34,231,245,0.45); background: rgba(34,231,245,0.05); }
+  .quota-widget.over { border-color: #ff7a7a; background: rgba(255,122,122,0.08); color: #ff9c9c; }
+  .quota-widget .quota-sep { color: var(--muted); margin: 0 1px; }
+  .quota-widget .quota-label { color: var(--muted); margin-left: 4px; }
+  .quota-widget .quota-upgrade {
+    margin-left: 8px; padding: 2px 8px;
+    border-radius: 999px;
+    background: #19e0c2; color: #0a1722;
+    font-weight: 700; font-size: 10px; letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .quota-widget.over .quota-upgrade { background: #ff7a7a; }
+  @media (max-width: 720px) {
+    .quota-widget .quota-label { display: none; }
+  }
+
   /* Profile widget (top-right of studio header) */
   .profile-wrap { position: relative; }
   .profile-btn {

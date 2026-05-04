@@ -148,6 +148,49 @@
       .catch(function () { alert("Update failed (network)."); });
   });
 
+  // Render-quota counter widget. Fetches /api/quota/state on load and
+  // every 60s after that (so the counter ticks up after a render
+  // submission without needing a page refresh). Hides itself when the
+  // user is on a paid tier with no practical limit.
+  function refreshQuota() {
+    authedFetch("/api/quota/state")
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok || !d.quota) return;
+        var q = d.quota;
+        var widget = $("quotaWidget");
+        if (!widget) return;
+        // Hide the widget for unlimited tiers — paying users don't need
+        // a "renders left" badge cluttering their header.
+        if (q.tier !== "free" || q.limit >= 999999) {
+          widget.style.display = "none";
+          return;
+        }
+        widget.style.display = "";
+        $("quotaUsed").textContent = String(q.used);
+        $("quotaLimit").textContent = String(q.limit);
+        var upgrade = $("quotaUpgrade");
+        if (q.over_limit) {
+          widget.classList.add("over");
+          if (upgrade) upgrade.hidden = false;
+          widget.title = "Over your monthly limit. Upgrade for unlimited renders.";
+        } else if (q.remaining <= 1) {
+          // Last render of the month — show upgrade prompt early so the
+          // user doesn't get stuck mid-workflow.
+          widget.classList.remove("over");
+          if (upgrade) upgrade.hidden = false;
+          widget.title = "Last free render this month. Upgrade to keep going.";
+        } else {
+          widget.classList.remove("over");
+          if (upgrade) upgrade.hidden = true;
+          widget.title = q.remaining + " free renders left this month";
+        }
+      })
+      .catch(function () { /* unauth or 503 — widget stays hidden */ });
+  }
+  refreshQuota();
+  setInterval(refreshQuota, 60000);
+
   // Sign out: clear the Supabase session key and bounce to /account.
   $("profileSignOutBtn").addEventListener("click", function () {
     try {
