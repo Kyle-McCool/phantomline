@@ -582,6 +582,101 @@ async function refreshOllama() {
   }
 }
 
+/* Mode toggle dropdown — hosted users click the badge to switch between
+ * browser mode and their local Phantomline install. We probe localhost
+ * once on dropdown open so the "Local Phantomline" row shows live status
+ * (DETECTED / MISSING) instead of always-stale text. The probe uses a
+ * short timeout so a missing local install doesn't hang the menu open. */
+(function () {
+  const badge = $('ollamaBadge');
+  const menu = $('modeToggleMenu');
+  const localRow = $('modeToggleLocal');
+  const localStatus = $('modeToggleLocalStatus');
+  if (!badge || !menu) return;
+
+  let localProbeCache = null; // null = not probed yet, true/false = result
+
+  async function probeLocal() {
+    if (localProbeCache !== null) return localProbeCache;
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 1500);
+      // Hit the known-light endpoint /api/launch/readiness with mode=local.
+      // It exists on every Phantomline install and returns quickly.
+      const r = await fetch('http://localhost:5000/api/launch/readiness?mode=local', {
+        signal: ctrl.signal,
+        mode: 'cors',
+      });
+      clearTimeout(t);
+      localProbeCache = r.ok;
+    } catch (e) {
+      // Network error / timeout / CORS / mixed-content block — all
+      // mean "not running locally" from the user's perspective.
+      localProbeCache = false;
+    }
+    return localProbeCache;
+  }
+
+  function setLocalStatus(detected) {
+    if (!localStatus) return;
+    if (detected) {
+      localStatus.textContent = 'DETECTED';
+      localStatus.classList.add('detected');
+      localStatus.classList.remove('missing');
+      if (localRow) localRow.style.display = '';
+    } else {
+      localStatus.textContent = 'NOT RUNNING';
+      localStatus.classList.add('missing');
+      localStatus.classList.remove('detected');
+    }
+  }
+
+  badge.addEventListener('click', async (ev) => {
+    ev.stopPropagation();
+    const isOpen = !menu.hidden;
+    menu.hidden = isOpen;
+    badge.setAttribute('aria-expanded', String(!isOpen));
+    if (!isOpen) {
+      // Refresh the local-Phantomline status each time the menu opens
+      // (user may have started their local server after first opening).
+      localProbeCache = null;
+      setLocalStatus(false);
+      const detected = await probeLocal();
+      setLocalStatus(detected);
+    }
+  });
+
+  document.addEventListener('click', (ev) => {
+    if (menu.hidden) return;
+    if (!badge.parentNode.contains(ev.target)) {
+      menu.hidden = true;
+      badge.setAttribute('aria-expanded', 'false');
+    }
+  });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && !menu.hidden) {
+      menu.hidden = true;
+      badge.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // If user clicks the local row but local isn't running, intercept and
+  // send them to /download instead of letting the localhost link 404.
+  if (localRow) {
+    localRow.addEventListener('click', async (ev) => {
+      const detected = await probeLocal();
+      if (!detected) {
+        ev.preventDefault();
+        location.href = '/download';
+      }
+      // If detected, the default href (http://localhost:5000/app) opens
+      // in the same tab. Browser may show a "Mixed Content" prompt for
+      // HTTPS->HTTP — we accept that since the user explicitly chose to
+      // switch. Could improve with target=_blank.
+    });
+  }
+})();
+
 document.querySelectorAll('.tag[data-g]').forEach(el => {
   el.addEventListener('click', () => {
     const targetId = el.dataset.target || 'genre';
