@@ -160,6 +160,11 @@
   .mode-toggle-status.detected { background: rgba(34,231,245,0.20); color: #19e0c2; }
   .mode-toggle-status.missing { background: rgba(255,122,122,0.15); color: #ff7a7a; }
   .mode-toggle-download { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 12px; }
+  .mode-toggle-hint {
+    color: #c9a93a !important;
+    font-style: italic;
+    margin-top: 4px;
+  }
 
   /* Render-quota counter (top-right of studio header) */
   .quota-widget {
