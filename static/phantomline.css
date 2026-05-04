@@ -2028,14 +2028,20 @@
     cursor: progress;
   }
   .launch-action.primary {
-    border-color: rgba(34,231,245,0.55);
-    background: rgba(34,231,245,0.10);
-    color: #baffff;
+    border-color: #19e0c2;
+    background: #19e0c2;
+    color: #0a1722;
+    font-weight: 600;
+    padding: 8px 14px;
+    box-shadow: 0 1px 0 rgba(34,231,245,0.25);
   }
   .launch-action.primary:hover {
-    background: rgba(34,231,245,0.18);
-    border-color: rgba(34,231,245,0.85);
+    background: #1ff5d4;
+    border-color: #1ff5d4;
+    color: #0a1722;
+    transform: translateY(-1px);
   }
+  .launch-action.primary .launch-action-icon { opacity: 1; color: #0a1722; }
   .launch-action-icon {
     font-size: 13px;
     line-height: 1;
@@ -2287,6 +2293,27 @@
     color: var(--muted);
     background: rgba(0,0,0,0.14);
     font-size: 12px;
+  }
+  .thumb-chip {
+    border: 1px solid #1f3447;
+    border-radius: 999px;
+    padding: 5px 11px;
+    background: rgba(25,224,194,0.05);
+    color: #cdd6df;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, transform 60ms;
+  }
+  .thumb-chip:hover {
+    background: rgba(25,224,194,0.18);
+    border-color: #19e0c2;
+    color: #fff;
+  }
+  .thumb-chip.active {
+    background: #19e0c2;
+    color: #0a1722;
+    border-color: #19e0c2;
+    font-weight: 600;
   }
   .publish-list {
     display: grid;

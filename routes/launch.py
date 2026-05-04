@@ -130,12 +130,12 @@ def _readiness_hosted():
     looks at navigator.gpu, window.speechSynthesis, etc. and updates
     the dot color before render.
 
-    On hosted, anything that requires per-user server state (YouTube
-    publishing OAuth, channel analytics, saved projects) is marked as
-    "desktop only" — the hosted server is single-tenant; sharing one
-    YouTube channel or one project list across every visitor would leak
-    state. These features live in the desktop install where each user
-    has their own server."""
+    Browser-first by design: every required engine runs in the user's
+    browser (WebGPU, Web Speech, ffmpeg.wasm). Power-user upgrades
+    (Ollama for bigger models, Kokoro for premium voices, Forge for AI
+    images, YouTube API key for live keyword data) are exposed as
+    optional install links on the same checklist — no desktop app
+    download required."""
     youtube_api = youtube_research.health()
 
     checks = [
@@ -146,9 +146,16 @@ def _readiness_hosted():
             "client_check": "webgpu",
             "required": True,
             "detail": "Llama 3.2 1B via WebGPU. Detecting browser support…",
-            "ready_detail": "Your browser supports WebGPU. The Llama 3.2 1B model (~1 GB) downloads to your browser on first use, then runs locally.",
+            # Be explicit that READY = browser supports it, not that the
+            # model is already on disk. First render pulls the ~1 GB weights
+            # into the browser cache. Power users can swap in Ollama for
+            # bigger local models via the action link.
+            "ready_detail": "Browser supports WebGPU. First render downloads Llama 3.2 1B (~1 GB) to your browser cache, then runs locally with no server round-trip.",
             "missing_detail": "WebGPU not detected. Try Chrome, Edge, or any Chromium-based browser. Safari support is limited.",
-            "actions": [],
+            "actions": [
+                {"kind": "link", "label": "Upgrade: install Ollama (1-click guide)",
+                 "value": "/install/ollama"},
+            ],
         },
         {
             "id": "browser_voice",
@@ -157,9 +164,12 @@ def _readiness_hosted():
             "client_check": "speech_synthesis",
             "required": True,
             "detail": "System TTS via Web Speech API. Detecting voices…",
-            "ready_detail": "Your browser exposes the Web Speech API — voices vary by OS and browser.",
+            "ready_detail": "Browser exposes the Web Speech API — fine for drafts. Kokoro voices sound dramatically better for finished videos — install in 1 minute.",
             "missing_detail": "Web Speech API unavailable. Try a modern Chromium or Safari.",
-            "actions": [],
+            "actions": [
+                {"kind": "link", "label": "Upgrade: install Kokoro voices (1-click guide)",
+                 "value": "/install/kokoro"},
+            ],
         },
         {
             "id": "browser_music",
@@ -176,9 +186,20 @@ def _readiness_hosted():
             "client_check": "ffmpeg_wasm",
             "required": True,
             "detail": "ffmpeg.wasm renders MP4 in the browser. Detecting…",
-            "ready_detail": "Your browser supports WebAssembly. ffmpeg.wasm will render MP4 locally.",
+            "ready_detail": "Browser supports WebAssembly. ffmpeg.wasm renders MP4 locally — no upload, no server cost.",
             "missing_detail": "Browser does not expose WebAssembly. Use a modern browser.",
             "actions": [],
+        },
+        {
+            "id": "browser_images",
+            "label": "AI images (optional)",
+            "status": "optional",
+            "required": False,
+            "detail": "Browser uses bundled stock + Pollinations (free public API) by default. For full-control local AI scene art, install Forge.",
+            "actions": [
+                {"kind": "link", "label": "Install Forge (1-click guide)",
+                 "value": "/install/forge"},
+            ],
         },
         {
             "id": "youtube_api",
@@ -186,35 +207,47 @@ def _readiness_hosted():
             "status": "ready" if youtube_api.get("available") else "optional",
             "required": False,
             "detail": "Live keyword ranking available" if youtube_api.get("available") else "Optional. SEO works in candidate mode without a key.",
-            "actions": [],
+            "actions": [] if youtube_api.get("available") else [
+                {"kind": "link", "label": "Get free API key",
+                 "value": "https://console.cloud.google.com/apis/credentials"},
+            ],
         },
-        # YouTube publishing OAuth, analytics upload, and project history are
-        # all server-side state that, on the hosted single-tenant server, would
-        # be shared across every visitor. They live in the desktop install
-        # where each user has their own local server.
+        # The items below need per-user state that the single-tenant hosted
+        # server can't safely share across visitors. Instead of pushing a
+        # desktop download, surface honest "what works today" copy + the
+        # install links power users actually want.
         {
             "id": "youtube",
             "label": "YouTube auto-publish",
-            "status": "desktop_only",
+            "status": "optional",
             "required": False,
-            "detail": "Scheduled YouTube uploads need a per-user OAuth token, which only the desktop install gives you. The hosted preview can build the video; the desktop app uploads it.",
-            "actions": [{"kind": "link", "label": "Get the desktop app", "value": "/pricing"}],
+            "detail": "Build and download your MP4 here, then upload to YouTube. Scheduled auto-publish needs a per-user OAuth token — set it up with your own Google API credentials.",
+            "actions": [
+                {"kind": "link", "label": "Create YouTube OAuth client",
+                 "value": "https://console.cloud.google.com/apis/credentials"},
+            ],
         },
         {
             "id": "insights",
             "label": "Channel analytics",
-            "status": "desktop_only",
+            "status": "optional",
             "required": False,
-            "detail": "Analytics CSV upload feeds personalized title and topic recommendations. Desktop-only so your channel data stays on your machine.",
-            "actions": [{"kind": "link", "label": "Get the desktop app", "value": "/pricing"}],
+            "detail": "Upload your YouTube Studio analytics CSV in the Insights tab — Phantomline parses it in your browser to suggest titles and topics.",
+            "actions": [
+                {"kind": "internal", "label": "Open Insights tab",
+                 "value": "tab:insights"},
+            ],
         },
         {
             "id": "demo",
             "label": "Saved projects",
-            "status": "desktop_only",
+            "status": "optional",
             "required": False,
-            "detail": "Your renders save to disk on the desktop install. The hosted preview is a try-before-you-buy demo — start a render here, finish it locally.",
-            "actions": [{"kind": "link", "label": "Get the desktop app", "value": "/pricing"}],
+            "detail": "Renders persist for this browser session. For permanent storage across devices, sign in (top-right) and your library syncs to your account.",
+            "actions": [
+                {"kind": "internal", "label": "Load demo workflow",
+                 "value": "demo:reddit"},
+            ],
         },
     ]
     return jsonify({
@@ -223,11 +256,7 @@ def _readiness_hosted():
         "score": None,  # client computes after capability checks
         "checks": checks,
         "headline": "Phantomline browser mode",
-        "subheadline": "Everything below runs on your device — no installs, no Ollama, no Python. Want full local AI with bigger models? Get the desktop app.",
-        "desktop_cta": {
-            "label": "Get the desktop app",
-            "url": "/#workflow",  # TODO: real download page
-        },
+        "subheadline": "Everything below runs in your browser — no installs required. Power-user upgrades (Ollama, Kokoro, Forge) are linked inline.",
         "launch_ready": False,
         "blockers": [],
     })
@@ -262,10 +291,13 @@ def _readiness_local():
         forge_error = str(exc)
 
     # Build per-check action lists. Hidden when status is "ready".
+    # Missing-dependency links go to the friendly /install/<tool> guide
+    # (OS-detected one-liner + Claude Code paste-prompt + manual steps),
+    # NOT the raw vendor README — non-technical users get stranded there.
     ollama_actions = []
     if ollama_unreachable:
-        ollama_actions.append({"kind": "link", "label": "Install Ollama",
-                               "value": "https://ollama.com/download"})
+        ollama_actions.append({"kind": "link", "label": "Install Ollama (1-click guide)",
+                               "value": "/install/ollama"})
     elif ollama_no_models:
         ollama_actions.append({"kind": "pull", "label": "Pull llama3.1 (4.7 GB)",
                                "value": "ollama-model:llama3.1"})
@@ -274,13 +306,13 @@ def _readiness_local():
 
     voice_actions = []
     if not voices:
-        voice_actions.append({"kind": "copy", "label": "Install voice deps",
-                              "value": "pip install -r requirements-desktop.txt"})
+        voice_actions.append({"kind": "link", "label": "Install Kokoro voices (1-click guide)",
+                              "value": "/install/kokoro"})
 
     forge_actions = []
     if not forge_ok:
-        forge_actions.append({"kind": "link", "label": "Install Forge WebUI",
-                              "value": "https://github.com/lllyasviel/stable-diffusion-webui-forge"})
+        forge_actions.append({"kind": "link", "label": "Install Forge (1-click guide)",
+                              "value": "/install/forge"})
         forge_actions.append({"kind": "copy", "label": "Default URL",
                               "value": forge_url})
     else:
