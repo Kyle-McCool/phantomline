@@ -24,10 +24,13 @@
     // Only classify download buttons that have a data-os attribute — those
     // are the OS-specific installer downloads. Other .download-btn elements
     // (e.g. "Get Claude" in the Claude Code pane) keep their default styling.
-    document.querySelectorAll('.download-btn[data-os]').forEach(function (a) {
-      if (a.dataset.os === os) {
+    var osBtns = document.querySelectorAll('.download-btn[data-os]');
+    osBtns.forEach(function (a) {
+      // data-os="All" means cross-platform single download — never demote
+      // to secondary; always keep it as the primary CTA.
+      if (a.dataset.os === 'All' || a.dataset.os === os) {
         a.classList.add('detected');
-      } else {
+      } else if (osBtns.length > 1) {
         a.classList.add('secondary');
       }
     });

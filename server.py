@@ -2248,22 +2248,19 @@ INSTALL_TOOLS = {
         "subtitle": "The full studio that runs locally on your machine. Uses your own Ollama, Kokoro, and Forge for unlimited high-quality renders. License-key activated. Auto-starts on boot so phantomline.xyz can switch to your local install with one click.",
         "downloads_note": "Phantomline desktop runs as a tiny background service on your computer (auto-starts on boot, lives in your system tray). When you visit phantomline.xyz from any browser, the 'Local Phantomline' button in the studio toggle opens your local install in a new tab. Projects sync between the two via your account so the same library follows you everywhere.",
         "downloads": [
-            {"os": "Windows", "url": "https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip",
-             "label": "Download Phantomline (ZIP)", "size": "~30 MB"},
-            {"os": "macOS", "url": "https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip",
-             "label": "Download Phantomline (ZIP)", "size": "~30 MB"},
-            {"os": "Linux", "url": "https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip",
-             "label": "Download Phantomline (ZIP)", "size": "~30 MB"},
+            {"os": "All", "url": "/download/phantomline-source.zip",
+             "label": "Download Phantomline source (Python · Windows · macOS · Linux)",
+             "size": "~30 MB"},
         ],
         "windows_oneliner": (
-            "Invoke-WebRequest https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip "
+            "Invoke-WebRequest https://phantomline.xyz/download/phantomline-source.zip "
             "-OutFile phantomline.zip; Expand-Archive phantomline.zip -DestinationPath . -Force; "
-            "cd phantomline-main; py -3.11 -m venv .venv; .\\.venv\\Scripts\\pip install -r requirements.txt; "
+            "cd phantomline; py -3.11 -m venv .venv; .\\.venv\\Scripts\\pip install -r requirements.txt; "
             ".\\.venv\\Scripts\\python server.py"
         ),
         "unix_oneliner": (
-            "curl -L https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip -o phantomline.zip && "
-            "unzip phantomline.zip && cd phantomline-main && python3 -m venv .venv && "
+            "curl -L https://phantomline.xyz/download/phantomline-source.zip -o phantomline.zip && "
+            "unzip phantomline.zip && cd phantomline && python3 -m venv .venv && "
             ".venv/bin/pip install -r requirements.txt && .venv/bin/python server.py"
         ),
         "claude_prompt": (
@@ -2273,12 +2270,19 @@ INSTALL_TOOLS = {
             "1. Verify Python 3.11+ is installed (run `python --version` or `py -3.11 "
             "--version` on Windows). If missing, install Python 3.11 from python.org or via "
             "Homebrew/apt. Phantomline does not work on Python 3.12+ yet (Forge dependency).\n"
-            "2. Verify Git is installed (`git --version`). If missing, install from git-scm.com.\n"
-            "3. Clone the Phantomline repo to a permanent location (NOT a temp dir, since "
-            "auto-start will reference this path forever): `git clone https://github.com/"
-            "daculturedswine/phantomline.git ~/phantomline` (or `%USERPROFILE%\\phantomline` "
-            "on Windows). Use the absolute path in the next steps.\n"
-            "4. cd into the directory.\n"
+            "2. Download the Phantomline source ZIP from "
+            "https://phantomline.xyz/download/phantomline-source.zip into a permanent "
+            "location (NOT a temp dir — auto-start will reference this path forever). "
+            "Use curl/wget on macOS/Linux: "
+            "`curl -L https://phantomline.xyz/download/phantomline-source.zip -o phantomline.zip`. "
+            "Or Invoke-WebRequest on Windows: "
+            "`Invoke-WebRequest https://phantomline.xyz/download/phantomline-source.zip "
+            "-OutFile phantomline.zip`. The ZIP is self-hosted on phantomline.xyz so no GitHub "
+            "account is needed.\n"
+            "3. Extract the ZIP. macOS/Linux: `unzip phantomline.zip`. Windows: "
+            "`Expand-Archive phantomline.zip -DestinationPath . -Force`. This creates a "
+            "`phantomline/` folder.\n"
+            "4. cd into the `phantomline` directory.\n"
             "5. Create a virtual environment: `python -m venv .venv` (use `py -3.11 -m venv "
             ".venv` on Windows). Activate it: `source .venv/bin/activate` on macOS/Linux, "
             "`.venv\\Scripts\\activate` on Windows.\n"
@@ -2311,12 +2315,12 @@ INSTALL_TOOLS = {
             "header toggle, and switch to my local install with one click."
         ),
         "manual_steps": [
-            {"title": "Install Python 3.11 + Git",
-             "body": "Phantomline desktop runs on Python. Get Python 3.11 from <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (NOT 3.12+ yet, has Forge compatibility issues). Get Git from <a href=\"https://git-scm.com/downloads\" target=\"_blank\" rel=\"noopener\">git-scm.com/downloads</a>.",
-             "command": "python --version && git --version"},
-            {"title": "Clone Phantomline",
-             "body": "Pick a folder with ~5 GB free (Phantomline + dependencies). Source: <a href=\"https://github.com/daculturedswine/phantomline\" target=\"_blank\" rel=\"noopener\">github.com/daculturedswine/phantomline</a>.",
-             "command": "git clone https://github.com/daculturedswine/phantomline.git ~/phantomline\ncd ~/phantomline"},
+            {"title": "Install Python 3.11",
+             "body": "Phantomline desktop runs on Python. Get Python 3.11 from <a href=\"https://www.python.org/downloads/\" target=\"_blank\" rel=\"noopener\">python.org/downloads</a> (NOT 3.12+ yet, has Forge compatibility issues). No Git or GitHub account needed — we host the download directly.",
+             "command": "python --version"},
+            {"title": "Download Phantomline (ZIP, self-hosted)",
+             "body": "Direct download from phantomline.xyz. No GitHub login required. Pick a folder with ~5 GB free (Phantomline + Python deps). Or just click the big download button at the top of this page.",
+             "command": "# macOS / Linux:\ncurl -L https://phantomline.xyz/download/phantomline-source.zip -o phantomline.zip\nunzip phantomline.zip\ncd phantomline\n\n# Windows (PowerShell):\nInvoke-WebRequest https://phantomline.xyz/download/phantomline-source.zip -OutFile phantomline.zip\nExpand-Archive phantomline.zip -DestinationPath . -Force\ncd phantomline"},
             {"title": "Install Phantomline's Python dependencies",
              "body": "Use a virtual environment so Phantomline's libs don't collide with your system Python. Takes 5-10 min on first install.",
              "command": "python -m venv .venv\nsource .venv/bin/activate   # macOS/Linux\n# .venv\\Scripts\\activate      # Windows\npip install -r requirements.txt"},
@@ -2355,6 +2359,106 @@ def download_page():
     /install/phantomline page so marketing copy / CTAs / external links
     can use the simpler name."""
     return render_template("install.html", tool=INSTALL_TOOLS["phantomline"])
+
+
+# ---------------------------------------------------------------------------
+# Self-hosted source zip. Avoids the GitHub-private-repo problem that
+# blocked early users from downloading via the archive URL or git clone.
+# We build the zip on first request and cache it in OUTPUT_DIR; rebuilds
+# happen automatically when the cache is older than the server start.
+#
+# Excludes: .git, .venv*, __pycache__, output (user data), .env files,
+# anything matching common secret-file patterns. The result is a clean
+# install-ready folder a user can unzip + `pip install -r requirements.txt`.
+# ---------------------------------------------------------------------------
+_SOURCE_ZIP_LOCK = threading.Lock()
+_SOURCE_ZIP_PATH = OUTPUT_DIR / "phantomline-source.zip"
+_SOURCE_ZIP_BUILT_AT = None  # mtime of last build, server-process-local
+
+
+def _build_source_zip() -> Path:
+    """Stream a fresh source archive. Called under _SOURCE_ZIP_LOCK so
+    concurrent download requests don't race the file write."""
+    import zipfile
+
+    EXCLUDE_DIRS = {
+        ".git", ".github", ".venv", ".venv312", "venv",
+        "__pycache__", "node_modules", "output", ".idea", ".vscode",
+        ".pytest_cache", ".mypy_cache", "dist", "build",
+    }
+    EXCLUDE_FILE_SUFFIXES = (".pyc", ".pyo", ".log", ".tmp", ".broken.json")
+    EXCLUDE_FILE_NAMES = {
+        ".env", ".env.local", ".env.production", ".env.development",
+        "phantomline-source.zip", "tmp_thumb_test.png",
+    }
+    EXCLUDE_FILE_GLOBS = ("*.key", "*.pem", "*.bak", "*.orig", "tmp_*")
+
+    src_root = BASE_DIR
+    out_path = _SOURCE_ZIP_PATH
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = out_path.with_suffix(".tmp")
+
+    def should_skip(p: Path) -> bool:
+        # Skip any path whose ancestors include an excluded dir name.
+        for part in p.relative_to(src_root).parts:
+            if part in EXCLUDE_DIRS:
+                return True
+        if p.name in EXCLUDE_FILE_NAMES:
+            return True
+        if p.suffix in EXCLUDE_FILE_SUFFIXES:
+            return True
+        from fnmatch import fnmatch
+        for pattern in EXCLUDE_FILE_GLOBS:
+            if fnmatch(p.name, pattern):
+                return True
+        return False
+
+    with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+        for root, dirs, files in os.walk(src_root):
+            root_path = Path(root)
+            # In-place prune excluded dirs so os.walk doesn't recurse into them.
+            dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+            for fname in files:
+                fpath = root_path / fname
+                if should_skip(fpath):
+                    continue
+                arcname = "phantomline/" + str(fpath.relative_to(src_root)).replace("\\", "/")
+                try:
+                    zf.write(fpath, arcname)
+                except OSError:
+                    # Some files (locked, permission-denied) get skipped silently.
+                    pass
+
+    os.replace(tmp_path, out_path)
+    return out_path
+
+
+@app.route("/download/phantomline-source.zip")
+def download_source_zip():
+    """Self-hosted source download. Avoids the GitHub-private-repo
+    block that prevented buddy from downloading. Streams the cached zip
+    and rebuilds on first request after server start."""
+    global _SOURCE_ZIP_BUILT_AT
+    with _SOURCE_ZIP_LOCK:
+        # Rebuild if missing OR if this server process hasn't built one
+        # this run (catches code updates after a deploy).
+        if _SOURCE_ZIP_BUILT_AT is None or not _SOURCE_ZIP_PATH.exists():
+            try:
+                _build_source_zip()
+                _SOURCE_ZIP_BUILT_AT = time.time()
+            except Exception as exc:
+                app.logger.exception("Source zip build failed")
+                return jsonify({
+                    "ok": False,
+                    "error": f"Could not build source zip: {exc}",
+                }), 500
+    return send_file(
+        str(_SOURCE_ZIP_PATH),
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name="phantomline-source.zip",
+        max_age=3600,
+    )
 
 
 @app.route("/alternatives")
