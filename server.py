@@ -75,6 +75,7 @@ from routes.research import research_bp
 from routes.optimize import optimize_bp
 from routes.billing import billing_bp, consume_quota, enforce_tier
 from routes.account import account_bp
+from routes.profile import profile_bp
 
 
 app = Flask(__name__)
@@ -86,6 +87,7 @@ app.register_blueprint(research_bp)
 app.register_blueprint(optimize_bp)
 app.register_blueprint(billing_bp)
 app.register_blueprint(account_bp)
+app.register_blueprint(profile_bp)
 # Stories are tiny but uploaded narration audio can be hundreds of MB
 # (an hour of WAV is ~330 MB, MP3 ~50 MB). Allow up to 1 GB.
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024

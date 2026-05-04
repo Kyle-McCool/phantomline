@@ -55,6 +55,30 @@
         </div>
       </div>
       <div id="ollamaBadge" class="ollama-badge"><span class="pulse"></span> <span id="ollamaText">checking…</span></div>
+      <div class="profile-wrap" id="profileWrap" style="display:none;">
+        <button id="profileBtn" class="profile-btn" type="button" title="Account">
+          <img id="profileAvatar" class="profile-avatar" alt="" />
+          <span id="profileInitials" class="profile-initials">·</span>
+          <span id="profileName" class="profile-name">Account</span>
+        </button>
+        <div id="profileMenu" class="profile-menu" hidden>
+          <div class="profile-menu-head">
+            <img id="profileMenuAvatar" class="profile-menu-avatar" alt="" />
+            <span id="profileMenuInitials" class="profile-menu-initials">·</span>
+            <div class="profile-menu-info">
+              <strong id="profileMenuName">Creator</strong>
+              <span id="profileMenuEmail"></span>
+            </div>
+          </div>
+          <label class="profile-menu-row" for="profileAvatarInput">
+            <span>Change avatar</span>
+            <input id="profileAvatarInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+          </label>
+          <button class="profile-menu-row" id="profileEditNameBtn" type="button">Change display name</button>
+          <a class="profile-menu-row" href="/account">Manage account &amp; billing</a>
+          <button class="profile-menu-row danger" id="profileSignOutBtn" type="button">Sign out</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -1773,5 +1797,6 @@ window.GHOSTLINE_DEFAULTS = {
 };
 </script>
 <script src="{{ '/static/phantomline.js' | versioned }}" defer></script>
+<script src="{{ '/static/profile-widget.js' | versioned }}" defer></script>
 </body>
 </html>
