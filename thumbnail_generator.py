@@ -107,22 +107,48 @@ TEXT_MUTED = (180, 195, 200)
 
 
 def post_process_background(img_bytes: bytes, *, preset_name: str = "faceless_story",
-                            sharpen: float = 1.18,
-                            contrast: float = 1.10,
-                            saturation: float = 1.12,
-                            vignette_strength: float = 0.18) -> bytes:
-    """Apply the polish pass: unsharp mask + contrast + saturation +
-    subtle vignette. Returns PNG bytes. Idempotent if you pass the
-    same input — same seed, same output."""
+                            sharpen: float = 1.35,
+                            contrast: float = 1.15,
+                            saturation: float = 1.18,
+                            vignette_strength: float = 0.18,
+                            denoise: bool = True) -> bytes:
+    """Apply the premium polish pass: subtle bilateral-style denoise +
+    unsharp mask + contrast/saturation grade + soft vignette. Returns
+    PNG bytes. Idempotent if you pass the same input.
+
+    The defaults aim for the "Magnific-lite" look — clean smooth low-detail
+    areas, crisp high-detail edges, rich-but-not-crushed color, gentle
+    eye-pull vignette. Stronger than the original tuning because AI image
+    backends (Pollinations FLUX) ship slightly soft and undersaturated
+    out of the box, and we have to compensate before text overlays."""
     with Image.open(BytesIO(img_bytes)) as img:
         img = img.convert("RGB")
         width, height = img.size
 
-        # Unsharp mask is more flattering than .SHARPEN — adds local
-        # contrast at edges without making everything look crispy.
+        # Step 1: gentle denoise on smooth areas BEFORE sharpening.
+        # MedianFilter with a small radius softens flat AI-noise patches
+        # (sky, walls, fog) without erasing edge detail. We then sharpen
+        # to bring back micro-contrast on the edges that survived. This
+        # is the "smooth then sharpen" trick that Topaz / Magnific do
+        # internally — denoise hides AI smudge, sharpen restores feel.
+        if denoise:
+            soft = img.filter(ImageFilter.MedianFilter(size=3))
+            # Edge mask: where the image has high local contrast, keep
+            # the original (sharp) pixels; where it's flat, use the soft
+            # version. PIL's FIND_EDGES gives us the mask cheaply.
+            edges = img.convert("L").filter(ImageFilter.FIND_EDGES)
+            edges = edges.filter(ImageFilter.GaussianBlur(2))
+            # Boost edge mask so even mid-strength edges keep sharp data.
+            edges = ImageEnhance.Contrast(edges).enhance(2.0)
+            img = Image.composite(img, soft, edges)
+
+        # Step 2: unsharp mask — adds local edge contrast without the
+        # crispy oversharpening look from .SHARPEN. Stronger settings
+        # than before (1.35 vs 1.18) because the denoise step softens
+        # things first.
         if sharpen and sharpen != 1.0:
             img = img.filter(
-                ImageFilter.UnsharpMask(radius=1.6, percent=int((sharpen - 1.0) * 200), threshold=2)
+                ImageFilter.UnsharpMask(radius=1.8, percent=int((sharpen - 1.0) * 200), threshold=2)
             )
 
         if contrast and contrast != 1.0:
@@ -131,12 +157,10 @@ def post_process_background(img_bytes: bytes, *, preset_name: str = "faceless_st
         if saturation and saturation != 1.0:
             img = ImageEnhance.Color(img).enhance(saturation)
 
-        # Subtle vignette pulls the eye to center. We bake it in PIL
-        # using a radial gradient mask blended over the image.
+        # Step 3: subtle vignette pulls the eye to center.
         if vignette_strength > 0:
             mask = Image.new("L", (width, height), 0)
             mdraw = ImageDraw.Draw(mask)
-            # Larger inner radius = subtler effect
             cx, cy = width // 2, height // 2
             max_r = int(math.hypot(width, height) * 0.55)
             for r in range(max_r, 0, -8):
@@ -149,6 +173,36 @@ def post_process_background(img_bytes: bytes, *, preset_name: str = "faceless_st
             dim = Image.new("RGB", (width, height), (0, 0, 0))
             img = Image.composite(img, dim, mask)
 
+        out = BytesIO()
+        img.save(out, "PNG", optimize=True)
+        return out.getvalue()
+
+
+def upscale_to_4k(img_bytes: bytes, target_long_edge: int = 3840) -> bytes:
+    """LANCZOS upscale + edge-preserving sharpening to push the final
+    composite toward YouTube's recommended 3840×2160 spec.
+
+    LANCZOS alone produces clean smooth upscaling. We follow with a mild
+    unsharp mask on the LARGE image to restore the perceived detail that
+    bilinear interpolation softens out. End result is closer to a true
+    4K capture than a stretched 1080p still."""
+    with Image.open(BytesIO(img_bytes)) as img:
+        img = img.convert("RGB")
+        w, h = img.size
+        long_edge = max(w, h)
+        if long_edge >= target_long_edge:
+            # Already 4K or larger — no work needed.
+            out = BytesIO()
+            img.save(out, "PNG", optimize=True)
+            return out.getvalue()
+        scale = target_long_edge / long_edge
+        new_w = int(round(w * scale))
+        new_h = int(round(h * scale))
+        # LANCZOS = highest-quality resampling PIL ships. Slow at 4K but
+        # we only do this once per thumbnail.
+        img = img.resize((new_w, new_h), Image.LANCZOS)
+        # Mild post-upscale sharpen to claw back perceived detail.
+        img = img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=80, threshold=3))
         out = BytesIO()
         img.save(out, "PNG", optimize=True)
         return out.getvalue()
@@ -560,13 +614,16 @@ def generate_forge_background(title: str, *, aspect: str = "16:9",
 
 _POLLINATIONS_BASE = "https://image.pollinations.ai/prompt/"
 
-# Pollinations model priority. We try the highest-quality endpoint first
-# and fall through to the next on HTTP failure. `gptimage` is OpenAI's
-# GPT-Image-1 mirror (when Pollinations has capacity); `flux` is
-# FLUX-schnell which is always available. `flux-realism` adds extra
-# photography fine-tuning and produces materially better thumbnail
-# imagery — it's the quality baseline we should ship as default.
-_POLLINATIONS_MODEL_PRIORITY = ["flux-realism", "flux", "turbo"]
+# Pollinations model priority. Try the highest-quality endpoint first
+# and fall through on HTTP failure / quota.
+#   - gptimage:      OpenAI's GPT-Image-1 mirror — best polish/coherence
+#                    when capacity is available. Falls through hard on
+#                    quota, so flux-realism backs it up.
+#   - flux-realism:  FLUX with extra photography fine-tuning. Materially
+#                    better thumbnail imagery than vanilla flux.
+#   - flux:          FLUX-schnell, always available, decent baseline.
+#   - turbo:         Last resort, fastest but lowest quality.
+_POLLINATIONS_MODEL_PRIORITY = ["gptimage", "flux-realism", "flux", "turbo"]
 
 
 def pollinations_available() -> bool:
@@ -954,10 +1011,16 @@ def generate_pollinations_background(title: str, *, aspect: str = "16:9",
     encoded = quote(full_prompt, safe="")
 
     last_error = None
+    # Generate at 2048 max width (Pollinations free-tier ceiling for FLUX
+    # without quota errors). The compose path resizes to the canonical
+    # THUMBNAIL_SIZES anyway, so going higher gives sharper detail when
+    # we upscale to 4K at output time.
+    gen_w = min(width * 2, 2048) if width <= 1080 else min(width, 2048)
+    gen_h = min(height * 2, 2048) if height <= 1080 else min(height, 2048)
     for model_name in _POLLINATIONS_MODEL_PRIORITY:
         params = {
-            "width": str(min(width, 1920)),
-            "height": str(min(height, 1920)),
+            "width": str(gen_w),
+            "height": str(gen_h),
             "model": model_name,
             "nologo": "true",
             "enhance": "false",
@@ -2191,12 +2254,33 @@ def generate_thumbnail(title: str, *, aspect: str = "16:9",
         bg_is_ai_image=bg_is_ai_image,
         headline_override=headline_override,
     )
+
+    # Final 4K upscale — push the composite to YouTube's recommended
+    # 3840×2160 with LANCZOS + edge-preserving sharpen. The text was
+    # composited at the source resolution (1920×1080) so it gets
+    # naturally crisper rather than blurry. Skipped for the PIL fallback
+    # since that's already a designed-not-photographed surface.
+    if bg_is_ai_image and used_mode in ("forge", "pollinations", "falai", "user_image"):
+        try:
+            composed = upscale_to_4k(composed, target_long_edge=3840)
+        except Exception:
+            # Upscale is best-effort; original 1080p composite is still
+            # a usable thumbnail if the upscale errors.
+            pass
+    # Report the actual final dimensions (post-upscale) so the UI shows
+    # the user the real 4K size they're getting.
+    final_w, final_h = width, height
+    try:
+        with Image.open(BytesIO(composed)) as _final:
+            final_w, final_h = _final.size
+    except Exception:
+        pass
     return {
         "png_bytes": composed,
         "mode": used_mode,
         "preset": preset_name,
-        "width": width,
-        "height": height,
+        "width": final_w,
+        "height": final_h,
         "fallback_reason": fallback_reason if not bg_is_ai_image else "",
     }
 
