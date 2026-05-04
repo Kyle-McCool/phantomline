@@ -111,6 +111,56 @@
   .ollama-badge.ok .pulse { background: var(--good); box-shadow: 0 0 10px var(--good); }
   .ollama-badge.bad .pulse { background: var(--bad); box-shadow: 0 0 10px var(--bad); }
 
+  /* Mode toggle: badge becomes a clickable dropdown that lets the user
+     switch between hosted browser mode and their local Phantomline. */
+  .mode-toggle-wrap { position: relative; }
+  .mode-toggle-btn {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    font-family: inherit;
+    transition: border-color 120ms, background 120ms;
+  }
+  .mode-toggle-btn:hover { border-color: rgba(34,231,245,0.45); background: rgba(34,231,245,0.05); }
+  .mode-toggle-caret {
+    margin-left: 4px; opacity: 0.6; font-size: 10px;
+  }
+  .mode-toggle-menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    width: 280px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    padding: 6px;
+    z-index: 80;
+    text-align: left;
+  }
+  .mode-toggle-menu[hidden] { display: none; }
+  .mode-toggle-row {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 100ms;
+  }
+  .mode-toggle-row:hover { background: rgba(34,231,245,0.08); }
+  .mode-toggle-row strong { font-size: 13px; color: var(--text); }
+  .mode-toggle-row .mode-toggle-meta { font-size: 11px; color: var(--muted); }
+  .mode-toggle-row[data-mode-row="browser"] { background: rgba(34,231,245,0.06); cursor: default; }
+  .mode-toggle-row[data-mode-row="browser"]:hover { background: rgba(34,231,245,0.06); }
+  .mode-toggle-status {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+    padding: 1px 6px; border-radius: 4px;
+    background: rgba(255,255,255,0.08); color: var(--muted);
+    text-transform: uppercase;
+    margin-left: 4px;
+  }
+  .mode-toggle-status.detected { background: rgba(34,231,245,0.20); color: #19e0c2; }
+  .mode-toggle-status.missing { background: rgba(255,122,122,0.15); color: #ff7a7a; }
+  .mode-toggle-download { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 12px; }
+
   /* Profile widget (top-right of studio header) */
   .profile-wrap { position: relative; }
   .profile-btn {

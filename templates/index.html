@@ -54,7 +54,27 @@
           <div id="notificationList" class="notification-list"></div>
         </div>
       </div>
-      <div id="ollamaBadge" class="ollama-badge"><span class="pulse"></span> <span id="ollamaText">checking…</span></div>
+      <div class="mode-toggle-wrap">
+        <button id="ollamaBadge" class="ollama-badge mode-toggle-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+          <span class="pulse"></span>
+          <span id="ollamaText">checking…</span>
+          <span class="mode-toggle-caret" aria-hidden="true">▾</span>
+        </button>
+        <div id="modeToggleMenu" class="mode-toggle-menu" hidden>
+          <div class="mode-toggle-row" data-mode-row="browser">
+            <strong>Browser mode</strong>
+            <span class="mode-toggle-meta">In-tab AI · WebGPU · ffmpeg.wasm</span>
+          </div>
+          <a class="mode-toggle-row" id="modeToggleLocal" href="http://localhost:5000/app">
+            <strong>Local Phantomline <span id="modeToggleLocalStatus" class="mode-toggle-status">checking…</span></strong>
+            <span class="mode-toggle-meta">Your Ollama, Kokoro, Forge · faster, premium quality</span>
+          </a>
+          <a class="mode-toggle-row mode-toggle-download" href="/download">
+            <strong>Don't have it yet?</strong>
+            <span class="mode-toggle-meta">Download Phantomline desktop →</span>
+          </a>
+        </div>
+      </div>
       <div class="profile-wrap" id="profileWrap" style="display:none;">
         <button id="profileBtn" class="profile-btn" type="button" title="Account">
           <img id="profileAvatar" class="profile-avatar" alt="" />
