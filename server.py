@@ -2245,8 +2245,8 @@ INSTALL_TOOLS = {
     },
     "phantomline": {
         "label": "Phantomline desktop",
-        "subtitle": "The full studio that runs locally on your machine. Uses your own Ollama, Kokoro, and Forge for unlimited high-quality renders. License-key activated.",
-        "downloads_note": "Phantomline desktop is the full studio. It runs Python on your machine and connects to your local Ollama / Kokoro / Forge for the heavy lifting. Sign in with your license key, and your finished projects sync to your phantomline.xyz library so you can view them on any device.",
+        "subtitle": "The full studio that runs locally on your machine. Uses your own Ollama, Kokoro, and Forge for unlimited high-quality renders. License-key activated. Auto-starts on boot so phantomline.xyz can switch to your local install with one click.",
+        "downloads_note": "Phantomline desktop runs as a tiny background service on your computer (auto-starts on boot, lives in your system tray). When you visit phantomline.xyz from any browser, the 'Local Phantomline' button in the studio toggle opens your local install in a new tab. Projects sync between the two via your account so the same library follows you everywhere.",
         "downloads": [
             {"os": "Windows", "url": "https://github.com/daculturedswine/phantomline/archive/refs/heads/main.zip",
              "label": "Download Phantomline (ZIP)", "size": "~30 MB"},
@@ -2268,27 +2268,47 @@ INSTALL_TOOLS = {
         ),
         "claude_prompt": (
             "Install Phantomline desktop on this machine so I can use my local Ollama for "
-            "high-quality video generation.\n\n"
-            "1. Verify Python 3.11+ is installed (run `python --version`). If missing, install "
-            "Python 3.11 from python.org or via Homebrew/apt. Phantomline does not work on "
-            "Python 3.12+ yet because of a Forge dependency.\n"
+            "high-quality video generation. Set up auto-start so it always runs in the "
+            "background and the phantomline.xyz toggle can switch to it with one click.\n\n"
+            "1. Verify Python 3.11+ is installed (run `python --version` or `py -3.11 "
+            "--version` on Windows). If missing, install Python 3.11 from python.org or via "
+            "Homebrew/apt. Phantomline does not work on Python 3.12+ yet (Forge dependency).\n"
             "2. Verify Git is installed (`git --version`). If missing, install from git-scm.com.\n"
-            "3. Clone the Phantomline repo: `git clone https://github.com/daculturedswine/"
-            "phantomline.git ~/phantomline` (or `%USERPROFILE%\\phantomline` on Windows).\n"
+            "3. Clone the Phantomline repo to a permanent location (NOT a temp dir, since "
+            "auto-start will reference this path forever): `git clone https://github.com/"
+            "daculturedswine/phantomline.git ~/phantomline` (or `%USERPROFILE%\\phantomline` "
+            "on Windows). Use the absolute path in the next steps.\n"
             "4. cd into the directory.\n"
-            "5. Create a virtual environment: `python -m venv .venv` (use `py -3.11 -m venv .venv` "
-            "on Windows). Activate it: `source .venv/bin/activate` on macOS/Linux, "
+            "5. Create a virtual environment: `python -m venv .venv` (use `py -3.11 -m venv "
+            ".venv` on Windows). Activate it: `source .venv/bin/activate` on macOS/Linux, "
             "`.venv\\Scripts\\activate` on Windows.\n"
             "6. Install Python dependencies: `pip install -r requirements.txt`. This takes "
-            "5-10 minutes (Pillow, Flask, requests, plus the optional ML libs for Kokoro "
-            "and ffmpeg-python).\n"
+            "5-10 min.\n"
             "7. Confirm Ollama is running: `ollama list` should show llama3.1 (or pull it "
             "with `ollama pull llama3.1`).\n"
-            "8. Start the server: `python server.py`. It listens on http://localhost:5000.\n"
-            "9. Open http://localhost:5000/account in a browser, sign in with my Google "
-            "account, and paste my Phantomline license key when prompted.\n"
-            "10. Tell me when it's ready so I can open http://localhost:5000/app and start "
-            "making videos."
+            "8. SET UP AUTO-START so server.py runs every time the user logs in. Use the "
+            "right method for the OS:\n"
+            "   - Windows: Create a Scheduled Task that runs at user logon. Use "
+            "`schtasks /create /tn Phantomline /tr \"<absolute path to .venv\\Scripts\\"
+            "pythonw.exe>\\\" \\\"<absolute path to server.py>\\\"\" /sc onlogon /rl highest`. "
+            "Use pythonw.exe (not python.exe) so no terminal window appears.\n"
+            "   - macOS: Create ~/Library/LaunchAgents/com.phantomline.server.plist with "
+            "<plist><dict><key>Label</key><string>com.phantomline.server</string><key>"
+            "ProgramArguments</key><array><string>/absolute/path/to/.venv/bin/python</string>"
+            "<string>/absolute/path/to/server.py</string></array><key>RunAtLoad</key><true/>"
+            "<key>KeepAlive</key><true/></dict></plist>. Then run `launchctl load ~/Library/"
+            "LaunchAgents/com.phantomline.server.plist`.\n"
+            "   - Linux: Create ~/.config/systemd/user/phantomline.service with "
+            "[Unit]\\nDescription=Phantomline\\n[Service]\\nExecStart=/absolute/path/to/.venv/"
+            "bin/python /absolute/path/to/server.py\\nRestart=always\\n[Install]\\nWantedBy="
+            "default.target. Then run `systemctl --user enable --now phantomline`.\n"
+            "9. Verify auto-start works: open http://localhost:5000/api/health in a browser. "
+            "Should return JSON with `\"ok\": true`. If yes, the background service is up.\n"
+            "10. Open http://localhost:5000/account, sign in with my Google account. License "
+            "auto-issues as Free tier (5 renders/month) or activates whatever paid license is "
+            "associated with my email.\n"
+            "11. Tell me when it's done so I can open phantomline.xyz, click the studio "
+            "header toggle, and switch to my local install with one click."
         ),
         "manual_steps": [
             {"title": "Install Python 3.11 + Git",
@@ -2303,11 +2323,14 @@ INSTALL_TOOLS = {
             {"title": "Install Ollama if you haven't yet",
              "body": "Phantomline uses your local Ollama for script + idea + title generation. Get the friendly install guide at <a href=\"/install/ollama\">/install/ollama</a>.",
              "command": "ollama pull llama3.1"},
-            {"title": "Start Phantomline",
-             "body": "It runs as a local web server on port 5000. Leave the terminal open while you're using it.",
+            {"title": "Start Phantomline (one-time test)",
+             "body": "It runs as a local web server on port 5000. Leave the terminal open while you confirm everything works, then we'll set up auto-start so you never have to do this manually again.",
              "command": "python server.py"},
+            {"title": "Set up auto-start so it always runs in the background",
+             "body": "Once-and-done. After this, Phantomline runs on every login and the phantomline.xyz toggle can switch to your local install with one click. Pick the command for your OS. Replace <code>&lt;ABSOLUTE_PATH&gt;</code> with the full path to your phantomline folder.",
+             "command": "# Windows (PowerShell as Administrator):\nschtasks /create /tn Phantomline /tr \"<ABSOLUTE_PATH>\\.venv\\Scripts\\pythonw.exe <ABSOLUTE_PATH>\\server.py\" /sc onlogon /rl highest\n\n# macOS (creates a LaunchAgent):\ncat > ~/Library/LaunchAgents/com.phantomline.server.plist <<'EOF'\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<plist version=\"1.0\"><dict>\n  <key>Label</key><string>com.phantomline.server</string>\n  <key>ProgramArguments</key>\n  <array>\n    <string><ABSOLUTE_PATH>/.venv/bin/python</string>\n    <string><ABSOLUTE_PATH>/server.py</string>\n  </array>\n  <key>RunAtLoad</key><true/>\n  <key>KeepAlive</key><true/>\n</dict></plist>\nEOF\nlaunchctl load ~/Library/LaunchAgents/com.phantomline.server.plist\n\n# Linux (systemd user service):\nmkdir -p ~/.config/systemd/user\ncat > ~/.config/systemd/user/phantomline.service <<EOF\n[Unit]\nDescription=Phantomline desktop server\n[Service]\nExecStart=<ABSOLUTE_PATH>/.venv/bin/python <ABSOLUTE_PATH>/server.py\nRestart=always\n[Install]\nWantedBy=default.target\nEOF\nsystemctl --user enable --now phantomline"},
             {"title": "Sign in with your license",
-             "body": "Open <code>http://localhost:5000/account</code>, sign in with the same Google account you bought your license under. Your projects + library will sync to phantomline.xyz so you can view them from any device.",
+             "body": "Open <code>http://localhost:5000/account</code>, sign in with the same Google account. Free tier (5 renders/month) auto-issues; paid licenses activate from your account email. Your projects + library will sync to phantomline.xyz so you can view them from any device.",
              "command": ""},
         ],
         "verify_text": "Open <a href=\"http://localhost:5000/app\" target=\"_blank\" rel=\"noopener\">http://localhost:5000/app</a> in your browser. You should see the Phantomline studio with your local Ollama detected. Make a quick test video to confirm everything works.",

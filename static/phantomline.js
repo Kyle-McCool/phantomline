@@ -665,6 +665,12 @@ async function refreshOllama() {
           localStatus.classList.remove('detected');
         }
       }
+      // Show the "make sure Phantomline desktop is running" hint to
+      // first-time clickers so they understand the failure mode if their
+      // server isn't up. Returning users (we know they have it set up)
+      // get the cleaner row.
+      const hintEl = $('modeToggleHint');
+      if (hintEl) hintEl.hidden = hasLocalInstall();
       if (localRow) {
         // Open in a new tab — keeps the hosted library visible while
         // the user works in their local install.
