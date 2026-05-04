@@ -469,8 +469,44 @@ function fillModelSelect(sel, models) {
   }
 }
 
+// Read the Supabase access token out of localStorage (same key the
+// auth-gate inspects). Returns null when the user isn't signed in or
+// when localStorage is unavailable. Used to attach an Authorization
+// header to every /api/* call so the hosted server can scope projects
+// to the signed-in user. Local desktop installs don't need this — the
+// server ignores the header when the Supabase flag is off.
+function _phantomlineAuthToken() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || k.indexOf('sb-') !== 0 || k.indexOf('-auth-token') < 0) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      const sess = (parsed && parsed.currentSession) || parsed;
+      if (sess && sess.access_token) return sess.access_token;
+    }
+  } catch (e) { /* localStorage disabled — anonymous fetch */ }
+  return null;
+}
+
+// Attach Authorization header on cross-origin-safe URLs (same-origin
+// /api/* calls). Mutates the supplied options.headers in place but
+// preserves any caller-supplied headers.
+function _withAuthHeader(options) {
+  options = options || {};
+  const token = _phantomlineAuthToken();
+  if (!token) return options;
+  const headers = new Headers(options.headers || {});
+  if (!headers.has('Authorization')) {
+    headers.set('Authorization', 'Bearer ' + token);
+  }
+  options.headers = headers;
+  return options;
+}
+
 async function apiJson(url, options) {
-  const r = await fetch(url, options);
+  const r = await fetch(url, _withAuthHeader(options));
   const text = await r.text();
   let data = null;
   try {
@@ -484,6 +520,27 @@ async function apiJson(url, options) {
   }
   return data;
 }
+
+// Wrap window.fetch so direct fetch() calls (not via apiJson) on /api/*
+// also get the bearer header. Avoids hunting through 200+ raw fetch
+// call sites to add auth manually.
+(function () {
+  const origFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    let url;
+    try {
+      url = (typeof input === 'string') ? input : (input && input.url) || '';
+    } catch (e) { url = ''; }
+    // Only auth-attach on same-origin /api/* paths so we never leak the
+    // token to third-party APIs.
+    if (typeof url === 'string' && url.indexOf('/api/') === 0) {
+      init = _withAuthHeader(init);
+    } else if (typeof url === 'string' && url.indexOf(location.origin + '/api/') === 0) {
+      init = _withAuthHeader(init);
+    }
+    return origFetch(input, init);
+  };
+})();
 
 async function refreshOllama() {
   const badge = $('ollamaBadge');

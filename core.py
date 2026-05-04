@@ -16,10 +16,13 @@ in the route module that owns it.
 
 from __future__ import annotations
 
+import contextvars
 import csv
+import functools
 import json
 import os
 import re
+import threading
 from io import StringIO
 from pathlib import Path
 
@@ -31,8 +34,223 @@ BASE_DIR: Path = Path(__file__).resolve().parent
 OUTPUT_DIR: Path = BASE_DIR / "output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# Persistent project store. Survives server restarts. Singleton-ish.
-PROJECTS = project_store.ProjectStore(OUTPUT_DIR)
+
+# ---------------------------------------------------------------------------
+# Project store proxy.
+#
+# The studio has 60+ call sites that touch `PROJECTS`. Refactoring every one
+# to thread `user_id` through manually would be a multi-day rewrite and would
+# break the desktop install (which doesn't have a user_id concept since it's
+# local-only).
+#
+# Instead: PROJECTS is a thin proxy that picks the active backend per-call:
+#   - Local install (or Supabase env vars unset): falls through to the
+#     file-based ProjectStore, no user scoping.
+#   - Hosted with PHANTOMLINE_USE_SUPABASE_PROJECTS=true: routes to the
+#     SupabaseProjectStore, scoped to the user_id stored in a context var
+#     that's set per-request by a Flask before_request hook.
+#
+# Background render threads call `with_user_context(user_id)` to re-bind the
+# context var when they spawn from a request handler, so a user's renders
+# always write back to their own row.
+# ---------------------------------------------------------------------------
+
+_USER_ID_VAR: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "phantomline_user_id", default=None
+)
+
+
+def _supabase_projects_enabled() -> bool:
+    """Feature flag. Default OFF so the existing local store stays the
+    canonical backend until we explicitly opt a deploy in."""
+    flag = os.environ.get("PHANTOMLINE_USE_SUPABASE_PROJECTS", "").lower()
+    return flag in ("1", "true", "yes")
+
+
+def set_request_user(user_id: str | None) -> contextvars.Token:
+    """Store the signed-in user's ID on the current context (Flask request
+    or background thread). Returns a token the caller MUST pass to
+    `reset_request_user` once the scope ends."""
+    return _USER_ID_VAR.set(user_id)
+
+
+def reset_request_user(token: contextvars.Token) -> None:
+    """Restore the previous user-id binding. Pair with set_request_user
+    in a try/finally."""
+    _USER_ID_VAR.reset(token)
+
+
+def current_user_id() -> str | None:
+    """The user_id bound to the current execution context, or None if
+    we're outside a request (e.g. a background render started before
+    sign-in support shipped)."""
+    return _USER_ID_VAR.get()
+
+
+def run_with_user_context(user_id: str | None, fn, *args, **kwargs):
+    """Run `fn(*args, **kwargs)` with `user_id` as the active context.
+    Restores the prior context on exit. Use this for spawned threads:
+
+        threading.Thread(
+            target=lambda: run_with_user_context(uid, worker, job_id),
+            daemon=True,
+        ).start()
+    """
+    token = set_request_user(user_id)
+    try:
+        return fn(*args, **kwargs)
+    finally:
+        reset_request_user(token)
+
+
+def spawn_user_thread(target, *args, daemon=True, name=None, **kwargs) -> threading.Thread:
+    """threading.Thread() replacement that captures the current
+    contextvar bindings (including the signed-in user_id set by the
+    Flask before_request hook) and re-binds them inside the worker.
+
+    Without this, a render thread spawned mid-request loses the
+    user_id when it tries to write back to PROJECTS, and SupabaseProjectStore
+    raises PermissionError because no user is on the context.
+    """
+    ctx = contextvars.copy_context()
+    thread = threading.Thread(
+        target=lambda: ctx.run(target, *args, **kwargs),
+        daemon=daemon,
+        name=name,
+    )
+    return thread
+
+
+class _RequestScopedProjectStore:
+    """Proxy that delegates to either the local file-based store or the
+    Supabase-backed store, transparently injecting `user_id` from the
+    context var when the Supabase backend is active.
+
+    Only the methods the rest of the app actually calls are surfaced;
+    anything else falls through via __getattr__ so the local store keeps
+    working unchanged for any obscure call sites."""
+
+    def __init__(self, local_store):
+        self._local = local_store
+        self._supabase_lock = threading.Lock()
+        self._supabase = None  # built lazily so import order doesn't matter
+
+    def _supabase_store(self):
+        if self._supabase is not None:
+            return self._supabase
+        with self._supabase_lock:
+            if self._supabase is None:
+                # Lazy import so machines without supabase env vars don't
+                # crash on module load.
+                from supabase_projects import SupabaseProjectStore  # noqa: WPS433
+                self._supabase = SupabaseProjectStore(self._local.output_dir)
+            return self._supabase
+
+    def _route(self):
+        """Return (active_store, user_id) for this call. user_id is None
+        when we're using the local store."""
+        if _supabase_projects_enabled():
+            user_id = current_user_id()
+            if user_id:
+                return self._supabase_store(), user_id
+            # Hosted env enabled but no user_id on the context — refuse.
+            # Caller (route handler) should have rejected the request
+            # before reaching this proxy. If we slip through, raise so
+            # the failure is loud not silent.
+            raise PermissionError(
+                "Supabase project store active but no user is signed in. "
+                "Ensure the route is JWT-gated."
+            )
+        return self._local, None
+
+    # ----- proxied methods -----
+
+    def all(self):
+        store, uid = self._route()
+        return store.all(user_id=uid) if uid else store.all()
+
+    def get(self, project_id):
+        store, uid = self._route()
+        return store.get(project_id, user_id=uid) if uid else store.get(project_id)
+
+    def create(self, kind, title, params=None):
+        store, uid = self._route()
+        if uid:
+            return store.create(user_id=uid, kind=kind, title=title, params=params)
+        return store.create(kind=kind, title=title, params=params)
+
+    def update(self, project_id, **fields):
+        store, uid = self._route()
+        if uid:
+            return store.update(project_id, user_id=uid, **fields)
+        return store.update(project_id, **fields)
+
+    def delete(self, project_id):
+        store, uid = self._route()
+        if uid:
+            return store.delete(project_id, user_id=uid)
+        return store.delete(project_id)
+
+    def attach_file(self, project_id, role, src_path, copy=False):
+        store, uid = self._route()
+        if uid:
+            return store.attach_file(project_id, role, src_path,
+                                     user_id=uid, copy=copy)
+        return store.attach_file(project_id, role, src_path, copy=copy)
+
+    def file_path(self, project_id, role):
+        store, uid = self._route()
+        if uid:
+            return store.file_path(project_id, role, user_id=uid)
+        return store.file_path(project_id, role)
+
+    def file_signed_url(self, project_id, role, expires_in=3600):
+        """Only available on the Supabase backend. Local store returns
+        None so the caller can fall back to streaming via Flask."""
+        store, uid = self._route()
+        if uid and hasattr(store, "file_signed_url"):
+            return store.file_signed_url(project_id, role,
+                                         user_id=uid, expires_in=expires_in)
+        return None
+
+    def create_bundle(self, title, params=None, members=None):
+        store, uid = self._route()
+        if uid:
+            return store.create_bundle(user_id=uid, title=title,
+                                       params=params, members=members)
+        return store.create_bundle(title=title, params=params, members=members)
+
+    def attach_bundle_member(self, bundle_id, role, project_id):
+        store, uid = self._route()
+        if uid:
+            return store.attach_bundle_member(bundle_id, role, project_id,
+                                              user_id=uid)
+        return store.attach_bundle_member(bundle_id, role, project_id)
+
+    def bundle_for(self, project_id):
+        store, uid = self._route()
+        if uid:
+            return store.bundle_for(project_id, user_id=uid)
+        return store.bundle_for(project_id)
+
+    def expand_bundle(self, bundle_id):
+        store, uid = self._route()
+        if uid:
+            return store.expand_bundle(bundle_id, user_id=uid)
+        return store.expand_bundle(bundle_id)
+
+    # Fall-through for anything we missed. Routes the call to the local
+    # store unconditionally — this is fine because anything not surfaced
+    # above isn't user-scoped (e.g. internal cache helpers).
+    def __getattr__(self, name):
+        return getattr(self._local, name)
+
+
+# Persistent project store. Survives server restarts.
+# In local desktop mode, this is the file-based store. On hosted with the
+# Supabase flag enabled, every call routes through the user-scoped Supabase
+# backend. Call sites stay identical thanks to the proxy.
+PROJECTS = _RequestScopedProjectStore(project_store.ProjectStore(OUTPUT_DIR))
 
 
 def _read_json_file(path: Path, fallback):
