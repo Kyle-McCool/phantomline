@@ -3,9 +3,18 @@
  * Reads the user's Supabase session from localStorage (same key the
  * auth-gate inspects), fetches /api/profile/me, renders the badge +
  * dropdown menu. Avatar upload + display-name edit + sign-out wired
- * inline. Skipped entirely on localhost (desktop install — no auth)
- * and inside the Capacitor Android shell (we don't have native auth
- * wired up there yet).
+ * inline.
+ *
+ * Behavior by environment:
+ * - Hosted (phantomline.xyz): normal flow — auth-gate redirects to
+ *   /account if no session, this widget renders the badge after sign-in.
+ * - Local install (localhost / 127.0.0.1 / *.local): if a session is
+ *   present in localStorage, render normally — the user signed in on
+ *   phantomline.xyz and the studio inherits it. If no session,
+ *   render a discoverable "Sign in to sync" button that opens
+ *   /account in a new tab. Without this, local users have no path to
+ *   cloud sync.
+ * - Capacitor (Android shell): native auth not wired yet — bail.
  */
 (function () {
   function $(id) { return document.getElementById(id); }
@@ -13,9 +22,7 @@
   var host = location.hostname;
   var isLocal = host === "localhost" || host === "127.0.0.1" || host === "" || host.endsWith(".local");
   var inCapacitor = typeof window !== "undefined" && window.Capacitor;
-  // If we're in the desktop install or the mobile shell, the studio
-  // doesn't have user accounts, so the widget never shows.
-  if (isLocal || inCapacitor) return;
+  if (inCapacitor) return;
 
   function readSession() {
     try {
@@ -60,10 +67,29 @@
   }
 
   var session = readSession();
-  if (!session) return; // auth-gate should have redirected, but bail safely
-
   var wrap = $("profileWrap");
   if (!wrap) return; // template missing the widget
+
+  // Local install + no session = render a discoverable "Sign in to sync"
+  // button. Clicks open the LOCAL /account (same origin as the studio)
+  // so the Supabase session writes to localhost's localStorage, which
+  // is what fetch() calls from this page can actually read. Going to
+  // phantomline.xyz/account would land the session on the wrong
+  // origin — same Google account but different localStorage, no help.
+  if (!session && isLocal) {
+    wrap.style.display = "inline-flex";
+    wrap.innerHTML = ''
+      + '<a href="/account" '
+      +    'class="profile-btn" '
+      +    'title="Sign in here to sync your library to the cloud" '
+      +    'style="text-decoration:none; gap:8px;">'
+      + '  <span class="profile-initials" aria-hidden="true">→</span>'
+      + '  <span class="profile-name">Sign in to sync</span>'
+      + '</a>';
+    return;
+  }
+
+  if (!session) return; // auth-gate should have redirected; bail safely
 
   function authedFetch(url, opts) {
     opts = opts || {};
