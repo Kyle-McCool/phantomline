@@ -71,7 +71,13 @@ def validate_jwt(authorization: str | None) -> dict[str, Any] | None:
 
 def service_headers() -> dict[str, str]:
     """Headers for service_role REST calls. Caller must check
-    supabase_configured() first."""
+    supabase_configured() first.
+
+    USE SPARINGLY. service_role bypasses RLS — the only legitimate use
+    case in Phantomline is the licenses-by-email lookup in
+    routes/account.py (cross-user, by design). Project store reads/writes
+    should go through user_headers(jwt) so RLS enforces ownership.
+    """
     key = supabase_service_role_key() or ""
     return {
         "apikey": key,
@@ -80,6 +86,42 @@ def service_headers() -> dict[str, str]:
         # Postgrest needs Prefer: return=representation to echo back the
         # inserted/updated row body (otherwise we just get 201 with no body).
         "Prefer": "return=representation",
+    }
+
+
+def user_headers(jwt: str | None) -> dict[str, str]:
+    """Headers for user-JWT-scoped REST calls. RLS policies enforce
+    that the user can only read/write their own rows.
+
+    `jwt` is the access_token from a Supabase auth session — typically
+    extracted from an `Authorization: Bearer <token>` request header
+    via validate_jwt(). Pass it through here, NOT the service_role.
+
+    `apikey` is still the publishable anon key (Postgrest requires it
+    even when the bearer is a user JWT — the anon key authorizes the
+    request to even reach Postgrest, then the bearer JWT controls
+    which rows the user can see).
+    """
+    anon = supabase_anon_key() or ""
+    bearer = (jwt or "").strip()
+    return {
+        "apikey": anon,
+        "Authorization": f"Bearer {bearer}" if bearer else f"Bearer {anon}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
+
+
+def storage_user_headers(jwt: str | None) -> dict[str, str]:
+    """Same as user_headers() but for the Storage HTTP API. Storage
+    uses the same auth scheme as Postgrest: apikey = anon, bearer = JWT.
+    Content-Type is omitted because Storage uploads use the file's
+    content type, not application/json."""
+    anon = supabase_anon_key() or ""
+    bearer = (jwt or "").strip()
+    return {
+        "apikey": anon,
+        "Authorization": f"Bearer {bearer}" if bearer else f"Bearer {anon}",
     }
 
 

@@ -209,7 +209,14 @@ def _bind_user_context_for_projects():
     auth = request.headers.get("Authorization")
     user = validate_jwt(auth) if auth else None
     user_id = (user or {}).get("id")
-    request.environ["phantomline.user_token"] = set_request_user(user_id)
+    # Extract the raw JWT from the Authorization header so the project
+    # store can make user-scoped Supabase calls. validate_jwt confirmed
+    # it's well-formed against /auth/v1/user; we just need the token
+    # itself for downstream calls.
+    jwt = None
+    if auth and auth.lower().startswith("bearer "):
+        jwt = auth.split(" ", 1)[1].strip() or None
+    request.environ["phantomline.user_token"] = set_request_user(user_id, jwt)
     # Gate project-touching routes on a valid JWT. Read-only static pages,
     # the launch readiness check, and the public landing/pricing pages
     # all stay reachable for anonymous visitors.
