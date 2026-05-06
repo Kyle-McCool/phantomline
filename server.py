@@ -4251,11 +4251,185 @@ def api_youtube_callback():
         return f"YouTube connection failed: {exc}", 500
 
 
-@app.route("/api/publish/status")
-def api_publish_status():
+# ---------------------------------------------------------------------------
+# Single-OAuth YouTube tokens (PRIORITY 5).
+#
+# When the user clicks "Connect YouTube" in the Publish tab, the studio
+# opens /account?yt-connect=1 in a popup. Account.js detects the param,
+# calls supabase.auth.signInWithOAuth with the YouTube scopes (incremental
+# authorization on top of the existing sign-in grant), then POSTs the
+# resulting provider_token + provider_refresh_token here. We upsert into
+# user_youtube_tokens via the user's JWT so RLS enforces ownership —
+# every user gets their own row, no shared "single channel for the
+# whole server" problem like the legacy youtube_connection.json had.
+# ---------------------------------------------------------------------------
+
+
+def _user_yt_rest_url(path: str) -> str:
+    """Postgrest URL for the user_youtube_tokens table."""
+    base = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    return f"{base}/rest/v1/{path.lstrip('/')}"
+
+
+def _require_jwt():
+    """Pull + validate the bearer JWT from the request. Returns (user, jwt)
+    or (None, None) on missing/invalid. JWT-gated routes use this inline
+    instead of the project-store before_request hook so YouTube tokens
+    work even when PHANTOMLINE_USE_SUPABASE_PROJECTS is off."""
+    from auth_helpers import validate_jwt
+    auth = request.headers.get("Authorization") or ""
+    user = validate_jwt(auth)
+    if not user:
+        return None, None
+    jwt = auth.split(" ", 1)[1].strip() if auth.lower().startswith("bearer ") else None
+    return user, jwt
+
+
+@app.route("/api/youtube/store-token", methods=["POST"])
+def api_youtube_store_token():
+    """Receive a freshly-granted YouTube OAuth token from the /account
+    incremental-authorization flow and upsert it into user_youtube_tokens.
+
+    Body (JSON):
+        provider_token         — the Google access_token (required)
+        provider_refresh_token — the refresh_token (optional but strongly
+                                 recommended; without it the user has to
+                                 re-grant when access_token expires)
+        expires_in             — seconds until access_token expires (Google
+                                 returns 3600 typically)
+        scope                  — space-separated scopes Google granted
+        channel_id             — UC... id (optional; cached for UI)
+        channel_title          — display name (optional; cached for UI)
+
+    Auth: Authorization: Bearer <user JWT>. RLS upserts the row scoped
+    to auth.uid().
+    """
+    user, jwt = _require_jwt()
+    if not user or not jwt:
+        return jsonify({"ok": False, "error": "Sign in required."}), 401
+    data = request.get_json(silent=True) or {}
+    provider_token = (data.get("provider_token") or "").strip()
+    if not provider_token:
+        return jsonify({"ok": False, "error": "Missing provider_token."}), 400
+    refresh_token = (data.get("provider_refresh_token") or "").strip() or None
+    scope = (data.get("scope") or "").strip() or None
+    channel_id = (data.get("channel_id") or "").strip() or None
+    channel_title = (data.get("channel_title") or "").strip() or None
+    expires_in = data.get("expires_in")
+    expires_at_iso = None
+    try:
+        if expires_in is not None:
+            from datetime import datetime, timezone, timedelta
+            expires_at_iso = (datetime.now(tz=timezone.utc)
+                              + timedelta(seconds=int(expires_in))).isoformat()
+    except (ValueError, TypeError):
+        expires_at_iso = None
+
+    body = {
+        "user_id": user.get("id"),
+        "access_token": provider_token,
+        "refresh_token": refresh_token,
+        "expires_at": expires_at_iso,
+        "scope": scope,
+        "channel_id": channel_id,
+        "channel_title": channel_title,
+        "last_refreshed_at": expires_at_iso,  # initial grant counts as a refresh
+    }
+    headers = {
+        "apikey": os.environ.get("SUPABASE_ANON_KEY") or "",
+        "Authorization": f"Bearer {jwt}",
+        "Content-Type": "application/json",
+        # Postgrest upsert syntax: resolution=merge-duplicates with the
+        # primary key (user_id) means re-grants update the existing row
+        # rather than 409'ing.
+        "Prefer": "return=representation,resolution=merge-duplicates",
+    }
+    try:
+        r = requests.post(
+            _user_yt_rest_url("user_youtube_tokens"),
+            headers=headers,
+            json=body,
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": f"Supabase unreachable: {exc}"}), 502
+    if r.status_code not in (200, 201):
+        return jsonify({
+            "ok": False,
+            "error": f"Supabase upsert failed ({r.status_code}): {r.text[:200]}",
+        }), 502
+    return jsonify({"ok": True, "channel_title": channel_title})
+
+
+@app.route("/api/youtube/disconnect", methods=["DELETE", "POST"])
+def api_youtube_disconnect():
+    """Remove the signed-in user's YouTube row. RLS makes sure they can
+    only delete their own. Idempotent (200 even if no row existed)."""
+    user, jwt = _require_jwt()
+    if not user or not jwt:
+        return jsonify({"ok": False, "error": "Sign in required."}), 401
+    headers = {
+        "apikey": os.environ.get("SUPABASE_ANON_KEY") or "",
+        "Authorization": f"Bearer {jwt}",
+    }
+    try:
+        r = requests.delete(
+            _user_yt_rest_url(f"user_youtube_tokens?user_id=eq.{user['id']}"),
+            headers=headers,
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": f"Supabase unreachable: {exc}"}), 502
+    if r.status_code not in (200, 204):
+        return jsonify({
+            "ok": False,
+            "error": f"Supabase delete failed ({r.status_code}): {r.text[:200]}",
+        }), 502
+    return jsonify({"ok": True})
+
+
+@app.route("/api/youtube/status")
+def api_youtube_status():
+    """Return the signed-in user's YouTube connection state. Uses the
+    user_youtube_status view so we never expose the access_token to the
+    client. Falls back to the legacy file-based connection on local
+    installs (where the user isn't signed into Supabase but still wants
+    publishing to work via their own YOUTUBE_CLIENT_ID/SECRET)."""
+    user, jwt = _require_jwt()
+    if user and jwt:
+        headers = {
+            "apikey": os.environ.get("SUPABASE_ANON_KEY") or "",
+            "Authorization": f"Bearer {jwt}",
+        }
+        try:
+            r = requests.get(
+                _user_yt_rest_url(
+                    f"user_youtube_status?user_id=eq.{user['id']}&limit=1"
+                ),
+                headers=headers,
+                timeout=8,
+            )
+            if r.status_code == 200:
+                rows = r.json() if r.content else []
+                if isinstance(rows, list) and rows:
+                    row = rows[0]
+                    return jsonify({
+                        "ok": True,
+                        "source": "supabase",
+                        "youtube_connected": row.get("status") == "connected",
+                        "youtube_channel": {
+                            "id": row.get("channel_id"),
+                            "title": row.get("channel_title"),
+                        } if row.get("channel_id") else None,
+                        "expires_at": row.get("expires_at"),
+                    })
+        except requests.RequestException:
+            pass  # fall through to legacy path
+    # Legacy file-based fallback (local install + own OAuth credentials).
     connection = _youtube_connection()
     return jsonify({
         "ok": True,
+        "source": "local-file",
         "youtube_configured": youtube_publish.configured(BASE_DIR),
         "youtube_connected": bool(connection),
         "youtube_channel": {
@@ -4263,6 +4437,15 @@ def api_publish_status():
             "title": connection.get("display_name"),
         } if connection else None,
     })
+
+
+@app.route("/api/publish/status")
+def api_publish_status():
+    """Back-compat alias of /api/youtube/status — the studio JS still
+    polls this URL. Forwarding keeps the new per-user state available
+    without touching the 5,800-line phantomline.js right now; a future
+    commit can switch the studio to call /api/youtube/status directly."""
+    return api_youtube_status()
 
 
 @app.route("/api/youtube/playlists")
