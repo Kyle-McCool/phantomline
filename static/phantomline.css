@@ -14,9 +14,9 @@
     --paper-dim: #d8d4cb;
     --rule: rgba(244, 241, 234, 0.14);
     --rule-strong: rgba(244, 241, 234, 0.32);
-    --brand: #19e0c2;
-    --brand-deep: #0d8e7a;
-    --brand-faint: rgba(25, 224, 194, 0.08);
+    --brand: #1ab8e8;
+    --brand-deep: #0d7ea8;
+    --brand-faint: rgba(26, 184, 232, 0.08);
     --signal: #e8a04a;
     --signal-deep: #b8761d;
     --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -195,7 +195,7 @@
     text-transform: uppercase;
     margin-left: 4px;
   }
-  .mode-toggle-status.detected { background: rgba(34,231,245,0.20); color: #19e0c2; }
+  .mode-toggle-status.detected { background: rgba(34,231,245,0.20); color: #1ab8e8; }
   .mode-toggle-status.missing { background: rgba(255,122,122,0.15); color: #ff7a7a; }
   .mode-toggle-download { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 12px; }
   .mode-toggle-hint {
@@ -223,7 +223,7 @@
   .quota-widget .quota-upgrade {
     margin-left: 8px; padding: 2px 8px;
     border-radius: 999px;
-    background: #19e0c2; color: #0a1722;
+    background: #1ab8e8; color: #0a1722;
     font-weight: 700; font-size: 10px; letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -256,7 +256,7 @@
   .profile-initials {
     width: 28px; height: 28px; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #19e0c2, #2bb1d6);
+    background: linear-gradient(135deg, #1ab8e8, #2bb1d6);
     color: #0a1722; font-weight: 700; font-size: 12px;
     text-transform: uppercase;
   }
@@ -291,7 +291,7 @@
   .profile-menu-initials {
     width: 40px; height: 40px; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #19e0c2, #2bb1d6);
+    background: linear-gradient(135deg, #1ab8e8, #2bb1d6);
     color: #0a1722; font-weight: 700; font-size: 16px;
     text-transform: uppercase;
   }
@@ -1016,6 +1016,68 @@
     border-left-color: var(--brand);
     color: var(--paper);
   }
+  /* Install-reminder banner — sticky at the top of the studio when
+     /api/launch/readiness reports required blockers (Ollama missing,
+     etc). Driven by static/install-banner.js. */
+  .install-banner {
+    background: var(--brand-faint);
+    border-top: 1px solid var(--brand);
+    border-bottom: 1px solid var(--brand);
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+  .install-banner-inner {
+    width: min(1320px, calc(100% - 48px));
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .install-banner-icon {
+    width: 24px; height: 24px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--brand);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .install-banner-msg { flex: 1; min-width: 200px; }
+  .install-banner-msg strong {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--paper);
+    margin-right: 8px;
+    letter-spacing: -0.01em;
+  }
+  .install-banner-msg span {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .install-banner .btn {
+    width: auto !important;
+    margin-top: 0 !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+    flex-shrink: 0;
+  }
+  .install-banner-x {
+    background: transparent;
+    border: 0;
+    color: var(--text-2);
+    font-size: 22px;
+    line-height: 1;
+    padding: 4px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .install-banner-x:hover { color: var(--paper); }
+
   /* Cloud-sync status pill — sits in the studio header. Driven by
      static/sync-status.js polling /api/projects success state. */
   .sync-status {
@@ -2283,16 +2345,16 @@
     cursor: progress;
   }
   .launch-action.primary {
-    border-color: #19e0c2;
-    background: #19e0c2;
+    border-color: #1ab8e8;
+    background: #1ab8e8;
     color: #0a1722;
     font-weight: 600;
     padding: 8px 14px;
     box-shadow: 0 1px 0 rgba(34,231,245,0.25);
   }
   .launch-action.primary:hover {
-    background: #1ff5d4;
-    border-color: #1ff5d4;
+    background: #33c8f0;
+    border-color: #33c8f0;
     color: #0a1722;
     transform: translateY(-1px);
   }
@@ -2553,21 +2615,21 @@
     border: 1px solid #1f3447;
     border-radius: 999px;
     padding: 5px 11px;
-    background: rgba(25,224,194,0.05);
+    background: rgba(26,184,232,0.05);
     color: #cdd6df;
     font-size: 11px;
     cursor: pointer;
     transition: background 120ms, border-color 120ms, transform 60ms;
   }
   .thumb-chip:hover {
-    background: rgba(25,224,194,0.18);
-    border-color: #19e0c2;
+    background: rgba(26,184,232,0.18);
+    border-color: #1ab8e8;
     color: #fff;
   }
   .thumb-chip.active {
-    background: #19e0c2;
+    background: #1ab8e8;
     color: #0a1722;
-    border-color: #19e0c2;
+    border-color: #1ab8e8;
     font-weight: 600;
   }
   .publish-list {

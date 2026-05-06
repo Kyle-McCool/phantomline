@@ -4092,12 +4092,12 @@ function _renderThumbVariants(variants) {
   }
   const v = variants[0];
   grid.innerHTML = `
-    <div style="border:2px solid #19e0c2; border-radius:10px; overflow:hidden; background:#0a1722;">
+    <div style="border:2px solid #1ab8e8; border-radius:10px; overflow:hidden; background:#0a1722;">
       <img src="data:image/png;base64,${v.png_b64}" alt="Generated thumbnail"
         style="width:100%; height:auto; display:block;" />
       <div style="padding:8px 12px; font-size:12px; color:#7a96ad; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
         <span>${escapeHtml(v.preset || 'auto')} · ${escapeHtml(v.mode || '')}${v.seed ? ` · seed ${v.seed}` : ''}</span>
-        <span style="color:${v.mode === 'pil_fallback' ? '#e0a019' : '#19e0c2'};">
+        <span style="color:${v.mode === 'pil_fallback' ? '#e0a019' : '#1ab8e8'};">
           ${v.mode === 'pil_fallback' ? 'AI image source unreachable. Text-only fallback. Try Regenerate.' : 'Attached to post'}
         </span>
       </div>

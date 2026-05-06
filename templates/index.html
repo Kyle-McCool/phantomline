@@ -83,14 +83,14 @@
     font-size: 12px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #19e0c2;
+    color: #1ab8e8;
     margin-bottom: 24px;
     display: inline-flex;
     align-items: center;
     gap: 10px;
   }
   .pl-mobile-eyebrow::before {
-    content: ""; width: 24px; height: 1px; background: #19e0c2;
+    content: ""; width: 24px; height: 1px; background: #1ab8e8;
   }
   .pl-mobile-h1 {
     font-family: "IBM Plex Sans", system-ui, sans-serif;
@@ -132,7 +132,7 @@
     border-bottom: 1px solid rgba(244,241,234,0.08);
   }
   .pl-mobile-link:last-child { border-bottom: 0; }
-  .pl-mobile-link:hover, .pl-mobile-link:active { color: #19e0c2; }
+  .pl-mobile-link:hover, .pl-mobile-link:active { color: #1ab8e8; }
   .pl-mobile-cta {
     display: inline-flex;
     align-items: center;
@@ -140,7 +140,7 @@
     gap: 8px;
     min-height: 48px;
     padding: 0 24px;
-    background: #19e0c2;
+    background: #1ab8e8;
     color: #0a0a0a;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 13px;
@@ -148,10 +148,10 @@
     text-decoration: none;
     text-transform: lowercase;
     letter-spacing: 0.02em;
-    border: 1px solid #19e0c2;
+    border: 1px solid #1ab8e8;
     border-radius: 0;
   }
-  .pl-mobile-cta:hover, .pl-mobile-cta:active { background: #0d8e7a; border-color: #0d8e7a; color: #f4f1ea; }
+  .pl-mobile-cta:hover, .pl-mobile-cta:active { background: #0d7ea8; border-color: #0d7ea8; color: #f4f1ea; }
   .pl-mobile-bypass {
     background: transparent;
     border: 0;
@@ -168,7 +168,7 @@
   .pl-mobile-bypass:hover, .pl-mobile-bypass:active { color: #8c8a82; }
 </style>
 <script src="{{ '/static/mobile-gate.js' | versioned }}"></script>
-<a class="skip-to-main" href="#main" style="position:absolute;top:-40px;left:0;background:#19e0c2;color:#0a0a0a;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;font-weight:600;padding:10px 16px;text-decoration:none;letter-spacing:0.02em;text-transform:lowercase;z-index:9999;transition:top 120ms ease;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to main content</a>
+<a class="skip-to-main" href="#main" style="position:absolute;top:-40px;left:0;background:#1ab8e8;color:#0a0a0a;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;font-weight:600;padding:10px 16px;text-decoration:none;letter-spacing:0.02em;text-transform:lowercase;z-index:9999;transition:top 120ms ease;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to main content</a>
 <div class="wrap">
   <!-- Visually-hidden h1 for screen readers + SEO. The studio's visible
        hierarchy is brand mark → tabs → tab content (h2s), so we don't
@@ -177,6 +177,23 @@
        but its parent has display:none on desktop — modern screen
        readers + crawlers correctly skip display:none subtrees. -->
   <h1 class="visually-hidden">Phantomline Studio</h1>
+  <!-- Install reminder banner. Sticky at the top of the studio when the
+       readiness check finds required blockers (Ollama not running,
+       Python missing, etc). Hidden by default; install-banner.js polls
+       /api/launch/readiness and reveals the banner when blockers exist.
+       Click "Open Launch Setup" jumps to the Launch tab where the full
+       checklist + actionable install links live. -->
+  <div id="installBanner" class="install-banner" role="status" hidden>
+    <div class="install-banner-inner">
+      <span class="install-banner-icon" aria-hidden="true">⚠</span>
+      <div class="install-banner-msg">
+        <strong id="installBannerTitle">Setup needed</strong>
+        <span id="installBannerDetail">Some required tools aren't installed yet.</span>
+      </div>
+      <button id="installBannerOpen" type="button" class="btn">Open Launch Setup →</button>
+      <button id="installBannerDismiss" type="button" class="install-banner-x" aria-label="Dismiss">×</button>
+    </div>
+  </div>
   <header>
     <a class="brand" href="/" title="Phantomline home" aria-label="Phantomline home">
       <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
@@ -1983,5 +2000,6 @@ window.GHOSTLINE_DEFAULTS = {
 <script src="{{ '/static/phantomline.js' | versioned }}" defer></script>
 <script src="{{ '/static/profile-widget.js' | versioned }}" defer></script>
 <script src="{{ '/static/sync-status.js' | versioned }}" defer></script>
+<script src="{{ '/static/install-banner.js' | versioned }}" defer></script>
 </body>
 </html>
