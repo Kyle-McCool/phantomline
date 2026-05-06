@@ -132,8 +132,13 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     // Tab switching
     // -----------------------------------------------------------------------
     function activateTab(name) {
+      // Roving-tabindex pattern: only the active tab is in the tab order;
+      // the others are reachable via arrow keys (handled below). This is
+      // the WAI-ARIA Authoring Practices recommendation for tabs.
       $$('.tabbar [role="tab"]').forEach((b) => {
-        b.setAttribute("aria-selected", b.dataset.tab === name ? "true" : "false");
+        const isActive = b.dataset.tab === name;
+        b.setAttribute("aria-selected", isActive ? "true" : "false");
+        b.setAttribute("tabindex", isActive ? "0" : "-1");
       });
       $$('[role="tabpanel"]').forEach((p) => {
         p.hidden = p.dataset.panel !== name;
@@ -144,6 +149,22 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
     $$('.tabbar [role="tab"]').forEach((btn) => {
       btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+      // Arrow-key nav per WAI-ARIA tabs pattern. Left/Right move between
+      // tabs and activate the new one; Home/End jump to first/last.
+      btn.addEventListener("keydown", (e) => {
+        const tabs = $$('.tabbar [role="tab"]');
+        const i = tabs.indexOf(btn);
+        let next = -1;
+        if (e.key === "ArrowRight") next = (i + 1) % tabs.length;
+        else if (e.key === "ArrowLeft") next = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === "Home") next = 0;
+        else if (e.key === "End") next = tabs.length - 1;
+        if (next >= 0) {
+          e.preventDefault();
+          activateTab(tabs[next].dataset.tab);
+          tabs[next].focus();
+        }
+      });
     });
 
     // -----------------------------------------------------------------------
