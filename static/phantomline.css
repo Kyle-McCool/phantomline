@@ -64,9 +64,16 @@
     /* Mobile defensive — prevent any rogue absolutely-positioned element
        (notification panel, dropdowns) from forcing horizontal scroll on
        phones. The studio is grid-heavy and a single overflowing child
-       can break layout below ~640px. */
-    overflow-x: clip;
+       can break layout below ~640px.
+
+       ORDER MATTERS: `clip` after `hidden` so modern browsers use clip
+       (which preserves position:sticky on descendants) and old browsers
+       fall back to hidden. The previous order had hidden winning,
+       which broke the right-rail sticky behavior — main column scrolled
+       freely while the right rail's bounding box left the viewport,
+       creating a 1300px-tall empty void below it. */
     overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
   /* Long unbreakable strings (URLs, model names like 'llama3.1:70b-instruct')
