@@ -89,15 +89,19 @@
     padding: 24px 24px 60px;
     display: grid;
     grid-template-columns: 240px 1fr;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto auto 1fr auto;
     grid-template-areas:
-      "header header"
+      "banner  banner"
+      "header  header"
       "sidebar main"
-      "footer footer";
+      "footer  footer";
     column-gap: 28px;
     row-gap: 24px;
     min-height: calc(100vh - 24px);
   }
+  /* Anchor the install banner to its grid row so it actually sits at
+     the TOP of the studio, not at the bottom (auto-placement). */
+  .wrap > .install-banner { grid-area: banner; margin: 0 -24px; }
   @media (max-width: 900px) {
     .wrap {
       grid-template-columns: 1fr;

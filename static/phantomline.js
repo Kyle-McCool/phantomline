@@ -2981,6 +2981,14 @@ function setMakeStep(id, state, label) {
   el.classList.remove('running', 'done', 'error');
   if (state) el.classList.add(state);
   const stateEl = el.querySelector('.state');
+  // Reveal the Production line panel the first time any step transitions
+  // from waiting → running. Until then it's empty noise.
+  if (state === 'running' || state === 'done' || state === 'error') {
+    const header = $('makeProductionLineHeader');
+    const panel = $('makeProductionLine');
+    if (header) header.style.display = '';
+    if (panel) panel.style.display = '';
+  }
   if (state === 'running') {
     if (!_makeStepStarts[id]) _makeStepStarts[id] = Date.now();
     el.dataset.runningLabel = label || 'running';
