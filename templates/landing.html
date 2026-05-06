@@ -75,7 +75,7 @@
   "name": "Phantomline",
   "inLanguage": "en-US",
   "applicationCategory": "MultimediaApplication",
-  "operatingSystem": "Windows, macOS, Linux, Android, Web",
+  "operatingSystem": "Windows, macOS, Linux",
   "description": "Local-first AI video studio for faceless YouTube creators. Generate scripts, narration, captions, music, visuals, MP4 exports, and YouTube publishing drafts on your own machine.",
   "url": "{{ site_url }}",
   "offers": {
@@ -101,9 +101,9 @@
   },
   "mainEntity": [
     {"@type": "Question", "name": "Do I need a fancy PC?",
-     "acceptedAnswer": {"@type": "Answer", "text": "For the full desktop experience: 16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. For mobile-only use: any flagship phone from the last 3 years works (Pixel 7+, Galaxy S22+, iPhone 13+). The mobile PWA uses Llama 3.2 1B which fits in 2 GB RAM."}},
-    {"@type": "Question", "name": "Does this actually work on a phone with no PC running?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Pick 'This device' as the AI engine in Settings. Llama 3.2 1B downloads once (~1 GB, cached forever). After that: scripts generate via WebGPU, narration uses your phone's built-in TTS, music comes from the bundled pack, and ffmpeg.wasm renders the MP4 in your browser. Airplane mode safe."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. CPU-only works too — slower TTS, but everything else is fine. Phantomline runs on Windows, macOS, and Linux."}},
+    {"@type": "Question", "name": "Can I use this on my phone?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Right now Phantomline runs on desktop. From your phone you can sign in to your account, view your project library, and manage your license. The mobile creator app is on the roadmap; the desktop studio is where you render and publish today."}},
     {"@type": "Question", "name": "What's free vs Pro?",
      "acceptedAnswer": {"@type": "Answer", "text": "Free tier: 5 video renders per month, all local AI features, project library. Pro: unlimited renders, no watermark, publish scheduler, SEO Finder, Optimize Library (vidIQ-aware repackaging), channel analytics ingest, brand presets, multi-channel."}},
     {"@type": "Question", "name": "What does Founding Lifetime get me?",
@@ -113,7 +113,7 @@
     {"@type": "Question", "name": "Can I use this commercially?",
      "acceptedAnswer": {"@type": "Answer", "text": "Yes. Any video you make is yours. The bundled music pack is procedurally generated and public-domain. Generated narration belongs to you. Generated visuals belong to you. Phantomline charges for the tool, not for what you make with it."}},
     {"@type": "Question", "name": "Does it run on Mac and Linux?",
-     "acceptedAnswer": {"@type": "Answer", "text": "The desktop app is Python, so it runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "The desktop app is Python, so it runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts."}},
     {"@type": "Question", "name": "Will my license expire?",
      "acceptedAnswer": {"@type": "Answer", "text": "Founding Lifetime: never. Creator Pro and Studio yearly: one year from purchase, renews. Monthly: 31 days, renews. Free tier: never expires. License validation is offline, so losing internet doesn't lock you out."}}
   ]
@@ -128,7 +128,7 @@
     </a>
     <div class="navlinks">
       <a href="#workflow">Workflow</a>
-      <a href="#mobile">Mobile</a>
+      <a href="#platforms">Platforms</a>
       <a href="/pricing">Pricing</a>
       <a href="#faq">FAQ</a>
       <a href="/account">Account</a>
@@ -138,52 +138,22 @@
 
   <main>
     <section class="hero">
-      <div class="hero-scene" aria-hidden="true"><canvas id="heroThree"></canvas></div>
       <div class="hero-grid">
         <div class="hero-copy">
-          <img class="hero-logo-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
-          <div class="eyebrow">Local AI video studio</div>
-          <h1>Faceless videos <span>without the tool chaos</span></h1>
+          <div class="eyebrow">Local AI · Faceless YouTube</div>
+          <h1>Faceless videos, <span>built on your own machine.</span></h1>
           <p class="lede">
-            Phantomline turns ideas into scripts, narration, captions, music, visual layers, SEO packages, and scheduled YouTube posts on your own PC.
+            Phantomline turns one-line ideas into finished YouTube videos: script, narration, captions, music, visuals, MP4 export, and a publishing draft. The whole pipeline runs locally — no paid APIs, no per-render fees, no cloud watching your work.
           </p>
           <div class="hero-actions">
-            <a class="cta" href="/app">Open Studio</a>
-            <a class="cta secondary" href="#workflow">See workflow</a>
+            <a class="cta" href="/download">Download for desktop</a>
+            <a class="cta secondary" href="#workflow">See the workflow</a>
           </div>
           <div class="proof">
-            <div><strong>Desktop + Mobile</strong><span>PC studio &amp; PWA on phone</span></div>
-            <div><strong>Local AI</strong><span>Llama, Kokoro, MusicGen, ffmpeg</span></div>
-            <div><strong>Publish</strong><span>Queue, calendar, YouTube</span></div>
-            <div><strong>No paid APIs</strong><span>Runs on your machine</span></div>
-          </div>
-        </div>
-        <div class="hero-device-stage" aria-label="Animated product preview">
-          <div class="phone-stack">
-            <div class="phone-shell">
-              <div class="phone-screen">
-                <img class="phone-logo" src="{{ '/static/phantomline-favicon.png' | versioned }}" alt="" />
-                <div class="platform-ui">
-                  <div class="tabs"><span>Following</span><strong>For You</strong></div>
-                  <div class="actions"><span>♡</span><span>↗</span><span>●</span></div>
-                </div>
-                <div class="hero-caption">The lighthouse keeper<br><span>found a second one</span></div>
-                <div class="creator-meta">
-                  <strong>@your_channel</strong>
-                  Slow-burn mystery. Local voice, captions, music, and post package, all in one render.
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="floating-card card-a">
-            <strong>Video readiness</strong>
-            <span>Hook, title, captions, and platform fit checked before render.</span>
-            <em class="status-pill">Checked</em>
-          </div>
-          <div class="floating-card card-b">
-            <strong>Publish package</strong>
-            <span>Title, description, tags, pinned comment, and schedule draft ready.</span>
-            <em class="status-pill">Draft ready</em>
+            <div><strong>Local pipeline</strong><span>Llama · Kokoro · MusicGen · ffmpeg</span></div>
+            <div><strong>No paid APIs</strong><span>Runs on your hardware</span></div>
+            <div><strong>Publish-ready</strong><span>Queue, calendar, YouTube</span></div>
+            <div><strong>Pay once option</strong><span>$79 founding · 500 seats</span></div>
           </div>
         </div>
       </div>
@@ -281,23 +251,23 @@
       </div>
     </section>
 
-    <section class="section" id="mobile">
+    <section class="section" id="platforms">
       <div class="section-head">
-        <h2>Desktop, web, mobile, Android</h2>
-        <p>Same studio, three places to use it. Mobile runs in the browser as a PWA: no Play Store fight, installs to your home screen in two taps. The full Android APK ships when you want a Play Store listing.</p>
+        <h2>Built for the desktop. Account follows you anywhere.</h2>
+        <p>Phantomline renders on your computer because that's where the GPU lives. Your account, library, and license follow you to any browser — desktop or phone — for review and management.</p>
       </div>
       <div class="features">
         <div class="feature">
-          <strong>Desktop (full power)</strong>
-          <p>Llama 3.1 8B, Kokoro TTS, MusicGen, FLUX image gen, the entire pipeline. The serious creator workspace.</p>
+          <strong>Desktop studio (where you create)</strong>
+          <p>Windows, macOS, Linux. Llama 3.1 8B for scripts, Kokoro for narration, MusicGen for soundtracks, FLUX for images, ffmpeg for assembly. Free and Pro tiers. License-key driven; works offline after activation.</p>
         </div>
         <div class="feature">
-          <strong>Mobile PWA (zero install)</strong>
-          <p>Llama 3.2 1B in your browser via WebGPU. Web Speech narration. Bundled royalty-free music pack. ffmpeg.wasm renders the MP4. Works offline after first load.</p>
+          <strong>Web account (anywhere)</strong>
+          <p>Sign in at phantomline.xyz on any device — desktop or phone — to see your project library, manage your license, copy keys, and check render quota. No render runs in the browser yet; that's still desktop-only.</p>
         </div>
         <div class="feature">
-          <strong>Android APK</strong>
-          <p>Same PWA wrapped in a Capacitor shell for Play Store distribution. Push notifications, share targets, and the rest of the native integration.</p>
+          <strong>Mobile creator app — on the roadmap</strong>
+          <p>The hard part is shipping a render pipeline that doesn't drain your battery. We'll publish the early-access list when in-browser preview is ready. Until then, treat mobile as your library + dashboard.</p>
         </div>
       </div>
       <div class="features" style="margin-top:14px;">
@@ -365,11 +335,11 @@
       <div class="faq">
         <details>
           <summary>Do I need a fancy PC?</summary>
-          <p>For the full desktop experience: 16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. For mobile-only use: any flagship phone from the last 3 years works (Pixel 7+, Galaxy S22+, iPhone 13+). The mobile PWA uses Llama 3.2 1B which fits in 2 GB RAM.</p>
+          <p>16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. CPU-only works too — slower TTS, but everything else is fine. Phantomline runs on Windows, macOS, and Linux.</p>
         </details>
         <details>
-          <summary>Does this actually work on a phone with no PC running?</summary>
-          <p>Yes. Pick "This device" as the AI engine in Settings. Llama 3.2 1B downloads once (~1 GB, cached forever). After that: scripts generate via WebGPU, narration uses your phone's built-in TTS, music comes from the bundled pack, and ffmpeg.wasm renders the MP4 in your browser. Airplane mode safe.</p>
+          <summary>Can I use this on my phone?</summary>
+          <p>Right now Phantomline runs on desktop. From your phone you can sign in to your account, view your project library, and manage your license. The mobile creator app is on the roadmap; the desktop studio is where you render and publish today.</p>
         </details>
         <details>
           <summary>What's free vs Pro?</summary>
@@ -389,7 +359,7 @@
         </details>
         <details>
           <summary>Does it run on Mac and Linux?</summary>
-          <p>The desktop app is Python, so it runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts. The PWA runs in any modern browser on any OS.</p>
+          <p>The desktop app is Python, so it runs anywhere Python runs. Some font paths are Windows-tuned but auto-fall-back to Mac and Linux system fonts.</p>
         </details>
         <details>
           <summary>Will my license expire?</summary>
