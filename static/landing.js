@@ -24,7 +24,7 @@ if (canvas) {
     const group = new THREE.Group();
     scene.add(group);
 
-    const cyan = new THREE.Color("#19e0c2");
+    const cyan = new THREE.Color("#1ab8e8");
 
     const pointLight = new THREE.PointLight(cyan, 2.2, 16);
     pointLight.position.set(2.8, 2.4, 3.6);

@@ -9,7 +9,7 @@
    keep working.
 
    Color discipline:
-   - One brand color (teal #19e0c2) used SPARINGLY as accent only
+   - One brand color (teal #1ab8e8) used SPARINGLY as accent only
    - One signal color (warm amber #e8a04a) reserved for urgency/CTA contrast
    - Black ink + warm off-white paper as the dominant palette
    - No gradients on text. No glass morphism. No drop-shadow glows.
@@ -38,9 +38,9 @@
   --rule-strong: rgba(244, 241, 234, 0.32);
 
   /* Brand + signal — used SPARINGLY */
-  --brand: #19e0c2;
-  --brand-deep: #0d8e7a;
-  --brand-faint: rgba(25, 224, 194, 0.08);
+  --brand: #1ab8e8;
+  --brand-deep: #0d7ea8;
+  --brand-faint: rgba(26, 184, 232, 0.08);
   --signal: #e8a04a;
   --signal-deep: #b8761d;
 
