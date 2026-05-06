@@ -400,6 +400,101 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     $("#settings-signout-btn").addEventListener("click", doSignOut);
 
     // -----------------------------------------------------------------------
+    // YouTube incremental-authorization (PRIORITY 5).
+    // The studio's "Connect YouTube" button opens this page with
+    // ?yt-connect=1. We trigger an additional Supabase OAuth round-trip
+    // requesting youtube.upload + youtube.readonly scopes. Because the
+    // user is already signed in, Google shows ONLY the new-scopes
+    // consent dialog (incremental auth), not a fresh sign-in.
+    //
+    // After the round-trip, Supabase puts the Google access_token +
+    // refresh_token in session.provider_token + provider_refresh_token.
+    // We POST those to /api/youtube/store-token so the server can
+    // upsert into user_youtube_tokens (RLS-scoped). Then we close
+    // the popup so the studio knows the connect succeeded.
+    // -----------------------------------------------------------------------
+    async function startYouTubeConnect() {
+      setStatus("Requesting YouTube access from Google…");
+      const redirectTo = window.location.origin + "/account?yt-connected=1";
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo,
+          scopes: "https://www.googleapis.com/auth/youtube.upload "
+                + "https://www.googleapis.com/auth/youtube.readonly",
+          queryParams: {
+            access_type: "offline",   // ask Google for a refresh_token
+            prompt: "consent",        // force the YT-scopes consent dialog
+            include_granted_scopes: "true",  // incremental auth
+          },
+        },
+      });
+      if (error) setStatus("YouTube connect failed: " + error.message, "error");
+    }
+
+    async function captureYouTubeTokens(session) {
+      // session.provider_token + provider_refresh_token are populated
+      // by Supabase right after the OAuth round-trip. They live on the
+      // session object only briefly — we ship them to the server here
+      // and never store them client-side.
+      const provider_token = session?.provider_token;
+      const provider_refresh_token = session?.provider_refresh_token;
+      if (!provider_token) return;
+      // Best-effort channel info: hit YouTube /channels?mine=true so we
+      // can cache the channel id + title alongside the tokens.
+      let channel_id, channel_title;
+      try {
+        const r = await fetch(
+          "https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true",
+          { headers: { Authorization: "Bearer " + provider_token } }
+        );
+        const d = await r.json();
+        const item = (d?.items || [])[0];
+        if (item) {
+          channel_id = item.id;
+          channel_title = item.snippet?.title;
+        }
+      } catch (_) { /* non-fatal, server will discover later */ }
+      try {
+        await authedFetch("/api/youtube/store-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider_token,
+            provider_refresh_token,
+            expires_in: 3600,
+            channel_id,
+            channel_title,
+          }),
+        });
+        setStatus(
+          channel_title
+            ? `YouTube connected: ${channel_title}`
+            : "YouTube connected.",
+          "success"
+        );
+      } catch (err) {
+        setStatus("Stored token failed: " + err.message, "error");
+        return;
+      }
+      // If this page was opened as a popup from the studio, close it so
+      // the studio's Connect button gets the focus back.
+      try {
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({ type: "phantomline:yt-connected" }, location.origin);
+          setTimeout(() => window.close(), 1000);
+        }
+      } catch (_) { /* opener access can throw across origins */ }
+    }
+
+    // Param triggers: ?yt-connect=1 starts the flow, ?yt-connected=1
+    // (Supabase redirect target) means we just got back, capture tokens.
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.get("yt-connect") === "1") {
+      startYouTubeConnect();
+    }
+
+    // -----------------------------------------------------------------------
     // Top-level refresh
     // -----------------------------------------------------------------------
     async function refresh() {
@@ -435,6 +530,20 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       $("#signin-card").hidden = true;
       $("#signed-in").hidden = false;
       setStatus("Loading your account…");
+
+      // If we just came back from the YouTube incremental-auth grant,
+      // capture the provider tokens before they fall off the session
+      // object. Done before the licenses/me load so any fetch race is
+      // benign.
+      if (urlParams.get("yt-connected") === "1") {
+        await captureYouTubeTokens(session);
+        // Strip the param so a refresh doesn't re-fire the capture.
+        try {
+          const cleanUrl = location.pathname + (safeNextPath()
+            ? "?next=" + encodeURIComponent(safeNextPath()) : "");
+          history.replaceState({}, "", cleanUrl);
+        } catch (_) {}
+      }
 
       // Pull /me + /licenses in parallel — they're independent.
       try {

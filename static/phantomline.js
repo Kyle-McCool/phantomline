@@ -4007,8 +4007,49 @@ async function loadPublishRecurring() {
   `).join('') : '<div class="hint">No recurring slots yet.</div>';
 }
 
-$('publishConnectYouTubeBtn').addEventListener('click', () => { window.open('/api/youtube/connect', '_blank'); });
-$('connectionsYoutubeBtn').addEventListener('click', () => { window.open('/api/youtube/connect', '_blank'); });
+// Connect YouTube routing. Two paths:
+// 1. Single-OAuth (PRIORITY 5) — hosted user with a Supabase session
+//    in localStorage. Opens /account?yt-connect=1 in a popup. The
+//    /account JS calls supabase.auth.signInWithOAuth with YouTube
+//    scopes (incremental authorization), captures the resulting
+//    provider_token, POSTs it to /api/youtube/store-token. Server
+//    upserts into user_youtube_tokens (RLS-scoped). Per-user channel.
+// 2. Legacy file-based flow — local install with YOUTUBE_CLIENT_ID +
+//    YOUTUBE_CLIENT_SECRET in .env. Opens /api/youtube/connect which
+//    redirects to Google's OAuth screen. Single shared connection
+//    file, fine for a single-user desktop install.
+// We pick path 1 if there's a Supabase session in localStorage AND
+// the studio fetch shim (_phantomlineAuthToken) returns a token —
+// that means store-token will be authenticated. Otherwise legacy.
+function _routeYouTubeConnect() {
+  const token = (typeof _phantomlineAuthToken === 'function')
+    ? _phantomlineAuthToken() : null;
+  if (token) {
+    // Open the incremental-auth flow in a small popup. We listen for
+    // the "phantomline:yt-connected" postMessage to refresh status.
+    const w = window.open(
+      '/account?yt-connect=1',
+      'phantomline-yt-connect',
+      'width=520,height=720,toolbar=no,menubar=no'
+    );
+    if (!w) {
+      // Popup blocked — fall back to opening in a new tab.
+      window.open('/account?yt-connect=1', '_blank');
+    }
+    return;
+  }
+  // Legacy local-install path.
+  window.open('/api/youtube/connect', '_blank');
+}
+$('publishConnectYouTubeBtn').addEventListener('click', _routeYouTubeConnect);
+$('connectionsYoutubeBtn').addEventListener('click', _routeYouTubeConnect);
+// Refresh publish status when the popup posts back saying YT was connected.
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin) return;
+  if (event.data?.type === 'phantomline:yt-connected') {
+    if (typeof loadPublishStatus === 'function') loadPublishStatus();
+  }
+});
 $('publishVideoProject').addEventListener('change', updatePublishPreview);
 $('publishTitle').addEventListener('input', updatePublishPreview);
 
