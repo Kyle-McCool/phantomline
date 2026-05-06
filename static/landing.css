@@ -415,7 +415,7 @@ h3 {
 .section-head p {
   margin: 0;
   color: var(--text-2);
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.5;
   max-width: 520px;
 }
@@ -477,7 +477,7 @@ h3 {
 .feature strong,
 .format strong {
   display: block;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--paper);
   margin-bottom: var(--s-3);
@@ -752,7 +752,7 @@ h3 {
 .faq p {
   margin: var(--s-4) 0 0 0;
   color: var(--text-2);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
   max-width: 760px;
 }

@@ -20,6 +20,62 @@ function forceReadableButtons(root = document) {
   });
 }
 window.addEventListener('DOMContentLoaded', () => forceReadableButtons());
+
+// First-run vs returning-user gate. The Make tab's hero block (eyebrow
+// + headline + 5-step rail + brand actions) is helpful on the first
+// visit and pure visual noise after that.
+//
+// Default behavior: HIDE the hero. Only show it if we have strong
+// evidence this is a genuine first visit — i.e. no Phantomline state
+// in localStorage at all. Anyone who has saved a tab, dismissed the
+// install banner, saved form state, or had auth in this browser is
+// treated as returning.
+//
+// The previous logic ("show by default; flip after 30s on page or
+// engagement") meant existing long-time users got the hero one more
+// time on every reload until they engaged — exactly the noise the
+// user complained about. This version is one-shot: first paint after
+// first install = hero; every subsequent load = no hero.
+(function makeHeroFirstRunGate() {
+  try {
+    const KEY = 'phantomline-make-hero-seen';
+    const isFirstVisit = (() => {
+      // Explicit flag wins.
+      if (localStorage.getItem(KEY) === '1') return false;
+      // Any other phantomline-* key is evidence of prior use.
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        // 'phantomline-' for our own keys, 'sb-' / 'supabase' for
+        // Supabase auth tokens (means they've signed in before, so
+        // they've definitely seen the studio at least once).
+        if (k.startsWith('phantomline-') || k.startsWith('sb-') || k.includes('supabase')) {
+          return false;
+        }
+      }
+      return true;
+    })();
+    if (!isFirstVisit) {
+      document.body.classList.add('is-returning');
+      // Backfill the flag so we don't have to re-scan keys next load.
+      try { localStorage.setItem(KEY, '1'); } catch (_) {}
+      return;
+    }
+    // True first visit — show the hero, then mark seen as soon as
+    // they take any action (or after 30s) so the next reload hides it.
+    const markSeen = () => {
+      try { localStorage.setItem(KEY, '1'); } catch (_) {}
+    };
+    setTimeout(markSeen, 30000);
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('.tab-btn[data-tab], #makeLoadDemoBtn, #makeShuffleIdeaBtn, #makeVideoBtn');
+      if (t) markSeen();
+    }, { once: false, passive: true });
+  } catch (_) {
+    // localStorage blocked — be safe and hide the hero.
+    document.body.classList.add('is-returning');
+  }
+})();
 let currentJob = null;
 let pollTimer = null;
 
@@ -947,32 +1003,37 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// Smart default tab. First-time users (no remembered tab) land on
-// Launch Setup so the readiness checklist is the first thing they see.
-// Returning users with a ready system land on whatever they were doing
-// last (typically Create Video). If they had an unmet blocker last time,
-// the install banner still nags from any tab — they don't need to start
-// on Launch every session.
+// Smart default tab. The HTML default is Create Video — that's where
+// users want to be after first-time login. Two overrides:
+//   1. If readiness has required blockers, route to Launch Setup so
+//      the user fixes the install issue before trying to render.
+//      (The install banner also appears at the top of every tab; this
+//      additionally puts the checklist front-and-center on first visit
+//      when nothing is set up yet.)
+//   2. If the user explicitly chose a different tab last session,
+//      honor it (publish, library, settings) provided readiness is OK.
+// Returning users get continuity; new users get the creator surface.
 (function smartDefaultTab() {
   try {
     const saved = localStorage.getItem('phantomline-last-tab');
-    if (!saved || saved === 'launch') return;
-    // If readiness shows blockers, force back to Launch so they fix
-    // the issue. Async — fires after the page paints, only switches
-    // if it determines blockers exist.
     fetch('/api/launch/readiness', { credentials: 'same-origin' })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         const blockers = (d?.blockers || []).filter(b => b.required);
-        if (blockers.length === 0) {
-          // System ready — honor the saved tab.
+        if (blockers.length > 0) {
+          // System not ready — force Launch so blockers are visible.
+          const btn = document.querySelector('.tab-btn[data-tab="launch"]');
+          if (btn) btn.click();
+          return;
+        }
+        // Ready: honor saved tab if it exists and is non-default.
+        if (saved && saved !== 'make') {
           const btn = document.querySelector(`.tab-btn[data-tab="${saved}"]`);
           if (btn) btn.click();
         }
-        // Otherwise: stay on Launch (the default), and the install
-        // banner will explain what's missing.
+        // Otherwise stay on Create Video (the HTML default).
       })
-      .catch(() => { /* no readiness — stay on default */ });
+      .catch(() => { /* no readiness — stay on Create Video default */ });
   } catch (_) {}
 })();
 $('advancedNavToggle')?.addEventListener('click', () => {
