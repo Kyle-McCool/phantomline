@@ -1027,6 +1027,10 @@
     border-left-color: var(--brand);
     color: var(--paper);
   }
+  /* Anchor scroll offset — when the workflow rail click-to-scrolls to
+     a make-stage, leave room for the sticky header + banner above. */
+  .make-stage[id] { scroll-margin-top: 80px; }
+
   /* Install-reminder banner — sticky at the top of the studio when
      /api/launch/readiness reports required blockers (Ollama missing,
      etc). Driven by static/install-banner.js. */

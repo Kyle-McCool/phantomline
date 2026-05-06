@@ -431,29 +431,35 @@
   <div id="tab-make" class="tab-content">
     <div class="workflow-grid">
       <section class="panel make-main-panel">
+        <!-- Compact hero. Previously contained 4 trust pills + a 5-step
+             rail + 3 mini-actions, ballooning to 833px tall. The trust
+             pills were redundant with the marketing landing; the 5-step
+             rail duplicates the .make-stage section titles below; Save
+             Brand / Load Brand baffle a first-time user. Cut to: eyebrow
+             + h2 + lede + Load Demo + Brand expander. ~250px shorter,
+             closes the gap with the right rail's content height. -->
         <div class="make-hero">
           <div>
             <div class="make-eyebrow">Local creator studio</div>
             <h2>Make faceless videos from a few clicks</h2>
             <p class="hint">Pick a format, choose a visual layer, let Ollama shape the hook and title package, then render a narrated MP4 on your own machine.</p>
-            <div class="make-trust-row">
-              <span class="make-trust-pill">Local Ollama scripts</span>
-              <span class="make-trust-pill">No paid APIs</span>
-              <span class="make-trust-pill">Shorts / Reels / TikTok ready</span>
-              <span class="make-trust-pill">Captions + music included</span>
-            </div>
-            <div class="workflow-rail" aria-label="Create workflow">
-              <div class="rail-step"><b>1</b><strong>Format</strong><span>Pick the channel lane.</span></div>
-              <div class="rail-step"><b>2</b><strong>Idea + title</strong><span>Generate the click package.</span></div>
-              <div class="rail-step"><b>3</b><strong>Visuals</strong><span>AI scenes or retention footage.</span></div>
-              <div class="rail-step"><b>4</b><strong>Render</strong><span>Voice, captions, music, MP4.</span></div>
-              <div class="rail-step"><b>5</b><strong>Publish</strong><span>Schedule-ready post draft.</span></div>
+            <div class="workflow-rail" aria-label="Create workflow" style="margin-top: 14px;">
+              <a href="#makeStageFormat" class="rail-step"><b>1</b><strong>Format</strong></a>
+              <a href="#makeStageIdea" class="rail-step"><b>2</b><strong>Idea + title</strong></a>
+              <a href="#makeStageVisuals" class="rail-step"><b>3</b><strong>Visuals</strong></a>
+              <a href="#makeStageRender" class="rail-step"><b>4</b><strong>Render</strong></a>
+              <a href="#tab-publish" class="rail-step"><b>5</b><strong>Publish</strong></a>
             </div>
           </div>
           <div class="make-mini-actions">
             <button id="makeLoadDemoBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Load Demo</button>
-            <button id="makeSaveBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Save Brand</button>
-            <button id="makeLoadBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Load Brand</button>
+            <details style="display:inline-block; margin-top:0;">
+              <summary style="cursor:pointer; padding:9px 14px; border:1px solid var(--rule-strong); font-family:var(--font-mono); font-size:13px; font-weight:600; letter-spacing:0.02em; text-transform:lowercase; color:var(--paper); user-select:none;">brand ▾</summary>
+              <div style="display:flex; gap:6px; margin-top:6px;">
+                <button id="makeSaveBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Save Brand</button>
+                <button id="makeLoadBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Load Brand</button>
+              </div>
+            </details>
           </div>
         </div>
 
@@ -484,7 +490,7 @@
           <input type="file" id="insightsSearchFile" accept=".csv,.tsv" style="display:none;" />
         </details>
 
-        <div class="make-stage">
+        <div class="make-stage" id="makeStageFormat">
           <div class="make-stage-title">
             <strong>1. Pick the channel format</strong>
             <span>One click fills the creative direction.</span>
@@ -560,7 +566,7 @@
           </div>
         </div>
 
-        <div class="make-stage">
+        <div class="make-stage" id="makeStageIdea">
           <div class="make-stage-title">
             <strong>2. Generate or choose the idea</strong>
             <span>Typing is optional.</span>
@@ -595,7 +601,7 @@
           <textarea id="makeTopic" rows="3" placeholder="e.g. {{ defaults.topic }}"></textarea>
         </div>
 
-        <div class="make-stage">
+        <div class="make-stage" id="makeStageVisuals">
           <div class="make-stage-title">
             <strong>3. Pick the visual layer</strong>
             <span>Generated art or attention footage.</span>
@@ -606,7 +612,7 @@
           </div>
         </div>
 
-        <div class="make-stage">
+        <div class="make-stage" id="makeStageRender">
           <div class="make-stage-title">
             <strong>4. Final render choices</strong>
             <span>Only the essentials before render.</span>
@@ -847,13 +853,22 @@
       </section>
 
       <section class="panel make-studio-panel">
-        <div class="studio-head">
-          <div>
-            <h2>Studio Preview</h2>
-            <div class="hint">A live read on the video package you are building.</div>
-          </div>
-          <div class="studio-live">Local</div>
-        </div>
+        <!-- Right rail = readiness signals + next-best-action.
+             The phone preview + platform mockup is collapsed in a
+             <details> because it doesn't actually update with the
+             user's content during composition (only at render
+             handoff), and it was contributing 700+px of low-info
+             height to the rail, making sticky release way too early
+             relative to the main column. Users who care about the
+             TikTok/Shorts/Reels safe-area can open it. -->
+        <details class="studio-preview-collapse" open>
+          <summary class="studio-head" style="cursor:pointer; list-style:none; user-select:none;">
+            <div>
+              <h2>Studio Preview</h2>
+              <div class="hint">Frame + format reference — opens to the platform mock.</div>
+            </div>
+            <div class="studio-live">Local</div>
+          </summary>
 
         <div class="studio-preview-card">
           <div class="phone-preview">
@@ -895,6 +910,7 @@
             <div class="studio-spec"><span>Length</span><strong id="makeSpecLength">2 min</strong></div>
           </div>
         </div>
+        </details>
 
         <div class="readiness-card">
           <div class="readiness-top">
