@@ -358,10 +358,14 @@
           </div>
           <div class="launch-score" id="launchScore">--</div>
         </div>
+        <!-- Launch CTAs. Single primary action: Open Create Video.
+             Secondary actions (re-run check, load demo) stay available
+             but visually subordinate so first-time users have a clear
+             "next step" without three competing buttons. -->
         <div class="launch-actions">
-          <button id="launchCheckBtn" class="btn" type="button">Run readiness check</button>
+          <button id="launchStartBtn" class="btn" type="button">Open Create Video →</button>
+          <button id="launchCheckBtn" class="btn secondary" type="button">Re-run readiness check</button>
           <button id="launchDemoBtn" class="btn secondary" type="button">Load demo workflow</button>
-          <button id="launchStartBtn" class="btn secondary" type="button">Open Create Video</button>
         </div>
         <div class="quality-list" style="margin-top:24px;">
           <div class="quality-pill">Local scripts</div>
