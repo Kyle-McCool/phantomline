@@ -79,13 +79,30 @@ if (safeNextPathTopLevel()) {
 
 // ---------------------------------------------------------------------------
 // Hard-fail short-circuit if Supabase config is missing on the server. Show
-// the signin card with a clear status so the user knows what to fix.
+// the signin card without a scary red banner on local dev — desktop installs
+// don't have Supabase env vars by design, so a "this site is broken" warning
+// is a false positive. On hosted (phantomline.xyz) the warning still fires
+// loudly because it IS a misconfigured deploy.
 // ---------------------------------------------------------------------------
+const _hostname = location.hostname || "";
+const _isLocal =
+  _hostname === "localhost" ||
+  _hostname === "127.0.0.1" ||
+  _hostname === "" ||
+  _hostname.endsWith(".local");
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  setStatus(
-    "Account portal isn't fully configured. Supabase env vars are missing on the server.",
-    "error",
-  );
+  if (_isLocal) {
+    // Friendly local message: this is your desktop install, no panic.
+    setStatus(
+      "Local install detected — sign-in lives on phantomline.xyz. Open the hosted account portal to manage your license.",
+    );
+  } else {
+    setStatus(
+      "Account portal isn't fully configured. Supabase env vars are missing on the server.",
+      "error",
+    );
+  }
   $("#signin-card").hidden = false;
 } else {
   // Dynamic import wrapped so a network/CSP error is visible to the user
@@ -180,7 +197,26 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     function renderLicenses(licenses) {
       const list = $("#licenses-list");
       if (!licenses || !licenses.length) {
-        list.innerHTML = `<div class="empty">No licenses on this email yet. After a Stripe purchase, your key arrives by email and shows up here within a minute.</div>`;
+        // Friendly empty state for new (free-tier) users. The previous copy
+        // ("No licenses on this email yet") read as a dead end — but a fresh
+        // sign-in IS a free account, so we lead with the positive frame and
+        // give them two next-steps: open Studio (use what they have) or
+        // upgrade (convert).
+        list.innerHTML = `
+          <div class="card">
+            <h3>You're on the Free tier <span class="pill">Active</span></h3>
+            <p class="meta">5 video renders per month, full local AI pipeline, project library. No card on file.</p>
+            <div class="row-actions">
+              <a class="cta signal" href="/app">Open Studio</a>
+              <a class="cta secondary" href="/pricing">See paid plans</a>
+            </div>
+            <p class="meta" style="margin-top:14px;">
+              Already bought with a different email? Email
+              <a href="mailto:support@phantomline.xyz">support@phantomline.xyz</a>
+              with your Stripe receipt and we'll move the license over.
+            </p>
+          </div>
+        `;
         return;
       }
       list.innerHTML = licenses.map((l) => {
