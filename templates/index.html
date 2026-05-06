@@ -457,14 +457,19 @@
           </div>
         </div>
 
-        <!-- Channel Insights: persistent analytics + SEO state.
-             When configured, every idea/title generation is automatically
-             informed by the user's actual channel performance data. -->
-        <div id="insightsPanel" class="insights-panel compact">
-          <div class="ip-head">
-            <span class="ip-title">Optional channel intelligence</span>
+        <!-- Channel Insights: persistent analytics + SEO state. Wrapped
+             in a <details> expander so it doesn't break the workflow
+             flow on first-time visits — 95% of users skip the CSV
+             upload, and putting it inline above step 1 was making it
+             read as required. When configured, every idea/title
+             generation is automatically informed by the user's
+             channel performance data, so the value is real once the
+             user opts in. -->
+        <details id="insightsPanel" class="insights-panel compact">
+          <summary class="ip-head" style="cursor:pointer; list-style:none;">
+            <span class="ip-title">Optional: channel intelligence</span>
             <span class="ip-status" id="insightsStatus">not configured</span>
-          </div>
+          </summary>
           <div id="insightsBody" class="ip-empty">
             Upload analytics once to make ideas, titles, scripts, SEO, and publish packages follow what already works for your channel.
           </div>
@@ -477,7 +482,7 @@
           <input type="file" id="insightsAnalyticsFile" accept=".csv,.tsv" style="display:none;" />
           <input type="file" id="insightsTrafficFile" accept=".csv,.tsv" style="display:none;" />
           <input type="file" id="insightsSearchFile" accept=".csv,.tsv" style="display:none;" />
-        </div>
+        </details>
 
         <div class="make-stage">
           <div class="make-stage-title">
@@ -895,8 +900,12 @@
           <button id="makeNextActionBtn" class="btn secondary" type="button">Start</button>
         </div>
 
-        <h2 style="margin-top:18px;">Production line</h2>
-        <div class="workflow-steps">
+        <!-- Production line. Hidden by default; revealed by phantomline.js
+             when render kicks off (any .workflow-step earns .running or
+             .done class). Until then it's empty noise — 7 stages all
+             "waiting" before the user has even pressed render. -->
+        <h2 id="makeProductionLineHeader" style="margin-top:18px; display:none;">Production line</h2>
+        <div class="workflow-steps" id="makeProductionLine" style="display:none;">
           <div class="workflow-step" id="makeStepScript">
             <div class="num">1</div><div><strong>Script</strong><span>Write the voiceover.</span></div><div class="state">waiting</div>
           </div>
