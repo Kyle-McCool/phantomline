@@ -489,18 +489,29 @@
             <strong>1. Pick the channel format</strong>
             <span>One click fills the creative direction.</span>
           </div>
+          <!-- Format picker: 4 most common up-front (Custom is the
+               flexible default; Viral Story / Reddit / Survival are
+               the highest-volume creator niches per the channel data).
+               The other 6 niches live in a 'More formats' expander
+               below — same data-recipe values, same JS wiring, just
+               not visually shouting at first-time users. -->
           <div class="choice-grid" id="makeRecipeCards">
-            <button class="choice-card" type="button" data-recipe="viral-story"><strong>Viral Story Short</strong><span>Confession, betrayal, horror, or impossible tension in under 45s.</span></button>
             <button class="choice-card active" type="button" data-recipe="custom"><strong>Custom</strong><span>Flexible faceless video for any niche.</span></button>
-            <button class="choice-card" type="button" data-recipe="scary-story"><strong>Scary story</strong><span>Slow-burn narration with eerie visuals.</span></button>
+            <button class="choice-card" type="button" data-recipe="viral-story"><strong>Viral Story Short</strong><span>Confession, betrayal, horror, or impossible tension in under 45s.</span></button>
             <button class="choice-card" type="button" data-recipe="reddit-story"><strong>Reddit-style</strong><span>Personal conflict, twist, and payoff.</span></button>
             <button class="choice-card" type="button" data-recipe="survival"><strong>Survival tips</strong><span>Actionable steps with a visual host.</span></button>
-            <button class="choice-card" type="button" data-recipe="mystery"><strong>Mystery doc</strong><span>Facts, theories, and unresolved tension.</span></button>
-            <button class="choice-card" type="button" data-recipe="finance"><strong>Finance</strong><span>Simple money lessons without hype.</span></button>
-            <button class="choice-card" type="button" data-recipe="history"><strong>History</strong><span>Dramatic explainers with clear stakes.</span></button>
-            <button class="choice-card" type="button" data-recipe="kids-edu"><strong>Kids edu</strong><span>Friendly, visual, parent-safe explainers.</span></button>
-            <button class="choice-card" type="button" data-recipe="motivational"><strong>Motivation</strong><span>Punchy emotional shorts.</span></button>
           </div>
+          <details style="margin-top: 12px;">
+            <summary style="cursor: pointer; font-family: var(--font-mono); font-size: 12px; color: var(--text-2); letter-spacing: 0.04em; padding: 8px 0;">More formats (6 more) ▾</summary>
+            <div class="choice-grid" id="makeRecipeCardsExtra" style="margin-top: 12px;">
+              <button class="choice-card" type="button" data-recipe="scary-story"><strong>Scary story</strong><span>Slow-burn narration with eerie visuals.</span></button>
+              <button class="choice-card" type="button" data-recipe="mystery"><strong>Mystery doc</strong><span>Facts, theories, and unresolved tension.</span></button>
+              <button class="choice-card" type="button" data-recipe="finance"><strong>Finance</strong><span>Simple money lessons without hype.</span></button>
+              <button class="choice-card" type="button" data-recipe="history"><strong>History</strong><span>Dramatic explainers with clear stakes.</span></button>
+              <button class="choice-card" type="button" data-recipe="kids-edu"><strong>Kids edu</strong><span>Friendly, visual, parent-safe explainers.</span></button>
+              <button class="choice-card" type="button" data-recipe="motivational"><strong>Motivation</strong><span>Punchy emotional shorts.</span></button>
+            </div>
+          </details>
           <select id="makeRecipe" style="display:none;">
             <option value="custom" selected>Custom faceless channel</option>
             <option value="viral-story">Viral Story Short</option>
@@ -576,7 +587,12 @@
             </div>
           </div>
           <label for="makeTopic">Selected video idea</label>
-          <textarea id="makeTopic" rows="3">{{ defaults.topic }}</textarea>
+          <!-- Empty value with the demo topic moved to placeholder so a
+               first-time user doesn't think the example is their idea
+               and type over it nervously. Generate Ideas / pick-an-idea
+               from the deck above will populate the value when the user
+               actually picks one. -->
+          <textarea id="makeTopic" rows="3" placeholder="e.g. {{ defaults.topic }}"></textarea>
         </div>
 
         <div class="make-stage">

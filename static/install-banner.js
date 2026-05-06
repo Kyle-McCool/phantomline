@@ -56,6 +56,25 @@
           + ' — install these to enable rendering.';
       }
       el.hidden = false;
+      // De-duplicate the "Ollama offline" signal: the header has its
+      // own mode-toggle pill that flashes "ollama offline" with a red
+      // dot. Banner and pill say the same thing — pill is redundant
+      // when the banner is up. Hide it; show again when banner is
+      // dismissed.
+      var modeToggle = document.querySelector('.mode-toggle-wrap');
+      if (modeToggle) modeToggle.style.display = 'none';
+      var origDismiss = document.getElementById('installBannerDismiss');
+      if (origDismiss) {
+        origDismiss.addEventListener('click', function () {
+          if (modeToggle) modeToggle.style.display = '';
+        }, { once: true });
+      }
+      var origOpen = document.getElementById('installBannerOpen');
+      if (origOpen) {
+        origOpen.addEventListener('click', function () {
+          if (modeToggle) modeToggle.style.display = '';
+        }, { once: true });
+      }
     })
     .catch(function () { /* readiness unavailable; leave banner hidden */ });
 })();

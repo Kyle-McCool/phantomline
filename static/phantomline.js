@@ -1436,7 +1436,7 @@ $('makeSaveBrandBtn').addEventListener('click', saveBrandKit);
 $('makeLoadBrandBtn').addEventListener('click', loadBrandKit);
 
 function updateMakeChoiceCards() {
-  document.querySelectorAll('#makeRecipeCards .choice-card').forEach(card => {
+  document.querySelectorAll('[id^="makeRecipeCards"] .choice-card').forEach(card => {
     card.classList.toggle('active', card.dataset.recipe === $('makeRecipe').value);
   });
   document.querySelectorAll('#makeVisualSourceCards .choice-card').forEach(card => {
@@ -1530,7 +1530,7 @@ function updatePlatformPreview(platform = makePreviewPlatform) {
 }
 
 function updateStudioPreview() {
-  const title = $('makePreferredTitle')?.value.trim() || selectedCardText('#makeRecipeCards', 'Phantomline short');
+  const title = $('makePreferredTitle')?.value.trim() || selectedCardText('[id^="makeRecipeCards"]','Phantomline short');
   const topic = $('makeTopic')?.value.trim() || '';
   const hookLine = topic.split(/[.!?\n]/).map(s => s.trim()).find(Boolean) || 'Pick a hook';
   const words = hookLine.split(/\s+/).filter(Boolean).slice(0, 4);
@@ -1544,7 +1544,7 @@ function updateStudioPreview() {
   if ($('makePreviewCaption')) $('makePreviewCaption').innerHTML = highlighted;
   if ($('makePreviewRatio')) $('makePreviewRatio').textContent = $('makeAspect')?.value || '9:16';
   if ($('makePreviewMeta')) $('makePreviewMeta').textContent = isViralStoryMode() ? 'Loop-ready' : 'Local render';
-  if ($('makeSpecFormat')) $('makeSpecFormat').textContent = selectedCardText('#makeRecipeCards', 'Custom');
+  if ($('makeSpecFormat')) $('makeSpecFormat').textContent = selectedCardText('[id^="makeRecipeCards"]','Custom');
   if ($('makeSpecVisual')) $('makeSpecVisual').textContent = $('makeVideoMode')?.value === 'source' ? 'Retention' : 'AI scenes';
   if ($('makeSpecLength')) $('makeSpecLength').textContent = durationLabels[$('makeDuration')?.value] || 'Custom';
   updatePlatformPreview();
@@ -1554,7 +1554,7 @@ document.querySelectorAll('#makePlatformPreviewToggle button').forEach(btn => {
   btn.addEventListener('click', () => updatePlatformPreview(btn.dataset.platform || 'tiktok'));
 });
 
-document.querySelectorAll('#makeRecipeCards .choice-card').forEach(card => {
+document.querySelectorAll('[id^="makeRecipeCards"] .choice-card').forEach(card => {
   card.addEventListener('click', () => {
     $('makeRecipe').value = card.dataset.recipe || 'custom';
     makeIdeaSelected = false;
