@@ -43,9 +43,12 @@ from auth_helpers import (
     service_headers,
     storage_signed_url,
     storage_url,
+    storage_user_headers,
+    supabase_anon_key,
     supabase_configured,
     supabase_service_role_key,
     supabase_url,
+    user_headers,
 )
 
 
@@ -70,35 +73,78 @@ _lock = threading.Lock()
 class SupabaseProjectStore:
     """Drop-in replacement for the file-based ProjectStore.
 
-    All public methods that need ownership context now require user_id
-    as the first kwarg. Methods that don't (file_path, etc.) are still
-    safe because the underlying RLS policies catch any cross-user
-    attempt.
+    Two auth modes:
+    - User JWT (preferred — local installs, hosted user-scoped requests):
+      pass `jwt=<access_token>` to the constructor or set per-call via
+      `with_jwt()`. RLS enforces row-level ownership.
+    - Service role (server-side admin, last resort): default when no JWT
+      is supplied AND SUPABASE_SERVICE_ROLE_KEY is configured. Bypasses
+      RLS — only used by the legacy hosted code path. Avoid for new code.
+
+    All public methods that need ownership context still require
+    user_id as the first kwarg. RLS catches cross-user attempts when
+    the JWT is in use; user_id is the trusted ownership signal when
+    falling back to service_role.
     """
 
-    def __init__(self, output_dir: Path | str | None = None):
-        # output_dir is kept as a download cache for streaming files
-        # back to clients. Files themselves live in Storage; this is
-        # just a scratch directory for the current Flask request.
+    def __init__(self, output_dir: Path | str | None = None,
+                 *, jwt: str | None = None):
         self.cache_dir = Path(output_dir or tempfile.gettempdir()) / "phantomline_dl_cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        if not supabase_configured():
-            # Fail loud at construction so a bad deploy doesn't silently
-            # serve every visitor an empty library.
-            raise RuntimeError(
-                "SupabaseProjectStore requires SUPABASE_URL, SUPABASE_ANON_KEY, "
-                "and SUPABASE_SERVICE_ROLE_KEY env vars. Either set them or "
-                "use the local-disk ProjectStore for the desktop install."
-            )
+        # The JWT mode requires only URL + anon key. The service_role
+        # fallback requires the service role too. Validate at the right
+        # level depending on which mode this instance will use.
+        self._jwt = (jwt or "").strip() or None
+        if self._jwt:
+            if not (supabase_url() and supabase_anon_key()):
+                raise RuntimeError(
+                    "SupabaseProjectStore(jwt=...) requires SUPABASE_URL "
+                    "and SUPABASE_ANON_KEY env vars."
+                )
+        else:
+            if not supabase_configured():
+                raise RuntimeError(
+                    "SupabaseProjectStore() with no JWT requires SUPABASE_URL, "
+                    "SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY env vars. "
+                    "Either pass jwt=<access_token> for a user-scoped store, "
+                    "set the service role key for the hosted admin path, or "
+                    "use the local-disk ProjectStore for the desktop install."
+                )
+
+    def with_jwt(self, jwt: str | None) -> "SupabaseProjectStore":
+        """Return a lightweight copy of this store bound to a different
+        JWT. The cache dir is shared across copies — they're cheap.
+        Used by the proxy in core.py to make per-request user-scoped
+        instances without the cost of re-validating env vars."""
+        clone = object.__new__(SupabaseProjectStore)
+        clone.cache_dir = self.cache_dir
+        clone._jwt = (jwt or "").strip() or None
+        return clone
 
     # ----- helpers -----
+
+    def _rest_headers(self) -> dict[str, str]:
+        """Postgrest REST headers for this store's auth mode. JWT mode
+        uses anon-key + bearer-JWT (RLS enforces ownership);
+        service-role mode bypasses RLS (legacy hosted path only)."""
+        if self._jwt:
+            return user_headers(self._jwt)
+        return service_headers()
+
+    def _storage_headers(self) -> dict[str, str]:
+        """Storage HTTP API headers — same auth mode mapping but no
+        Content-Type (set per-upload by the caller)."""
+        if self._jwt:
+            return storage_user_headers(self._jwt)
+        key = supabase_service_role_key() or ""
+        return {"apikey": key, "Authorization": f"Bearer {key}"}
 
     def _get_url(self, path: str) -> str:
         return rest_url(path)
 
     def _post_json(self, path: str, body: Any) -> Any:
         res = requests.post(self._get_url(path), json=body,
-                            headers=service_headers(), timeout=10)
+                            headers=self._rest_headers(), timeout=10)
         if res.status_code not in (200, 201):
             raise RuntimeError(f"Supabase POST {path} -> {res.status_code} {res.text[:200]}")
         try:
@@ -108,7 +154,7 @@ class SupabaseProjectStore:
 
     def _patch_json(self, path: str, body: Any) -> Any:
         res = requests.patch(self._get_url(path), json=body,
-                             headers=service_headers(), timeout=10)
+                             headers=self._rest_headers(), timeout=10)
         if res.status_code not in (200, 204):
             raise RuntimeError(f"Supabase PATCH {path} -> {res.status_code} {res.text[:200]}")
         try:
@@ -117,7 +163,7 @@ class SupabaseProjectStore:
             return None
 
     def _get(self, path: str) -> Any:
-        res = requests.get(self._get_url(path), headers=service_headers(), timeout=10)
+        res = requests.get(self._get_url(path), headers=self._rest_headers(), timeout=10)
         if res.status_code != 200:
             raise RuntimeError(f"Supabase GET {path} -> {res.status_code} {res.text[:200]}")
         try:
@@ -126,7 +172,7 @@ class SupabaseProjectStore:
             return None
 
     def _delete(self, path: str) -> None:
-        res = requests.delete(self._get_url(path), headers=service_headers(), timeout=10)
+        res = requests.delete(self._get_url(path), headers=self._rest_headers(), timeout=10)
         if res.status_code not in (200, 204):
             raise RuntimeError(f"Supabase DELETE {path} -> {res.status_code} {res.text[:200]}")
 
@@ -270,13 +316,10 @@ class SupabaseProjectStore:
         if not ctype:
             ctype = "application/octet-stream"
         upload_url = storage_url(PROJECT_FILES_BUCKET, object_path)
-        headers = {
-            "apikey": supabase_service_role_key() or "",
-            "Authorization": f"Bearer {supabase_service_role_key() or ''}",
-            "Content-Type": ctype,
-            "x-upsert": "true",  # replace if a previous upload exists
-            "Cache-Control": "max-age=31536000",
-        }
+        headers = dict(self._storage_headers())
+        headers["Content-Type"] = ctype
+        headers["x-upsert"] = "true"  # replace if a previous upload exists
+        headers["Cache-Control"] = "max-age=31536000"
         with src.open("rb") as fh:
             res = requests.post(upload_url, data=fh, headers=headers, timeout=120)
         if res.status_code not in (200, 201):
@@ -311,14 +354,12 @@ class SupabaseProjectStore:
         # been updated since we cached it.
         if local.exists():
             return local
-        # Cache miss: pull from Storage.
+        # Cache miss: pull from Storage. Uses the same auth mode as the
+        # Postgrest reads (JWT mode → bearer JWT, fallback → service_role).
         url = storage_url(PROJECT_FILES_BUCKET, rel)
-        headers = {
-            "apikey": supabase_service_role_key() or "",
-            "Authorization": f"Bearer {supabase_service_role_key() or ''}",
-        }
         try:
-            res = requests.get(url, headers=headers, timeout=60, stream=True)
+            res = requests.get(url, headers=self._storage_headers(),
+                               timeout=60, stream=True)
         except requests.RequestException:
             return None
         if res.status_code != 200:
@@ -349,12 +390,8 @@ class SupabaseProjectStore:
             return
         base = (supabase_url() or "").rstrip("/")
         url = f"{base}/storage/v1/object/{PROJECT_FILES_BUCKET}/{object_path}"
-        headers = {
-            "apikey": supabase_service_role_key() or "",
-            "Authorization": f"Bearer {supabase_service_role_key() or ''}",
-        }
         try:
-            requests.delete(url, headers=headers, timeout=8)
+            requests.delete(url, headers=self._storage_headers(), timeout=8)
         except requests.RequestException:
             pass
 

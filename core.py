@@ -58,6 +58,16 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 _USER_ID_VAR: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "phantomline_user_id", default=None
 )
+# Companion contextvar for the user's Supabase JWT (access_token).
+# Set alongside _USER_ID_VAR by the Flask before_request hook so
+# SupabaseProjectStore can make user-scoped REST calls. RLS then
+# enforces row-level ownership instead of relying on service_role.
+# spawn_user_thread() copies contextvars so background render threads
+# inherit both — they keep working with the user's own JWT instead of
+# crashing or silently writing to the wrong row.
+_USER_JWT_VAR: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "phantomline_user_jwt", default=None
+)
 
 
 def _supabase_projects_enabled() -> bool:
@@ -67,17 +77,40 @@ def _supabase_projects_enabled() -> bool:
     return flag in ("1", "true", "yes")
 
 
-def set_request_user(user_id: str | None) -> contextvars.Token:
-    """Store the signed-in user's ID on the current context (Flask request
-    or background thread). Returns a token the caller MUST pass to
-    `reset_request_user` once the scope ends."""
-    return _USER_ID_VAR.set(user_id)
+def set_request_user(user_id: str | None,
+                     jwt: str | None = None):
+    """Bind the signed-in user's ID + JWT to the current context.
+    Returns a tuple of (user_token, jwt_token) which the caller MUST
+    pass to `reset_request_user` once the scope ends.
+
+    `jwt` is optional for backward compatibility. When None, the
+    project store falls back to service_role (Render hosted pattern).
+    On local installs the JWT is required for cloud sync to work."""
+    user_token = _USER_ID_VAR.set(user_id)
+    jwt_token = _USER_JWT_VAR.set(jwt)
+    return (user_token, jwt_token)
 
 
-def reset_request_user(token: contextvars.Token) -> None:
-    """Restore the previous user-id binding. Pair with set_request_user
-    in a try/finally."""
-    _USER_ID_VAR.reset(token)
+def reset_request_user(token) -> None:
+    """Restore the previous user-id + JWT bindings. Accepts either the
+    new (user_token, jwt_token) tuple or a legacy single-token value
+    for backward compat with older callers."""
+    if isinstance(token, tuple) and len(token) == 2:
+        user_token, jwt_token = token
+        try:
+            _USER_ID_VAR.reset(user_token)
+        except (LookupError, ValueError):
+            pass
+        try:
+            _USER_JWT_VAR.reset(jwt_token)
+        except (LookupError, ValueError):
+            pass
+    else:
+        # Legacy single-token path — older callers that only set user_id.
+        try:
+            _USER_ID_VAR.reset(token)
+        except (LookupError, ValueError):
+            pass
 
 
 def current_user_id() -> str | None:
@@ -85,6 +118,14 @@ def current_user_id() -> str | None:
     we're outside a request (e.g. a background render started before
     sign-in support shipped)."""
     return _USER_ID_VAR.get()
+
+
+def current_user_jwt() -> str | None:
+    """The Supabase access_token (JWT) bound to the current execution
+    context, or None if not signed in / not running under a hooked
+    request. Used by SupabaseProjectStore to make user-scoped REST
+    calls so RLS enforces ownership."""
+    return _USER_JWT_VAR.get()
 
 
 def run_with_user_context(user_id: str | None, fn, *args, **kwargs):
@@ -136,27 +177,58 @@ class _RequestScopedProjectStore:
         self._supabase = None  # built lazily so import order doesn't matter
 
     def _supabase_store(self):
+        """The shared base SupabaseProjectStore. Per-request user-scoped
+        clones are created via .with_jwt() inside _route(). Building the
+        base once lets us amortize the env-var validation + cache_dir
+        setup across requests."""
         if self._supabase is not None:
             return self._supabase
         with self._supabase_lock:
             if self._supabase is None:
-                # Lazy import so machines without supabase env vars don't
-                # crash on module load.
                 from supabase_projects import SupabaseProjectStore  # noqa: WPS433
-                self._supabase = SupabaseProjectStore(self._local.output_dir)
+                # Construct WITHOUT a JWT so the env-var check picks the
+                # right path: hosted with service_role works; local with
+                # only URL+anon would fail here, but local installs hit
+                # this code path only after a sign-in (JWT-mode), so the
+                # base store stays unused on local.
+                try:
+                    self._supabase = SupabaseProjectStore(self._local.output_dir)
+                except RuntimeError:
+                    # Local install with no service_role — that's fine,
+                    # we'll build per-request JWT-scoped stores instead.
+                    # Use a minimal placeholder we can call .with_jwt() on.
+                    self._supabase = SupabaseProjectStore.__new__(SupabaseProjectStore)
+                    from pathlib import Path as _P
+                    import tempfile as _t
+                    self._supabase.cache_dir = (
+                        _P(self._local.output_dir) / "phantomline_dl_cache"
+                        if hasattr(self._local, "output_dir") else
+                        _P(_t.gettempdir()) / "phantomline_dl_cache"
+                    )
+                    self._supabase.cache_dir.mkdir(parents=True, exist_ok=True)
+                    self._supabase._jwt = None
             return self._supabase
 
     def _route(self):
         """Return (active_store, user_id) for this call. user_id is None
-        when we're using the local store."""
+        when we're using the local file store.
+
+        New for Phase 2B: when a user JWT is bound to the context, we
+        return a per-request user-scoped SupabaseProjectStore clone so
+        the JWT travels through every Postgrest + Storage call. RLS
+        enforces ownership instead of relying on service_role.
+
+        The legacy service_role path (no JWT, hosted) still works for
+        any background admin use cases on Render — but for normal user
+        traffic the JWT path is now the default."""
         if _supabase_projects_enabled():
             user_id = current_user_id()
             if user_id:
-                return self._supabase_store(), user_id
+                jwt = current_user_jwt()
+                base = self._supabase_store()
+                store = base.with_jwt(jwt) if jwt else base
+                return store, user_id
             # Hosted env enabled but no user_id on the context — refuse.
-            # Caller (route handler) should have rejected the request
-            # before reaching this proxy. If we slip through, raise so
-            # the failure is loud not silent.
             raise PermissionError(
                 "Supabase project store active but no user is signed in. "
                 "Ensure the route is JWT-gated."
