@@ -11,8 +11,8 @@ function forceReadableButtons(root = document) {
     const isPrimary = el.classList.contains('btn') && !el.classList.contains('secondary');
     if (isPrimary) {
       el.style.setProperty('color', '#f4f8f5', 'important');
-      el.style.setProperty('background', 'linear-gradient(135deg, rgba(110,231,183,0.24), rgba(38,231,245,0.18)), rgba(10,18,18,0.94)', 'important');
-      el.style.setProperty('border-color', 'rgba(110,231,183,0.42)', 'important');
+      el.style.setProperty('background', 'linear-gradient(135deg, rgba(26,184,232,0.24), rgba(26,184,232,0.18)), rgba(10,18,18,0.94)', 'important');
+      el.style.setProperty('border-color', 'rgba(26,184,232,0.42)', 'important');
       el.style.setProperty('text-shadow', '0 1px 1px rgba(0,0,0,0.65)', 'important');
     } else if (el.classList.contains('secondary') || el.tagName === 'BUTTON') {
       el.style.setProperty('color', '#f4f8f5', 'important');
@@ -935,8 +935,46 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (target === 'publish' && btn.dataset.pubJump && typeof switchPublishView === 'function') {
       switchPublishView(btn.dataset.pubJump);
     }
+    // Remember the user's last tab so refresh doesn't always slam them
+    // back to Launch Setup. Only persist meaningful tabs (skip ephemeral
+    // sub-tools like Generate/Short/Paste since those are entered from
+    // Make Video, not picked as a home).
+    try {
+      if (['launch','make','publish','library','settings'].includes(target)) {
+        localStorage.setItem('phantomline-last-tab', target);
+      }
+    } catch (_) {}
   });
 });
+
+// Smart default tab. First-time users (no remembered tab) land on
+// Launch Setup so the readiness checklist is the first thing they see.
+// Returning users with a ready system land on whatever they were doing
+// last (typically Create Video). If they had an unmet blocker last time,
+// the install banner still nags from any tab — they don't need to start
+// on Launch every session.
+(function smartDefaultTab() {
+  try {
+    const saved = localStorage.getItem('phantomline-last-tab');
+    if (!saved || saved === 'launch') return;
+    // If readiness shows blockers, force back to Launch so they fix
+    // the issue. Async — fires after the page paints, only switches
+    // if it determines blockers exist.
+    fetch('/api/launch/readiness', { credentials: 'same-origin' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const blockers = (d?.blockers || []).filter(b => b.required);
+        if (blockers.length === 0) {
+          // System ready — honor the saved tab.
+          const btn = document.querySelector(`.tab-btn[data-tab="${saved}"]`);
+          if (btn) btn.click();
+        }
+        // Otherwise: stay on Launch (the default), and the install
+        // banner will explain what's missing.
+      })
+      .catch(() => { /* no readiness — stay on default */ });
+  } catch (_) {}
+})();
 $('advancedNavToggle')?.addEventListener('click', () => {
   document.querySelector('.tabs')?.classList.toggle('show-advanced');
 });
@@ -2508,7 +2546,7 @@ function renderOptimizeDetail(video, analysis = null) {
       html += `
         <div class="opt-section">
           <div class="opt-label">Why we should leave this alone</div>
-          <div class="opt-diagnosis" style="background:rgba(110,231,183,0.05); border-color:rgba(110,231,183,0.2);">
+          <div class="opt-diagnosis" style="background:rgba(26,184,232,0.05); border-color:rgba(26,184,232,0.2);">
             ${escapeHtml(ana.do_nothing_reason)}
           </div>
         </div>
@@ -4763,7 +4801,7 @@ async function loadLibraryBundles(grid) {
         <div class="proj-card bundle-card" data-id="${b.id}">
           <div class="row1">
             <h3>${escapeHtml(b.title || 'Untitled video')}</h3>
-            <span class="kind-badge" style="background: rgba(110,231,183,0.18); color: var(--accent);">Bundle</span>
+            <span class="kind-badge" style="background: rgba(26,184,232,0.18); color: var(--accent);">Bundle</span>
           </div>
           <div class="meta">${memberPills} · ${relTime(b.created_at)}</div>
           ${tagline ? `<div class="bundle-tagline" style="color:var(--muted); font-size:13px; margin-top:6px;">${escapeHtml(tagline)}</div>` : ''}
@@ -5040,8 +5078,8 @@ function mountWaveform(audioEl) {
 
   const ws = WaveSurfer.create({
     container: canvas,
-    waveColor: 'rgba(38,231,245,0.34)',
-    progressColor: '#8ab4ff',
+    waveColor: 'rgba(26,184,232,0.34)',
+    progressColor: '#69cff0',
     cursorColor: 'transparent',
     barWidth: 2, barGap: 2, barRadius: 2,
     height: 40,
