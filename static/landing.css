@@ -874,6 +874,82 @@ h3 {
   .calendar { font-size: 10px; }
 }
 
+/* ─── Brand-align overrides for /alternatives + pillar pages ──────────── */
+/* article.css forces Cormorant Garamond on .article-head h1 + .article h2.
+   These pages share the landing.css token system but had headline fonts
+   that didn't match the IBM Plex direction. Override here so the fix
+   reaches every page that loads landing.css without touching article.css
+   (which is also used for alt-card grids that we want to keep). */
+.article-head h1,
+.article h2,
+.article h3 {
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+  color: var(--paper) !important;
+}
+.article-head .article-lede {
+  font-family: var(--font-sans);
+  color: var(--text-2);
+}
+
+/* ─── FAQ touch targets ───────────────────────────────────────────────── */
+/* Default <summary> rendering is ~34px tall on mobile; below the
+   44px Apple HIG / 48dp Material minimum. Easy mis-tap. Pad the
+   summary so the parent details element is comfortable to tap. */
+.faq summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Pricing responsive (1024px breakpoint between 4-up and 1-up) ────── */
+/* 4 cards × 280-ish px on a 1180 grid is tight. Add a 2-up breakpoint
+   so cards breathe at typical laptop widths. */
+@media (max-width: 1024px) and (min-width: 901px) {
+  .pricing-grid { grid-template-columns: 1fr 1fr; }
+  .pricing-card:nth-child(2n) { border-right: 0; }
+}
+
+/* ─── Pricing comparison hint on the Lifetime card ────────────────────── */
+/* Pro $15/mo vs Lifetime $79 once breaks even at ~5.5 months. Persona
+   shouldn't have to do that math. The pricing-price-alt--lifetime
+   variant renders next to the price on the Founding tier card only. */
+.pricing-price-alt--lifetime {
+  color: var(--signal);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ─── Skip-to-main link (a11y, keyboard users) ────────────────────────── */
+/* Hidden until focused. First Tab on any page lands here, lets keyboard
+   users bypass the nav and jump straight to the page's main content. */
+.skip-to-main {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--brand);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  z-index: 9999;
+  transition: top 120ms ease;
+}
+.skip-to-main:focus {
+  top: 0;
+  outline: 2px solid var(--paper);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

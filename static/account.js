@@ -93,9 +93,12 @@ const _isLocal =
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   if (_isLocal) {
-    // Friendly local message: this is your desktop install, no panic.
+    // Friendly local message: cloud sync is opt-in on local installs
+    // (Phase 2B). Walk the dev through enabling it; offer the hosted
+    // portal as a fallback for managing existing licenses without
+    // any local config.
     setStatus(
-      "Local install detected — sign-in lives on phantomline.xyz. Open the hosted account portal to manage your license.",
+      "Cloud sync isn't configured. Copy .env.example → .env and add SUPABASE_ANON_KEY to enable, or open phantomline.xyz/account to manage your license without setting up sync.",
     );
   } else {
     setStatus(

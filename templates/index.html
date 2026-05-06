@@ -168,13 +168,14 @@
   .pl-mobile-bypass:hover, .pl-mobile-bypass:active { color: #8c8a82; }
 </style>
 <script src="{{ '/static/mobile-gate.js' | versioned }}"></script>
+<a class="skip-to-main" href="#main" style="position:absolute;top:-40px;left:0;background:#19e0c2;color:#0a0a0a;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;font-weight:600;padding:10px 16px;text-decoration:none;letter-spacing:0.02em;text-transform:lowercase;z-index:9999;transition:top 120ms ease;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to main content</a>
 <div class="wrap">
   <!-- Visually-hidden h1 for screen readers + SEO. The studio's visible
        hierarchy is brand mark → tabs → tab content (h2s), so we don't
-       want a big "Phantomline Studio" headline painting on desktop. But
-       a page with no h1 is an a11y/SEO smell, so we hide-but-announce
-       one here. The mobile interstitial above also has its own h1 — it's
-       inside a display:none parent on desktop, so screen readers skip it. -->
+       want a big "Phantomline Studio" headline painting on desktop.
+       The mobile interstitial above this in DOM also has its own h1,
+       but its parent has display:none on desktop — modern screen
+       readers + crawlers correctly skip display:none subtrees. -->
   <h1 class="visually-hidden">Phantomline Studio</h1>
   <header>
     <a class="brand" href="/" title="Phantomline home" aria-label="Phantomline home">
@@ -326,6 +327,7 @@
     </button>
   </div>
 
+  <a id="main" tabindex="-1"></a>
   <div id="tab-launch" class="tab-content active">
     <div class="launch-shell">
       <section class="panel launch-hero">
