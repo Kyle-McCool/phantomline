@@ -31,6 +31,143 @@
 <link rel="stylesheet" href="{{ '/static/phantomline.css' | versioned }}" />
 </head>
 <body>
+<!-- Mobile interstitial — Phantomline studio is desktop-first.
+     On phones the studio layout collapses awkwardly; the render
+     pipeline (TTS, video assembly, image gen) needs hardware that
+     phones don't have. Rather than dropping mobile users into a
+     broken /app, show an honest banner explaining what they CAN do
+     here. Same detection pattern as templates/install.html:96-98.
+     The .pl-mobile-only display is hidden on desktop; on mobile it's
+     a full-page card BEFORE the studio so the layout itself never
+     paints. Toggleable via the "Continue anyway" link for the rare
+     desktop-class tablet user. -->
+<div id="mobileInterstitial" class="pl-mobile-only" hidden>
+  <div class="pl-mobile-card">
+    <div class="pl-mobile-eyebrow">Phantomline studio</div>
+    <h1 class="pl-mobile-h1">Built for the desktop.</h1>
+    <p class="pl-mobile-lede">
+      Rendering needs a real GPU and a long-running process — your phone can't
+      run that without melting. Open Phantomline on your computer to create.
+    </p>
+    <div class="pl-mobile-list">
+      <div class="pl-mobile-list-head">From your phone right now you can:</div>
+      <a class="pl-mobile-link" href="/account">› Sign in &amp; manage your license</a>
+      <a class="pl-mobile-link" href="/account">› View your project library</a>
+      <a class="pl-mobile-link" href="/pricing">› Compare plans &amp; upgrade</a>
+      <a class="pl-mobile-link" href="/download">› Get the desktop install link</a>
+    </div>
+    <a class="pl-mobile-cta" href="/download">Open install guide →</a>
+    <button id="mobileBypassBtn" class="pl-mobile-bypass" type="button">
+      Continue to studio anyway
+    </button>
+  </div>
+</div>
+<style>
+  .pl-mobile-only { display: none; }
+  @media (max-width: 720px) {
+    .pl-mobile-only { display: block; }
+    .pl-mobile-only:not([hidden]) ~ .wrap { display: none; }
+    html.pl-mobile-bypass-on .pl-mobile-only ~ .wrap { display: grid; }
+  }
+  .pl-mobile-card {
+    min-height: 100vh;
+    padding: 64px 24px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .pl-mobile-eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #19e0c2;
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pl-mobile-eyebrow::before {
+    content: ""; width: 24px; height: 1px; background: #19e0c2;
+  }
+  .pl-mobile-h1 {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: clamp(40px, 11vw, 64px);
+    font-weight: 600;
+    line-height: 0.96;
+    letter-spacing: -0.025em;
+    color: #f4f1ea;
+    margin: 0 0 20px 0;
+  }
+  .pl-mobile-lede {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    color: #d8d4cb;
+    margin: 0 0 36px 0;
+  }
+  .pl-mobile-list {
+    border-top: 1px solid rgba(244,241,234,0.14);
+    border-bottom: 1px solid rgba(244,241,234,0.14);
+    padding: 20px 0;
+    margin-bottom: 32px;
+  }
+  .pl-mobile-list-head {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8c8a82;
+    margin-bottom: 14px;
+  }
+  .pl-mobile-link {
+    display: block;
+    padding: 10px 0;
+    color: #f4f1ea;
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 16px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(244,241,234,0.08);
+  }
+  .pl-mobile-link:last-child { border-bottom: 0; }
+  .pl-mobile-link:hover, .pl-mobile-link:active { color: #19e0c2; }
+  .pl-mobile-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 24px;
+    background: #19e0c2;
+    color: #0a0a0a;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    border: 1px solid #19e0c2;
+    border-radius: 0;
+  }
+  .pl-mobile-cta:hover, .pl-mobile-cta:active { background: #0d8e7a; border-color: #0d8e7a; color: #f4f1ea; }
+  .pl-mobile-bypass {
+    background: transparent;
+    border: 0;
+    color: #5e5d57;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    margin-top: 24px;
+    padding: 8px 0;
+    cursor: pointer;
+    text-align: left;
+    text-decoration: underline;
+  }
+  .pl-mobile-bypass:hover, .pl-mobile-bypass:active { color: #8c8a82; }
+</style>
+<script src="{{ '/static/mobile-gate.js' | versioned }}"></script>
 <div class="wrap">
   <header>
     <a class="brand" href="/" title="Phantomline home" aria-label="Phantomline home">
