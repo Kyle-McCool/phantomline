@@ -169,6 +169,13 @@
 </style>
 <script src="{{ '/static/mobile-gate.js' | versioned }}"></script>
 <div class="wrap">
+  <!-- Visually-hidden h1 for screen readers + SEO. The studio's visible
+       hierarchy is brand mark → tabs → tab content (h2s), so we don't
+       want a big "Phantomline Studio" headline painting on desktop. But
+       a page with no h1 is an a11y/SEO smell, so we hide-but-announce
+       one here. The mobile interstitial above also has its own h1 — it's
+       inside a display:none parent on desktop, so screen readers skip it. -->
+  <h1 class="visually-hidden">Phantomline Studio</h1>
   <header>
     <a class="brand" href="/" title="Phantomline home" aria-label="Phantomline home">
       <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
@@ -176,11 +183,13 @@
     </a>
     <div class="header-actions">
       <div class="notification-wrap">
-        <button id="notificationBell" class="notification-button" type="button" title="Notifications">
-          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
-          <span id="notificationCount" class="notification-count">0</span>
+        <button id="notificationBell" class="notification-button" type="button"
+                title="Notifications" aria-label="Notifications"
+                aria-controls="notificationPanel" aria-expanded="false" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+          <span id="notificationCount" class="notification-count" aria-label="0 unread notifications">0</span>
         </button>
-        <div id="notificationPanel" class="notification-panel">
+        <div id="notificationPanel" class="notification-panel" role="dialog" aria-label="Notifications" aria-modal="false">
           <div class="notification-head">
             <strong>Notifications</strong>
             <div class="notification-actions">

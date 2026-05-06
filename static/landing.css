@@ -205,6 +205,32 @@ img { max-width: 100%; display: block; }
   color: var(--paper);
 }
 
+/* ─── Focus-visible (keyboard-only focus indicators) ─────────────────── */
+/* On a dark theme the browser default focus ring is faint to invisible.
+   :focus-visible draws a deliberate brand-teal outline only when the
+   user is navigating with a keyboard — mouse clicks don't trigger it.
+   Same brand-teal as accents so it reads as "the design did this on
+   purpose," not as a default-fallback ring. */
+.cta:focus-visible,
+.cta.secondary:focus-visible,
+.cta.signal:focus-visible,
+.navlinks a:focus-visible,
+.faq summary:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+/* Mirror the nav underline animation on focus so keyboard users get the
+   same wayfinding cue mouse hover gives. */
+.navlinks a:not(.cta):focus-visible::after { transform: scaleX(1); }
+/* Dim the outline-offset on filled CTAs so it doesn't fight the brand
+   fill — the offset alone signals focus without a halo. */
+.cta:focus-visible { outline-offset: 2px; }
+
 /* ─── Phantom-line motif ─────────────────────────────────────────────── */
 /* Recurring brand device: a hairline that bisects sections, anchored by
    a small teal endpoint dot. Echoes the "phantomline" name literally. */

@@ -117,7 +117,10 @@ function setupNotifications() {
   loadNotifications();
   renderNotifications();
   $('notificationBell')?.addEventListener('click', () => {
-    $('notificationPanel')?.classList.toggle('open');
+    const panel = $('notificationPanel');
+    const bell = $('notificationBell');
+    const opened = panel?.classList.toggle('open');
+    bell?.setAttribute('aria-expanded', opened ? 'true' : 'false');
     notifications = notifications.map(n => ({ ...n, read: true }));
     saveNotifications();
     renderNotifications();
@@ -130,7 +133,10 @@ function setupNotifications() {
   $('enableDesktopNotificationsBtn')?.addEventListener('click', requestDesktopNotifications);
   document.addEventListener('click', (event) => {
     const wrap = document.querySelector('.notification-wrap');
-    if (wrap && !wrap.contains(event.target)) $('notificationPanel')?.classList.remove('open');
+    if (wrap && !wrap.contains(event.target)) {
+      $('notificationPanel')?.classList.remove('open');
+      $('notificationBell')?.setAttribute('aria-expanded', 'false');
+    }
   });
 }
 
