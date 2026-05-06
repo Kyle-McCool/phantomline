@@ -182,6 +182,16 @@
       <small class="brand-tagline">local AI videos without showing your face</small>
     </a>
     <div class="header-actions">
+      <!-- Cloud-sync status dot. Updated by static/sync-status.js. States:
+           grey = sync not configured (no Supabase env vars)
+           green = last write succeeded
+           amber = transient error, retry pending
+           red = persistent failure -->
+      <span id="syncStatusDot" class="sync-status sync-status--unknown"
+            title="Cloud sync status" aria-label="Cloud sync status: checking">
+        <span class="sync-status-dot" aria-hidden="true"></span>
+        <span class="sync-status-text">checking</span>
+      </span>
       <div class="notification-wrap">
         <button id="notificationBell" class="notification-button" type="button"
                 title="Notifications" aria-label="Notifications"
@@ -1970,5 +1980,6 @@ window.GHOSTLINE_DEFAULTS = {
 </script>
 <script src="{{ '/static/phantomline.js' | versioned }}" defer></script>
 <script src="{{ '/static/profile-widget.js' | versioned }}" defer></script>
+<script src="{{ '/static/sync-status.js' | versioned }}" defer></script>
 </body>
 </html>
