@@ -1016,6 +1016,39 @@
     border-left-color: var(--brand);
     color: var(--paper);
   }
+  /* Cloud-sync status pill — sits in the studio header. Driven by
+     static/sync-status.js polling /api/projects success state. */
+  .sync-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--text-2);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    user-select: none;
+  }
+  .sync-status .sync-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text-3);
+    transition: background 200ms ease;
+  }
+  .sync-status--ok           .sync-status-dot { background: var(--brand); box-shadow: 0 0 8px var(--brand); }
+  .sync-status--warn         .sync-status-dot { background: var(--signal); }
+  .sync-status--err          .sync-status-dot { background: #ef8b8b; }
+  .sync-status--unconfigured .sync-status-dot { background: var(--text-3); }
+  .sync-status--unknown      .sync-status-dot { background: var(--text-3); }
+  .sync-status--ok           { color: var(--brand); border-color: var(--brand); }
+  .sync-status--warn         { color: var(--signal); border-color: var(--signal); }
+  .sync-status--err          { color: #ef8b8b; border-color: #ef8b8b; }
+  /* Hidden when cloud sync is irrelevant (Capacitor Android shell). */
+  .sync-status[hidden] { display: none; }
+
   .tab-btn .ico {
     display: inline-grid;
     width: 18px;
