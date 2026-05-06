@@ -1168,10 +1168,18 @@ def _publish_post_from_request(data):
     if tags:
         tag_line = " ".join("#" + t for t in tags[:12])
         caption = (caption + "\n\n" + tag_line).strip()
+    # Stamp the scheduling user. JWT-validated; service_role-bypassing.
+    # On hosted with a session this is the auth.uid(); on local installs
+    # without sign-in it's None and the post falls back to the legacy
+    # shared-connection upload path.
+    from auth_helpers import validate_jwt as _validate_jwt
+    _user = _validate_jwt(request.headers.get("Authorization") or "") or {}
+    user_id = _user.get("id")
     post = {
         "id": uuid.uuid4().hex[:12],
         "platform": "YOUTUBE",
         "status": "SCHEDULED",
+        "user_id": user_id,
         "created_at": time.time(),
         "scheduled_at": data.get("scheduled_at") or "",
         "scheduled_epoch": _parse_iso_to_epoch(data.get("scheduled_at")),
@@ -4388,6 +4396,108 @@ def api_youtube_disconnect():
     return jsonify({"ok": True})
 
 
+def _resolve_user_youtube_connection(user_id: str) -> dict | None:
+    """Background-thread helper that reads a user's YouTube tokens from
+    Supabase via service_role (the worker has no JWT context), refreshes
+    the access_token via Google's oauth2/token if expired, and returns
+    a connection-shaped dict matching the legacy _youtube_connection()
+    schema so youtube_publish.upload_video() can consume it unchanged.
+
+    service_role is justified here — this runs in a background worker
+    that legitimately needs cross-user lookups by user_id, and the
+    user_id was authoritatively assigned via JWT validation when the
+    post was scheduled.
+
+    Returns None if the user has no token row OR if refresh fails (e.g.
+    refresh_token revoked). Caller should mark the post FAILED with a
+    clear "reconnect YouTube" error.
+    """
+    if not user_id:
+        return None
+    base = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or ""
+    if not base or not service_key:
+        return None
+    headers = {"apikey": service_key, "Authorization": f"Bearer {service_key}"}
+    try:
+        r = requests.get(
+            f"{base}/rest/v1/user_youtube_tokens?user_id=eq.{user_id}&limit=1",
+            headers=headers, timeout=8,
+        )
+    except requests.RequestException:
+        return None
+    if r.status_code != 200:
+        return None
+    rows = r.json() if r.content else []
+    if not rows:
+        return None
+    row = rows[0]
+    access_token = (row.get("access_token") or "").strip()
+    refresh_token = (row.get("refresh_token") or "").strip()
+    expires_at = row.get("expires_at")
+    # Refresh if access_token expired (or expires within 60s — give a buffer).
+    needs_refresh = False
+    if expires_at:
+        try:
+            from datetime import datetime, timezone, timedelta
+            expiry_dt = datetime.fromisoformat(str(expires_at).replace("Z", "+00:00"))
+            if expiry_dt - datetime.now(tz=timezone.utc) < timedelta(seconds=60):
+                needs_refresh = True
+        except (ValueError, TypeError):
+            pass
+    if needs_refresh and refresh_token:
+        client_id = os.environ.get("YOUTUBE_CLIENT_ID") or ""
+        client_secret = os.environ.get("YOUTUBE_CLIENT_SECRET") or ""
+        if client_id and client_secret:
+            try:
+                rr = requests.post(
+                    "https://oauth2.googleapis.com/token",
+                    data={
+                        "grant_type": "refresh_token",
+                        "refresh_token": refresh_token,
+                        "client_id": client_id,
+                        "client_secret": client_secret,
+                    }, timeout=10,
+                )
+                if rr.status_code == 200:
+                    rd = rr.json() or {}
+                    new_access = rd.get("access_token")
+                    new_expires_in = int(rd.get("expires_in") or 3600)
+                    if new_access:
+                        access_token = new_access
+                        from datetime import datetime, timezone, timedelta
+                        new_expires_at = (datetime.now(tz=timezone.utc)
+                                          + timedelta(seconds=new_expires_in)).isoformat()
+                        # Persist the refreshed token back to Supabase.
+                        try:
+                            requests.patch(
+                                f"{base}/rest/v1/user_youtube_tokens?user_id=eq.{user_id}",
+                                headers={**headers, "Content-Type": "application/json",
+                                         "Prefer": "return=minimal"},
+                                json={
+                                    "access_token": new_access,
+                                    "expires_at": new_expires_at,
+                                    "last_refreshed_at": new_expires_at,
+                                }, timeout=8,
+                            )
+                        except requests.RequestException:
+                            pass  # in-memory refresh works for this upload
+                else:
+                    return None  # refresh failed, user must reconnect
+            except requests.RequestException:
+                return None
+    if not access_token:
+        return None
+    # Shape-match the legacy _youtube_connection() dict so
+    # youtube_publish.upload_video() consumes it unchanged.
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "external_id": row.get("channel_id"),
+        "display_name": row.get("channel_title") or "YouTube",
+    }
+
+
 @app.route("/api/youtube/status")
 def api_youtube_status():
     """Return the signed-in user's YouTube connection state. Uses the
@@ -4471,7 +4581,22 @@ def api_youtube_playlists():
 
 @app.route("/api/publish/posts")
 def api_publish_posts():
-    return jsonify({"ok": True, "posts": _publish_posts()})
+    """Return scheduled posts visible to the caller.
+
+    Multi-tenancy rule: when a JWT is present (signed-in hosted user),
+    return only posts stamped with their user_id. Posts without a
+    user_id are LEGACY (created before this column existed) and are
+    treated as belonging to no one — only visible on local installs
+    where JWT validation always returns None and we fall through to
+    the unfiltered list.
+    """
+    from auth_helpers import validate_jwt as _validate_jwt
+    user = _validate_jwt(request.headers.get("Authorization") or "")
+    posts = _publish_posts()
+    if user and user.get("id"):
+        uid = user["id"]
+        posts = [p for p in posts if p.get("user_id") == uid]
+    return jsonify({"ok": True, "posts": posts})
 
 
 @app.route("/api/publish/schedule", methods=["POST"])
@@ -4497,10 +4622,17 @@ def api_publish_upload_now():
         return jsonify({"ok": False, "error": err, "code": "UPGRADE"}), 402
     data = request.get_json(force=True) or {}
     post_id = (data.get("post_id") or "").strip()
+    # Verify ownership before triggering the upload — a Pro user shouldn't
+    # be able to upload another Pro user's queued post.
+    from auth_helpers import validate_jwt as _validate_jwt
+    user = _validate_jwt(request.headers.get("Authorization") or "")
     with PUBLISH_LOCK:
         posts = _publish_posts()
         post = next((p for p in posts if p.get("id") == post_id), None)
     if not post:
+        return jsonify({"ok": False, "error": "Scheduled post not found."}), 404
+    if user and user.get("id") and post.get("user_id") and post["user_id"] != user["id"]:
+        # Foreign post — pretend it doesn't exist rather than 403 (less leaky).
         return jsonify({"ok": False, "error": "Scheduled post not found."}), 404
     result = _publish_post_to_youtube(post)
     return jsonify(result)
@@ -4672,9 +4804,24 @@ Rules:
 
 
 def _publish_post_to_youtube(post):
-    connection = _youtube_connection()
-    if not connection:
-        return {"ok": False, "error": "YouTube is not connected."}
+    """Upload a queued post to YouTube. Auth source picked by post:
+    - post.user_id present → per-user token from user_youtube_tokens
+      (PRIORITY 5 single-OAuth flow). Refreshes via refresh_token if
+      access_token is expired. Stays in Supabase, NOT the shared file.
+    - post.user_id missing → legacy shared _youtube_connection() file
+      (local installs without sign-in, single-user mode).
+    """
+    user_id = post.get("user_id")
+    use_per_user = bool(user_id)
+    if use_per_user:
+        connection = _resolve_user_youtube_connection(user_id)
+        if not connection:
+            return {"ok": False, "error":
+                    "YouTube reconnect required. Open Publish and click Connect YouTube."}
+    else:
+        connection = _youtube_connection()
+        if not connection:
+            return {"ok": False, "error": "YouTube is not connected."}
     video_path = Path(post.get("video_path") or "")
     if not video_path.exists():
         return {"ok": False, "error": "Video file no longer exists."}
@@ -4687,7 +4834,10 @@ def _publish_post_to_youtube(post):
         _save_publish_posts(posts)
     try:
         result, updated = youtube_publish.upload_video(BASE_DIR, connection, video_path, post)
-        _save_youtube_connection(updated)
+        # Only save back to the legacy file when we used it. Per-user
+        # tokens get refreshed inside _resolve_user_youtube_connection.
+        if not use_per_user:
+            _save_youtube_connection(updated)
         with PUBLISH_LOCK:
             posts = _publish_posts()
             for p in posts:
