@@ -39,6 +39,51 @@
     --warn: var(--signal);
     --bad: #ef8b8b;
     --shadow: 0 20px 70px rgba(0,0,0,0.42);
+
+    /* ─── Canonical design scale (Phase 1 craft pass, 2026-05) ──────────
+       Spacing, radius, and type tokens documented here so future
+       components reference one ladder instead of inventing new values.
+       Pre-existing rules already use these magnitudes ad-hoc; the var
+       names are the contract for new code. */
+
+    /* Spacing scale: 4px grid. Use these names for new components. */
+    --space-1: 4px;     /* hairline gaps, icon insets */
+    --space-2: 8px;     /* tight gaps, icon padding */
+    --space-3: 12px;    /* standard pad / row gap */
+    --space-4: 16px;    /* comfortable pad */
+    --space-6: 24px;    /* generous pad / section gap */
+    --space-8: 32px;    /* major section spacing */
+    --space-12: 48px;   /* hero spacing */
+    /* 6/10/14/18/22 are tolerated as they're widely used; new code
+       should prefer the scale above. */
+
+    /* Radius scale: industrial-editorial wants sharp + flat depth.
+       --r-pill (999px) and --r-circle (50%) for badges/avatars. */
+    --r-1: 4px;         /* tiny accents */
+    --r-2: 8px;         /* chips, buttons, inputs */
+    --r-3: 14px;        /* cards (workflow steps, panels) */
+    --r-4: 22px;        /* hero cards, big panels */
+    --r-pill: 999px;
+    --r-circle: 50%;
+
+    /* Type scale: 11/12/13/14/16/18/24/32. Body = 13/14, labels = 11/12,
+       hero = clamp(28-44). Fractional sizes (11.5/12.5 etc) are
+       deprecated — round to the nearest integer in this ladder. */
+    --t-xs: 11px;       /* labels, eyebrows */
+    --t-sm: 12px;       /* secondary, mono labels */
+    --t-base: 13px;     /* body */
+    --t-md: 14px;       /* primary body / button */
+    --t-lg: 16px;       /* lede, button text */
+    --t-xl: 18px;       /* h3 */
+    --t-2xl: 24px;      /* h2 (compact contexts) */
+    --t-3xl: 32px;      /* h2 (display) */
+
+    /* Motion: 150-200ms for micro-interactions, 300ms+ for transitions. */
+    --motion-fast: 150ms;
+    --motion-base: 200ms;
+    --motion-slow: 300ms;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   }
   * { box-sizing: border-box; }
   /* Screen-reader-only utility. Used to keep semantic structure (h1, etc)
@@ -461,7 +506,7 @@
     margin-top: 7px;
   }
   .notification-empty {
-    padding: 30px 14px;
+    padding: 32px 14px;
     text-align: center;
     color: var(--muted);
     font-size: 13px;
@@ -566,7 +611,7 @@
   .scene-card p {
     margin: 0;
     color: var(--muted);
-    font-size: 12.5px;
+    font-size: 13px;
   }
   .prompt-box {
     background: #090b13;
@@ -574,7 +619,7 @@
     border-radius: 8px;
     padding: 10px;
     color: var(--text);
-    font-size: 12.5px;
+    font-size: 13px;
     line-height: 1.45;
   }
   .empty-state {
@@ -583,13 +628,13 @@
     color: var(--muted);
   }
   .empty-state .big { font-size: 36px; margin-bottom: 14px; opacity: 0.6; }
-  .empty-state h3 { color: var(--text); margin: 0 0 6px; font-size: 17px; font-weight: 600; }
+  .empty-state h3 { color: var(--text); margin: 0 0 6px; font-size: 16px; font-weight: 600; }
   .empty-state p { margin: 0 0 18px; font-size: 14px; }
 
   .panel {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 26px;
+    border-radius: 22px;
     padding: 26px;
     box-shadow: var(--shadow);
     backdrop-filter: blur(18px);
@@ -908,7 +953,7 @@
     font-weight: 600;
     color: var(--text);
     margin-bottom: 8px;
-    min-height: 30px;
+    min-height: 32px;
   }
   .title-display.empty { color: var(--muted); font-style: italic; font-weight: 400; font-size: 14px; }
 
@@ -918,7 +963,7 @@
     border-radius: 10px;
     padding: 12px 14px;
     font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--muted);
     height: 220px;
     overflow-y: auto;
@@ -1206,13 +1251,13 @@
     background: var(--accent, #1ab8e8);
     box-shadow: 0 0 10px rgba(26,184,232,0.7);
   }
-  .insights-panel .ip-status { font-size: 11.5px; color: var(--muted, #9aa6a0); }
+  .insights-panel .ip-status { font-size: 12px; color: var(--muted, #9aa6a0); }
   .insights-panel .ip-empty {
     color: var(--muted, #9aa6a0); font-size: 13px;
   }
   .insights-panel .ip-section { display: flex; flex-direction: column; gap: 4px; }
   .insights-panel .ip-section-label {
-    font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
     color: var(--muted, #9aa6a0); font-weight: 600;
   }
   .insights-panel .ip-list { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
@@ -1241,7 +1286,7 @@
     color: var(--text);
     border-radius: 8px;
     padding: 6px 10px;
-    font-size: 11.5px;
+    font-size: 12px;
     font-family: inherit;
     cursor: pointer;
     transition: background 0.12s, border-color 0.12s;
@@ -1256,7 +1301,7 @@
     display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 9px;
     border-radius: 999px;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.3px;
     text-transform: uppercase;
@@ -1268,7 +1313,7 @@
   .fit-risky      { background: rgba(217,122,122,0.16); color: #f47c7c; }
   .fit-why {
     display: block;
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--muted, #9aa6a0);
     margin-top: 4px;
     font-style: italic;
@@ -1330,7 +1375,7 @@
   }
   .vid-card .thumb {
     width: 96px; height: 54px;
-    border-radius: 6px; flex-shrink: 0;
+    border-radius: 8px; flex-shrink: 0;
     background: #000; background-size: cover; background-position: center;
   }
   .vid-card .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
@@ -1343,7 +1388,7 @@
   .vid-card .vstats { color: var(--muted, #9aa6a0); font-size: 11px; }
   .vid-card .vbadges { display: flex; gap: 4px; }
   .tier-badge {
-    font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
     text-transform: uppercase;
     padding: 2px 6px; border-radius: 999px;
   }
@@ -1378,7 +1423,7 @@
   }
   .opt-section { margin-top: 14px; }
   .opt-section .opt-label {
-    font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
     color: var(--muted, #9aa6a0); font-weight: 600;
     margin-bottom: 6px;
   }
@@ -1386,7 +1431,7 @@
     background: rgba(26,184,232,0.06);
     border: 1px solid rgba(26,184,232,0.18);
     border-radius: 10px; padding: 12px 14px;
-    color: var(--text); font-size: 13.5px; line-height: 1.5;
+    color: var(--text); font-size: 14px; line-height: 1.5;
   }
   .opt-diff {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -1402,19 +1447,19 @@
     background: rgba(26,184,232,0.05);
   }
   .opt-diff .col-label {
-    font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
     color: var(--muted, #9aa6a0); font-weight: 600; margin-bottom: 6px;
   }
   .opt-diff .col-text { font-size: 13px; color: var(--text); white-space: pre-wrap; line-height: 1.45; }
   .opt-why { color: var(--muted, #9aa6a0); font-size: 12px; margin-top: 6px; font-style: italic; }
   .opt-tag-changes { display: flex; flex-wrap: wrap; gap: 6px; }
   .opt-tag-add, .opt-tag-remove {
-    border-radius: 999px; padding: 3px 9px; font-size: 11.5px; font-weight: 600;
+    border-radius: 999px; padding: 3px 9px; font-size: 12px; font-weight: 600;
   }
   .opt-tag-add { background: rgba(26,184,232,0.16); color: #1ab8e8; }
   .opt-tag-remove { background: rgba(217,122,122,0.16); color: #f47c7c; text-decoration: line-through; }
   .opt-risks { color: var(--warn, #ffb86b); }
-  .opt-risks li { margin-bottom: 4px; font-size: 12.5px; }
+  .opt-risks li { margin-bottom: 4px; font-size: 13px; }
   .opt-verdict-pill {
     display: inline-block; padding: 4px 10px;
     border-radius: 999px; font-size: 11px;
@@ -1516,7 +1561,7 @@
     flex-shrink: 0;
   }
   .hero-choice .hc-ico svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-  .hero-choice strong { display: block; font-size: 13.5px; color: var(--text); font-weight: 600; }
+  .hero-choice strong { display: block; font-size: 14px; color: var(--text); font-weight: 600; }
   .hero-choice span.hint { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
 
   .recent-strip h3 {
@@ -1544,11 +1589,11 @@
     border-color: rgba(105,207,240,0.4);
   }
   .recent-card .rc-meta { flex: 1; min-width: 0; }
-  .recent-card .rc-title { color: var(--text); font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .recent-card .rc-sub { color: var(--muted); font-size: 11.5px; margin-top: 1px; }
+  .recent-card .rc-title { color: var(--text); font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .recent-card .rc-sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
   .recent-card .rc-kind {
     flex-shrink: 0;
-    font-size: 10.5px; padding: 3px 8px;
+    font-size: 11px; padding: 3px 8px;
     border-radius: 999px; letter-spacing: 0.3px; text-transform: uppercase;
     background: rgba(105,207,240,0.14); color: var(--accent-2);
     font-weight: 600;
@@ -1610,7 +1655,7 @@
   .wave-wrap .wave-canvas { flex: 1; min-width: 0; }
   .wave-wrap .wave-time {
     color: var(--muted);
-    font-size: 11.5px;
+    font-size: 12px;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
     min-width: 40px;
@@ -1653,7 +1698,7 @@
   }
   .gen-tray .gt-head button.gt-close {
     background: transparent; border: none; color: var(--muted);
-    cursor: pointer; padding: 4px 6px; border-radius: 6px;
+    cursor: pointer; padding: 4px 6px; border-radius: 8px;
     font-size: 16px; line-height: 1;
   }
   .gen-tray .gt-head button.gt-close:hover { color: var(--text); background: var(--panel-2); }
@@ -1735,10 +1780,14 @@
   .make-result.shown { display: block; }
   .make-result video { width: 100%; max-height: 420px; background: #000; border-radius: 8px; margin-top: 12px; }
 
-  /* Make Video premium studio treatment */
+  /* Make Video premium studio treatment.
+     align-items: stretch so left + right panels match each other's
+     full height — bottoms line up cleanly instead of one panel ending
+     mid-air while the other extends. The right rail is non-sticky
+     (see .make-studio-panel below) so the page scrolls as one block. */
   #tab-make .workflow-grid {
     grid-template-columns: minmax(0, 1fr) 410px;
-    align-items: start;
+    align-items: stretch;
     gap: 24px;
   }
   #tab-make .panel {
@@ -1768,6 +1817,14 @@
       linear-gradient(135deg, rgba(26,184,232,0.13), rgba(105,207,240,0.07)),
       linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  /* Returning-user mode: hide the marketing-y hero block (eyebrow +
+     headline + lede + 5-step rail + brand actions) since the user
+     already knows what this tab does. The Load Demo button is
+     surfaced in the next-action-card on the right rail instead, so
+     they can still kick off a demo from a single click. */
+  body.is-returning .make-hero[data-first-run-only] {
+    display: none;
   }
   .make-hero h2 {
     font-size: clamp(28px, 4vw, 44px);
@@ -1806,7 +1863,7 @@
   .make-trust-pill {
     display: inline-flex;
     align-items: center;
-    min-height: 30px;
+    min-height: 32px;
     padding: 6px 10px;
     border-radius: 999px;
     border: 1px solid rgba(26,184,232,0.24);
@@ -1881,10 +1938,27 @@
     font-weight: 700;
   }
   .make-studio-panel {
-    position: sticky;
-    top: 24px;
+    /* Non-sticky. Earlier versions used position: sticky; top: 24px so
+       the readiness + next-action stayed visible while scrolling, but
+       the trade-off was the rail "ran out" of content before the left
+       column did, leaving an empty bottom that looked broken. Now the
+       page scrolls as one block; bottoms align via grid stretch on
+       the parent. Content inside the rail uses flex column so
+       readiness + next-action push to natural positions and the
+       panel background fills any leftover height to the shared
+       bottom edge. */
     padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
+  /* When the studio-preview <details> is open, let it take its natural
+     height; when closed, the readiness + next-action cards float to
+     the top and the panel background still extends to bottom-align
+     with the left column. */
+  .make-studio-panel > .studio-preview-collapse { flex: 0 0 auto; }
+  .make-studio-panel > .readiness-card,
+  .make-studio-panel > .next-action-card { flex: 0 0 auto; }
   .studio-head {
     display: flex;
     align-items: flex-start;
@@ -1924,7 +1998,7 @@
     width: min(230px, 72%);
     aspect-ratio: 9 / 16;
     margin: 4px auto 16px;
-    border-radius: 28px;
+    border-radius: 22px;
     padding: 12px;
     background: #050606;
     border: 1px solid rgba(255,255,255,0.13);
@@ -1985,7 +2059,7 @@
     position: absolute;
     left: 18px;
     right: 48px;
-    bottom: 142px;
+    bottom: 144px;
     color: #fff;
     font-size: 18px;
     line-height: 1.02;
@@ -2039,7 +2113,7 @@
     z-index: 3;
     pointer-events: none;
     color: rgba(255,255,255,0.82);
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 800;
     text-shadow: 0 2px 8px rgba(0,0,0,0.85);
   }
@@ -2069,7 +2143,7 @@
   }
   .platform-tabs {
     position: absolute;
-    top: 34px;
+    top: 32px;
     left: 44px;
     right: 44px;
     display: flex;
@@ -2097,7 +2171,7 @@
     right: 13px;
     display: flex;
     gap: 9px;
-    font-size: 17px;
+    font-size: 16px;
   }
   .platform-top-left {
     position: absolute;
@@ -2142,7 +2216,7 @@
   .platform-action .icon[data-icon="more"]:before { content: "\2026"; }
   .platform-action .icon[data-icon="camera"]:before { content: "\25A3"; }
   .platform-action small {
-    font-size: 8px;
+    font-size: 10px;
     color: rgba(255,255,255,0.63);
   }
   .platform-meta-block {
@@ -2151,7 +2225,7 @@
     right: 58px;
     bottom: 20px;
     color: rgba(255,255,255,0.74);
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1.35;
   }
   .platform-meta-block strong {
@@ -2251,7 +2325,7 @@
     position: relative;
     overflow: hidden;
     min-height: 420px;
-    padding: 34px;
+    padding: 32px;
     border: 1px solid rgba(89,255,210,0.18);
     background:
       radial-gradient(circle at 78% 18%, rgba(89,255,210,0.18), transparent 28%),
@@ -2731,7 +2805,7 @@
     box-shadow: 0 18px 70px rgba(0,0,0,0.24);
   }
   .brand h1 {
-    font-size: 19px;
+    font-size: 18px;
     letter-spacing: 0;
   }
   .brand small {
@@ -2760,7 +2834,7 @@
     top: 100px;
     min-height: calc(100vh - 128px);
     padding: 18px;
-    border-radius: 26px;
+    border-radius: 22px;
     background:
       linear-gradient(180deg, rgba(244,248,245,0.052), rgba(244,248,245,0.018)),
       rgba(9, 12, 13, 0.62);
@@ -2962,13 +3036,13 @@
     text-shadow: 0 0 28px rgba(26,184,232,0.24);
   }
   .phone-preview {
-    border-radius: 34px;
+    border-radius: 22px;
     border: 1px solid rgba(244,248,245,0.16);
     background: linear-gradient(145deg, #020303, #151b1c);
     box-shadow: 0 34px 95px rgba(0,0,0,0.52), -16px 0 70px rgba(26,184,232,0.14);
   }
   .phone-preview-inner {
-    border-radius: 24px;
+    border-radius: 22px;
     background:
       linear-gradient(180deg, rgba(26,184,232,0.10), transparent 34%),
       radial-gradient(circle at 72% 18%, rgba(105,207,240,0.18), transparent 24%),
@@ -2993,7 +3067,7 @@
   }
   .publish-nav-label:first-child { margin-top: 0; }
   .publish-nav button {
-    border-radius: 13px;
+    border-radius: 14px;
     font-weight: 760;
   }
   .publish-nav button.active {
@@ -3310,7 +3384,7 @@
   .gh-walk-tooltip p {
     margin: 0 0 14px;
     color: var(--muted, #9aa6a0);
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1.45;
   }
   .gh-walk-tooltip .gh-walk-bar {
@@ -3403,7 +3477,7 @@
   .iconbtn:focus-visible {
     outline: 2px solid var(--accent, #1ab8e8);
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: 8px;
   }
   /* When keyboard focus lands on a skip-only element, reveal it. */
   .gh-skip-link {
@@ -3646,7 +3720,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--text);
   }
   .pricing-tier-features li {

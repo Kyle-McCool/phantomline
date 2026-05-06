@@ -197,7 +197,6 @@
   <header>
     <a class="brand" href="/" title="Phantomline home" aria-label="Phantomline home">
       <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
-      <small class="brand-tagline">local AI videos without showing your face</small>
     </a>
     <div class="header-actions">
       <!-- Cloud-sync status dot. Updated by static/sync-status.js. States:
@@ -284,11 +283,11 @@
 
   <div class="tabs" role="tablist">
     <div class="nav-section">Workflow</div>
-    <button class="tab-btn active" data-tab="launch">
+    <button class="tab-btn" data-tab="launch">
       <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/><path d="M5 19l2-2M17 7l2-2"/></svg></span>
       Launch Setup
     </button>
-    <button class="tab-btn" data-tab="make">
+    <button class="tab-btn active" data-tab="make">
       <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 9l5 3-5 3V9z"/><path d="M4 21h16"/></svg></span>
       Create Video
     </button>
@@ -345,7 +344,7 @@
   </div>
 
   <a id="main" tabindex="-1"></a>
-  <div id="tab-launch" class="tab-content active">
+  <div id="tab-launch" class="tab-content">
     <div class="launch-shell">
       <section class="panel launch-hero">
         <div class="make-eyebrow">First-run setup</div>
@@ -428,17 +427,18 @@
     </div>
   </div>
 
-  <div id="tab-make" class="tab-content">
+  <div id="tab-make" class="tab-content active">
     <div class="workflow-grid">
       <section class="panel make-main-panel">
-        <!-- Compact hero. Previously contained 4 trust pills + a 5-step
-             rail + 3 mini-actions, ballooning to 833px tall. The trust
-             pills were redundant with the marketing landing; the 5-step
-             rail duplicates the .make-stage section titles below; Save
-             Brand / Load Brand baffle a first-time user. Cut to: eyebrow
-             + h2 + lede + Load Demo + Brand expander. ~250px shorter,
-             closes the gap with the right rail's content height. -->
-        <div class="make-hero">
+        <!-- First-run only hero. Hidden for returning users via the
+             body.is-returning class set by phantomline.js when the
+             phantomline-make-hero-seen flag is in localStorage. After
+             the first session a user knows the workflow — the eyebrow,
+             tagline, and 5-step rail just become wallpaper. The Load
+             Demo + Brand controls move to the right rail's
+             next-action-card area in returning-user mode (see CSS).
+             ~280px reclaimed for returning users on every visit. -->
+        <div class="make-hero" data-first-run-only>
           <div>
             <div class="make-eyebrow">Local creator studio</div>
             <h2>Make faceless videos from a few clicks</h2>
@@ -581,16 +581,6 @@
           <div class="title-package" id="makeTitlePackage">
             <label for="makePreferredTitle">Chosen YouTube title</label>
             <input type="text" id="makePreferredTitle" placeholder="Click a generated title or write your own." />
-          </div>
-          <div class="row">
-            <div>
-              <label for="makePinnedComment">Pinned comment</label>
-              <input type="text" id="makePinnedComment" placeholder="Would you have checked?" />
-            </div>
-            <div>
-              <label for="makeHashtags">Hashtags</label>
-              <input type="text" id="makeHashtags" placeholder="#shorts #storytime #plotwist" />
-            </div>
           </div>
           <label for="makeTopic">Selected video idea</label>
           <!-- Empty value with the demo topic moved to placeholder so a
@@ -853,14 +843,12 @@
       </section>
 
       <section class="panel make-studio-panel">
-        <!-- Right rail = readiness signals + next-best-action.
-             The phone preview + platform mockup is collapsed in a
-             <details> because it doesn't actually update with the
-             user's content during composition (only at render
-             handoff), and it was contributing 700+px of low-info
-             height to the rail, making sticky release way too early
-             relative to the main column. Users who care about the
-             TikTok/Shorts/Reels safe-area can open it. -->
+        <!-- Right rail = preview + readiness + next-best-action.
+             Non-sticky; the page scrolls as one block. Bottoms align
+             with the left column via grid stretch. Phone preview is
+             a <details> so users who don't need the platform mock
+             can collapse it and shrink the rail to readiness +
+             next-action only. -->
         <details class="studio-preview-collapse" open>
           <summary class="studio-head" style="cursor:pointer; list-style:none; user-select:none;">
             <div>
@@ -904,24 +892,27 @@
             <button type="button" data-platform="shorts">Shorts</button>
             <button type="button" data-platform="reels">Reels</button>
           </div>
-          <div class="studio-specs">
-            <div class="studio-spec"><span>Format</span><strong id="makeSpecFormat">Custom</strong></div>
-            <div class="studio-spec"><span>Visuals</span><strong id="makeSpecVisual">AI scenes</strong></div>
-            <div class="studio-spec"><span>Length</span><strong id="makeSpecLength">2 min</strong></div>
-          </div>
+          <!-- studio-specs (Format/Visuals/Length chips) removed: it
+               duplicated the dropdowns in step 4 (Final render choices)
+               and added vertical noise without giving the user any
+               new information. -->
         </div>
         </details>
 
-        <div class="readiness-card">
-          <div class="readiness-top">
+        <!-- Readiness card. Score-first; the per-check breakdown lives
+             in a <details> expander because it duplicated the workflow
+             step titles in the main column. The score is the signal
+             users actually act on; the breakdown is a debugging tool. -->
+        <details class="readiness-card">
+          <summary class="readiness-top" style="cursor:pointer; list-style:none;">
             <div>
               <strong>Video readiness</strong>
-              <div class="hint" style="margin-top:2px;">Quality gates before rendering.</div>
+              <div class="hint" style="margin-top:2px;">Score updates as you fill each step.</div>
             </div>
             <div class="readiness-score" id="makeReadinessScore">0</div>
-          </div>
-          <div class="readiness-items" id="makeReadinessItems"></div>
-        </div>
+          </summary>
+          <div class="readiness-items" id="makeReadinessItems" style="margin-top:12px;"></div>
+        </details>
         <div class="next-action-card">
           <div class="make-section-title">
             <div>
@@ -966,6 +957,20 @@
           <div class="handoff-card" id="makeHandoffCard">
             <strong>Finish the launch package</strong>
             <div class="hint">Preview the MP4, check the publish draft, then schedule or upload from Publish Studio.</div>
+            <!-- Publish metadata. Populated automatically when ideas /
+                 titles are generated. Lives here (post-render) instead
+                 of mid-step-2 because they're metadata for publishing,
+                 not inputs that change the rendered video. -->
+            <div class="row" style="margin-top:12px;">
+              <div>
+                <label for="makePinnedComment">Pinned comment</label>
+                <input type="text" id="makePinnedComment" placeholder="Would you have checked?" />
+              </div>
+              <div>
+                <label for="makeHashtags">Hashtags</label>
+                <input type="text" id="makeHashtags" placeholder="#shorts #storytime #plotwist" />
+              </div>
+            </div>
             <div class="readiness-checklist" id="makeHandoffChecklist"></div>
             <div class="handoff-actions">
               <button class="btn secondary" id="makePreviewFinalBtn" type="button">Preview final video</button>
