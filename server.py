@@ -315,8 +315,12 @@ def _security_headers(response):
         "default-src 'self'; "
         "img-src 'self' data: blob: https://images.pexels.com; "
         "media-src 'self' blob: https://*.pexels.com https://cdn.pixabay.com; "
-        "font-src 'self' data:; "
-        "style-src 'self' 'unsafe-inline'; "  # inline styles still used in places
+        # Google Fonts (fonts.googleapis.com for the @import CSS, fonts.gstatic.com
+        # for the actual woff2 binaries). Used for IBM Plex Mono/Sans on the
+        # 2026-05 brand-aligned landing + studio. Self-hosting was considered
+        # but Google Fonts CDN gives us shared cache + automatic font optimization.
+        "font-src 'self' data: https://fonts.gstatic.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "  # inline styles still used in places
         # esm.sh: dynamic-import target for the /account page's Supabase JS
         # bundle. supabase-js is the standard auth/REST client and shipping it
         # ourselves would duplicate ~80 KB on every visit.
