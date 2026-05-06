@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Install {{ tool.label }} for Phantomline</title>
+<title>{% if tool.label == 'Phantomline desktop' %}Install Phantomline{% else %}Install {{ tool.label }} for Phantomline{% endif %}</title>
 <meta name="description" content="One-click install for {{ tool.label }}: power up Phantomline with {{ tool.subtitle }}." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
@@ -92,7 +92,7 @@
 </head>
 <body>
 <div class="install-hero">
-  <a class="back-link" href="/app">&larr; Back to Phantomline Studio</a>
+  <a class="back-link" href="/">&larr; Back to phantomline.xyz</a>
   <div id="mobileHint" style="display:none; margin-top:14px; padding:14px; background:#3a2f0c; border:1px solid #c9a93a; border-radius:8px; color:#fff8d4;">
     <strong>You're on mobile.</strong> {{ tool.label }} can't be installed on a phone. It runs on your desktop or laptop. Open this page on your computer (<a href="/app" style="color:#ffe48a; text-decoration:underline;">phantomline.xyz/install/{{ tool.label.split()[0]|lower }}</a>) to continue.
   </div>
@@ -115,9 +115,9 @@
   {% endif %}
 
   <div class="install-options-tabs" role="tablist">
-    <button class="active" data-pane="claude">Open in Claude Code <span style="background:#19e0c2;color:#0a1722;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px;font-weight:700;">EASIEST</span></button>
+    <button class="active" data-pane="manual">Manual steps <span style="background:#19e0c2;color:#0a1722;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px;font-weight:700;">RECOMMENDED</span></button>
     <button data-pane="oneline">One-line install (terminal)</button>
-    <button data-pane="manual">Manual steps</button>
+    <button data-pane="claude">Open in Claude Code</button>
   </div>
 
   <!-- ONE-LINE INSTALL -->
@@ -137,7 +137,7 @@
   </div>
 
   <!-- CLAUDE CODE PROMPT -->
-  <div id="pane-claude" class="install-pane active">
+  <div id="pane-claude" class="install-pane">
     <div class="install-block">
       <h3>Paste this into Claude Code (works in Cursor / Codex / Cline too)</h3>
       <p style="color:#cdd6df; font-size:14px; margin:0 0 12px;">
@@ -171,7 +171,7 @@
   </div>
 
   <!-- MANUAL -->
-  <div id="pane-manual" class="install-pane">
+  <div id="pane-manual" class="install-pane active">
     {% for step in tool.manual_steps %}
     <div class="install-block">
       <h3><span class="step-num">{{ loop.index }}</span>{{ step.title }}</h3>
