@@ -1,6 +1,6 @@
 /* Mobile interstitial for the studio (/app).
    Phantomline's render pipeline (TTS, video assembly, image gen) needs
-   real desktop hardware — phones can't run it. Rather than dropping
+   real desktop hardware. phones can't run it. Rather than dropping
    mobile users into a layout-broken /app, show them an honest banner
    explaining what they CAN do here (account, library, license,
    download). Same detection pattern as static/install.js.
@@ -17,7 +17,7 @@
   var el = document.getElementById("mobileInterstitial");
   if (el) el.hidden = false;
 
-  // "Continue to studio anyway" — for the rare desktop-class tablet
+  // "Continue to studio anyway". for the rare desktop-class tablet
   // user. Hides the interstitial and tells the CSS to un-hide the
   // studio .wrap. localStorage so the choice sticks for the session.
   var bypass = document.getElementById("mobileBypassBtn");

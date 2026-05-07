@@ -157,7 +157,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
-    /* Mobile defensive — prevent any rogue absolutely-positioned element
+    /* Mobile defensive. prevent any rogue absolutely-positioned element
        (notification panel, dropdowns) from forcing horizontal scroll on
        phones. The studio is grid-heavy and a single overflowing child
        can break layout below ~640px.
@@ -165,7 +165,7 @@
        ORDER MATTERS: `clip` after `hidden` so modern browsers use clip
        (which preserves position:sticky on descendants) and old browsers
        fall back to hidden. The previous order had hidden winning,
-       which broke the right-rail sticky behavior — main column scrolled
+       which broke the right-rail sticky behavior. main column scrolled
        freely while the right rail's bounding box left the viewport,
        creating a 1300px-tall empty void below it. */
     overflow-x: hidden;
@@ -173,7 +173,7 @@
     max-width: 100vw;
   }
   /* Long unbreakable strings (URLs, model names like 'llama3.1:70b-instruct')
-     shouldn't punch out the layout — but regular words must NEVER break
+     shouldn't punch out the layout. but regular words must NEVER break
      mid-character. `break-word` only kicks in when a string can't fit any
      other way; `anywhere` was causing "Phantomline" to wrap as
      "Phantomlin / e" on the studio launch hero where the column is narrow
@@ -226,7 +226,7 @@
     transition: opacity 0.15s;
   }
   a.brand:hover { opacity: 0.85; text-decoration: none; }
-  /* Studio brand mark — single primary-logo PNG sized to header height.
+  /* Studio brand mark. single primary-logo PNG sized to header height.
      Replaced the legacy icon-plus-CSS-text combo when the real designed
      logo shipped. */
   .brand .brand-img {
@@ -484,7 +484,7 @@
     max-height: 470px;
     overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     background: rgba(15, 18, 18, 0.98);
     box-shadow: 0 24px 80px rgba(0,0,0,0.55);
     z-index: 80;
@@ -600,7 +600,7 @@
   .proj-card {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 18px;
     /* box-shadow removed (Bible §02: depth via bg-color) */
     display: flex; flex-direction: column; gap: 10px;
@@ -644,7 +644,7 @@
   .scene-card {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -685,7 +685,7 @@
   .panel {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 22px;
+    border-radius: 12px;
     padding: 26px;
     /* box-shadow removed (Bible §02: depth via bg-color) */
     backdrop-filter: blur(18px);
@@ -712,7 +712,7 @@
     background: var(--panel-2);
     color: var(--text);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 11px 12px;
     font-size: 14px;
     font-family: inherit;
@@ -739,7 +739,7 @@
     padding: 18px;
     margin-bottom: 18px;
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 12px;
     background: linear-gradient(135deg, rgba(34, 231, 245,0.09), rgba(105,207,240,0.06));
   }
   .make-hero h2 {
@@ -755,7 +755,7 @@
   .make-stage {
     padding: 16px;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     background: rgba(244,248,245,0.025);
     margin-top: 12px;
   }
@@ -784,7 +784,7 @@
     border: 1px solid var(--border);
     background: rgba(244,248,245,0.035);
     color: var(--text);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 13px;
     text-align: left;
     cursor: pointer;
@@ -808,7 +808,7 @@
   .advanced-box {
     margin-top: 14px;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     background: rgba(244,248,245,0.025);
     overflow: hidden;
   }
@@ -828,7 +828,7 @@
     margin-top: 16px;
     padding: 14px;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     background: rgba(34, 231, 245,0.055);
   }
   .readiness-top {
@@ -978,7 +978,7 @@
   .stat {
     background: var(--panel-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 12px;
   }
   .stat .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
@@ -1011,7 +1011,7 @@
   .log {
     background: #090b13;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 12px 14px;
     font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
     font-size: 13px;
@@ -1123,11 +1123,11 @@
     border-left-color: var(--brand);
     color: var(--paper);
   }
-  /* Anchor scroll offset — when the workflow rail click-to-scrolls to
+  /* Anchor scroll offset. when the workflow rail click-to-scrolls to
      a make-stage, leave room for the sticky header + banner above. */
   .make-stage[id] { scroll-margin-top: 80px; }
 
-  /* Install-reminder banner — sticky at the top of the studio when
+  /* Install-reminder banner. sticky at the top of the studio when
      /api/launch/readiness reports required blockers (Ollama missing,
      etc). Driven by static/install-banner.js. */
   .install-banner {
@@ -1189,7 +1189,7 @@
   }
   .install-banner-x:hover { color: var(--paper); }
 
-  /* Cloud-sync status pill — sits in the studio header. Driven by
+  /* Cloud-sync status pill. sits in the studio header. Driven by
      static/sync-status.js polling /api/projects success state. */
   .sync-status {
     display: inline-flex;
@@ -1268,7 +1268,7 @@
     position: fixed; bottom: 24px; right: 24px;
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 12px 16px;
     box-shadow: var(--shadow);
     color: var(--text);
@@ -1284,7 +1284,7 @@
   .insights-panel {
     background: linear-gradient(135deg, rgba(34, 231, 245,0.07), rgba(34, 231, 245,0.04));
     border: 1px solid rgba(34, 231, 245,0.20);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 16px 18px;
     display: flex; flex-direction: column; gap: 10px;
     margin-bottom: 14px;
@@ -1409,7 +1409,7 @@
   .vid-card {
     background: var(--panel-2, #1b2021);
     border: 1px solid var(--border, rgba(238,246,241,0.10));
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px;
     display: flex; gap: 10px;
     cursor: pointer;
@@ -1460,7 +1460,7 @@
   }
   @media (max-width: 720px) { .opt-current { grid-template-columns: 1fr; } }
   .opt-current .opt-thumb {
-    width: 100%; aspect-ratio: 16/9; border-radius: 10px;
+    width: 100%; aspect-ratio: 16/9; border-radius: 8px;
     background: #000; background-size: cover; background-position: center;
   }
   .opt-current h3 { margin: 0 0 6px; font-size: 16px; line-height: 1.3; }
@@ -1481,7 +1481,7 @@
   .opt-diagnosis {
     background: rgba(34, 231, 245,0.06);
     border: 1px solid rgba(34, 231, 245,0.18);
-    border-radius: 10px; padding: 12px 14px;
+    border-radius: 8px; padding: 12px 14px;
     color: var(--text); font-size: 14px; line-height: 1.5;
   }
   .opt-diff {
@@ -1491,7 +1491,7 @@
   .opt-diff .col {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px; padding: 10px 12px;
+    border-radius: 8px; padding: 10px 12px;
   }
   .opt-diff .col.new {
     border-color: rgba(34, 231, 245,0.25);
@@ -1549,7 +1549,7 @@
 .tab-btn .ico svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .tab-btn.active .ico { opacity: 1; color: var(--accent); }
 
-  /* Hover lift — applied universally to interactive surfaces. */
+  /* Hover lift. applied universally to interactive surfaces. */
   .panel, .feat, .stat, .proj-card, .hero-choice, .recent-card {
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
@@ -1569,7 +1569,7 @@
   .hero-card {
     background: linear-gradient(135deg, rgba(34, 231, 245,0.10), rgba(105,207,240,0.06));
     border: 1px solid rgba(105,207,240,0.22);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 26px 24px;
   }
   .hero-card h2 {
@@ -1590,7 +1590,7 @@
   .hero-choice {
     background: var(--panel-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 14px;
     cursor: pointer;
     text-align: left;
@@ -1630,7 +1630,7 @@
   .recent-card {
     background: var(--panel-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px 12px;
     display: flex; align-items: center; gap: 12px;
     cursor: pointer;
@@ -1685,7 +1685,7 @@
   .wave-wrap {
     background: var(--panel-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px 12px;
     display: flex; align-items: center; gap: 12px;
   }
@@ -1722,7 +1722,7 @@
     max-height: 60vh;
     background: var(--panel);
     border: 1px solid rgba(105,207,240,0.25);
-    border-radius: 14px;
+    border-radius: 12px;
     /* box-shadow removed (Bible §02: depth via bg-color) */
     z-index: 60;
     overflow: hidden;
@@ -1760,7 +1760,7 @@
   }
   .gen-tray .gt-item {
     background: var(--panel-2);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px 12px;
   }
   .gen-tray .gt-item .gt-row1 {
@@ -1802,7 +1802,7 @@
     padding: 14px;
     background: rgba(255,255,255,0.025);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
   }
   .workflow-step .num {
     width: 28px; height: 28px;
@@ -1826,14 +1826,14 @@
     padding: 16px;
     background: var(--panel-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
   }
   .make-result.shown { display: block; }
   .make-result video { width: 100%; max-height: 420px; background: #000; border-radius: 8px; margin-top: 12px; }
 
   /* Make Video premium studio treatment.
      align-items: stretch so left + right panels match each other's
-     full height — bottoms line up cleanly instead of one panel ending
+     full height. bottoms line up cleanly instead of one panel ending
      mid-air while the other extends. The right rail is non-sticky
      (see .make-studio-panel below) so the page scrolls as one block. */
   #tab-make .workflow-grid {
@@ -1842,7 +1842,7 @@
     gap: 24px;
   }
   #tab-make .panel {
-    border-radius: 22px;
+    border-radius: 12px;
     background:
       radial-gradient(circle at 12% 0%, rgba(34, 231, 245,0.08), transparent 34%),
       radial-gradient(circle at 92% 14%, rgba(105,207,240,0.08), transparent 30%),
@@ -1863,7 +1863,7 @@
   .make-main-panel > * { position: relative; z-index: 1; }
   .make-hero {
     padding: 24px;
-    border-radius: 20px;
+    border-radius: 12px;
     background:
       linear-gradient(135deg, rgba(34, 231, 245,0.13), rgba(105,207,240,0.07)),
       linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
@@ -1926,7 +1926,7 @@
     min-width: 156px;
   }
   .make-stage {
-    border-radius: 18px;
+    border-radius: 12px;
     background:
       linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)),
       rgba(244,248,245,0.02);
@@ -1936,7 +1936,7 @@
     font-size: 14px;
   }
   .choice-card {
-    border-radius: 16px;
+    border-radius: 12px;
     min-height: 104px;
     position: relative;
     overflow: hidden;
@@ -1961,7 +1961,7 @@
     font-size: 14px;
   }
   .idea-card {
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 14px;
     min-height: 150px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
@@ -2039,7 +2039,7 @@
     box-shadow: 0 0 12px rgba(34, 231, 245,0.8);
   }
   .studio-preview-card {
-    border-radius: 22px;
+    border-radius: 12px;
     border: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(0,0,0,0.12));
     padding: 16px;
@@ -2049,7 +2049,7 @@
     width: min(230px, 72%);
     aspect-ratio: 9 / 16;
     margin: 4px auto 16px;
-    border-radius: 22px;
+    border-radius: 12px;
     padding: 12px;
     background: #050606;
     border: 1px solid rgba(255,255,255,0.13);
@@ -2059,7 +2059,7 @@
     position: relative;
     height: 100%;
     overflow: hidden;
-    border-radius: 20px;
+    border-radius: 12px;
     background:
       radial-gradient(circle at 50% 18%, rgba(105,207,240,0.22), transparent 22%),
       radial-gradient(circle at 20% 52%, rgba(34, 231, 245,0.18), transparent 24%),
@@ -2292,7 +2292,7 @@
     top: 45%;
     height: 17%;
     border: 1px dashed rgba(34, 231, 245,0.42);
-    border-radius: 14px;
+    border-radius: 12px;
     background: rgba(34, 231, 245,0.045);
     z-index: 2;
     pointer-events: none;
@@ -2324,7 +2324,7 @@
   }
   .studio-spec {
     padding: 10px;
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid var(--border);
     background: rgba(0,0,0,0.14);
   }
@@ -2538,7 +2538,7 @@
     margin-top: 12px;
     display: none;
     border: 1px solid rgba(238,246,241,0.10);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     background: rgba(0,0,0,0.22);
   }
@@ -2557,7 +2557,7 @@
   .pricing-tier,
   .launch-kit-box {
     border: 1px solid rgba(238,246,241,0.10);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 14px;
     background: rgba(4,7,8,0.24);
   }
@@ -2576,7 +2576,7 @@
     margin-top: 14px;
     padding: 14px;
     border: 1px solid rgba(34, 231, 245,0.24);
-    border-radius: 18px;
+    border-radius: 12px;
     background:
       linear-gradient(135deg, rgba(34, 231, 245,0.10), rgba(105,207,240,0.045)),
       rgba(4,7,8,0.30);
@@ -2616,7 +2616,7 @@
     background: transparent;
     color: var(--muted);
     border: 1px solid transparent;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px 12px;
     text-align: left;
     font: inherit;
@@ -2635,7 +2635,7 @@
   }
   .publish-card {
     border: 1px solid var(--border);
-    border-radius: 22px;
+    border-radius: 12px;
     background: rgba(244,248,245,0.03);
     padding: 20px;
     margin-bottom: 14px;
@@ -2651,7 +2651,7 @@
     align-items: center;
     gap: 8px;
     border: 1px solid rgba(238,246,241,0.10);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 8px 9px;
     background: rgba(0,0,0,0.16);
     color: var(--muted);
@@ -2683,7 +2683,7 @@
   .handoff-card {
     margin-top: 14px;
     border: 1px solid rgba(34, 231, 245,0.24);
-    border-radius: 18px;
+    border-radius: 12px;
     padding: 14px;
     background:
       linear-gradient(135deg, rgba(34, 231, 245,0.10), rgba(105,207,240,0.055)),
@@ -2712,7 +2712,7 @@
   }
   .advanced-banner {
     border: 1px solid rgba(105,207,240,0.18);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 12px 14px;
     margin: 0 0 18px;
     background: rgba(105,207,240,0.055);
@@ -2730,7 +2730,7 @@
   }
   .settings-card {
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 12px;
     background: rgba(244,248,245,0.03);
     padding: 18px;
   }
@@ -2738,7 +2738,7 @@
     aspect-ratio: 9 / 16;
     max-height: 520px;
     background: #000;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -2850,7 +2850,7 @@
     z-index: 70;
     padding: 10px 12px;
     border: 1px solid rgba(238,246,241,0.10);
-    border-radius: 20px;
+    border-radius: 12px;
     background: rgba(7,10,11,0.62);
     backdrop-filter: blur(18px);
     /* box-shadow removed (Bible §02: depth via bg-color) */
@@ -2885,7 +2885,7 @@
     top: 100px;
     min-height: calc(100vh - 128px);
     padding: 18px;
-    border-radius: 22px;
+    border-radius: 12px;
     background:
       linear-gradient(180deg, rgba(244,248,245,0.052), rgba(244,248,245,0.018)),
       rgba(9, 12, 13, 0.62);
@@ -2971,7 +2971,7 @@
   input,
   textarea,
   select {
-    border-radius: 14px;
+    border-radius: 12px;
     border-color: rgba(238,246,241,0.12);
     background: rgba(4, 7, 8, 0.56);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
@@ -3075,7 +3075,7 @@
     box-shadow: 0 20px 54px rgba(0,0,0,0.24), 0 0 0 1px rgba(34, 231, 245,0.16);
   }
   .readiness-card {
-    border-radius: 22px;
+    border-radius: 12px;
     border-color: rgba(34, 231, 245,0.20);
     background:
       radial-gradient(circle at 90% 12%, rgba(105,207,240,0.16), transparent 30%),
@@ -3087,13 +3087,13 @@
     text-shadow: 0 0 28px rgba(34, 231, 245,0.24);
   }
   .phone-preview {
-    border-radius: 22px;
+    border-radius: 12px;
     border: 1px solid rgba(244,248,245,0.16);
     background: linear-gradient(145deg, #020303, #151b1c);
     box-shadow: 0 34px 95px rgba(0,0,0,0.52), -16px 0 70px rgba(34, 231, 245,0.14);
   }
   .phone-preview-inner {
-    border-radius: 22px;
+    border-radius: 12px;
     background:
       linear-gradient(180deg, rgba(34, 231, 245,0.10), transparent 34%),
       radial-gradient(circle at 72% 18%, rgba(105,207,240,0.18), transparent 24%),
@@ -3104,7 +3104,7 @@
   }
   .publish-nav {
     padding: 12px;
-    border-radius: 20px;
+    border-radius: 12px;
     background: rgba(4,7,8,0.34);
     border: 1px solid rgba(238,246,241,0.10);
   }
@@ -3118,7 +3118,7 @@
   }
   .publish-nav-label:first-child { margin-top: 0; }
   .publish-nav button {
-    border-radius: 14px;
+    border-radius: 12px;
     font-weight: 760;
   }
   .publish-nav button.active {
@@ -3128,7 +3128,7 @@
   }
 
 .publish-preview {
-    border-radius: 22px;
+    border-radius: 12px;
     border: 1px solid rgba(238,246,241,0.10);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.035), 0 24px 70px rgba(0,0,0,0.32);
   }
@@ -3138,7 +3138,7 @@
   }
   .status-grid .stat,
   .stat {
-    border-radius: 16px;
+    border-radius: 12px;
     background:
       linear-gradient(180deg, rgba(244,248,245,0.035), rgba(244,248,245,0.012)),
       rgba(4,7,8,0.24);
@@ -3160,7 +3160,7 @@
     background: linear-gradient(90deg, var(--accent), var(--cyan), var(--accent-2));
   }
   .toast {
-    border-radius: 16px;
+    border-radius: 12px;
     background:
       linear-gradient(180deg, rgba(244,248,245,0.06), rgba(244,248,245,0.018)),
       rgba(9,12,13,0.88);
@@ -3260,7 +3260,7 @@
     }
     .tabs {
       padding: 12px;
-      border-radius: 20px;
+      border-radius: 12px;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
@@ -3281,7 +3281,7 @@
     }
     .panel {
       padding: 18px;
-      border-radius: 22px;
+      border-radius: 12px;
     }
     .make-hero h2 {
       font-size: clamp(32px, 11vw, 44px);
@@ -3300,7 +3300,7 @@
      existing `.tabs:not(.show-advanced) .secondary-nav { display: none }`
      rule above handles visibility, and the "Advanced Tools" toggle button
      can override on demand. We intentionally do NOT hide secondary-nav via
-     a body.simple-mode !important rule — that would prevent the toggle
+     a body.simple-mode !important rule. that would prevent the toggle
      from ever revealing the panel. */
 
   /* ---- Toggle row used in Settings ---- */
@@ -3335,7 +3335,7 @@
     color: #f4f8f5;
     border: 1px solid rgba(238,246,241,0.18);
     padding: 8px 12px;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 12px;
     line-height: 1.35;
     white-space: nowrap;
@@ -3384,7 +3384,7 @@
     width: min(480px, 92vw);
     background: rgba(15,19,20,0.98);
     border: 1px solid rgba(238,246,241,0.14);
-    border-radius: 18px;
+    border-radius: 12px;
     padding: 22px;
     /* box-shadow removed (Bible §02: depth via bg-color) */
   }
@@ -3395,7 +3395,7 @@
   .gh-feedback-card .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 
   /* ---- First-run walkthrough overlay ---- */
-  /* Backdrop is transparent — its only job is blocking click-through and
+  /* Backdrop is transparent. its only job is blocking click-through and
      catching Escape. The highlight's box-shadow below creates the dim
      overlay, with a hole-punch around the target so the highlighted
      element stays fully readable. */
@@ -3407,9 +3407,9 @@
   .gh-walk-highlight {
     position: fixed; z-index: 9501;
     border: 2px solid var(--accent, #22E7F5);
-    border-radius: 14px;
+    border-radius: 12px;
     /* The 9999px outer shadow is a single dim layer that fills the viewport
-       minus the highlight rectangle — so the target shows through clearly.
+       minus the highlight rectangle. so the target shows through clearly.
        Doubling this with a backdrop background would re-dim the target. */
     /* box-shadow removed (Bible §02: depth via bg-color) */
     pointer-events: none;
@@ -3420,7 +3420,7 @@
     width: min(360px, calc(100vw - 32px));
     background: rgba(15, 19, 20, 0.98);
     border: 1px solid rgba(34, 231, 245, 0.32);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 18px 18px 14px;
     box-shadow: 0 28px 64px rgba(0, 0, 0, 0.5), 0 0 24px rgba(34, 231, 245, 0.16);
     color: var(--text, #f4f8f5);
@@ -3456,7 +3456,7 @@
   }
   .gh-walk-tooltip button {
     padding: 7px 14px;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid rgba(238, 246, 241, 0.16);
     background: transparent;
     color: var(--muted, #9aa6a0);
@@ -3487,7 +3487,7 @@
   .gh-skeleton-card {
     height: 168px;
     border: 1px solid rgba(238, 246, 241, 0.08);
-    border-radius: 16px;
+    border-radius: 12px;
     background: rgba(18, 21, 22, 0.55);
     position: relative;
     overflow: hidden;
@@ -3594,7 +3594,7 @@
       position: static !important;
       min-height: auto !important;
       padding: 12px !important;
-      border-radius: 18px !important;
+      border-radius: 12px !important;
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
@@ -3611,7 +3611,7 @@
     .nav-section, .nav-section--advanced { width: 100%; }
     .panel {
       padding: 18px !important;
-      border-radius: 18px !important;
+      border-radius: 12px !important;
     }
     .workflow-grid,
     .grid,
@@ -3675,7 +3675,7 @@
     .wrap { padding: 8px; }
     h1 { font-size: 24px !important; }
     h2 { font-size: 16px !important; }
-    .panel { padding: 14px !important; border-radius: 14px !important; }
+    .panel { padding: 14px !important; border-radius: 12px !important; }
     .tab-btn .tab-sub { display: none; }  /* Just labels, no subtitles */
     .tab-btn { font-size: 13px !important; }
     .filter-btn { padding: 7px 10px !important; font-size: 12px !important; }
@@ -3712,7 +3712,7 @@
   }
 
   /* ===========================================================================
-     Pricing grid in Settings — shows the four tiers with upgrade CTAs.
+     Pricing grid in Settings. shows the four tiers with upgrade CTAs.
      =========================================================================== */
   .settings-pricing-grid {
     display: grid;
@@ -3721,7 +3721,7 @@
   }
   .pricing-tier-card {
     border: 1px solid rgba(238, 246, 241, 0.10);
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 14px;
     background: rgba(15, 19, 20, 0.55);
     display: flex;
@@ -3849,7 +3849,7 @@
       font-size: 11px;
       padding: 4px 8px;
     }
-    /* Sidebar tab list — make it horizontal, scrollable, so it doesn't
+    /* Sidebar tab list. make it horizontal, scrollable, so it doesn't
        eat half the viewport vertically before the user even sees content. */
     .sidebar, .tabs-vertical, .left-rail {
       width: 100%;
@@ -3870,17 +3870,17 @@
       font-size: 13px;
       padding: 8px 12px;
     }
-    /* Forms — single-column at all costs. */
+    /* Forms. single-column at all costs. */
     .grid, .form-grid, .row, .two-col {
       grid-template-columns: 1fr !important;
       gap: 10px;
     }
-    /* Notification panel + dropdowns — clamp width and align right edge to viewport. */
+    /* Notification panel + dropdowns. clamp width and align right edge to viewport. */
     .notification-panel, .dropdown, .menu, .popover {
       max-width: calc(100vw - 24px) !important;
       right: 12px !important;
     }
-    /* Launch checklist on phones — give the "X READY" status pill room
+    /* Launch checklist on phones. give the "X READY" status pill room
        to wrap below the label rather than crash off the right edge. */
     .launch-check {
       grid-template-columns: auto 1fr;

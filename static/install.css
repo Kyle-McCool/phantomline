@@ -18,7 +18,7 @@
 }
 
 .install-block {
-  background: #0a1722; border: 1px solid #1f3447; border-radius: 10px;
+  background: #0a1722; border: 1px solid #1f3447; border-radius: 8px;
   padding: 18px; margin-bottom: 14px;
 }
 .install-block h3 { margin: 0 0 8px; color: #22E7F5; font-size: 16px; }
@@ -80,7 +80,7 @@ pre.cmd {
 .download-hero {
   background: linear-gradient(180deg, #0c2a3a 0%, #07151c 100%);
   border: 1px solid #22E7F5;
-  border-radius: 14px; padding: 22px;
+  border-radius: 12px; padding: 22px;
   margin-bottom: 22px;
 }
 .download-hero h2 { margin: 0 0 4px; color: var(--text-primary); font-size: 16px; }
@@ -117,5 +117,5 @@ a.download-btn.secondary:hover {
 .os-detected-pill {
   display: inline-block; padding: 3px 10px;
   background: #22E7F5; color: #0a1722;
-  font-size: 11px; border-radius: 10px; font-weight: 700; margin-left: 8px;
+  font-size: 11px; border-radius: 8px; font-weight: 700; margin-left: 8px;
 }

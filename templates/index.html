@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="{{ '/static/phantomline.css' | versioned }}" />
 </head>
 <body>
-<!-- Mobile interstitial — Phantomline studio is desktop-first.
+<!-- Mobile interstitial. Phantomline studio is desktop-first.
      On phones the studio layout collapses awkwardly; the render
      pipeline (TTS, video assembly, image gen) needs hardware that
      phones don't have. Rather than dropping mobile users into a
@@ -46,7 +46,7 @@
     <div class="pl-mobile-eyebrow">Phantomline studio</div>
     <h1 class="pl-mobile-h1">Built for the desktop.</h1>
     <p class="pl-mobile-lede">
-      Rendering needs a real GPU and a long-running process — your phone can't
+      Rendering needs a real GPU and a long-running process. Your phone can't
       run that without melting. Open Phantomline on your computer to create.
     </p>
     <div class="pl-mobile-list">
@@ -174,7 +174,7 @@
        hierarchy is brand mark → tabs → tab content (h2s), so we don't
        want a big "Phantomline Studio" headline painting on desktop.
        The mobile interstitial above this in DOM also has its own h1,
-       but its parent has display:none on desktop — modern screen
+       but its parent has display:none on desktop. modern screen
        readers + crawlers correctly skip display:none subtrees. -->
   <h1 class="visually-hidden">Phantomline Studio</h1>
   <!-- Install reminder banner. Sticky at the top of the studio when the
@@ -433,7 +433,7 @@
         <!-- First-run only hero. Hidden for returning users via the
              body.is-returning class set by phantomline.js when the
              phantomline-make-hero-seen flag is in localStorage. After
-             the first session a user knows the workflow — the eyebrow,
+             the first session a user knows the workflow. the eyebrow,
              tagline, and 5-step rail just become wallpaper. The Load
              Demo + Brand controls move to the right rail's
              next-action-card area in returning-user mode (see CSS).
@@ -465,7 +465,7 @@
 
         <!-- Channel Insights: persistent analytics + SEO state. Wrapped
              in a <details> expander so it doesn't break the workflow
-             flow on first-time visits — 95% of users skip the CSV
+             flow on first-time visits. 95% of users skip the CSV
              upload, and putting it inline above step 1 was making it
              read as required. When configured, every idea/title
              generation is automatically informed by the user's
@@ -499,7 +499,7 @@
                flexible default; Viral Story / Reddit / Survival are
                the highest-volume creator niches per the channel data).
                The other 6 niches live in a 'More formats' expander
-               below — same data-recipe values, same JS wiring, just
+               below. same data-recipe values, same JS wiring, just
                not visually shouting at first-time users. -->
           <div class="choice-grid" id="makeRecipeCards">
             <button class="choice-card active" type="button" data-recipe="custom"><strong>Custom</strong><span>Flexible faceless video for any niche.</span></button>
@@ -853,7 +853,7 @@
           <summary class="studio-head" style="cursor:pointer; list-style:none; user-select:none;">
             <div>
               <h2>Studio Preview</h2>
-              <div class="hint">Frame + format reference — opens to the platform mock.</div>
+              <div class="hint">Frame + format reference. Opens to the platform mock.</div>
             </div>
             <div class="studio-live">Local</div>
           </summary>
@@ -925,7 +925,7 @@
 
         <!-- Production line. Hidden by default; revealed by phantomline.js
              when render kicks off (any .workflow-step earns .running or
-             .done class). Until then it's empty noise — 7 stages all
+             .done class). Until then it's empty noise. 7 stages all
              "waiting" before the user has even pressed render. -->
         <h2 id="makeProductionLineHeader" style="margin-top:18px; display:none;">Production line</h2>
         <div class="workflow-steps" id="makeProductionLine" style="display:none;">

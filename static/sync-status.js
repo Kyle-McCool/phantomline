@@ -3,13 +3,13 @@
  * are syncing to Supabase or stuck on disk.
  *
  * States (see phantomline.css .sync-status--* classes):
- *   unknown       — initial, before first probe
- *   unconfigured  — Supabase env vars not set on the local install,
+ *   unknown      . initial, before first probe
+ *   unconfigured . Supabase env vars not set on the local install,
  *                   sync is off by design (grey, "local only")
- *   ok            — last /api/projects fetch succeeded with a session
+ *   ok           . last /api/projects fetch succeeded with a session
  *                   (green dot, "synced")
- *   warn          — transient: 1 fetch failed, retrying. Yellow.
- *   err           — persistent: 2+ consecutive failures. Red.
+ *   warn         . transient: 1 fetch failed, retrying. Yellow.
+ *   err          . persistent: 2+ consecutive failures. Red.
  *
  * Implementation notes:
  * - Polls /api/projects every 30s when the tab is visible (page
@@ -18,7 +18,7 @@
  * - Listens for any fetch() failure on /api/* via a wrapped onerror
  *   path. The window.fetch shim in phantomline.js handles the auth
  *   header; this just observes the outcome.
- * - On Capacitor (mobile shell) the dot stays hidden — sync isn't
+ * - On Capacitor (mobile shell) the dot stays hidden. sync isn't
  *   wired there yet.
  */
 (function () {
@@ -65,7 +65,7 @@
       .then(function (r) {
         if (r.status === 401 || r.status === 403) {
           // Server says "you need to sign in." If we have no session,
-          // sync is not really broken — it's just not on yet. Show
+          // sync is not really broken. it's just not on yet. Show
           // the unconfigured grey state with a friendlier label.
           if (!readSession()) {
             setState('unconfigured', 'local only');

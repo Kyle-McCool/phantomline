@@ -1,4 +1,4 @@
-/* Phantomline landing — industrial-editorial redesign.
+/* Phantomline landing. industrial-editorial redesign.
    2026-05 redesign. Rationale: the previous landing leaned generic-SaaS
    (glass morphism, multi-color radial gradients, Three.js hero canvas,
    floating phone mock). This pass commits to a deliberate aesthetic:
@@ -15,10 +15,10 @@
    - No gradients on text. No glass morphism. No drop-shadow glows.
 
    Typography:
-   - Display: Geist Mono — technical, characterful, free, not in
+   - Display: Geist Mono. technical, characterful, free, not in
      the bencium "do not use" list (Inter, Roboto, Arial, Space Grotesk)
-   - Body: Geist — highly legible, distinctive lowercase
-   - Scale: 1.333 (perfect fourth) — editorial drama, not SaaS timidity
+   - Body: Geist. highly legible, distinctive lowercase
+   - Scale: 1.333 (perfect fourth). editorial drama, not SaaS timidity
 */
 
 /* Phantomline Brand Bible v1.0 typography stack (2026-05 update).
@@ -93,7 +93,7 @@
   --text-label: 12px;
   --text-mono: 14px;
 
-  /* Radius — Bible §04: NO PILLS */
+  /* Radius. Bible §04: NO PILLS */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -114,7 +114,7 @@
   --signal: var(--warning);
   --signal-deep: #B8761D;
 
-  /* Spacing scale (8px base + 4px half-step) — Bible §03 */
+  /* Spacing scale (8px base + 4px half-step). Bible §03 */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -145,7 +145,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-/* Subtle grain — tactile texture without weight. SVG noise turbulence
+/* Subtle grain. tactile texture without weight. SVG noise turbulence
    inlined as base64 to avoid an extra HTTP request. Opacity is low
    on purpose: felt, not seen. */
 body::before {
@@ -286,7 +286,7 @@ img { max-width: 100%; display: block; }
 /* ─── Focus-visible (keyboard-only focus indicators) ─────────────────── */
 /* On a dark theme the browser default focus ring is faint to invisible.
    :focus-visible draws a deliberate brand-teal outline only when the
-   user is navigating with a keyboard — mouse clicks don't trigger it.
+   user is navigating with a keyboard. mouse clicks don't trigger it.
    Same brand-teal as accents so it reads as "the design did this on
    purpose," not as a default-fallback ring. */
 .cta:focus-visible,
@@ -306,7 +306,7 @@ select:focus-visible {
    same wayfinding cue mouse hover gives. */
 .navlinks a:not(.cta):focus-visible::after { transform: scaleX(1); }
 /* Dim the outline-offset on filled CTAs so it doesn't fight the brand
-   fill — the offset alone signals focus without a halo. */
+   fill. the offset alone signals focus without a halo. */
 .cta:focus-visible { outline-offset: 2px; }
 
 /* ─── Phantom-line motif ─────────────────────────────────────────────── */
@@ -337,8 +337,8 @@ select:focus-visible {
   border-bottom: 1px solid var(--rule);
 }
 .hero::before {
-  /* Subtle warm gradient wash — keeps the corner from feeling dead.
-     Single direction, single color, low opacity — nothing like the
+  /* Subtle warm gradient wash. keeps the corner from feeling dead.
+     Single direction, single color, low opacity. nothing like the
      prior multi-radial soup. */
   content: "";
   position: absolute;
@@ -356,7 +356,7 @@ select:focus-visible {
 .hero-copy { max-width: 920px; }
 .hero-logo-img {
   display: none; /* Replaced by dramatic typography. The wordmark in
-                    the nav is enough — landing hero leads with type. */
+                    the nav is enough. landing hero leads with type. */
 }
 .eyebrow {
   display: inline-flex;
@@ -425,7 +425,7 @@ h4 {
   font-weight: 600;
   margin-bottom: var(--s-3);
 }
-/* Bible body 16px / 450 / 24 line-height — used as the default lede style too. */
+/* Bible body 16px / 450 / 24 line-height. used as the default lede style too. */
 .lede {
   max-width: 640px;
   margin: 0 0 var(--s-5) 0;
@@ -440,7 +440,7 @@ h4 {
   gap: var(--s-3);
   margin-top: var(--s-7);
 }
-/* Hero stats — replaces the vague "proof" pills with something
+/* Hero stats. replaces the vague "proof" pills with something
    honest and technical-feeling. */
 .proof {
   display: grid;
@@ -477,7 +477,7 @@ h4 {
   line-height: 1.4;
 }
 
-/* Hero scene + phone-mock theatre — REMOVED. Replaced by editorial
+/* Hero scene + phone-mock theatre. REMOVED. Replaced by editorial
    typography. Selectors kept so any HTML still referencing them
    degrades silently rather than throwing layout chaos. */
 .hero-scene,
@@ -542,7 +542,7 @@ h4 {
   border-right: 1px solid var(--rule);
 }
 /* First cell aligns to grid edge (no left padding contributing to
-   excess inset) — but still needs a small breathing margin so text
+   excess inset). but still needs a small breathing margin so text
    doesn't sit against the section's outer padding. Handled by
    the .wrap container's own side padding. */
 .step:first-child { padding-left: 0; }
@@ -699,7 +699,7 @@ h4 {
 }
 .mini-phone .caption span { color: var(--brand); display: block; font-weight: 400; }
 
-/* Calendar mock — ASCII-grid style instead of decorative dots */
+/* Calendar mock. ASCII-grid style instead of decorative dots */
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -750,7 +750,7 @@ h4 {
   display: flex;
   flex-direction: column;
 }
-/* Push the feature list to fill remaining space — CTA below it is
+/* Push the feature list to fill remaining space. CTA below it is
    then anchored at the bottom edge across all 4 cards. */
 .pricing-card .pricing-features { flex: 1 0 auto; }
 .pricing-card .cta { margin-top: auto; }
@@ -898,7 +898,7 @@ h4 {
   border-bottom: 1px solid var(--rule);
 }
 /* Bible §01: section h2 = 32px / 600 / 36px LH / -0.015em.
-   No clamp(40-80px) — that violates "no font sizes outside this scale". */
+   No clamp(40-80px). that violates "no font sizes outside this scale". */
 .final h2 {
   font-size: var(--text-h2);
   line-height: 36px;
@@ -920,7 +920,7 @@ h4 {
 
 /* ─── Footer ─────────────────────────────────────────────────────────── */
 /* Brand Bible §06 layout. Single row: brand block on the left,
-   3-column nav grid on the right. Tighter than a stacked layout —
+   3-column nav grid on the right. Tighter than a stacked layout.
    the brand stays visually anchored to the columns instead of
    floating in 144px of empty space above them. */
 .site-footer {
