@@ -885,25 +885,37 @@ h4 {
 }
 
 /* ─── Final CTA ──────────────────────────────────────────────────────── */
+/* Layout matches .section-head: h2 + lede on the left, CTA on the
+   right. align-items: start anchors both columns to the top so the
+   text block and button share a baseline (was 'center' which made
+   the button float mid-card). */
 .final {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) auto;
-  align-items: center;
+  align-items: start;
   gap: var(--s-7);
-  padding: var(--s-9) 0;
+  padding: var(--s-8) 0;
   border-bottom: 1px solid var(--rule);
 }
+/* Bible §01: section h2 = 32px / 600 / 36px LH / -0.015em.
+   No clamp(40-80px) — that violates "no font sizes outside this scale". */
 .final h2 {
-  font-size: clamp(40px, 6vw, 80px);
-  line-height: 0.96;
+  font-size: var(--text-h2);
+  line-height: 36px;
+  letter-spacing: -0.015em;
   margin: 0 0 var(--s-3) 0;
 }
+/* Bible §01: mono is for code/tech values only, NEVER body text.
+   Was var(--font-mono) which used different character widths than
+   the sans headline above and made the left edge feel offset. Sans
+   matches the rest of the site's body copy. */
 .final p {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--text-2);
-  letter-spacing: 0.02em;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: 450;
+  line-height: 24px;
+  color: var(--text-secondary);
 }
 
 /* ─── Footer ─────────────────────────────────────────────────────────── */
