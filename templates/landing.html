@@ -151,22 +151,26 @@
             <a class="cta" href="/download">Download for desktop</a>
             <a class="cta secondary" href="#workflow">See the workflow</a>
           </div>
-          <div class="proof">
-            <div><strong>Local pipeline</strong><span>Llama · Kokoro · MusicGen · ffmpeg</span></div>
-            <div><strong>No paid APIs</strong><span>Runs on your hardware</span></div>
-            <div><strong>Publish-ready</strong><span>Queue, calendar, YouTube</span></div>
-            <div><strong>Pay once option</strong><span>$79 founding · 500 seats</span></div>
-          </div>
         </div>
-        <!-- Hero atmospheric mark. Simple ghost icon at scale to fill the
-             empty right-side real estate. Decorative (aria-hidden) since
-             the page already has a logo in the nav. Phantom-line hairline
-             framing references the brand motif. -->
+        <!-- Hero atmospheric mark. Simple ghost icon framed by two
+             horizontal hairlines (top + bottom) that anchor to the
+             top of the headline and the bottom of the buttons. The
+             mark column stretches to match the copy column's height
+             (eyebrow → buttons row), with the icon centered inside. -->
         <div class="hero-mark" aria-hidden="true">
           <span class="hero-mark-line hero-mark-line--top"></span>
           <span class="hero-mark-line hero-mark-line--bottom"></span>
           <img src="{{ '/static/phantomline-logo-square.png' | versioned }}" alt="" width="320" height="320" loading="eager" decoding="async" />
         </div>
+      </div>
+      <!-- Proof strip: pulled OUT of .hero-grid so the mark column
+           can stretch only over the eyebrow→buttons height per Bible
+           §03 vertical rhythm (proof is a separate signal block). -->
+      <div class="proof">
+        <div><strong>Local pipeline</strong><span>Llama · Kokoro · MusicGen · ffmpeg</span></div>
+        <div><strong>No paid APIs</strong><span>Runs on your hardware</span></div>
+        <div><strong>Publish-ready</strong><span>Queue, calendar, YouTube</span></div>
+        <div><strong>Pay once option</strong><span>$79 founding · 500 seats</span></div>
       </div>
     </section>
 
