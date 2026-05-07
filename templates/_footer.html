@@ -1,52 +1,35 @@
-{# Shared footer included on every public page. Update once, ships everywhere.
-   Internal-link rich for SEO authority distribution. #}
+{# Shared footer (Brand Bible §06: 3 columns max, 4-5 links each).
+   Previously 6 columns; consolidated 2026-05 to honor the Bible.
+   The dropped link surfaces (full Tools / Use cases / Compare grids)
+   live on the dedicated /alternatives hub and on individual pillar
+   pages — sitemap.xml still serves SEO crawl. #}
 <footer class="site-footer">
-  <div class="site-footer-grid">
-    <div class="site-footer-brand">
-      <a href="/" aria-label="Phantomline home">
-        <img class="footer-brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
-      </a>
-      <p>Local-first AI video studio for faceless YouTube creators. No paid APIs. License keys validate offline.</p>
-    </div>
+  <div class="site-footer-brand">
+    <a href="/" aria-label="Phantomline home">
+      <img class="footer-brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <p>Local-first AI video studio for faceless YouTube creators. No paid APIs. License keys validate offline.</p>
+  </div>
 
+  <div class="site-footer-grid">
     <div class="site-footer-col">
       <h4>Product</h4>
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/pricing">Pricing</a></li>
-        <li><a href="/app">Open Studio</a></li>
+        <li><a href="/app">Studio</a></li>
         <li><a href="/#workflow">How it works</a></li>
-        <li><a href="/#platforms">Platforms</a></li>
       </ul>
     </div>
 
     <div class="site-footer-col">
-      <h4>Tools</h4>
+      <h4>Resources</h4>
       <ul>
         <li><a href="/local-ai-video-generator">Local AI video generator</a></li>
-        <li><a href="/ai-voice-generator">AI voice generator</a></li>
-        <li><a href="/youtube-scheduler">YouTube scheduler</a></li>
-        <li><a href="/youtube-seo-tool">YouTube SEO tool</a></li>
         <li><a href="/faceless-youtube">Faceless YouTube tool</a></li>
-      </ul>
-    </div>
-
-    <div class="site-footer-col">
-      <h4>Use cases</h4>
-      <ul>
-        <li><a href="/reddit-stories-video-tool">Reddit storytime tool</a></li>
-        <li><a href="/horror-narration-tool">Horror narration tool</a></li>
-        <li><a href="/mystery-docs-tool">Mystery docs tool</a></li>
-      </ul>
-    </div>
-
-    <div class="site-footer-col">
-      <h4>Compare</h4>
-      <ul>
-        <li><a href="/alternatives">All alternatives</a></li>
-        <li><a href="/alternatives/vidiq">vs vidIQ</a></li>
-        <li><a href="/alternatives/elevenlabs">vs ElevenLabs</a></li>
-        <li><a href="/alternatives/submagic">vs Submagic</a></li>
+        <li><a href="/youtube-seo-tool">YouTube SEO tool</a></li>
+        <li><a href="/alternatives">Alternatives</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
       </ul>
     </div>
 
@@ -54,24 +37,15 @@
       <h4>Company</h4>
       <ul>
         <li><a href="/about">About</a></li>
+        <li><a href="mailto:kyle@makko.ai">Contact</a></li>
+        <li><a href="https://github.com/daculturedswine/phantomline" rel="noopener" target="_blank">GitHub</a></li>
         <li><a href="/privacy">Privacy</a></li>
         <li><a href="/terms">Terms</a></li>
-        <li><a href="mailto:kyle@makko.ai">Contact</a></li>
-      </ul>
-    </div>
-
-    <div class="site-footer-col">
-      <h4>Resources</h4>
-      <ul>
-        <li><a href="https://github.com/daculturedswine/phantomline" rel="noopener" target="_blank">GitHub</a></li>
-        <li><a href="/sitemap.xml">Sitemap</a></li>
-        <li><a href="/robots.txt">robots.txt</a></li>
       </ul>
     </div>
   </div>
 
   <div class="site-footer-bottom">
-    <small>&copy; 2026 Phantomline. All rights reserved.</small>
-    <small>No subscription required.</small>
+    <small>&copy; 2026 Phantomline · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></small>
   </div>
 </footer>
