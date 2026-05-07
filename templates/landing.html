@@ -46,7 +46,7 @@
 <!-- JSON-LD: WebSite. SearchAction lets Google offer a sitelinks
      searchbox in SERPs that points at /alternatives?q= as a fallback
      until we ship real site search. Google's spec requires a string
-     placeholder ({search_term_string}) — present tense, no fake
+     placeholder ({search_term_string}). present tense, no fake
      promises about the destination beyond "phantomline-shaped results". -->
 <script type="application/ld+json">
 {
@@ -67,7 +67,7 @@
 </script>
 
 <!-- JSON-LD: SoftwareApplication. Tells Google this is a multi-platform
-     creator tool with a free tier. Real prices below — no fake reviews. -->
+     creator tool with a free tier. Real prices below. no fake reviews. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -89,7 +89,7 @@
 
 <!-- JSON-LD: FAQPage. Mirrors the visible <details> block lower in the
      page verbatim. Google penalizes FAQPage schema where the schema
-     answers don't match the rendered text — keep these in sync. -->
+     answers don't match the rendered text. keep these in sync. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -101,7 +101,7 @@
   },
   "mainEntity": [
     {"@type": "Question", "name": "Do I need a fancy PC?",
-     "acceptedAnswer": {"@type": "Answer", "text": "16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. CPU-only works too — slower TTS, but everything else is fine. Phantomline runs on Windows, macOS, and Linux."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. CPU-only works too. Slower TTS, but everything else is fine. Phantomline runs on Windows, macOS, and Linux."}},
     {"@type": "Question", "name": "Can I use this on my phone?",
      "acceptedAnswer": {"@type": "Answer", "text": "Right now Phantomline runs on desktop. From your phone you can sign in to your account, view your project library, and manage your license. The mobile creator app is on the roadmap; the desktop studio is where you render and publish today."}},
     {"@type": "Question", "name": "What's free vs Pro?",
@@ -145,7 +145,7 @@
           <div class="eyebrow">Local AI · Faceless YouTube</div>
           <h1>Faceless videos, <span>built on your own machine.</span></h1>
           <p class="lede">
-            Phantomline turns one-line ideas into finished YouTube videos: script, narration, captions, music, visuals, MP4 export, and a publishing draft. The whole pipeline runs locally — no paid APIs, no per-render fees, no cloud watching your work.
+            Phantomline turns one-line ideas into finished YouTube videos: script, narration, captions, music, visuals, MP4 export, and a publishing draft. The whole pipeline runs locally. No paid APIs, no per-render fees, no cloud watching your work.
           </p>
           <div class="hero-actions">
             <a class="cta" href="/download">Download for desktop</a>
@@ -256,7 +256,7 @@
     <section class="section" id="platforms">
       <div class="section-head">
         <h2>Built for the desktop. Account follows you anywhere.</h2>
-        <p>Phantomline renders on your computer because that's where the GPU lives. Your account, library, and license follow you to any browser — desktop or phone — for review and management.</p>
+        <p>Phantomline renders on your computer because that's where the GPU lives. Your account, library, and license follow you to any browser (desktop or phone) for review and management.</p>
       </div>
       <div class="features">
         <div class="feature">
@@ -265,10 +265,10 @@
         </div>
         <div class="feature">
           <strong>Web account (anywhere)</strong>
-          <p>Sign in at phantomline.xyz on any device — desktop or phone — to see your project library, manage your license, copy keys, and check render quota. No render runs in the browser yet; that's still desktop-only.</p>
+          <p>Sign in at phantomline.xyz on any device (desktop or phone) to see your project library, manage your license, copy keys, and check render quota. No render runs in the browser yet; that's still desktop-only.</p>
         </div>
         <div class="feature">
-          <strong>Mobile creator app — on the roadmap</strong>
+          <strong>Mobile creator app: on the roadmap</strong>
           <p>The hard part is shipping a render pipeline that doesn't drain your battery. We'll publish the early-access list when in-browser preview is ready. Until then, treat mobile as your library + dashboard.</p>
         </div>
       </div>
@@ -338,7 +338,7 @@
       <div class="faq">
         <details>
           <summary>Do I need a fancy PC?</summary>
-          <p>16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. CPU-only works too — slower TTS, but everything else is fine. Phantomline runs on Windows, macOS, and Linux.</p>
+          <p>16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. CPU-only works too. Slower TTS, but everything else is fine. Phantomline runs on Windows, macOS, and Linux.</p>
         </details>
         <details>
           <summary>Can I use this on my phone?</summary>
