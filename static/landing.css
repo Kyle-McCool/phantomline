@@ -369,38 +369,47 @@ select:focus-visible {
                     the nav is enough. landing hero leads with type. */
 }
 
-/* Hero atmospheric mark. Decorative ghost icon contained inside its
-   own bounding box (no overflow past the .wrap edge) with a soft
-   brand-cyan glow. Bible §03 spacing: container has padding so the
-   icon doesn't kiss the section edge. Per-Bible internal padding
-   matches the section's external rhythm. */
+/* Hero atmospheric mark. Decorative ghost icon centered in its column,
+   framed by two horizontal hairlines (top + bottom) that echo the
+   "phantom line" motif from the brand name. Soft brand-cyan glow
+   blooms behind the icon. Bible §03 spacing: container is centered
+   in the right column so the mark sits aligned with the text middle. */
 .hero-mark {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  /* Cap the size so the mark stays a quiet anchor, not a dominator.
-     240px keeps it visually tied to the type scale (h1 = 56px,
-     ~4x is the right relative weight for an atmospheric mark). */
-  max-width: 240px;
+  /* Substantial visual presence (~6.5x headline font-size at 56px)
+     while still letting the type column carry the message. */
+  max-width: 360px;
   aspect-ratio: 1;
-  margin-left: auto;
-  /* Contain any glow that would otherwise bleed into adjacent grid cells. */
-  overflow: visible;
+  /* Center the mark in its grid column. */
+  margin: 0 auto;
 }
 .hero-mark img {
-  width: 100%;
-  height: 100%;
+  position: relative;
+  z-index: 2;
+  width: 78%;
+  height: 78%;
   object-fit: contain;
-  filter: drop-shadow(0 0 32px rgba(34, 231, 245, 0.25));
-  opacity: 0.92;
+  filter: drop-shadow(0 0 40px rgba(34, 231, 245, 0.30));
+  opacity: 0.95;
 }
-/* Decorative hairlines from earlier iteration removed. they weren't
-   rendering visibly at this scale and added clutter. The drop-shadow
-   bloom and aspect-ratio frame are enough to make the mark feel
-   intentional without competing with the headline. */
-.hero-mark-line { display: none; }
+/* Phantom-line hairlines: two horizontal rules that bracket the mark
+   top + bottom. Linear-gradient ends transparent so they fade off
+   the edges of the bounding box instead of stopping abruptly. */
+.hero-mark-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-default) 30%, var(--accent-default) 70%, transparent);
+  z-index: 1;
+  opacity: 0.55;
+}
+.hero-mark-line--top { top: 8%; }
+.hero-mark-line--bottom { bottom: 8%; }
 .eyebrow {
   display: inline-flex;
   align-items: center;
