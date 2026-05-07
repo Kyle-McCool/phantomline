@@ -385,11 +385,12 @@ select:focus-visible {
   width: 100%;
   max-width: 360px;
   /* No aspect-ratio. height is driven by the copy column. */
-  /* Shift left from the right edge so the mark sits more centered
-     within its half of the page (Kyle's note: feels too flush-right
-     when mark fills the column). var(--s-7) = 48px right offset. */
+  /* Shift the mark substantially left of the section's right edge
+     so it sits nested inside the page rather than hugging the
+     boundary. clamp(96px, 12vw, 200px) scales with viewport so
+     the offset feels right at every desktop width. */
   margin-left: auto;
-  margin-right: var(--s-7);
+  margin-right: clamp(96px, 12vw, 200px);
 }
 .hero-mark img {
   position: relative;
