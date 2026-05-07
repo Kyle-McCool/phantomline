@@ -37,7 +37,7 @@
   {% endif %}
 
   <div class="install-options-tabs" role="tablist">
-    <button class="active" data-pane="manual">Manual steps <span style="background:#1ab8e8;color:#0a1722;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px;font-weight:700;">RECOMMENDED</span></button>
+    <button class="active" data-pane="manual">Manual steps <span style="background:#22E7F5;color:#0a1722;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px;font-weight:700;">RECOMMENDED</span></button>
     <button data-pane="oneline">One-line install (terminal)</button>
     <button data-pane="claude">Open in Claude Code</button>
   </div>
@@ -76,7 +76,7 @@
       <pre class="cmd" id="cmdClaude">{{ tool.claude_prompt }}</pre>
       <button class="copy-btn" data-copy="cmdClaude">Copy prompt</button>
       <div style="margin-top:14px; padding:12px; background:#06141d; border-radius:6px; border:1px solid #1f3447;">
-        <strong style="color:#1ab8e8; font-size:13px;">What Claude will do for you:</strong>
+        <strong style="color:#22E7F5; font-size:13px;">What Claude will do for you:</strong>
         <ol style="color:#cdd6df; font-size:13px; margin:6px 0 0 18px; padding:0;">
           <li>Detect your OS</li>
           <li>Check whether prerequisites are installed (Python, Git, etc.)</li>
@@ -104,7 +104,7 @@
       {% endif %}
       {% if step.expected %}
       <details style="margin-top:10px;">
-        <summary style="cursor:pointer; color:#1ab8e8; font-size:13px; padding:6px 0;">What you should see &raquo;</summary>
+        <summary style="cursor:pointer; color:#22E7F5; font-size:13px; padding:6px 0;">What you should see &raquo;</summary>
         <pre class="cmd" style="background:#011018; border-color:#0d2230; color:#7adfb8;">{{ step.expected }}</pre>
       </details>
       {% endif %}
@@ -119,7 +119,7 @@
     {% endfor %}
   </div>
 
-  <div class="install-block" style="margin-top:24px; border-color:#1ab8e8;">
+  <div class="install-block" style="margin-top:24px; border-color:#22E7F5;">
     <h3>Verify it worked</h3>
     <p style="color:#cdd6df; font-size:14px; margin:0 0 10px;">{{ tool.verify_text | safe }}</p>
     {% if tool.verify_command %}
@@ -127,14 +127,14 @@
     <button class="copy-btn" data-copy="cmdVerify">Copy</button>
     {% endif %}
     <div class="verify-row" style="margin-top:14px;">
-      <strong style="color:#1ab8e8;">Then:</strong>
-      <span style="color:#cdd6df;">Reload <a href="/app" style="color:#1ab8e8;">/app</a> &mdash; the readiness checklist will flip {{ tool.label }} to READY.</span>
+      <strong style="color:#22E7F5;">Then:</strong>
+      <span style="color:#cdd6df;">Reload <a href="/app" style="color:#22E7F5;">/app</a> &mdash; the readiness checklist will flip {{ tool.label }} to READY.</span>
     </div>
   </div>
 
   <div style="margin-top:20px; padding:14px; background:#06141d; border-radius:8px; border:1px solid #1f3447;">
     <strong style="color:#cdd6df;">Stuck?</strong>
-    <span style="color:#7a96ad; font-size:13px;"> Email <a href="mailto:support@phantomline.xyz" style="color:#1ab8e8;">support@phantomline.xyz</a> with your OS and the error and we'll send you exact steps.</span>
+    <span style="color:#7a96ad; font-size:13px;"> Email <a href="mailto:support@phantomline.xyz" style="color:#22E7F5;">support@phantomline.xyz</a> with your OS and the error and we'll send you exact steps.</span>
   </div>
 </div>
 

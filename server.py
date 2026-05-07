@@ -323,7 +323,7 @@ def _security_headers(response):
         "img-src 'self' data: blob: https://images.pexels.com; "
         "media-src 'self' blob: https://*.pexels.com https://cdn.pixabay.com; "
         # Google Fonts (fonts.googleapis.com for the @import CSS, fonts.gstatic.com
-        # for the actual woff2 binaries). Used for IBM Plex Mono/Sans on the
+        # for the actual woff2 binaries). Used for Geist Mono/Sans on the
         # 2026-05 brand-aligned landing + studio. Self-hosting was considered
         # but Google Fonts CDN gives us shared cache + automatic font optimization.
         "font-src 'self' data: https://fonts.gstatic.com; "
