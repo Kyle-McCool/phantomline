@@ -352,16 +352,18 @@ select:focus-visible {
   background: radial-gradient(ellipse at 100% 0%, var(--brand-faint), transparent 60%);
 }
 /* Hero is a 2-col grid on desktop: copy left, atmospheric mark right.
-   The text column is wider (2fr) so the headline gets dominant
-   weight; the mark column (1fr) is a quiet right-side anchor.
-   align-items: center keeps the mark visually paired with the
-   middle of the text block. */
+   align-items: stretch so the mark column matches the copy column's
+   height (eyebrow → buttons row). With the proof block pulled OUT
+   of .hero-copy and rendered below the grid, the mark spans exactly
+   the headline-to-CTA-button vertical range — top hairline anchors
+   to the top of the h1, bottom hairline anchors to the bottom of
+   the last button. */
 .hero-grid {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: var(--s-7);
-  align-items: center;
+  align-items: stretch;
 }
 .hero-copy { max-width: 920px; }
 .hero-logo-img {
@@ -369,47 +371,54 @@ select:focus-visible {
                     the nav is enough. landing hero leads with type. */
 }
 
-/* Hero atmospheric mark. Decorative ghost icon centered in its column,
-   framed by two horizontal hairlines (top + bottom) that echo the
-   "phantom line" motif from the brand name. Soft brand-cyan glow
-   blooms behind the icon. Bible §03 spacing: container is centered
-   in the right column so the mark sits aligned with the text middle. */
+/* Hero atmospheric mark. Stretches to match copy column height
+   (eyebrow → buttons). The icon centers vertically inside the
+   bounding box; the hairlines pin to top + bottom of the box.
+   The eyebrow above the h1 is short (~16px); we offset the top
+   hairline by that amount so it lands at the top of the "F" in
+   "Faceless" rather than at the eyebrow. */
 .hero-mark {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  /* Substantial visual presence (~6.5x headline font-size at 56px)
-     while still letting the type column carry the message. */
-  max-width: 360px;
-  aspect-ratio: 1;
-  /* Center the mark in its grid column. */
+  max-width: 420px;
+  /* No aspect-ratio — height is driven by the copy column. */
   margin: 0 auto;
 }
 .hero-mark img {
   position: relative;
   z-index: 2;
-  width: 78%;
-  height: 78%;
+  width: 90%;
+  max-width: 360px;
+  height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 40px rgba(34, 231, 245, 0.30));
+  filter: drop-shadow(0 0 48px rgba(34, 231, 245, 0.32));
   opacity: 0.95;
 }
-/* Phantom-line hairlines: two horizontal rules that bracket the mark
-   top + bottom. Linear-gradient ends transparent so they fade off
-   the edges of the bounding box instead of stopping abruptly. */
+/* Phantom-line hairlines: full-width rules that fade at both ends.
+   --top is offset to clear the eyebrow row above the h1 so the
+   line visually lands on top of the "F" of "Faceless". --bottom
+   is flush with the column bottom (which is the last button bottom
+   since proof is pulled out of the grid). */
 .hero-mark-line {
   position: absolute;
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent-default) 30%, var(--accent-default) 70%, transparent);
+  background: linear-gradient(90deg, transparent, var(--accent-default) 25%, var(--accent-default) 75%, transparent);
   z-index: 1;
-  opacity: 0.55;
+  opacity: 0.6;
 }
-.hero-mark-line--top { top: 8%; }
-.hero-mark-line--bottom { bottom: 8%; }
+.hero-mark-line--top {
+  /* Eyebrow + its margin-bottom is ~36px; place the top hairline at
+     that depth so it aligns with the top of the h1 capital F. */
+  top: 36px;
+}
+.hero-mark-line--bottom {
+  bottom: 0;
+}
 .eyebrow {
   display: inline-flex;
   align-items: center;
