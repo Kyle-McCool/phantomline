@@ -361,11 +361,11 @@ select:focus-visible {
 .hero-grid {
   position: relative;
   display: grid;
-  /* Shifted ratio so the mark column gets more room (1.3/1 instead
-     of 2/1). With more breathing space in the right column the mark
-     can sit visually nestled inside the page rather than flush to
-     the right edge. */
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  /* Tightened to 1fr/1fr so the mark column gets the full half of
+     the page. Combined with justify-self: start on .hero-mark, the
+     mark sits in the LEFT side of its right column — visually
+     nested deeper into the page rather than hugging the right edge. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--s-7);
   align-items: stretch;
 }
@@ -1063,10 +1063,11 @@ h4 {
   .wrap { width: min(100% - 32px, 1180px); padding-bottom: 64px; }
   .hero { padding: 64px 0 56px; }
   .hero-grid { grid-template-columns: 1fr; gap: var(--s-6); }
-  /* Hide atmospheric mark on tablet/mobile. typography is the focal
-     point on small viewports and the mark would crowd the headline. */
-  .hero-mark { display: none; }
   .brand .brand-img { height: 44px; }  /* Slightly smaller nav logo on mobile so the nav row still fits. */
+  /* When the grid stacks at ≤900px, scale the mark down so it sits
+     comfortably below the headline. Hidden entirely at ≤540px. */
+  .hero-mark { max-width: 220px; margin: 0 auto; }
+  .hero-mark img { max-width: 200px; }
   .section { padding: 64px 0; }
   .section-head { grid-template-columns: 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
   .workflow { grid-template-columns: 1fr 1fr; }
@@ -1097,6 +1098,8 @@ h4 {
   h2 { font-size: 24px; line-height: 28px; }
   h3 { font-size: 20px; line-height: 28px; }
   .lede { font-size: 16px; }
+  /* Hide atmospheric mark on true mobile — typography is the focal point. */
+  .hero-mark { display: none; }
   .workflow { grid-template-columns: 1fr; }
   .step { border-right: 0; }
   .step:not(:first-child) { border-top: 1px solid var(--rule); }
