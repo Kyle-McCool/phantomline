@@ -361,11 +361,11 @@ select:focus-visible {
 .hero-grid {
   position: relative;
   display: grid;
-  /* Tightened to 1fr/1fr so the mark column gets the full half of
-     the page. Combined with justify-self: start on .hero-mark, the
-     mark sits in the LEFT side of its right column — visually
-     nested deeper into the page rather than hugging the right edge. */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  /* Slight back-shift toward 1.15fr/1fr — the 50/50 split overshot
+     leftward. Copy column gets a bit more weight (back toward where
+     the headline reads more comfortably) and the mark anchors a
+     touch further right of the page midpoint. */
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: var(--s-7);
   align-items: stretch;
 }
