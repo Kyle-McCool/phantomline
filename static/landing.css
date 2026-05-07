@@ -132,13 +132,15 @@ html { scroll-behavior: smooth; background: var(--ink); }
 body {
   margin: 0;
   min-height: 100vh;
-  color: var(--text);
-  background: var(--ink);
+  color: var(--text-primary);
+  background: var(--bg-base);
   font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.55;
-  font-weight: 400;
-  letter-spacing: -0.005em;
+  /* Bible §01: body = 16px / weight 450 (Geist variable axis) / 24px LH. */
+  font-size: var(--text-body);
+  line-height: 24px;
+  font-weight: 450;
+  letter-spacing: 0;
+  font-feature-settings: 'tnum', 'zero';
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -377,42 +379,60 @@ select:focus-visible {
   height: 1px;
   background: var(--brand);
 }
-h1, h2, h3 {
+/* Brand Bible §01 type scale.
+   Desktop: display 56 / h1 40 / h2 32 / h3 24 / h4 20 / body 16
+   Mobile:  display 36 / h1 28 / h2 24 / h3 20 / h4 20 / body 16
+   "No font sizes outside this scale." */
+h1, h2, h3, h4 {
   font-family: var(--font-sans);
   font-weight: 600;
-  letter-spacing: -0.025em;
   margin: 0;
-  color: var(--paper);
+  color: var(--text-primary);
   text-wrap: balance;
 }
+/* The landing hero h1 is the ONLY display-sized heading on the site.
+   Bible §01: Display = 56px desktop / 36px mobile, weight 700, line-height 60 (1.07), letter-spacing -0.02em. */
 h1 {
-  font-size: clamp(56px, 9vw, 124px);
-  line-height: 0.94;
-  font-weight: 600;
-  margin-bottom: var(--s-6);
+  font-size: var(--text-display);
+  line-height: 60px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin-bottom: var(--s-5);
 }
 h1 span {
-  color: var(--brand);
-  font-style: italic;
-  font-weight: 500;
+  color: var(--accent-default);
+  font-weight: 600;
 }
+/* Section heading. Bible H2: 32px / weight 600 / line-height 36 / -0.015em. */
 h2 {
-  font-size: clamp(36px, 5vw, 64px);
-  line-height: 1.02;
+  font-size: var(--text-h2);
+  line-height: 36px;
+  letter-spacing: -0.015em;
   margin-bottom: var(--s-4);
 }
+/* Sub-section / card title. Bible H3: 24px / 600 / 32 / -0.01em. */
 h3 {
-  font-size: 20px;
-  line-height: 1.3;
+  font-size: var(--text-h3);
+  line-height: 32px;
+  letter-spacing: -0.01em;
   font-weight: 600;
   margin-bottom: var(--s-3);
 }
+h4 {
+  font-size: var(--text-h4);
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  margin-bottom: var(--s-3);
+}
+/* Bible body 16px / 450 / 24 line-height — used as the default lede style too. */
 .lede {
   max-width: 640px;
-  margin: 0 0 var(--s-6) 0;
-  color: var(--paper-dim);
-  font-size: clamp(17px, 1.4vw, 20px);
-  line-height: 1.55;
+  margin: 0 0 var(--s-5) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-body);
+  font-weight: 450;
+  line-height: 24px;
 }
 .hero-actions {
   display: flex;
@@ -434,9 +454,13 @@ h3 {
 .proof div {
   border: 0;
   border-radius: 0;
-  padding: var(--s-4) var(--s-5) var(--s-4) 0;
+  /* Bible §03: symmetric inset; the proof grid uses a top hairline
+     not vertical dividers, so this just controls breathing room. */
+  padding: var(--s-4) var(--s-5);
   background: transparent;
 }
+.proof div:first-child { padding-left: 0; }
+.proof div:last-child { padding-right: 0; }
 .proof strong {
   display: block;
   font-family: var(--font-mono);
@@ -478,21 +502,27 @@ h3 {
   border-bottom: 1px solid var(--rule);
   position: relative;
 }
+/* Section heading row: h2 left, lede right.
+   align-items: start so the lede sits at the TOP of the heading box,
+   not floating at the bottom. Bible §03: heading-to-body gap = 16px;
+   we tighten the section-head bottom-margin to s-6 (32px) to keep
+   the heading visually attached to the section content below. */
 .section-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: var(--s-8);
-  align-items: end;
-  margin-bottom: var(--s-8);
+  gap: var(--s-6);
+  align-items: start;
+  margin-bottom: var(--s-6);
 }
 .section-head h2 {
   margin: 0;
 }
 .section-head p {
   margin: 0;
-  color: var(--text-2);
-  font-size: 16px;
-  line-height: 1.5;
+  color: var(--text-secondary);
+  font-size: var(--text-body);
+  font-weight: 450;
+  line-height: 24px;
   max-width: 520px;
 }
 
@@ -505,9 +535,17 @@ h3 {
 }
 .step {
   position: relative;
-  padding: var(--s-6) var(--s-5) var(--s-6) 0;
+  /* Bible §03: symmetric padding inside cells. The right-border is
+     the vertical divider; cells need equal left+right insets so text
+     doesn't collide with the line. */
+  padding: var(--s-6) var(--s-5);
   border-right: 1px solid var(--rule);
 }
+/* First cell aligns to grid edge (no left padding contributing to
+   excess inset) — but still needs a small breathing margin so text
+   doesn't sit against the section's outer padding. Handled by
+   the .wrap container's own side padding. */
+.step:first-child { padding-left: 0; }
 .step:last-child { border-right: 0; }
 .step:not(:nth-child(-n+4)) { border-top: 1px solid var(--rule); }
 .step b {
@@ -544,12 +582,15 @@ h3 {
 }
 .feature,
 .format {
-  padding: var(--s-6) var(--s-5) var(--s-6) 0;
+  /* Bible §03: symmetric padding so text never sits on the divider. */
+  padding: var(--s-6) var(--s-5);
   border-right: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
 }
+.feature:nth-child(3n + 1),
+.format:nth-child(3n + 1) { padding-left: 0; }
 .feature:nth-child(3n),
-.format:nth-child(3n) { border-right: 0; }
+.format:nth-child(3n) { border-right: 0; padding-right: 0; }
 .feature strong,
 .format strong {
   display: block;
@@ -946,7 +987,10 @@ h3 {
 
 @media (max-width: 540px) {
   .wrap { width: min(100% - 24px, 1180px); }
-  h1 { font-size: clamp(44px, 11vw, 72px); }
+  /* Bible §01 mobile scale: display 36 / h1 28 / h2 24 / h3 20 / body 16 */
+  h1 { font-size: 36px; line-height: 40px; }
+  h2 { font-size: 24px; line-height: 28px; }
+  h3 { font-size: 20px; line-height: 28px; }
   .lede { font-size: 16px; }
   .workflow { grid-template-columns: 1fr; }
   .step { border-right: 0; }
