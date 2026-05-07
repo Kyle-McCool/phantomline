@@ -361,7 +361,11 @@ select:focus-visible {
 .hero-grid {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  /* Shifted ratio so the mark column gets more room (1.3/1 instead
+     of 2/1). With more breathing space in the right column the mark
+     can sit visually nestled inside the page rather than flush to
+     the right edge. */
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   gap: var(--s-7);
   align-items: stretch;
 }
@@ -385,12 +389,12 @@ select:focus-visible {
   width: 100%;
   max-width: 360px;
   /* No aspect-ratio. height is driven by the copy column. */
-  /* Shift the mark substantially left of the section's right edge
-     so it sits nested inside the page rather than hugging the
-     boundary. clamp(96px, 12vw, 200px) scales with viewport so
-     the offset feels right at every desktop width. */
-  margin-left: auto;
-  margin-right: clamp(96px, 12vw, 200px);
+  /* justify-self: start aligns the mark to the LEFT side of its
+     grid column. Combined with the wider mark column (1.3/1 ratio
+     above), this puts the mark visibly inset from the page's right
+     edge — nestled inside the right half rather than hugging the
+     boundary. */
+  justify-self: start;
 }
 .hero-mark img {
   position: relative;
