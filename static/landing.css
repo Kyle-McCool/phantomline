@@ -907,31 +907,35 @@ h4 {
 }
 
 /* ─── Footer ─────────────────────────────────────────────────────────── */
+/* Brand Bible §06 layout. Single row: brand block on the left,
+   3-column nav grid on the right. Tighter than a stacked layout —
+   the brand stays visually anchored to the columns instead of
+   floating in 144px of empty space above them. */
 .site-footer {
-  padding: var(--s-9) 0 var(--s-7);
-  margin-top: var(--s-7);
+  padding: var(--s-7) 0 var(--s-5);
   border-top: 1px solid var(--rule);
-  color: var(--text-2);
-  font-size: 13px;
+  color: var(--text-secondary);
+  font-size: var(--text-caption);
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+  gap: var(--s-7);
+  align-items: start;
 }
-/* Brand Bible §06: max 3 columns, max 4-5 links each.
-   Brand block sits ABOVE the grid (full width) instead of as a column;
-   keeps the 3-col rhythm clean on every breakpoint. */
 .site-footer-brand {
-  margin-bottom: var(--s-6);
+  /* No own margin; the parent grid gap handles spacing. */
 }
 .site-footer-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--s-6);
-  margin-bottom: var(--s-7);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-5);
 }
 .site-footer-brand p {
   font-family: var(--font-sans);
-  font-size: 13px;
-  color: var(--text-2);
-  max-width: 420px;
-  line-height: 1.5;
+  font-size: var(--text-caption);
+  font-weight: 450;
+  color: var(--text-secondary);
+  max-width: 320px;
+  line-height: 20px;
   margin: var(--s-3) 0 0 0;
 }
 .footer-brand-img { height: 28px; width: auto; }
@@ -959,14 +963,17 @@ h4 {
 }
 .site-footer-col li a:hover { color: var(--brand); }
 .site-footer-bottom {
+  /* Legal bar spans both grid columns of the footer. */
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
-  padding-top: var(--s-5);
+  margin-top: var(--s-6);
+  padding-top: var(--s-4);
   border-top: 1px solid var(--rule);
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: var(--text-3);
+  color: var(--text-muted);
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────── */
@@ -990,7 +997,9 @@ h4 {
   .navlinks { display: none; }
   .navlinks .cta { display: inline-flex; }
   .top { gap: 12px; }
-  /* Bible §06: footer columns stay 3-wide on every breakpoint. */
+  /* Bible §06 footer: stack brand above columns on tablet/mobile,
+     but columns themselves stay 3-wide (Bible mandates no stacking). */
+  .site-footer { grid-template-columns: 1fr; gap: var(--s-5); }
   .site-footer-grid { grid-template-columns: repeat(3, 1fr); gap: var(--s-3); }
   .site-footer-bottom { flex-direction: column; gap: 8px; }
 }
