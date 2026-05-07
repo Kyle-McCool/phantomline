@@ -2,53 +2,119 @@
    2026-05 redesign. Rationale: the previous landing leaned generic-SaaS
    (glass morphism, multi-color radial gradients, Three.js hero canvas,
    floating phone mock). This pass commits to a deliberate aesthetic:
-   black + warm paper + brand teal, IBM Plex Mono/Sans typography, a
+   black + warm paper + brand teal, Geist Sans/Mono typography, a
    recurring "phantom line" motif (literal hairlines that echo the
    brand name), and grain texture for tactile feel. Class hooks are
    preserved so pillar/alternative pages that share this stylesheet
    keep working.
 
    Color discipline:
-   - One brand color (teal #1ab8e8) used SPARINGLY as accent only
+   - One brand color (teal #22E7F5) used SPARINGLY as accent only
    - One signal color (warm amber #e8a04a) reserved for urgency/CTA contrast
    - Black ink + warm off-white paper as the dominant palette
    - No gradients on text. No glass morphism. No drop-shadow glows.
 
    Typography:
-   - Display: IBM Plex Mono — technical, characterful, free, not in
+   - Display: Geist Mono — technical, characterful, free, not in
      the bencium "do not use" list (Inter, Roboto, Arial, Space Grotesk)
-   - Body: IBM Plex Sans — highly legible, distinctive lowercase
+   - Body: Geist — highly legible, distinctive lowercase
    - Scale: 1.333 (perfect fourth) — editorial drama, not SaaS timidity
 */
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+/* Phantomline Brand Bible v1.0 typography stack (2026-05 update).
+   Geist Sans + Geist Mono. Ideally self-hosted from vercel.com/font;
+   Google Fonts CDN here as a fallback (slight loss of OpenType
+   features but brand identity preserved). To upgrade: drop Geist
+   variable woff2 in static/fonts/ + replace this @import with
+   @font-face declarations. */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
 
 :root {
-  /* Ink + paper base */
-  --ink: #0a0a0a;
-  --ink-2: #141414;
-  --paper: #f4f1ea;
-  --paper-dim: #d8d4cb;
-  --text: #f4f1ea;
-  --text-2: #8c8a82;
-  --text-3: #5e5d57;
+  /* ─── Brand Bible v1.0 tokens ──────────────────────────────────── */
+  /* Cyan ladder (from logo) */
+  --cyan-900: #0A7A85;
+  --cyan-700: #0AA7B5;
+  --cyan-500: #22E7F5;
+  --cyan-400: #26F3FF;
+  --cyan-200: #BAFFFF;
 
-  /* Hairlines + dividers */
-  --rule: rgba(244, 241, 234, 0.14);
-  --rule-strong: rgba(244, 241, 234, 0.32);
+  /* Cool gray scale */
+  --gray-950: #0B0F11;
+  --gray-900: #111619;
+  --gray-850: #161B1F;
+  --gray-800: #1C2227;
+  --gray-700: #2A3137;
+  --gray-600: #3A4249;
+  --gray-500: #5C6B77;
+  --gray-400: #7A8B97;
+  --gray-300: #94A3B0;
+  --gray-100: #E6EAEC;
 
-  /* Brand + signal — used SPARINGLY */
-  --brand: #1ab8e8;
-  --brand-deep: #0d7ea8;
-  --brand-faint: rgba(26, 184, 232, 0.08);
-  --signal: #e8a04a;
-  --signal-deep: #b8761d;
+  /* Surfaces (4-level via bg-color, no shadows for elevation) */
+  --bg-base: var(--gray-950);
+  --bg-surface-1: var(--gray-900);
+  --bg-surface-2: var(--gray-850);
+  --bg-surface-3: var(--gray-800);
+  --bg-overlay: rgba(0, 0, 0, 0.6);
+
+  /* Borders */
+  --border-default: var(--gray-700);
+  --border-subtle: var(--gray-800);
+  --border-strong: var(--gray-600);
+  --border-focus: var(--cyan-500);
+
+  /* Text */
+  --text-primary: var(--gray-100);
+  --text-secondary: var(--gray-300);
+  --text-muted: var(--gray-500);
+  --text-accent: var(--cyan-500);
+  --text-on-accent: var(--gray-950);
+
+  /* Accent + states */
+  --accent-default: var(--cyan-500);
+  --accent-hover: var(--cyan-400);
+  --accent-muted: rgba(34, 231, 245, 0.15);
+  --accent-glow: rgba(34, 231, 245, 0.25);
+  --success: #34D399;
+  --warning: #FBBF24;
+  --error: #F87171;
 
   /* Typography */
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --font-sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-display: 56px;
+  --text-h1: 40px;
+  --text-h2: 32px;
+  --text-h3: 24px;
+  --text-h4: 20px;
+  --text-body: 16px;
+  --text-body-sm: 14px;
+  --text-caption: 13px;
+  --text-label: 12px;
+  --text-mono: 14px;
 
-  /* Spacing scale (4px base, 1.5x rhythm) */
+  /* Radius — Bible §04: NO PILLS */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* ─── Backward-compat aliases (legacy rules) ───────────────────── */
+  --ink: var(--bg-base);
+  --ink-2: var(--bg-surface-2);
+  --paper: var(--text-primary);
+  --paper-dim: var(--text-secondary);
+  --text: var(--text-primary);
+  --text-2: var(--text-secondary);
+  --text-3: var(--text-muted);
+  --rule: var(--border-subtle);
+  --rule-strong: var(--border-default);
+  --brand: var(--accent-default);
+  --brand-deep: var(--cyan-700);
+  --brand-faint: var(--accent-muted);
+  --signal: var(--warning);
+  --signal-deep: #B8761D;
+
+  /* Spacing scale (8px base + 4px half-step) — Bible §03 */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -113,7 +179,7 @@ img { max-width: 100%; display: block; }
   gap: 24px;
   padding: 18px 0;
   border-bottom: 1px solid var(--rule);
-  background: rgba(10, 10, 10, 0.88);
+  background: rgba(11, 15, 17, 0.88);
   backdrop-filter: saturate(140%) blur(8px);
   -webkit-backdrop-filter: saturate(140%) blur(8px);
 }
@@ -127,6 +193,16 @@ img { max-width: 100%; display: block; }
   width: auto;
   max-width: min(60vw, 220px);
   object-fit: contain;
+}
+/* Bible §05 mobile rule: drop the wordmark on phones, ghost icon only. */
+@media (max-width: 767px) {
+  .brand .brand-img {
+    /* Crop horizontally so only the leading icon glyph remains visible.
+       Logo asset is wide (icon + wordmark); object-position keeps the
+       icon while max-width clips the wordmark. */
+    max-width: 28px;
+    object-position: left center;
+  }
 }
 .navlinks {
   display: flex;
@@ -445,7 +521,7 @@ h3 {
 }
 .step strong {
   display: block;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--paper);
   margin-bottom: var(--s-3);
@@ -634,7 +710,7 @@ h3 {
   background: rgba(232, 160, 74, 0.06);
 }
 .pricing-card h3 {
-  font-size: 22px;
+  font-size: 24px;
   margin-bottom: var(--s-2);
 }
 .pricing-tagline {
@@ -731,7 +807,7 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--paper);
   letter-spacing: -0.01em;
@@ -741,7 +817,7 @@ h3 {
 .faq summary::after {
   content: "+";
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 400;
   color: var(--brand);
   transition: transform 160ms ease;
@@ -787,9 +863,15 @@ h3 {
   color: var(--text-2);
   font-size: 13px;
 }
+/* Brand Bible §06: max 3 columns, max 4-5 links each.
+   Brand block sits ABOVE the grid (full width) instead of as a column;
+   keeps the 3-col rhythm clean on every breakpoint. */
+.site-footer-brand {
+  margin-bottom: var(--s-6);
+}
 .site-footer-grid {
   display: grid;
-  grid-template-columns: 2fr repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--s-6);
   margin-bottom: var(--s-7);
 }
@@ -797,7 +879,7 @@ h3 {
   font-family: var(--font-sans);
   font-size: 13px;
   color: var(--text-2);
-  max-width: 280px;
+  max-width: 420px;
   line-height: 1.5;
   margin: var(--s-3) 0 0 0;
 }
@@ -857,8 +939,8 @@ h3 {
   .navlinks { display: none; }
   .navlinks .cta { display: inline-flex; }
   .top { gap: 12px; }
-  .site-footer-grid { grid-template-columns: 1fr 1fr; gap: var(--s-5); }
-  .site-footer-brand { grid-column: 1 / -1; }
+  /* Bible §06: footer columns stay 3-wide on every breakpoint. */
+  .site-footer-grid { grid-template-columns: repeat(3, 1fr); gap: var(--s-3); }
   .site-footer-bottom { flex-direction: column; gap: 8px; }
 }
 
@@ -877,7 +959,7 @@ h3 {
 /* ─── Brand-align overrides for /alternatives + pillar pages ──────────── */
 /* article.css forces Cormorant Garamond on .article-head h1 + .article h2.
    These pages share the landing.css token system but had headline fonts
-   that didn't match the IBM Plex direction. Override here so the fix
+   that didn't match the Geist direction. Override here so the fix
    reaches every page that loads landing.css without touching article.css
    (which is also used for alt-card grids that we want to keep). */
 .article-head h1,

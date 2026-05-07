@@ -50,12 +50,18 @@ mode).
 
 ## Brand direction
 
-- **Industrial-editorial**: IBM Plex Mono + Plex Sans, hairline rules,
-  warm-paper text on near-black ink. References Linear, Vercel, Stripe
-  docs — but with a creator-tool warmth (not a cold dashboard).
-- **Color**: brand-teal `#1ab8e8` (matches the logo) + signal-orange
-  `#e8a04a` for warnings. Greys are warm-tinted (`#f4f1ea` paper, not
-  pure white).
+Aligned with `phantomline-brand-bible-markdown.md` v1.0 (May 2026).
+
+- **Cool dark + cyan + Geist**. Vercel-flavored industrial-precision.
+  References Linear, Vercel, Stripe docs. Tight spacing, monochrome
+  cool-gray foundation, one accent color, no pills, no gradients on
+  chrome, no shadows for elevation.
+- **Color**: cyan-500 `#22E7F5` (logo color) is the only accent. Cool
+  gray scale `#0B0F11` → `#E6EAEC` for surfaces and text. Never pure
+  white for text.
+- **Typography**: Geist Sans + Geist Mono (self-hosted from
+  vercel.com/font ideally; Google Fonts CDN as a temporary fallback).
+  Body weight is **450** (variable axis), not 400.
 - **Voice**: lowercase, direct, technical-honest. No "10x your
   productivity!" copy. Real claims with real numbers ("2-min render
   on M2 Air", not "lightning fast"). Show the install commands; don't

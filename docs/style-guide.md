@@ -1,232 +1,252 @@
 # Phantomline Style Guide
 
-The single source of truth for tokens, scales, and patterns. Reference
-this from any prompt that touches CSS — "follow style-guide.md
-spacing/radius/type scales" — to stop the drift that produced 25
-distinct font-sizes and 14 distinct radii in `phantomline.css`.
+**This guide is a summary of `phantomline-brand-bible-markdown.md` v1.0
+(May 2026) — the Brand Bible is the source of truth.** This file
+explains how the Bible's tokens are wired into the codebase. When the
+Bible says one thing and this file says another, **the Bible wins** —
+update this file to match.
 
-The canonical tokens themselves live in `static/phantomline.css`'s
-`:root` block (Phase 1 craft pass, 2026-05). This doc explains the
-intent.
+The canonical CSS tokens live in `static/phantomline.css`'s `:root`
+block and `static/landing.css`'s `:root` block (both kept in sync).
 
-## Design philosophy
+## Brand direction
 
-**Industrial-editorial.** Sharp, dense, technical-honest. Ink + paper
-+ brand-teal. Hairline rules over heavy borders. Mono for labels and
-data, sans for prose. Flat-by-default depth (no big drop shadows);
-subtle gradients on hero panels for premium feel.
+**Cool dark + cyan + Geist.** Vercel-flavored industrial-precision
+aesthetic. References: Linear, Vercel, Stripe docs. Tight spacing,
+monochrome cool gray foundation, one accent color (cyan), no
+gradients on chrome, no shadows for elevation.
 
-**Personality (per `anthropic-skills:design` matrix): "Precision &
-Density."** Power users live in the tool. Tight spacing, monochrome
-foundation, info-forward layout. References: Linear, Raycast, terminal
-aesthetics — softened with warm paper text instead of cold pure white.
-
-## Color palette
+## Color (Bible §02)
 
 ```
---ink            #0a0a0a    Page background (near-black, not pure)
---ink-2          #141414    Panel background
---paper          #f4f1ea    Foreground text (warm white)
---paper-dim      #d8d4cb    Secondary text
---rule           rgba(244, 241, 234, 0.14)    Hairline divider
---rule-strong    rgba(244, 241, 234, 0.32)    Visible divider
---brand          #1ab8e8    Brand teal — logo color, primary accent
---brand-deep     #0d7ea8    Pressed / hover for brand
---brand-faint    rgba(26, 184, 232, 0.08)     Brand-tinted bg
---signal         #e8a04a    Warnings, secondary accent
---signal-deep    #b8761d    Warning emphasis
+/* Brand cyan ladder (logo) */
+--cyan-900   #0A7A85
+--cyan-700   #0AA7B5
+--cyan-500   #22E7F5  Primary — buttons, links, accents
+--cyan-400   #26F3FF  Hover
+--cyan-200   #BAFFFF  Ice glow
+
+/* Cool gray scale */
+--gray-950   #0B0F11  Deepest bg
+--gray-900   #111619
+--gray-850   #161B1F
+--gray-800   #1C2227
+--gray-700   #2A3137
+--gray-600   #3A4249
+--gray-500   #5C6B77  Muted text
+--gray-300   #94A3B0  Secondary text
+--gray-100   #E6EAEC  Primary text — never #FFF
+
+/* Surfaces — 4-level via bg-color, NEVER box-shadow */
+--bg-base       gray-950
+--bg-surface-1  gray-900   Cards, panels, sidebar
+--bg-surface-2  gray-850   Nested cards, hover states
+--bg-surface-3  gray-800   Active states, dropdowns
+--bg-overlay    rgba(0,0,0,0.6)  Modal backdrop only
+
+/* Accent + state */
+--accent-default  cyan-500
+--accent-hover    cyan-400
+--accent-muted    rgba(34, 231, 245, 0.15)
+--success         #34D399
+--warning         #FBBF24
+--error           #F87171
 ```
 
-### Do
-- Use `--brand` for primary CTAs and active states only.
-- Use `--paper` for headings, `--paper-dim` for body and captions.
-- Use `--rule` for dividers; `--rule-strong` only when separation matters.
+### Rules
+- Never raw hex in components — always go through a token.
+- Never `#FFFFFF` for text — primary text is `#E6EAEC`.
+- Never `box-shadow` for elevation — depth = bg-color step.
+- Focus rings are always cyan: `outline: 2px solid var(--border-focus); outline-offset: 2px`.
+- One accent color. Never introduce a second.
 
-### Don't
-- Don't introduce new accent colors. We're a one-accent product.
-- Don't use pure `#fff` or `#000`. Always the warmer ink/paper pair.
-- Don't hard-code rgba colors when a token exists.
+## Typography (Bible §01)
 
-## Typography
+**Geist Sans + Geist Mono.** Self-hosted ideally
+(from vercel.com/font); currently via Google Fonts CDN as a fallback
+(slight loss of OpenType `tnum`/`zero` features but brand identity
+preserved). To upgrade: drop Geist variable woff2 in `static/fonts/` +
+replace `@import` with `@font-face`.
 
-**Fonts:**
-- Headings + body: `IBM Plex Sans` (var: `--font-sans`)
-- Labels, data, pills, eyebrows, code: `IBM Plex Mono` (var: `--font-mono`)
-- One display font, one body. **Never mix two display fonts** (the
-  pillar pages used Cormorant Garamond — that's been removed).
+| Token | Size | Weight | LH | Tracking | Usage |
+|---|---|---|---|---|---|
+| `--text-display` | 56px | 700 | 60 | -0.02em | Landing hero only |
+| `--text-h1` | 40px | 700 | 44 | -0.02em | Page titles |
+| `--text-h2` | 32px | 600 | 36 | -0.015em | Section headings |
+| `--text-h3` | 24px | 600 | 32 | -0.01em | Sub-section, card titles |
+| `--text-h4` | 20px | 600 | 28 | -0.01em | Minor headings |
+| `--text-body` | 16px | 450 | 24 | 0 | Default body |
+| `--text-body-sm` | 14px | 450 | 20 | 0 | Secondary body |
+| `--text-caption` | 13px | 400 | 20 | 0.01em | Captions, metadata |
+| `--text-label` | 12px | 500 | 16 | 0.04em | Uppercase labels, badges |
+| `--text-mono` | 14px | 400 | 20 | 0 | Code, technical (Geist Mono) |
 
-**Scale (phantomline.css `:root` tokens):**
+### Rules
+- **Body weight is 450** (Geist variable axis), not 400.
+- **No 15px, 17px, 18px, 22px.** If it's not in the table, it doesn't exist.
+- Negative letter-spacing on headings (-0.02 to -0.01em).
+- Positive +0.04em on uppercase labels (the only uppercase context).
+- Mono ONLY for: code, technical values, metrics, kbd shortcuts. Never body or headings.
+- Self-host Geist (Google Fonts CDN strips OpenType features).
 
-| Token | Size | Usage |
+### Mobile scaling
+
+| | Desktop | Mobile (≤767px) |
 |---|---|---|
-| `--t-xs` | 11px | eyebrows, badge labels |
-| `--t-sm` | 12px | secondary, tag chips, mono labels |
-| `--t-base` | 13px | body in dense contexts |
-| `--t-md` | 14px | primary body, button text |
-| `--t-lg` | 16px | lede, prominent body |
-| `--t-xl` | 18px | h3 |
-| `--t-2xl` | 24px | h2 in compact contexts |
-| `--t-3xl` | 32px | h2 in display contexts |
+| Display | 56px | 36px |
+| H1 | 40px | 28px |
+| H2 | 32px | 24px |
+| H3 | 24px | 20px |
+| Body+below | unchanged | unchanged |
 
-**Hero scale (fluid):**
-- Landing h1: `clamp(56px, 9vw, 124px)`
-- Section eyebrows + heroes: use `clamp()` for fluidity at desktop widths
+## Spacing (Bible §03)
 
-**Weights:** 400 body, 500 active body, 600 headings/buttons, 700 brand. No 800/900.
+8px base + 4px half-step.
 
-**Tracking:** -0.005em on body, -0.02em on display headlines, +0.04em on
-uppercase labels.
-
-### Fractional sizes are forbidden
-The Phase 1 pass eliminated 11.5 / 12.5 / 13.5 / 9.5 / 10.5px. **Never
-re-introduce them.** Round to the nearest scale token.
-
-## Spacing scale
-
-4px-grid based. **Phantomline.css** tolerates 6/10/14/18/22 historically
-but new code should reference these tokens:
-
-| Token | Value | Use case |
+| Token | Value | Usage |
 |---|---|---|
-| `--space-1` | 4px | hairline, icon insets |
-| `--space-2` | 8px | tight gaps |
-| `--space-3` | 12px | standard pad / row gap |
-| `--space-4` | 16px | comfortable pad |
-| `--space-6` | 24px | generous pad / section gap |
-| `--space-8` | 32px | major section spacing |
-| `--space-12` | 48px | hero spacing |
+| `--space-1` | 4px | icon-to-label, fine adjustments |
+| `--space-2` | 8px | tightly related |
+| `--space-3` | 12px | small internal gaps |
+| `--space-4` | 16px | default component padding |
+| `--space-5` | 24px | between groups |
+| `--space-6` | 32px | between content blocks |
+| `--space-7` | 48px | sections (mobile) |
+| `--space-8` | 64px | sections (desktop, smaller) |
+| `--space-9` | 96px | major sections (desktop) |
+| `--space-10` | 128px | hero |
 
-**Symmetrical padding rule:** TLBR sides match. If top is 16px, all
-sides are 16px. The only exception is when content naturally creates
-asymmetry (e.g. card with leading icon).
+### Section spacing
+- Section vertical padding: 96px desktop / 64px tablet / 48px mobile
+- Content max-width: 1200px centered
+- Side padding: 48 / 32 / 24px
 
-## Border radius
+### Golden rule: internal ≤ external
+Padding inside a component must never exceed margin separating it from
+its neighbors. If a card has 16px internal padding, gap between cards
+must be ≥16px (24px recommended).
 
-Sharp + flat depth strategy. Industrial-editorial wants chips and
-buttons to feel cut-out, not pillowy.
+### Rules
+- Never spacing values outside scale (no 13px, 17px, 22px).
+- Never `--space-1` for non-icon adjustments.
+- Never 0px gap between interactive elements (min 8px).
 
-| Token | Value | Use case |
+## Border radius (Bible §04)
+
+| Token | Value | Usage |
 |---|---|---|
-| `--r-1` | 4px | tiny accents (focus rings, status dots) |
-| `--r-2` | 8px | chips, buttons, inputs |
-| `--r-3` | 14px | cards, workflow steps |
-| `--r-4` | 22px | hero cards, big panels |
-| `--r-pill` | 999px | pills, tags |
-| `--r-circle` | 50% | avatars, status dots |
+| `--radius-sm` | 4px | badges, tags, small |
+| `--radius-md` | 8px | buttons, inputs, cards, dropdowns |
+| `--radius-lg` | 12px | modals, hero containers |
 
-Phase 1 collapsed one-offs (13/24/26/28/34px) to nearest scale value.
-**Don't introduce new radii.** Pick from the ladder.
+**NO PILLS, EVER.** Bible §04: pills are the #1 vibe-coded tell.
+Avatars and status dots use `border-radius: 50%` (circles, not pills).
 
-## Depth strategy
+## Components (Bible §04)
 
-**Flat by default; subtle gradients for emphasis.** Match Linear /
-Raycast, not Stripe.
+### Buttons — 3 variants only
 
-- Plain panels: 1px hairline border (`--rule`), no shadow
-- Cards on focus: 1px brighter border (`--rule-strong`)
-- Hero cards: subtle linear-gradient + inset 1px highlight at top
-- Modals / popovers: heavier shadow `--shadow` (the only big drop shadow)
+| Variant | Bg | Text | Border | Use |
+|---|---|---|---|---|
+| Primary | `--accent-default` | `--text-on-accent` | none | Main CTA |
+| Secondary | transparent | `--text-primary` | 1px `--border-strong` | Supporting |
+| Ghost | transparent | `--text-secondary` | none | Tertiary, nav |
 
-**No** dramatic drop shadows on resting state. **No** layered shadows
-unless on a true overlay.
-
-## Motion
-
-| Token | Value | Use case |
-|---|---|---|
-| `--motion-fast` | 150ms | micro (hover, tap, focus ring) |
-| `--motion-base` | 200ms | tab switches, card flips |
-| `--motion-slow` | 300ms | route transitions, large reveals |
-| `--ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | entrances |
-| `--ease-in-out` | `cubic-bezier(0.65, 0, 0.35, 1)` | state changes |
-
-**Always** wrap motion in `@media (prefers-reduced-motion: reduce)` to
-disable for users who opt out.
-
-**Don't** use spring physics, bouncy overshoots, or parallax. Motion is
-communication, not decoration.
-
-## Component patterns
-
-### Buttons
-
-```css
-.btn {
-  font-family: var(--font-mono);
-  font-size: var(--t-md);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: lowercase;
-  padding: 12px 18px;
-  border-radius: var(--r-2);
-  border: 1px solid var(--rule-strong);
-  background: var(--brand-faint);
-  color: var(--paper);
-  transition: background var(--motion-fast) var(--ease-out),
-              border-color var(--motion-fast) var(--ease-out);
-}
-.btn:hover { background: var(--brand-faint), brighter; }
-.btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.btn.secondary { background: transparent; border-color: var(--rule); }
-```
-
-### Inputs
-
-Custom only — no native `<select>` styling. Use `--rule` borders, paper
-text, `--ink-2` background. Focus ring = `--brand` 2px outline.
+- Padding: 12px 24px
+- Radius: `--radius-md` (8px)
+- Font: 14px / 500
+- Transition: `all 200ms ease`
+- Hover Primary: bg → `--accent-hover`
+- Hover Secondary: bg → `--bg-surface-2`
+- Hover Ghost: bg → `--bg-surface-1`
+- Active: `transform: scale(0.98)`
+- Focus: 2px cyan outline, 2px offset
 
 ### Cards
+- Bg `--bg-surface-1`, border 1px `--border-default`, radius `--radius-md`, padding 24px, **NO shadow**
+- Hover (interactive): border → `--border-strong`, bg → `--bg-surface-2`
 
-- Panel: 1px `--rule` border, `--ink-2` background, `--r-3` radius
-- Hero card: `--r-4` radius, brand-tinted gradient, inset top highlight
+### Inputs
+- Bg `--bg-surface-1`, border 1px `--border-strong`, radius `--radius-md`, padding 12px 16px
+- Text `--text-primary`, placeholder `--text-muted`
+- Focus: border → `--accent-default` + focus ring
+- Error: border → `--error`
 
-### Eyebrows
+### Badges / Tags
+- Radius `--radius-sm` (4px) — NOT pill
+- Padding 4px 8px
+- Font 12px/500/uppercase/+0.04em
+- Bg `--accent-muted` (cyan) or `--bg-surface-2` (neutral)
 
-Mono, 11px, uppercase, brand-teal, with a brand-teal dot prefix.
+## Logo (Bible §05)
 
-```css
-.make-eyebrow::before {
-  content: "";
-  width: 8px; height: 8px;
-  border-radius: var(--r-circle);
-  background: var(--brand);
-  box-shadow: 0 0 16px rgba(26, 184, 232, 0.7);
-}
-```
+- **Only in nav and footer.** Never in hero.
+- Nav: ghost icon + "phantomline.xyz" wordmark, left-aligned, 28px height in 60px nav
+- Footer: same, in `--text-muted`, 24-28px height
+- Mobile <768px: ghost icon only, drop wordmark
+- Clear space: minimum height of ghost icon on all sides
+- Min digital size: 24px
+
+## Footer (Bible §06)
+
+**Max 3 columns. 4-5 links per column. Stay 3-wide on mobile.**
+
+Current: Product / Resources / Company. Brand block sits ABOVE the
+grid (full-width) for clean column rhythm.
+
+- No newsletter signup
+- No social icon bars (text links only)
+- No back-to-top
+- No gradients / decorative bg
+
+## Mobile (Bible §07)
+
+Mobile-first CSS. Base = mobile, `min-width` queries scale up.
+
+| Breakpoint | Width | Layout |
+|---|---|---|
+| Mobile | ≤767px | Single column, stacked |
+| Tablet | 768-1023px | 2-col where appropriate |
+| Desktop | ≥1024px | Full multi-column |
+
+### Touch targets
+- Min 44×44px tap area on every interactive
+- Min 8px between adjacent tap targets
+- No hover-only interactions
+
+### Non-negotiable
+- No horizontal scroll on any viewport ≥320px
+- No fixed/sticky except nav bar
+- No carousels
+- Use `srcset`/`sizes` on all images
 
 ## Anti-patterns (forbidden)
 
-- ❌ Pure black or pure white (use `--ink` / `--paper`)
-- ❌ Big drop shadows on resting state (`0 25px 50px` etc.)
-- ❌ `border-radius` larger than `--r-4` on small elements
-- ❌ Asymmetric padding without a content reason
-- ❌ Multiple accent colors (one + one signal max)
-- ❌ Spring or bouncy animations
+- ❌ `#FFFFFF` for text
+- ❌ `box-shadow` for elevation on resting components (modals/overlays OK)
+- ❌ `border-radius: 999px` (pills) on anything
+- ❌ `linear-gradient` on buttons, cards, inputs
+- ❌ Border width > 1px (except focus rings)
+- ❌ Spring/bouncy animations
+- ❌ More than 1 primary CTA per viewport
+- ❌ Icon-only button without `aria-label`
+- ❌ Spacing outside scale (13/17/22px)
+- ❌ Font size outside scale (15/17/18/22px)
 - ❌ Two display fonts on one surface
-- ❌ Fractional font-sizes (no 11.5/12.5/etc — round to scale)
-- ❌ Native `<select>` rendering — build custom
-- ❌ Animations without `prefers-reduced-motion` guard
-
-## Per-surface notes
-
-### Landing (`templates/landing.html` + `static/landing.css`)
-- Bold-minimalism direction with fluid `clamp()` hero type
-- 5 fluid-type clauses, `prefers-reduced-motion` honored, `:focus-visible` present
-- Brand mark + favicon are the only `<img>` tags — both have `width`/`height`/`decoding="async"`
-
-### Studio (`templates/index.html` + `static/phantomline.css`)
-- Precision-and-density direction; sidebar tabs + main + right rail
-- Workflow grid: `align-items: stretch` so left + right panels match heights
-- Tab default = "Create Video" for returning users; auto-routes to "Launch Setup" when readiness has blockers
-- `body.is-returning` hides first-run hero on every visit after first
-
-### Pillar / alternative pages
-- Use `landing.css` tokens + `article.css` for typography
-- Headings = `--font-sans` (IBM Plex Sans), no Cormorant Garamond
+- ❌ Multiple accent colors
 
 ## Living document
 
-This doc is updated as design decisions emerge. **When you make a
-decision that contradicts this guide, update the guide first, then
-build.** Otherwise the guide rots and the next session re-litigates
-the same choices.
+Update this file when:
+- A Bible decision is implemented and the codebase converges on a token
+- A new component pattern emerges
+- A token's intended use changes
+
+Always: update this file BEFORE building, never after. Otherwise the
+guide rots and the next session re-litigates the same choices.
+
+## Cross-reference
+
+- Brand Bible (source of truth): `phantomline-brand-bible-markdown.md`
+- Brand brief (audience + voice): `docs/brand-brief.md`
+- Design process (Define→Build→Review→Refine loop): `docs/design-process.md`

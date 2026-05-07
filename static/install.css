@@ -5,8 +5,8 @@
    shouldn't lean on). */
 
 .install-hero { padding: 42px 24px 18px; max-width: 820px; margin: 0 auto; }
-.install-hero h1 { font-size: 34px; margin: 0 0 6px; color: #1ab8e8; }
-.install-hero p.lead { color: #cdd6df; font-size: 17px; margin: 0 0 22px; }
+.install-hero h1 { font-size: 34px; margin: 0 0 6px; color: #22E7F5; }
+.install-hero p.lead { color: #cdd6df; font-size: 16px; margin: 0 0 22px; }
 
 .install-tabs { display: flex; gap: 8px; margin: 22px 0 14px; flex-wrap: wrap; }
 .install-tabs button {
@@ -14,17 +14,17 @@
   padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;
 }
 .install-tabs button.active {
-  background: #1ab8e8; color: #0a1722; border-color: #1ab8e8; font-weight: 600;
+  background: #22E7F5; color: #0a1722; border-color: #22E7F5; font-weight: 600;
 }
 
 .install-block {
   background: #0a1722; border: 1px solid #1f3447; border-radius: 10px;
   padding: 18px; margin-bottom: 14px;
 }
-.install-block h3 { margin: 0 0 8px; color: #1ab8e8; font-size: 16px; }
+.install-block h3 { margin: 0 0 8px; color: #22E7F5; font-size: 16px; }
 .install-block .step-num {
   display: inline-block; width: 24px; height: 24px; border-radius: 12px;
-  background: #1ab8e8; color: #0a1722; text-align: center; line-height: 24px;
+  background: #22E7F5; color: #0a1722; text-align: center; line-height: 24px;
   font-weight: 700; margin-right: 8px; font-size: 13px;
 }
 
@@ -35,7 +35,7 @@ pre.cmd {
 }
 
 .copy-btn {
-  background: #1ab8e8; color: #0a1722; border: none;
+  background: #22E7F5; color: #0a1722; border: none;
   padding: 6px 14px; border-radius: 6px; cursor: pointer;
   font-size: 12px; font-weight: 600; margin-left: 6px;
 }
@@ -54,7 +54,7 @@ pre.cmd {
 }
 
 .back-link { color: #7a96ad; text-decoration: none; font-size: 13px; }
-.back-link:hover { color: #1ab8e8; }
+.back-link:hover { color: #22E7F5; }
 
 .install-options-tabs {
   display: flex; gap: 0; border-bottom: 1px solid #1f3447; margin-bottom: 14px;
@@ -65,7 +65,7 @@ pre.cmd {
   border-bottom: 2px solid transparent;
 }
 .install-options-tabs button.active {
-  color: #1ab8e8; border-bottom-color: #1ab8e8;
+  color: #22E7F5; border-bottom-color: #22E7F5;
 }
 
 .install-pane { display: none; }
@@ -73,39 +73,39 @@ pre.cmd {
 
 .badge-os {
   display: inline-block; padding: 2px 8px;
-  background: #1f3447; color: #1ab8e8;
+  background: #1f3447; color: #22E7F5;
   font-size: 11px; border-radius: 4px; margin-right: 6px;
 }
 
 .download-hero {
   background: linear-gradient(180deg, #0c2a3a 0%, #07151c 100%);
-  border: 1px solid #1ab8e8;
+  border: 1px solid #22E7F5;
   border-radius: 14px; padding: 22px;
   margin-bottom: 22px;
 }
-.download-hero h2 { margin: 0 0 4px; color: #fff; font-size: 18px; }
+.download-hero h2 { margin: 0 0 4px; color: var(--text-primary); font-size: 16px; }
 .download-hero p.sub { margin: 0 0 16px; color: #9bb1c1; font-size: 13px; }
 
 .download-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
 
 a.download-btn {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 20px; background: #1ab8e8; color: #0a1722;
+  padding: 12px 20px; background: #22E7F5; color: #0a1722;
   text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px;
   transition: background 120ms, transform 60ms;
 }
 a.download-btn:hover { background: #33c8f0; transform: translateY(-1px); }
-a.download-btn.detected { box-shadow: 0 0 0 3px rgba(26, 184, 232, 0.35); }
+a.download-btn.detected { box-shadow: 0 0 0 3px rgba(34, 231, 245, 0.35); }
 a.download-btn.secondary {
   background: transparent; border: 1px solid #1f3447; color: #cdd6df;
 }
 a.download-btn.secondary:hover {
-  border-color: #1ab8e8; color: #1ab8e8; background: rgba(26, 184, 232, 0.05);
+  border-color: #22E7F5; color: #22E7F5; background: rgba(34, 231, 245, 0.05);
 }
 
 .download-size { color: #7a96ad; font-weight: 400; font-size: 11px; }
 
-.install-block a { color: #1ab8e8; text-decoration: underline; }
+.install-block a { color: #22E7F5; text-decoration: underline; }
 .install-block a:hover { color: #33c8f0; }
 .install-block a.download-btn,
 .install-block a.copy-btn { text-decoration: none; }
@@ -116,6 +116,6 @@ a.download-btn.secondary:hover {
 
 .os-detected-pill {
   display: inline-block; padding: 3px 10px;
-  background: #1ab8e8; color: #0a1722;
+  background: #22E7F5; color: #0a1722;
   font-size: 11px; border-radius: 10px; font-weight: 700; margin-left: 8px;
 }

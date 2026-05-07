@@ -11,8 +11,8 @@ function forceReadableButtons(root = document) {
     const isPrimary = el.classList.contains('btn') && !el.classList.contains('secondary');
     if (isPrimary) {
       el.style.setProperty('color', '#f4f8f5', 'important');
-      el.style.setProperty('background', 'linear-gradient(135deg, rgba(26,184,232,0.24), rgba(26,184,232,0.18)), rgba(10,18,18,0.94)', 'important');
-      el.style.setProperty('border-color', 'rgba(26,184,232,0.42)', 'important');
+      el.style.setProperty('background', 'linear-gradient(135deg, rgba(34, 231, 245,0.24), rgba(34, 231, 245,0.18)), rgba(10,18,18,0.94)', 'important');
+      el.style.setProperty('border-color', 'rgba(34, 231, 245,0.42)', 'important');
       el.style.setProperty('text-shadow', '0 1px 1px rgba(0,0,0,0.65)', 'important');
     } else if (el.classList.contains('secondary') || el.tagName === 'BUTTON') {
       el.style.setProperty('color', '#f4f8f5', 'important');
@@ -2607,7 +2607,7 @@ function renderOptimizeDetail(video, analysis = null) {
       html += `
         <div class="opt-section">
           <div class="opt-label">Why we should leave this alone</div>
-          <div class="opt-diagnosis" style="background:rgba(26,184,232,0.05); border-color:rgba(26,184,232,0.2);">
+          <div class="opt-diagnosis" style="background:rgba(34, 231, 245,0.05); border-color:rgba(34, 231, 245,0.2);">
             ${escapeHtml(ana.do_nothing_reason)}
           </div>
         </div>
@@ -4199,12 +4199,12 @@ function _renderThumbVariants(variants) {
   }
   const v = variants[0];
   grid.innerHTML = `
-    <div style="border:2px solid #1ab8e8; border-radius:10px; overflow:hidden; background:#0a1722;">
+    <div style="border:2px solid #22E7F5; border-radius:10px; overflow:hidden; background:#0a1722;">
       <img src="data:image/png;base64,${v.png_b64}" alt="Generated thumbnail"
         style="width:100%; height:auto; display:block;" />
       <div style="padding:8px 12px; font-size:12px; color:#7a96ad; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
         <span>${escapeHtml(v.preset || 'auto')} · ${escapeHtml(v.mode || '')}${v.seed ? ` · seed ${v.seed}` : ''}</span>
-        <span style="color:${v.mode === 'pil_fallback' ? '#e0a019' : '#1ab8e8'};">
+        <span style="color:${v.mode === 'pil_fallback' ? '#e0a019' : '#22E7F5'};">
           ${v.mode === 'pil_fallback' ? 'AI image source unreachable. Text-only fallback. Try Regenerate.' : 'Attached to post'}
         </span>
       </div>
@@ -4870,7 +4870,7 @@ async function loadLibraryBundles(grid) {
         <div class="proj-card bundle-card" data-id="${b.id}">
           <div class="row1">
             <h3>${escapeHtml(b.title || 'Untitled video')}</h3>
-            <span class="kind-badge" style="background: rgba(26,184,232,0.18); color: var(--accent);">Bundle</span>
+            <span class="kind-badge" style="background: rgba(34, 231, 245,0.18); color: var(--accent);">Bundle</span>
           </div>
           <div class="meta">${memberPills} · ${relTime(b.created_at)}</div>
           ${tagline ? `<div class="bundle-tagline" style="color:var(--muted); font-size:13px; margin-top:6px;">${escapeHtml(tagline)}</div>` : ''}
@@ -5147,7 +5147,7 @@ function mountWaveform(audioEl) {
 
   const ws = WaveSurfer.create({
     container: canvas,
-    waveColor: 'rgba(26,184,232,0.34)',
+    waveColor: 'rgba(34, 231, 245,0.34)',
     progressColor: '#69cff0',
     cursorColor: 'transparent',
     barWidth: 2, barGap: 2, barRadius: 2,
