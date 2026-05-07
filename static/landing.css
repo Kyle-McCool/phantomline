@@ -191,9 +191,14 @@ img { max-width: 100%; display: block; }
   line-height: 0;
 }
 .brand .brand-img {
-  height: 32px;
+  /* Brand mark in nav. Bumped from 32px to 56px for stronger
+     presence (per-direction Bible §05 caps at 28px in 60px nav, but
+     the actual logo asset uses padding inside its bbox so the
+     visible mark is closer to 36-40px equivalent. 56px lands the
+     visible glyphs near where 40px would in a tighter asset). */
+  height: 56px;
   width: auto;
-  max-width: min(60vw, 220px);
+  max-width: min(60vw, 320px);
   object-fit: contain;
 }
 /* Bible §05 mobile rule: drop the wordmark on phones, ghost icon only. */
@@ -346,18 +351,56 @@ select:focus-visible {
   pointer-events: none;
   background: radial-gradient(ellipse at 100% 0%, var(--brand-faint), transparent 60%);
 }
+/* Hero is now 2-col on desktop: copy + atmospheric mark. The mark
+   fills the right-side real estate that was sitting empty.
+   Stacks to 1-col on mobile (mark hidden on small screens since
+   the typography is already the focal point on a phone). */
 .hero-grid {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: var(--s-7);
-  align-items: end;
+  align-items: center;
 }
 .hero-copy { max-width: 920px; }
 .hero-logo-img {
   display: none; /* Replaced by dramatic typography. The wordmark in
                     the nav is enough. landing hero leads with type. */
 }
+
+/* Hero atmospheric mark. Decorative ghost icon at scale, framed by
+   two thin hairlines that echo the "phantom line" motif from the
+   brand name. Brand-glow blooms behind the icon to anchor the eye
+   without screaming logo. */
+.hero-mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 420px;
+  margin-left: auto;
+}
+.hero-mark img {
+  position: relative;
+  z-index: 2;
+  width: 78%;
+  height: auto;
+  filter: drop-shadow(0 0 48px rgba(34, 231, 245, 0.35));
+  opacity: 0.95;
+}
+.hero-mark-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-default), transparent);
+  z-index: 1;
+  opacity: 0.5;
+}
+.hero-mark-line--top { top: 18%; }
+.hero-mark-line--bottom { bottom: 18%; }
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -993,6 +1036,10 @@ h4 {
   .wrap { width: min(100% - 32px, 1180px); padding-bottom: 64px; }
   .hero { padding: 64px 0 56px; }
   .hero-grid { grid-template-columns: 1fr; gap: var(--s-6); }
+  /* Hide atmospheric mark on tablet/mobile. typography is the focal
+     point on small viewports and the mark would crowd the headline. */
+  .hero-mark { display: none; }
+  .brand .brand-img { height: 44px; }  /* Slightly smaller nav logo on mobile so the nav row still fits. */
   .section { padding: 64px 0; }
   .section-head { grid-template-columns: 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
   .workflow { grid-template-columns: 1fr 1fr; }
