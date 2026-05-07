@@ -351,14 +351,15 @@ select:focus-visible {
   pointer-events: none;
   background: radial-gradient(ellipse at 100% 0%, var(--brand-faint), transparent 60%);
 }
-/* Hero is now 2-col on desktop: copy + atmospheric mark. The mark
-   fills the right-side real estate that was sitting empty.
-   Stacks to 1-col on mobile (mark hidden on small screens since
-   the typography is already the focal point on a phone). */
+/* Hero is a 2-col grid on desktop: copy left, atmospheric mark right.
+   The text column is wider (2fr) so the headline gets dominant
+   weight; the mark column (1fr) is a quiet right-side anchor.
+   align-items: center keeps the mark visually paired with the
+   middle of the text block. */
 .hero-grid {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: var(--s-7);
   align-items: center;
 }
@@ -368,39 +369,38 @@ select:focus-visible {
                     the nav is enough. landing hero leads with type. */
 }
 
-/* Hero atmospheric mark. Decorative ghost icon at scale, framed by
-   two thin hairlines that echo the "phantom line" motif from the
-   brand name. Brand-glow blooms behind the icon to anchor the eye
-   without screaming logo. */
+/* Hero atmospheric mark. Decorative ghost icon contained inside its
+   own bounding box (no overflow past the .wrap edge) with a soft
+   brand-cyan glow. Bible §03 spacing: container has padding so the
+   icon doesn't kiss the section edge. Per-Bible internal padding
+   matches the section's external rhythm. */
 .hero-mark {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
   width: 100%;
-  max-width: 420px;
+  /* Cap the size so the mark stays a quiet anchor, not a dominator.
+     240px keeps it visually tied to the type scale (h1 = 56px,
+     ~4x is the right relative weight for an atmospheric mark). */
+  max-width: 240px;
+  aspect-ratio: 1;
   margin-left: auto;
+  /* Contain any glow that would otherwise bleed into adjacent grid cells. */
+  overflow: visible;
 }
 .hero-mark img {
-  position: relative;
-  z-index: 2;
-  width: 78%;
-  height: auto;
-  filter: drop-shadow(0 0 48px rgba(34, 231, 245, 0.35));
-  opacity: 0.95;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 32px rgba(34, 231, 245, 0.25));
+  opacity: 0.92;
 }
-.hero-mark-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent-default), transparent);
-  z-index: 1;
-  opacity: 0.5;
-}
-.hero-mark-line--top { top: 18%; }
-.hero-mark-line--bottom { bottom: 18%; }
+/* Decorative hairlines from earlier iteration removed. they weren't
+   rendering visibly at this scale and added clutter. The drop-shadow
+   bloom and aspect-ratio frame are enough to make the mark feel
+   intentional without competing with the headline. */
+.hero-mark-line { display: none; }
 .eyebrow {
   display: inline-flex;
   align-items: center;
