@@ -1,7 +1,7 @@
 /* Live founding-seats counter. Replaces the static "500 SEATS" badge
  * on the Founding Lifetime pricing card with the real "X seats left"
  * count from /api/account/founding-seats. Falls back silently to the
- * static badge on any failure — never flashes a broken state.
+ * static badge on any failure. never flashes a broken state.
  *
  * Loaded on /pricing and / (landing). Pure progressive enhancement.
  */
@@ -27,7 +27,7 @@
       } else if (left < total) {
         badge.textContent = left + ' / ' + total + ' SEATS LEFT';
       } else {
-        // No takers yet — keep the static 'launch only' badge as-is.
+        // No takers yet. keep the static 'launch only' badge as-is.
         badge.textContent = orig;
       }
     })

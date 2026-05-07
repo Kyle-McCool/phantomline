@@ -26,14 +26,14 @@ window.addEventListener('DOMContentLoaded', () => forceReadableButtons());
 // visit and pure visual noise after that.
 //
 // Default behavior: HIDE the hero. Only show it if we have strong
-// evidence this is a genuine first visit — i.e. no Phantomline state
+// evidence this is a genuine first visit. i.e. no Phantomline state
 // in localStorage at all. Anyone who has saved a tab, dismissed the
 // install banner, saved form state, or had auth in this browser is
 // treated as returning.
 //
 // The previous logic ("show by default; flip after 30s on page or
 // engagement") meant existing long-time users got the hero one more
-// time on every reload until they engaged — exactly the noise the
+// time on every reload until they engaged. exactly the noise the
 // user complained about. This version is one-shot: first paint after
 // first install = hero; every subsequent load = no hero.
 (function makeHeroFirstRunGate() {
@@ -61,7 +61,7 @@ window.addEventListener('DOMContentLoaded', () => forceReadableButtons());
       try { localStorage.setItem(KEY, '1'); } catch (_) {}
       return;
     }
-    // True first visit — show the hero, then mark seen as soon as
+    // True first visit. show the hero, then mark seen as soon as
     // they take any action (or after 30s) so the next reload hides it.
     const markSeen = () => {
       try { localStorage.setItem(KEY, '1'); } catch (_) {}
@@ -72,7 +72,7 @@ window.addEventListener('DOMContentLoaded', () => forceReadableButtons());
       if (t) markSeen();
     }, { once: false, passive: true });
   } catch (_) {
-    // localStorage blocked — be safe and hide the hero.
+    // localStorage blocked. be safe and hide the hero.
     document.body.classList.add('is-returning');
   }
 })();
@@ -535,7 +535,7 @@ function fillModelSelect(sel, models) {
 // auth-gate inspects). Returns null when the user isn't signed in or
 // when localStorage is unavailable. Used to attach an Authorization
 // header to every /api/* call so the hosted server can scope projects
-// to the signed-in user. Local desktop installs don't need this — the
+// to the signed-in user. Local desktop installs don't need this. the
 // server ignores the header when the Supabase flag is off.
 function _phantomlineAuthToken() {
   try {
@@ -548,7 +548,7 @@ function _phantomlineAuthToken() {
       const sess = (parsed && parsed.currentSession) || parsed;
       if (sess && sess.access_token) return sess.access_token;
     }
-  } catch (e) { /* localStorage disabled — anonymous fetch */ }
+  } catch (e) { /* localStorage disabled. anonymous fetch */ }
   return null;
 }
 
@@ -607,10 +607,10 @@ async function apiJson(url, options) {
 async function refreshOllama() {
   const badge = $('ollamaBadge');
   const text = $('ollamaText');
-  // On the hosted PWA there is no local Ollama — inference runs in-browser via
+  // On the hosted PWA there is no local Ollama. inference runs in-browser via
   // WebLLM. Showing "ollama offline" with a red dot makes the app look broken
   // to first-time visitors. Detect hosted mode via hostname and surface a
-  // neutral "browser mode" badge instead — set this BEFORE the fetch so
+  // neutral "browser mode" badge instead. set this BEFORE the fetch so
   // the word "ollama" never flashes on screen during the first paint.
   const host = (window.location && window.location.hostname) || '';
   const isHosted = /\.onrender\.com$/i.test(host)
@@ -644,7 +644,7 @@ async function refreshOllama() {
   }
 }
 
-/* Mode toggle dropdown — clickable badge that lets the user switch
+/* Mode toggle dropdown. clickable badge that lets the user switch
  * between hosted browser mode and their local Phantomline install.
  *
  * Why we DON'T probe localhost from hosted: Chrome / Brave block
@@ -709,7 +709,7 @@ async function refreshOllama() {
       }
     } else {
       // Hosted. Browser row is current. Local row is "switch to local"
-      // action (no probe — we trust the user). Status pill adapts based
+      // action (no probe. we trust the user). Status pill adapts based
       // on whether the user has previously used local Phantomline (we
       // remember via localStorage).
       if (browserRow) {
@@ -734,7 +734,7 @@ async function refreshOllama() {
       const hintEl = $('modeToggleHint');
       if (hintEl) hintEl.hidden = hasLocalInstall();
       if (localRow) {
-        // Open in a new tab — keeps the hosted library visible while
+        // Open in a new tab. keeps the hosted library visible while
         // the user works in their local install.
         localRow.target = '_blank';
         localRow.rel = 'noopener';
@@ -766,7 +766,7 @@ async function refreshOllama() {
   // On hosted, clicking the "Local Phantomline" row tries to open
   // localhost:5000/app. If we know the user has it installed (visited
   // before), the link just works. If we don't know, we still let them
-  // click — failure mode is "browser shows site-not-reachable", which
+  // click. failure mode is "browser shows site-not-reachable", which
   // is itself a clear signal to start their local server.
   // The "Don't have it yet?" row goes to /download as a fallback path.
 })();
@@ -1003,7 +1003,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// Smart default tab. The HTML default is Create Video — that's where
+// Smart default tab. The HTML default is Create Video. that's where
 // users want to be after first-time login. Two overrides:
 //   1. If readiness has required blockers, route to Launch Setup so
 //      the user fixes the install issue before trying to render.
@@ -1021,7 +1021,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       .then(d => {
         const blockers = (d?.blockers || []).filter(b => b.required);
         if (blockers.length > 0) {
-          // System not ready — force Launch so blockers are visible.
+          // System not ready. force Launch so blockers are visible.
           const btn = document.querySelector('.tab-btn[data-tab="launch"]');
           if (btn) btn.click();
           return;
@@ -1033,7 +1033,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         }
         // Otherwise stay on Create Video (the HTML default).
       })
-      .catch(() => { /* no readiness — stay on Create Video default */ });
+      .catch(() => { /* no readiness. stay on Create Video default */ });
   } catch (_) {}
 })();
 $('advancedNavToggle')?.addEventListener('click', () => {
@@ -1932,7 +1932,7 @@ async function generateMakeTitles() {
         $('makeTitlePackage').style.display = 'block';
         updateMakeReadiness();
         toast('Title selected');
-        // Auto-pull-forward to the render button — the next obvious action.
+        // Auto-pull-forward to the render button. the next obvious action.
         const renderBtn = $('makeVideoBtn');
         if (renderBtn) {
           renderBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2160,7 +2160,7 @@ function renderLaunchReadiness(data) {
       : 'Finish the required setup items before charging through the full workflow.';
   }
   $('launchChecks').innerHTML = checks.map(c => {
-    // 'desktop_only' renders like 'optional' — gray dot, action button shown.
+    // 'desktop_only' renders like 'optional'. gray dot, action button shown.
     // The status label below ("desktop only") makes the gating obvious.
     const cls = c.status === 'ready' ? 'ready'
               : c.status === 'missing' ? 'missing'
@@ -2168,7 +2168,7 @@ function renderLaunchReadiness(data) {
               : 'optional';
     // Render action buttons for any non-ready item that has actions.
     // The dataset attributes carry the action's kind/value back to the
-    // delegated click handler below — keeps this template free of
+    // delegated click handler below. keeps this template free of
     // inline JS so escapeHtml does its job and we don't open XSS.
     const actions = (c.actions || []).map((a, i) => {
       const primary = i === 0 ? ' primary' : '';
@@ -2410,7 +2410,7 @@ async function loadInsightsPanel() {
         }
       });
     });
-  } catch (e) { /* ignore — panel is non-blocking */ }
+  } catch (e) { /* ignore. panel is non-blocking */ }
 }
 
 async function uploadInsightsCsv(endpoint, file) {
@@ -2624,7 +2624,7 @@ function renderOptimizeDetail(video, analysis = null) {
 
       html += `
         <div class="opt-section">
-          <div class="opt-label">Title — proposed</div>
+          <div class="opt-label">Title. proposed</div>
           <div class="opt-diff">
             <div class="col">
               <div class="col-label">Current</div>
@@ -2639,7 +2639,7 @@ function renderOptimizeDetail(video, analysis = null) {
         </div>
 
         <div class="opt-section">
-          <div class="opt-label">Description — proposed</div>
+          <div class="opt-label">Description. proposed</div>
           <div class="opt-diff">
             <div class="col">
               <div class="col-label">Current</div>
@@ -3335,7 +3335,7 @@ async function makeVideoWorkflow() {
     });
     renderMakeHandoffChecklist();
     // Bundle this whole session so it shows up in Library as one navigable
-    // record. Best-effort — never let a bundle failure obscure the rendered
+    // record. Best-effort. never let a bundle failure obscure the rendered
     // video; the artifacts are already saved as individual projects.
     try {
       const members = {};
@@ -3434,7 +3434,7 @@ async function makeVideoWorkflow() {
 }
 
 // Cancel button: trips the abort flag. The active await chain throws on
-// next check; the UI resets cleanly. Backend thread keeps going — its
+// next check; the UI resets cleanly. Backend thread keeps going. its
 // artifacts will appear in Library when complete.
 $('makeCancelBtn')?.addEventListener('click', () => {
   _makeRenderAborted = true;
@@ -3609,7 +3609,7 @@ async function loadSavedSettings() {
     if (s.musicLevel && $('settingsMusicLevel')) $('settingsMusicLevel').value = s.musicLevel;
     if (s.forgeUrl && $('settingsForgeUrl')) $('settingsForgeUrl').value = s.forgeUrl;
     if (s.forgeCheckpoint && $('settingsForgeCheckpoint')) $('settingsForgeCheckpoint').value = s.forgeCheckpoint;
-    // Model and voice selects populate async — defer.
+    // Model and voice selects populate async. defer.
     setTimeout(() => {
       if (s.model && $('settingsModel') && [...$('settingsModel').options].some(o => o.value === s.model)) {
         $('settingsModel').value = s.model;
@@ -4115,18 +4115,18 @@ async function loadPublishRecurring() {
 }
 
 // Connect YouTube routing. Two paths:
-// 1. Single-OAuth (PRIORITY 5) — hosted user with a Supabase session
+// 1. Single-OAuth (PRIORITY 5). hosted user with a Supabase session
 //    in localStorage. Opens /account?yt-connect=1 in a popup. The
 //    /account JS calls supabase.auth.signInWithOAuth with YouTube
 //    scopes (incremental authorization), captures the resulting
 //    provider_token, POSTs it to /api/youtube/store-token. Server
 //    upserts into user_youtube_tokens (RLS-scoped). Per-user channel.
-// 2. Legacy file-based flow — local install with YOUTUBE_CLIENT_ID +
+// 2. Legacy file-based flow. local install with YOUTUBE_CLIENT_ID +
 //    YOUTUBE_CLIENT_SECRET in .env. Opens /api/youtube/connect which
 //    redirects to Google's OAuth screen. Single shared connection
 //    file, fine for a single-user desktop install.
 // We pick path 1 if there's a Supabase session in localStorage AND
-// the studio fetch shim (_phantomlineAuthToken) returns a token —
+// the studio fetch shim (_phantomlineAuthToken) returns a token.
 // that means store-token will be authenticated. Otherwise legacy.
 function _routeYouTubeConnect() {
   const token = (typeof _phantomlineAuthToken === 'function')
@@ -4140,7 +4140,7 @@ function _routeYouTubeConnect() {
       'width=520,height=720,toolbar=no,menubar=no'
     );
     if (!w) {
-      // Popup blocked — fall back to opening in a new tab.
+      // Popup blocked. fall back to opening in a new tab.
       window.open('/account?yt-connect=1', '_blank');
     }
     return;
@@ -4395,7 +4395,7 @@ async function buildProductionKitFromShort() {
     const ttsData = await ttsRes.json();
     if (!ttsData.ok) throw new Error(ttsData.error || 'narration failed');
     const narrationProjectId = await waitForTtsProject(ttsData.job_id, msg => {
-      $('shortProductionHint').textContent = '2/4 Narrating locally with Kokoro... ' + msg;
+      $('shortProductionHint').textContent = '2/4 Narrating locally with Kokoro.. ' + msg;
     });
 
     $('shortProductionHint').textContent = '3/4 Aligning scene timing to narration...';
@@ -4415,7 +4415,7 @@ async function buildProductionKitFromShort() {
     document.querySelector('.tab-btn[data-tab="video"]').click();
     const videoJobId = await renderDraftVideoFromCurrentTimeline();
     await waitForDraftVideo(videoJobId, msg => {
-      $('shortProductionHint').textContent = '4/4 Rendering draft MP4 with narration attached... ' + msg;
+      $('shortProductionHint').textContent = '4/4 Rendering draft MP4 with narration attached.. ' + msg;
     });
     $('shortProductionHint').textContent = 'Production kit created. Open Video Studio or Library to download the MP4.';
   } catch (e) {
@@ -4842,7 +4842,7 @@ async function loadLibraryBundles(grid) {
         <div class="empty-state" style="grid-column:1/-1;">
           <div class="big">🎬</div>
           <h3>No videos yet</h3>
-          <p>Render your first video in Create Video and it will appear here as one bundle — script, audio, MP4, and publish draft, all together.</p>
+          <p>Render your first video in Create Video and it will appear here as one bundle. script, audio, MP4, and publish draft, all together.</p>
           <button class="btn" id="emptyStartBundleBtn" style="width:auto; margin-top:0;">Open Create Video</button>
         </div>`;
       document.getElementById('emptyStartBundleBtn')?.addEventListener('click', () => {
@@ -5418,7 +5418,7 @@ function ghStartWalkthrough() {
   function applyPositioning(target, step) {
     const rect = target.getBoundingClientRect();
     // Hidden targets (display:none, inside an inactive tab, etc.) report
-    // a zero-size rect — bail out to the centered fallback rather than
+    // a zero-size rect. bail out to the centered fallback rather than
     // pinning the highlight to the page's top-left corner.
     if (rect.width === 0 && rect.height === 0) {
       centerFallback();
@@ -5474,7 +5474,7 @@ function ghStartWalkthrough() {
       centerFallback();
       return;
     }
-    // Only scroll if the target is offscreen — re-scrolling sticky-positioned
+    // Only scroll if the target is offscreen. re-scrolling sticky-positioned
     // targets (like the sidebar tabs) makes them shift unpredictably. Use
     // 'instant' so CSS scroll-behavior:smooth (set on landing pages, not the
     // studio, but we don't trust the inheritance) doesn't turn this into a
@@ -5592,7 +5592,7 @@ function ghShowSkeletons(target, count = 6) {
     if (typeof original !== 'function') return;
     window[fnName] = async function (...args) {
       const grid = document.getElementById(gridId);
-      // Only show skeletons if grid is currently empty — avoid flash on
+      // Only show skeletons if grid is currently empty. avoid flash on
       // refreshes where data already populates the grid.
       if (grid && (!grid.children.length || grid.querySelector('.empty-state'))) {
         ghShowSkeletons(grid, count);

@@ -10,7 +10,7 @@
  * avoids the "broken in the middle" experience.
  *
  * The banner remembers a dismissal in sessionStorage so it doesn't
- * pester returning visitors who already know — it'll come back next
+ * pester returning visitors who already know. it'll come back next
  * tab open or after a real page reload.
  *
  * Hidden on Capacitor (mobile shell) where /api/launch/readiness
@@ -53,12 +53,12 @@
         if (titleEl) titleEl.textContent = blockers.length + ' tools needed';
         if (detailEl) detailEl.textContent =
           blockers.map(function (x) { return x.label || ''; }).filter(Boolean).join(' · ')
-          + ' — install these to enable rendering.';
+          + '. install these to enable rendering.';
       }
       el.hidden = false;
       // De-duplicate the "Ollama offline" signal: the header has its
       // own mode-toggle pill that flashes "ollama offline" with a red
-      // dot. Banner and pill say the same thing — pill is redundant
+      // dot. Banner and pill say the same thing. pill is redundant
       // when the banner is up. Hide it; show again when banner is
       // dismissed.
       var modeToggle = document.querySelector('.mode-toggle-wrap');
