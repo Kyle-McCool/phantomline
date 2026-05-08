@@ -40,6 +40,46 @@ def api_system_health():
     })
 
 
+@system_bp.route("/api/system/ping", methods=["GET", "OPTIONS"])
+def api_system_ping():
+    """Cross-origin probe endpoint.
+
+    Hosted phantomline.xyz/account uses this to detect whether a local
+    Phantomline install is running on the user's machine, so the desktop-
+    activation flow can show actionable help when the server is down
+    instead of bouncing the user to a broken `localhost:5000/account`.
+
+    Specifically allows fetch() from phantomline.xyz origin and answers
+    PNA preflights — Chrome's Private Network Access spec requires
+    explicit headers when an HTTPS public-internet site probes a private/
+    localhost address. Without these, Chrome silently blocks the fetch.
+
+    Body is intentionally minimal: just enough info to render the card
+    state and decide whether to enable the "Open desktop" button.
+    """
+    response = jsonify({
+        "ok": True,
+        "service": "phantomline",
+        "uptime_seconds": int(time.time() - _BOOT_TIME),
+    })
+    # Only the hosted marketing origin needs this; lock the allow list down
+    # rather than `*` to keep the surface tight.
+    origin = request.headers.get("Origin", "")
+    if origin in ("https://phantomline.xyz", "https://www.phantomline.xyz"):
+        response.headers["Access-Control-Allow-Origin"] = origin
+    else:
+        response.headers["Access-Control-Allow-Origin"] = "https://phantomline.xyz"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    # Chrome PNA: tells the browser this private-network endpoint accepts
+    # requests from the public-internet origin above.
+    response.headers["Access-Control-Allow-Private-Network"] = "true"
+    response.headers["Vary"] = "Origin"
+    # No caching — the ping must reflect current run state.
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @system_bp.route("/api/system/setup-status", methods=["GET"])
 def api_system_setup_status():
     """Snapshot of "is this install ready to make videos?".

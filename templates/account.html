@@ -324,19 +324,57 @@
             </p>
           </div>
           <!-- Desktop activation card. Hidden by default; account.js shows it
-               only when this page is NOT running on localhost (i.e. user is on
-               phantomline.xyz). Local installs auto-activate after sign-in. -->
-          <div class="card" id="desktop-activate-card" hidden>
-            <h3>Running the desktop app?</h3>
-            <p class="meta">
-              Open <code>http://localhost:5000/account</code> on the same computer where Phantomline desktop is running, then sign in with the same Google account. Your license auto-activates — no key to copy.
+               only on hosted phantomline.xyz (not localhost). Has three states:
+                 - probing (shown briefly while we check localhost:5000)
+                 - running (Phantomline detected → big actionable button)
+                 - not_running (server down or not installed → coaching panel)
+               The state is set by account.js via data-state on the card root. -->
+          <div class="card" id="desktop-activate-card" data-state="probing" hidden>
+            <h3 id="desktop-card-title">Running the desktop app?</h3>
+
+            <!-- State: probing -->
+            <p class="meta" data-card-state="probing">
+              Checking whether Phantomline is running on this computer&hellip;
             </p>
-            <div class="row-actions">
-              <a class="cta secondary" id="desktop-activate-btn" href="http://localhost:5000/account" target="_blank" rel="noopener">Open desktop /account</a>
+
+            <!-- State: running (server detected on localhost:5000) -->
+            <div data-card-state="running" hidden>
+              <p class="meta" style="color: var(--brand);">
+                <strong>&#10003; Phantomline detected on this computer.</strong> Click below to activate your license locally.
+              </p>
+              <div class="row-actions">
+                <a class="cta signal" href="http://localhost:5000/account" target="_blank" rel="noopener">Open in desktop app &rarr;</a>
+              </div>
             </div>
-            <p class="meta" style="margin-top: 10px; font-size: 12px;">
-              No desktop app yet? <a href="/install/phantomline">Install Phantomline desktop</a> first.
-            </p>
+
+            <!-- State: not_running -->
+            <div data-card-state="not_running" hidden>
+              <p class="meta">
+                Phantomline isn&rsquo;t running yet on this computer. Start it first, then click "I started it &mdash; retry."
+              </p>
+              <div class="row-actions">
+                <button class="cta secondary" id="desktop-show-launch-btn" type="button">Show me how to start it</button>
+                <button class="cta" id="desktop-retry-btn" type="button">I started it &mdash; retry</button>
+              </div>
+
+              <!-- Hidden until "Show me how to start it" is clicked -->
+              <div id="desktop-launch-help" hidden style="margin-top: 16px; padding: 16px; border: 1px solid var(--rule); border-radius: 0; background: var(--ink-2);">
+                <p class="meta" style="margin-top: 0;"><strong>Easiest:</strong> double-click the launcher</p>
+                <ul class="meta" style="margin: 6px 0 16px 18px; padding: 0;">
+                  <li><strong>Windows:</strong> double-click <code>start-phantomline.bat</code> in your Phantomline folder.</li>
+                  <li><strong>macOS:</strong> double-click <code>start-phantomline.command</code> (right-click &rarr; Open the first time, since it&rsquo;s unsigned).</li>
+                  <li><strong>Linux:</strong> run <code>./start-phantomline.sh</code> from the Phantomline folder.</li>
+                </ul>
+
+                <p class="meta"><strong>Or via terminal:</strong></p>
+                <pre style="background: var(--ink); border: 1px solid var(--rule); padding: 10px; font-family: var(--font-mono); font-size: 12px; overflow-x: auto; margin: 4px 0 16px;">cd path/to/phantomline
+python server.py</pre>
+
+                <p class="meta" style="margin-bottom: 0;">
+                  Don&rsquo;t have it installed yet? <a href="/install/phantomline" style="color: var(--brand);">Install Phantomline desktop</a> &rarr; takes ~3 minutes.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
