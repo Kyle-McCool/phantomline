@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "ghostline",
-      "runtimeExecutable": ".venv312/Scripts/python.exe",
+      "runtimeExecutable": "python",
       "runtimeArgs": ["server.py"],
       "port": 5000
     }
