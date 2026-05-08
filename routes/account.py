@@ -34,6 +34,12 @@ from urllib.parse import quote
 import requests
 from flask import Blueprint, jsonify, render_template, request
 
+from auth_helpers import (
+    supabase_url as _supabase_url_helper,
+    supabase_anon_key as _supabase_anon_key_helper,
+    supabase_service_role_key as _supabase_service_role_key_helper,
+)
+
 
 account_bp = Blueprint("account", __name__)
 
@@ -43,11 +49,13 @@ def _env(key: str) -> str | None:
 
 
 def _supabase_url() -> str | None:
-    return _env("SUPABASE_URL")
+    # Delegates to auth_helpers so the baked-in DEFAULT_SUPABASE_URL fallback
+    # applies for fresh local installs without a .env file.
+    return _supabase_url_helper()
 
 
 def _service_role_key() -> str | None:
-    return _env("SUPABASE_SERVICE_ROLE_KEY")
+    return _supabase_service_role_key_helper()
 
 
 def _validate_jwt(authorization: str | None) -> dict[str, Any] | None:
@@ -57,7 +65,7 @@ def _validate_jwt(authorization: str | None) -> dict[str, Any] | None:
     if not authorization or not authorization.lower().startswith("bearer "):
         return None
     base = _supabase_url()
-    anon = _env("SUPABASE_ANON_KEY")
+    anon = _supabase_anon_key_helper()
     if not base or not anon:
         return None
     try:
@@ -124,7 +132,7 @@ def account_page():
     return render_template(
         "account.html",
         supabase_url=_supabase_url() or "",
-        supabase_anon_key=_env("SUPABASE_ANON_KEY") or "",
+        supabase_anon_key=_supabase_anon_key_helper() or "",
     )
 
 

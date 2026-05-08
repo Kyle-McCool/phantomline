@@ -17,6 +17,7 @@ import threading
 import time
 from typing import Any
 
+import requests
 from flask import Blueprint, jsonify, request
 
 import license as license_mod
@@ -153,8 +154,51 @@ def _current_month_key(now: float | None = None) -> str:
 
 def current_tier() -> dict[str, Any]:
     """Return the active tier with metadata. Always returns a dict —
-    never None — so callers can read `current_tier()["tier"]` safely."""
+    never None — so callers can read `current_tier()["tier"]` safely.
+
+    Two activation paths:
+      1. Supabase-synced license: written by /api/license/sync after the
+         user signs in with Google. The desktop app trusts these because
+         Supabase already verified the JWT + email + RLS at sync time —
+         re-running HMAC locally is redundant and requires shipping
+         GHOSTLINE_LICENSE_SECRET to laptops, which we don't.
+      2. Pasted HMAC license: legacy/air-gapped path. Falls back to
+         license.validate() against GHOSTLINE_LICENSE_SECRET.
+    """
     stored = _read_license()
+
+    # Path 1: Supabase-sourced. The sync route writes
+    # {"source": "supabase", "tier": ..., "email": ..., ...} into
+    # license.json. We trust those fields verbatim.
+    if stored.get("source") == "supabase":
+        expires_at = stored.get("expires_at") or 0
+        try:
+            expires_at = int(expires_at)
+        except (TypeError, ValueError):
+            expires_at = 0
+        # Lifetime/no-expiry rows have expires_at == 0 — always active.
+        if expires_at and expires_at < time.time():
+            return {
+                "tier": "free",
+                "source": "supabase_expired",
+                "expires_at": expires_at,
+                "license_id": stored.get("license_id"),
+                "email": stored.get("email"),
+                "error": "License expired. Renew to restore Pro features.",
+            }
+        return {
+            "tier": stored.get("tier") or "free",
+            "source": "supabase",
+            "expires_at": expires_at,
+            "license_id": stored.get("license_id"),
+            "email": stored.get("email"),
+            "lifetime": bool(stored.get("lifetime")),
+            "is_founding": bool(stored.get("is_founding")),
+            "founding_seat": stored.get("founding_seat"),
+            "synced_at": stored.get("stored_at"),
+        }
+
+    # Path 2: HMAC key (legacy / pasted manually / air-gapped install).
     key = (stored.get("key") or "").strip()
     if not key:
         return {"tier": "free", "source": "none", "expires_at": 0}
@@ -302,6 +346,146 @@ def api_license_delete():
     """Drop the stored license. App reverts to free tier."""
     _write_license({})
     return jsonify({"ok": True, "license": current_tier()})
+
+
+@billing_bp.route("/api/license/sync", methods=["POST"])
+def api_license_sync():
+    """Sync the active license from Supabase using the user's bearer JWT.
+
+    This is the new "sign in once on /account, instantly activated" path.
+    The browser POSTs with `Authorization: Bearer <supabase_access_token>`.
+    The server:
+      1. Validates the JWT against Supabase /auth/v1/user.
+      2. Queries public.licenses for the user's own rows (RLS allowlists
+         these via 0004_licenses_user_select.sql — no service_role needed).
+      3. Picks the best license (highest tier among active rows, prefer
+         lifetime, prefer most recent issued_at) and writes it to
+         output/license.json with source="supabase".
+      4. Subsequent current_tier() calls trust the stored row.
+
+    Returns 401 if the JWT is missing/invalid, 503 if Supabase isn't
+    configured, 502 on Supabase fetch failure, 200 with the new tier on
+    success (including a "no licenses found" success that downgrades to free).
+    """
+    # Lazy import to avoid a hard dep at module load — auth_helpers reaches
+    # into env + baked defaults; we only need it on this code path.
+    from auth_helpers import (
+        supabase_url,
+        supabase_anon_key,
+        validate_jwt,
+        rest_url,
+        user_headers,
+    )
+
+    base = supabase_url()
+    anon = supabase_anon_key()
+    if not base or not anon:
+        return jsonify({
+            "ok": False,
+            "error": "Supabase isn't configured on this install. Sign-in sync is unavailable; paste a license key in Settings instead.",
+        }), 503
+
+    user = validate_jwt(request.headers.get("Authorization"))
+    if not user or not user.get("email"):
+        return jsonify({"ok": False, "error": "Not signed in."}), 401
+
+    email = (user.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"ok": False, "error": "Token has no email claim."}), 401
+
+    # Pull the JWT back out for the user-scoped REST call. validate_jwt
+    # already confirmed the bearer header exists in a valid form.
+    bearer = (request.headers.get("Authorization") or "").split(" ", 1)[-1].strip()
+
+    fields = "id,license_id,tier,lifetime,is_founding,founding_seat,issued_at,expires_at,key"
+    url = rest_url(f"licenses?select={fields}&order=created_at.desc")
+    try:
+        res = requests.get(url, headers=user_headers(bearer), timeout=8)
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": f"Supabase fetch failed: {exc}"}), 502
+    if res.status_code != 200:
+        return jsonify({
+            "ok": False,
+            "error": f"Supabase returned {res.status_code}: {res.text[:200]}",
+        }), 502
+    try:
+        rows = res.json() or []
+    except ValueError:
+        rows = []
+    if not isinstance(rows, list):
+        rows = []
+
+    # Pick the "best" license. Priority order:
+    #   1. Active (not expired) over expired.
+    #   2. Higher tier (studio > pro > free).
+    #   3. Lifetime over time-bounded.
+    #   4. Most recent issued_at as tiebreaker.
+    tier_rank = {"free": 0, "pro": 1, "studio": 2}
+    now = time.time()
+
+    def is_active(row: dict[str, Any]) -> bool:
+        if row.get("lifetime"):
+            return True
+        exp = row.get("expires_at")
+        if not exp:
+            return True
+        try:
+            from datetime import datetime
+            exp_unix = datetime.fromisoformat(str(exp).replace("Z", "+00:00")).timestamp()
+        except (ValueError, TypeError):
+            return True  # unparseable expiry — assume active rather than locking the user out
+        return exp_unix > now
+
+    def score(row: dict[str, Any]) -> tuple[int, int, int, int]:
+        return (
+            1 if is_active(row) else 0,
+            tier_rank.get(row.get("tier") or "free", 0),
+            1 if row.get("lifetime") else 0,
+            int(row.get("issued_at") or 0),
+        )
+
+    if not rows:
+        # No licenses found at all — clear any stale local license and
+        # surface "you're free tier" so the UI can render accordingly.
+        _write_license({})
+        return jsonify({
+            "ok": True,
+            "license": current_tier(),
+            "synced": False,
+            "email": email,
+            "message": "No licenses on file for this email.",
+        })
+
+    best = max(rows, key=score)
+    expires_at_unix = 0
+    if best.get("expires_at"):
+        try:
+            from datetime import datetime
+            expires_at_unix = int(datetime.fromisoformat(
+                str(best["expires_at"]).replace("Z", "+00:00")
+            ).timestamp())
+        except (ValueError, TypeError):
+            expires_at_unix = 0
+
+    _write_license({
+        "source": "supabase",
+        "tier": best.get("tier") or "free",
+        "license_id": best.get("license_id") or best.get("id"),
+        "email": email,
+        "lifetime": bool(best.get("lifetime")),
+        "is_founding": bool(best.get("is_founding")),
+        "founding_seat": best.get("founding_seat"),
+        "expires_at": expires_at_unix,
+        "key": best.get("key") or "",  # kept for "Resend by email" UX, not validation
+        "stored_at": time.time(),
+    })
+
+    return jsonify({
+        "ok": True,
+        "license": current_tier(),
+        "synced": True,
+        "email": email,
+    })
 
 
 @billing_bp.route("/api/usage", methods=["GET"])

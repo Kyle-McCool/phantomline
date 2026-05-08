@@ -37,11 +37,54 @@
   document.getElementById('installBannerOpen')?.addEventListener('click', jumpToLaunch);
   document.getElementById('installBannerDismiss')?.addEventListener('click', dismiss);
 
-  fetch('/api/launch/readiness', { credentials: 'same-origin' })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (d) {
-      if (!d || !d.ok) return;
-      var blockers = (d.blockers || []).filter(function (b) { return b.required; });
+  // Fan out two parallel readiness checks:
+  //   - /api/launch/readiness → tooling (Ollama, ffmpeg, model weights)
+  //   - /api/system/setup-status → account state (Supabase config, license sync)
+  // We merge their blockers into a single banner so a fresh-install user sees
+  // ONE "Setup needed" card listing every missing piece, not two competing
+  // banners.
+  Promise.all([
+    fetch('/api/launch/readiness', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; }),
+    fetch('/api/system/setup-status', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; }),
+  ]).then(function (results) {
+      var readiness = results[0];
+      var setupStatus = results[1];
+      var blockers = [];
+      if (readiness && readiness.ok) {
+        blockers = (readiness.blockers || []).filter(function (b) { return b.required; });
+      }
+      // Merge license + supabase items from setup-status when not OK. Skip
+      // license items where source === 'none' AND tier === 'free' — that's
+      // a perfectly valid state (free tier user, can still render 5/mo).
+      // We only flag licence as a blocker when it's invalid/expired.
+      if (setupStatus && setupStatus.ok && Array.isArray(setupStatus.items)) {
+        setupStatus.items.forEach(function (item) {
+          if (item.ok) return;
+          if (item.id === 'license') {
+            // Free-tier-no-license is fine; flag only invalid/expired.
+            if (item.source === 'invalid' ||
+                item.source === 'expired' ||
+                item.source === 'supabase_expired') {
+              blockers.push({
+                label: 'License: ' + (item.hint || 'expired or invalid'),
+                detail: item.hint || '',
+                required: true,
+              });
+            }
+          } else if (item.id === 'supabase') {
+            blockers.push({
+              label: 'Sign-in unavailable',
+              detail: item.hint || '',
+              required: true,
+            });
+          }
+          // Ollama is already covered by /api/launch/readiness — skip to avoid dupes.
+        });
+      }
       if (!blockers.length) return;
       var titleEl = document.getElementById('installBannerTitle');
       var detailEl = document.getElementById('installBannerDetail');
@@ -50,10 +93,10 @@
         if (titleEl) titleEl.textContent = b.label || 'Setup needed';
         if (detailEl) detailEl.textContent = b.detail || 'Install required tools to render videos.';
       } else {
-        if (titleEl) titleEl.textContent = blockers.length + ' tools needed';
+        if (titleEl) titleEl.textContent = blockers.length + ' items need attention';
         if (detailEl) detailEl.textContent =
           blockers.map(function (x) { return x.label || ''; }).filter(Boolean).join(' · ')
-          + '. install these to enable rendering.';
+          + '.';
       }
       el.hidden = false;
       // De-duplicate the "Ollama offline" signal: the header has its
@@ -75,6 +118,5 @@
           if (modeToggle) modeToggle.style.display = '';
         }, { once: true });
       }
-    })
-    .catch(function () { /* readiness unavailable; leave banner hidden */ });
+    });
 })();
