@@ -423,17 +423,36 @@ def api_license_sync():
     tier_rank = {"free": 0, "pro": 1, "studio": 2}
     now = time.time()
 
+    def _to_unix(value: Any) -> int:
+        """Coerce a Supabase timestamp value to unix epoch seconds. Returns
+        0 if the value is missing or unparseable. Handles all three shapes
+        seen in the licenses table:
+          - bigint epoch (issued by the 0002 trigger): 1714234567
+          - numeric string from older edge function: "1714234567"
+          - ISO 8601 string from Postgres timestamptz columns:
+            "2026-05-03T16:11:05+00:00"
+        """
+        if value in (None, "", 0):
+            return 0
+        # Try as a number first — fast path for the trigger-issued rows.
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            pass
+        # ISO 8601 fallback. fromisoformat in 3.11+ handles "+00:00" natively;
+        # older Pythons need the Z→+00:00 swap, which is harmless here.
+        try:
+            from datetime import datetime
+            return int(datetime.fromisoformat(str(value).replace("Z", "+00:00")).timestamp())
+        except (ValueError, TypeError):
+            return 0
+
     def is_active(row: dict[str, Any]) -> bool:
         if row.get("lifetime"):
             return True
-        exp = row.get("expires_at")
-        if not exp:
-            return True
-        try:
-            from datetime import datetime
-            exp_unix = datetime.fromisoformat(str(exp).replace("Z", "+00:00")).timestamp()
-        except (ValueError, TypeError):
-            return True  # unparseable expiry — assume active rather than locking the user out
+        exp_unix = _to_unix(row.get("expires_at"))
+        if not exp_unix:
+            return True  # no expiry set OR unparseable — treat as active
         return exp_unix > now
 
     def score(row: dict[str, Any]) -> tuple[int, int, int, int]:
@@ -441,7 +460,7 @@ def api_license_sync():
             1 if is_active(row) else 0,
             tier_rank.get(row.get("tier") or "free", 0),
             1 if row.get("lifetime") else 0,
-            int(row.get("issued_at") or 0),
+            _to_unix(row.get("issued_at")),
         )
 
     if not rows:
@@ -457,15 +476,7 @@ def api_license_sync():
         })
 
     best = max(rows, key=score)
-    expires_at_unix = 0
-    if best.get("expires_at"):
-        try:
-            from datetime import datetime
-            expires_at_unix = int(datetime.fromisoformat(
-                str(best["expires_at"]).replace("Z", "+00:00")
-            ).timestamp())
-        except (ValueError, TypeError):
-            expires_at_unix = 0
+    expires_at_unix = _to_unix(best.get("expires_at"))
 
     _write_license({
         "source": "supabase",
