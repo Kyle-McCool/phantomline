@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>True Crime Video Generator — AI Crime Narration Tool | Phantomline</title>
+<meta name="description" content="Generate true crime narration videos locally with AI: investigative scripts, measured narrator voice, slow-pace visuals, source-cited workflow. Built for true crime YouTubers covering cold cases, unsolved mysteries, and case retrospectives." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="True Crime Video Generator | Phantomline" />
+<meta property="og:description" content="AI true crime narration with investigative pacing, measured voices, and a source-cited workflow. Local pipeline, no per-render fees." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "True Crime Video Generator", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "True Crime Video Generator for Faceless YouTube",
+  "description": "Investigative narration scripts, measured narrator voice, slow visual pacing, and case-research workflow tuned for true crime channels.",
+  "datePublished": "2026-05-08",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "mainEntity": [
+    {"@type": "Question", "name": "Is making true crime videos with AI ethical?",
+     "acceptedAnswer": {"@type": "Answer", "text": "It can be when handled with the same care any responsible true crime channel applies. Phantomline ships an editorial-responsibility prompt that biases scripts toward verified facts, names victims as humans rather than props, attributes claims to sources, and avoids speculative reconstructions of real assaults or murders. The AI doesn't relax these guardrails because they're baked into the preset's system prompt. Editorial responsibility is a creator decision either way, not a tool decision."}},
+    {"@type": "Question", "name": "Can AI write a true crime script that doesn't get demonetized?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes, with the right preset. YouTube's advertiser-friendly guidelines penalize graphic descriptions of violence, sexual assault, and child harm. The true crime preset rewrites graphic source material into reportorial prose: dates, locations, methods stated factually rather than dramatized. The script avoids flagged terms in their most flaggable forms. Most channels using the preset see normal ad eligibility on standard cold-case content."}},
+    {"@type": "Question", "name": "Which narrator voice works for true crime?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Three Kokoro voices fit the niche: a measured baritone (the dominant Bailey Sarian / Stephanie Soo register), a journalistic female narrator (Lemino-style mystery cross-over), and a clipped news-style voice (closer to Forensic Files documentary tone). The true-crime preset auto-applies measured pacing, no exclamatory inflection, and tightens enunciation around proper nouns so case names and locations come through clearly."}},
+    {"@type": "Question", "name": "How do you research true crime cases without leaking your topic ideas?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Standard tools (vidIQ, TubeBuddy, ChatGPT) log every search and prompt. For true crime channels covering competitive cold cases, your research history is your content pipeline; competitors log into the same tools and see your trends. Phantomline keeps research local — there's no shared cloud index of what you've been searching, prompting, or scripting."}},
+    {"@type": "Question", "name": "How long should a true crime video be?",
+     "acceptedAnswer": {"@type": "Answer", "text": "8-25 minutes is the dominant successful range. Single-case deep-dives run 15-30 minutes; cold case overviews land at 8-12 minutes; multi-case compilations run 25-40 minutes. The longer formats outperform on watch-time but are harder to plan; the preset handles all three with adjustable structure."}}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article" style="max-width: 820px;">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <span class="current">True Crime Video Generator</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Use case</div>
+        <h1>True Crime Video Generator for Faceless YouTube</h1>
+        <p class="article-lede">Phantomline's true crime preset generates measured-narrator AI scripts, journalistic pacing, period-appropriate visuals, and atmospheric MusicGen backing — all locally. Built for cold-case channels, unsolved mystery hosts, and the documentary-style retrospectives that own the true crime category on YouTube.</p>
+        <p class="article-meta">Published May 8, 2026 · Updated <time datetime="{{ today_iso }}">{{ today_iso }}</time></p>
+      </header>
+
+      <h2>The true crime niche on YouTube</h2>
+      <p>True crime is one of the largest content categories on YouTube and one of the most enduring. The platform's biggest hosts (Bailey Sarian, Stephanie Soo, Kendall Rae, Eleanor Neale) have built audiences in the millions on essentially the same format: a host walks through a case from background to outcome with measured pacing, period photographs, and atmospheric backing. The faceless variant of the same format is also enormous — channels that present cases without an on-camera host (Lemmino, Wendigoon-adjacent investigators, plus dozens of mid-size faceless cold-case channels). The niche rewards research depth, narration quality, and pacing more than visual production.</p>
+      <p>The category is also the most editorially sensitive of the popular faceless niches. Real victims, real families, ongoing investigations, and ad-policy enforcement all matter. The cost of a sloppy script is not just demonetization; it's reputational damage that's hard to recover from. The standard tooling stack is built for general content and doesn't help here — it'll happily output a graphic dramatization that gets a video flagged or causes harm.</p>
+
+      <h2>True crime formats Phantomline ships presets for</h2>
+      <ul>
+        <li><strong>Cold case retrospectives</strong> — closed or stalled cases reported factually with timeline, key parties, and outcome. The most stable format for ad eligibility because there's resolution to report toward.</li>
+        <li><strong>Unsolved mystery deep-dives</strong> — long-form treatment of unresolved cases. Phantomline structures scripts around: case background, primary theories, evidence summary, current status. Bridges into mystery-doc territory.</li>
+        <li><strong>Forensic / Forensic Files-style cases</strong> — emphasis on the investigative method, evidence, and procedural details. The preset uses the clipped news-host narrator voice and emphasizes process over personality.</li>
+        <li><strong>Lesser-known historical cases</strong> — pre-1980 cases under-covered by the major hosts. Higher research overhead but lower competition. Phantomline's research module helps here, but the editorial responsibility is the creator's.</li>
+        <li><strong>Multi-case theme compilations</strong> — five-case episodes around a theme (cases solved by DNA decades later, cases broken by overlooked details, etc.). 25-40 minute runtime, strong watch-time performer.</li>
+        <li><strong>Documentary-style single subjects</strong> — 30-60 minute treatment of one case with full context. Performs well for established channels; harder to break into for new accounts because audience commitment is high.</li>
+        <li><strong>News-recap format</strong> — recent verdicts and high-profile court news. Faster turnaround, more ephemeral; useful for fill content between deep-dives.</li>
+      </ul>
+
+      <h2>How Phantomline's true crime pipeline differs from the standard stack</h2>
+      <p>The standard true crime stack — ChatGPT for scripts, ElevenLabs for narration, a stock visual subscription, a music subscription, an editor, a research tool, a thumbnail tool, a scheduler — runs $90-180 per month and meters per character on TTS. The true crime niche compounds the cost because researched scripts run longer than entertainment scripts; an average single-case deep-dive is 2,500-4,000 words. At 12 videos a month, character counts hit ElevenLabs Creator-tier limits routinely.</p>
+
+      <h3>Editorial-responsible script generation</h3>
+      <p>The true crime preset prompts Llama 3.1 with a system instruction that biases scripts toward verified facts, attributes claims to sources, and rewrites graphic source material into reportorial prose. Names appear with consistent honorifics; victims are referred to by full name on first reference and with respect throughout; investigative actions are described with the standard procedural language journalists use. The script avoids the flagged terms YouTube's advertiser-friendly system penalizes most consistently.</p>
+
+      <h3>Measured narrator voices</h3>
+      <p>Three Kokoro voices fit the true crime formula: a measured baritone (closer to the Bailey Sarian register), a journalistic female narrator (Lemino-style cross-over), and a clipped news-style voice (Forensic Files documentary tone). The preset auto-applies measured pacing, no exclamatory inflection, and tightens enunciation around proper nouns so case names and locations are clear.</p>
+
+      <h3>Period-appropriate visual sourcing</h3>
+      <p>Phantomline's stock pull is configurable per script section so older case retrospectives use grayscale or muted-tone B-roll while contemporary cases use modern footage. The preset also automatically flags images that would be unsuitable (graphic content, unrelated public figures) and suggests substitutes from the safe pool.</p>
+
+      <h3>Source-citation workflow</h3>
+      <p>The script preset can be configured to embed bracketed source references that Phantomline strips from narration but keeps in the show notes / description text. The pipeline emits a separate "sources.txt" file alongside the MP4 with claim-to-source mapping. This makes post-publication fact-checking and corrections cleaner.</p>
+
+      <h3>Privacy on case research</h3>
+      <p>True crime hosts research underexplored cases for the same reason any creator researches: differentiation. Standard tools log every search. Phantomline keeps research local; competitors don't see the cases you're working on before publish.</p>
+
+      <h2>True crime channel economics</h2>
+      <p>A true crime channel publishing 3 videos a week (~13 per month) at 15-minute average runtime runs about 30,000-40,000 spoken words / 200,000+ TTS characters monthly. ElevenLabs Pro covers it; ElevenLabs Creator Pro covers it comfortably. That's $1,200-3,900 per year for narration, before script tools, music, visuals, scheduling, and thumbnails. The full cloud stack typically runs $2,500-5,000/year for a single channel.</p>
+      <p>Phantomline's Founding Lifetime is $79 one-time. Multi-channel operators (a primary cold-case channel plus a forensic-style channel plus a news-recap channel) compound the savings linearly because licenses are per-install, not per-channel.</p>
+
+      <h2>Editorial notes that materially affect channel longevity</h2>
+      <ul>
+        <li><strong>Use real names with care.</strong> Naming victims, suspects, and convicted parties accurately is part of doing the work properly. The preset enforces consistent naming conventions, but the creator owns the editorial choice.</li>
+        <li><strong>Don't speculate.</strong> The single biggest reason true crime channels lose audience trust is unfounded speculation about ongoing or unsolved cases. The preset avoids speculative phrasing, but the creator must hold the line in editing.</li>
+        <li><strong>Cite sources visibly.</strong> The "sources.txt" emitted by Phantomline is meant to be pasted into the description. Channels that show their work earn audience trust faster.</li>
+        <li><strong>Avoid recreations of violent acts.</strong> Reportorial description outperforms dramatic reconstruction on both ad eligibility and audience response. The preset biases this way by default.</li>
+        <li><strong>Update inaccuracies promptly.</strong> If a video lands a fact wrong, post a pinned correction and update the description. The community is more forgiving of corrections than concealment.</li>
+      </ul>
+
+      <h2>Honest limitations</h2>
+      <ul>
+        <li><strong>AI does not verify facts.</strong> Llama 3.1 generates plausible-sounding prose; it does not check claims against external sources. The creator owns fact-checking. Phantomline's source-citation workflow makes this easier but doesn't replace it.</li>
+        <li><strong>Recent / ongoing cases need extra care.</strong> Cases under investigation or in active litigation are higher-risk for both legal and editorial reasons. The preset will generate scripts on these topics but defaults to a heavier "alleged / reportedly / according to" register that some hosts may want to relax for stylistic reasons.</li>
+        <li><strong>Frontier models still have a craft edge for marquee episodes.</strong> For your channel's flagship deep-dive of the year, frontier models often produce slightly more nuanced script structure than open-weight models. For weekly content, Llama 3.1 with the preset is competitive.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Is making AI true crime videos ethical?</summary>
+          <p>It can be. The preset enforces editorial conventions (verified facts, source attribution, no graphic dramatization). Editorial responsibility is the creator's, not the tool's.</p>
+        </details>
+        <details>
+          <summary>Can AI true crime scripts get demonetized?</summary>
+          <p>Less often than untuned scripts. The preset rewrites graphic source material into reportorial prose and avoids flagged terms in their most flaggable forms.</p>
+        </details>
+        <details>
+          <summary>Which voice works for true crime?</summary>
+          <p>Measured baritone, journalistic female narrator, or clipped news-host voice. The preset adjusts pacing and inflection automatically.</p>
+        </details>
+        <details>
+          <summary>Does Phantomline verify case facts?</summary>
+          <p>No. AI generates plausible prose; fact-checking is the creator's responsibility. Phantomline's source-citation workflow helps but does not replace it.</p>
+        </details>
+        <details>
+          <summary>How long should a true crime video be?</summary>
+          <p>8-25 minutes is dominant. Single-case deep-dives run 15-30 minutes; multi-case compilations 25-40 minutes.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin: 36px 0 24px;" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/faceless-youtube">Faceless YouTube tool pillar</a></li>
+        <li><a href="/local-ai-video-generator">Local AI video generator pillar</a></li>
+        <li><a href="/ai-voice-generator">AI voice generator pillar</a></li>
+        <li><a href="/horror-narration-tool">Horror narration tool</a></li>
+        <li><a href="/mystery-docs-tool">Mystery docs creation tool</a></li>
+        <li><a href="/youtube-seo-tool">YouTube SEO tool</a></li>
+        <li><a href="/alternatives/elevenlabs">ElevenLabs alternative</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
