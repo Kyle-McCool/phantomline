@@ -40,6 +40,106 @@ def api_system_health():
     })
 
 
+@system_bp.route("/api/system/setup-status", methods=["GET"])
+def api_system_setup_status():
+    """Snapshot of "is this install ready to make videos?".
+
+    The studio polls this on first load to render the setup checklist.
+    Each entry is {id, label, ok, hint, action_url} so the UI can render
+    a uniform list with green/red badges and an inline fix-it link.
+
+    Designed to be cheap (sub-second) — Ollama check has a 2s timeout, the
+    rest are env / file lookups. Polled every ~5s by the studio while the
+    setup panel is open, then stops once everything is green.
+    """
+    from auth_helpers import supabase_url, supabase_anon_key
+
+    items: list[dict[str, Any]] = []
+
+    # ---- 1. Supabase / sign-in availability ---------------------------------
+    sb_ok = bool(supabase_url() and supabase_anon_key())
+    items.append({
+        "id": "supabase",
+        "label": "Sign-in (Supabase)",
+        "ok": sb_ok,
+        "hint": (
+            "Supabase config is loaded — sign in on /account to activate your license."
+            if sb_ok else
+            "Supabase URL or anon key missing. Set DEFAULT_SUPABASE_ANON_KEY in auth_helpers.py."
+        ),
+        "action_url": "/account" if sb_ok else None,
+    })
+
+    # ---- 2. License / tier --------------------------------------------------
+    # Cheap import: just reads license.json and (maybe) HMAC-validates a key.
+    from routes.billing import current_tier
+    tier_info = current_tier()
+    tier = tier_info.get("tier", "free")
+    source = tier_info.get("source", "none")
+    license_ok = source in ("supabase", "license")  # any active path counts
+    if source == "supabase":
+        license_hint = f"{tier.title()} tier active (synced from your account)."
+    elif source == "license":
+        license_hint = f"{tier.title()} tier active via offline key."
+    elif source in ("supabase_expired", "expired"):
+        license_hint = "Your license expired. Renew or sign in again."
+    elif source == "invalid":
+        license_hint = "Stored license is invalid. Sign in again or paste a fresh key."
+    else:
+        license_hint = "Free tier (5 renders/month). Sign in on /account to activate a paid tier."
+    items.append({
+        "id": "license",
+        "label": "License",
+        "ok": license_ok or source == "none",  # free tier counts as "set up", just limited
+        "hint": license_hint,
+        "action_url": "/account",
+        "tier": tier,
+        "source": source,
+    })
+
+    # ---- 3. Ollama (local LLM) ----------------------------------------------
+    # Hits localhost:11434/api/tags with a 2s timeout. Returns the model
+    # list when up so we can also flag "running but no models pulled".
+    ollama_running = False
+    ollama_models: list[str] = []
+    try:
+        r = requests.get("http://localhost:11434/api/tags", timeout=2)
+        if r.status_code == 200:
+            ollama_running = True
+            data = r.json() or {}
+            ollama_models = [m.get("name", "") for m in (data.get("models") or [])]
+    except requests.RequestException:
+        pass
+
+    if not ollama_running:
+        ollama_hint = "Ollama isn't running. Install from ollama.com, then run `ollama serve` (or open the Ollama app)."
+    elif not ollama_models:
+        ollama_hint = "Ollama is running but no models pulled. Run `ollama pull llama3.1` in a terminal."
+    else:
+        ollama_hint = f"Ollama running with {len(ollama_models)} model{'s' if len(ollama_models) != 1 else ''}: {', '.join(ollama_models[:3])}"
+    items.append({
+        "id": "ollama",
+        "label": "Ollama (local LLM)",
+        "ok": ollama_running and bool(ollama_models),
+        "hint": ollama_hint,
+        "action_url": "/install/ollama",
+        "running": ollama_running,
+        "models": ollama_models,
+    })
+
+    # ---- 4. Are we ready to make videos? ------------------------------------
+    # The studio uses this top-level "ready" flag to decide whether to
+    # show the setup panel as a hard gate or a passive nudge.
+    all_ok = all(item["ok"] for item in items)
+
+    return jsonify({
+        "ok": True,
+        "ready": all_ok,
+        "items": items,
+        "tier": tier,
+    })
+
+
 # ---------------------------------------------------------------------------
 # Settings — persisted to output/settings.json so defaults survive restart.
 # ---------------------------------------------------------------------------
