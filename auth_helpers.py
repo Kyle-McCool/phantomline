@@ -30,7 +30,11 @@ import requests
 # UX wall this whole change is removing. If you ever rotate the anon key,
 # update this constant.
 DEFAULT_SUPABASE_URL = "https://vdzydhrgazqeyaalguuy.supabase.co"
-DEFAULT_SUPABASE_ANON_KEY = ""  # FIXME(kyle): paste the publishable anon key from phantomline.xyz/account view-source meta[name="supabase-anon-key"]
+# Publishable Supabase anon key. Same value that ships in the deployed JS at
+# phantomline.xyz/account in the <meta name="supabase-anon-key"> tag — RLS-gated,
+# safe to embed. If you rotate the anon key in Supabase, update both here and
+# Render's SUPABASE_ANON_KEY env var.
+DEFAULT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkenlkaHJnYXpxZXlhYWxndXV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzE5OTEsImV4cCI6MjA5MzM0Nzk5MX0.tDZYgABNm5WH4iVWhxBPXM1JiEUt-Rhr2XQoM6OlD1A"
 
 
 def _env(name: str) -> str | None:
