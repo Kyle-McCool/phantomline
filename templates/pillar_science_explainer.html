@@ -49,6 +49,38 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make an AI science explainer video",
+  "description": "Produce a pedagogically-structured science explainer with clear narration, supporting visuals, source citations, and atomic claim markers for fact-checking — locally, no per-render meter.",
+  "totalTime": "PT45M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A scientific concept and authoritative source material"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier covers single videos)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline science explainer preset"},
+    {"@type": "HowToTool", "name": "Llama 3.1 (pedagogical script generation)"},
+    {"@type": "HowToTool", "name": "Kokoro TTS (measured academic or conversational narrator)"},
+    {"@type": "HowToTool", "name": "MusicGen (minimal electronic / warm orchestral backing)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Pick a science explainer format",
+     "text": "Single-concept episode, deep dive, how-does-X-work, common-misconception correction, recent paper explainer, math visualization, engineering teardown, or biographical (scientist) episode. Each preset has tuned structure."},
+    {"@type": "HowToStep", "position": 2, "name": "Generate a script with claim atomicity",
+     "text": "The science preset structures each claim as an independent atomic assertion in the script. Embedded markers let you verify each claim against authoritative sources before publish."},
+    {"@type": "HowToStep", "position": 3, "name": "Run the fact-check pass",
+     "text": "Distinguish settled from contested claims. Mark simplifications that approach the misleading threshold. Verify recent findings against current papers (training data has cutoffs)."},
+    {"@type": "HowToStep", "position": 4, "name": "Pick a measured narrator voice",
+     "text": "Measured male academic narrator, measured female narrator with conversational tone, or energetic baritone (Veritasium / Real Engineering register). The preset auto-applies measured pacing and concept-transition pauses."},
+    {"@type": "HowToStep", "position": 5, "name": "Render with sources file",
+     "text": "Phantomline emits a sources.txt mapping each claim to its source. Paste into the description. Channels that show their sources earn audience trust faster than those that don't."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "inLanguage": "en-US",
   "mainEntity": [
@@ -75,6 +107,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>

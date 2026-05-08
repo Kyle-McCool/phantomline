@@ -19,6 +19,18 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Blog", "item": "{{ site_url }}/blog"},
+    {"@type": "ListItem", "position": 3, "name": "Sleep channel economics", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "Why Sleep Channels Are a Watch-Time Goldmine on YouTube",
   "datePublished": "2026-05-08",

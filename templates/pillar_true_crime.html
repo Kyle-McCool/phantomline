@@ -53,6 +53,39 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make an AI true crime video",
+  "description": "Produce a true crime narration video with editorial-responsible AI scripts, journalistic narrator voice, source citations, and period-appropriate visuals — locally and ad-eligibility-aware.",
+  "totalTime": "PT45M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A case to research (cold case, unsolved mystery, forensic deep dive)"},
+    {"@type": "HowToSupply", "name": "Verified sources (court records, archived news, scholarly references)"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier covers single videos)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline true crime preset"},
+    {"@type": "HowToTool", "name": "Llama 3.1 (editorial-aware script generation)"},
+    {"@type": "HowToTool", "name": "Kokoro TTS (journalistic narrator voice)"},
+    {"@type": "HowToTool", "name": "MusicGen (atmospheric backing)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Pick a true crime format",
+     "text": "Phantomline ships presets for cold case retrospectives, unsolved mystery deep dives, forensic-style episodes, multi-case theme compilations, and news-recap formats. Each tunes pacing, tone, and structure."},
+    {"@type": "HowToStep", "position": 2, "name": "Research the case using verified sources",
+     "text": "True crime requires accuracy. Compile court records, archived news, official statements, and scholarly references before drafting. The preset rewrites graphic source material into reportorial prose to maintain ad eligibility."},
+    {"@type": "HowToStep", "position": 3, "name": "Generate the script with claim markers",
+     "text": "Llama 3.1 with the true crime preset structures scripts in measured documentary register. Embedded claim markers let you fact-check each assertion against your sources before publish."},
+    {"@type": "HowToStep", "position": 4, "name": "Pick a journalistic narrator voice",
+     "text": "Measured baritone (Bailey Sarian register), journalistic female narrator (Lemmino mystery cross-over), or clipped news-host voice (Forensic Files tone). The preset auto-applies measured pacing and clear enunciation of proper nouns."},
+    {"@type": "HowToStep", "position": 5, "name": "Render with sources file",
+     "text": "Phantomline emits a sources.txt alongside the MP4 mapping each claim to its source. Paste it into the description so the audience can verify your work — channels that show their sources earn audience trust faster."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "inLanguage": "en-US",
   "mainEntity": [
@@ -79,6 +112,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>

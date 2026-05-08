@@ -53,6 +53,38 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make an AI sleep story video",
+  "description": "Generate a long-form sleep story or guided sleep meditation with calming AI narration, ambient music, and slow-pace visuals — locally, no per-character TTS fees.",
+  "totalTime": "PT25M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A sleep-story prompt or guided meditation outline"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier covers single videos)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline sleep preset"},
+    {"@type": "HowToTool", "name": "Llama 3.1 (calming script generation)"},
+    {"@type": "HowToTool", "name": "Kokoro TTS (soft narrator voice)"},
+    {"@type": "HowToTool", "name": "MusicGen (ambient music)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Pick a sleep format",
+     "text": "Phantomline ships presets for bedtime stories, guided sleep meditations, cozy travel narration, quiet history retellings, and pure ambient. Each tunes pacing, tone, and music selection."},
+    {"@type": "HowToStep", "position": 2, "name": "Write or generate the story",
+     "text": "Either write a topic prompt and let Llama 3.1 generate a long-form story (60-180 minute target runtime), or paste your own outline. The sleep preset writes at low conflict density so the listener never reaches a tension spike that wakes them."},
+    {"@type": "HowToStep", "position": 3, "name": "Pick a sleep narrator voice",
+     "text": "Soft warm female narrator (the dominant voice in the niche) or low-register male narrator with extended breath pauses. The sleep preset auto-applies slower pacing, longer pauses, and lowered pitch range."},
+    {"@type": "HowToStep", "position": 4, "name": "Generate ambient music",
+     "text": "MusicGen composes warm pad layers, sparse reverb-heavy piano, or slow drone textures. The bundled ambient pack also includes pink-noise base layers (rain, ocean, fireplace) that mix under the music."},
+    {"@type": "HowToStep", "position": 5, "name": "Render the long-form video",
+     "text": "Phantomline supports continuous output up to four hours per render. Volume normalization runs tighter than other presets so unexpected level changes don't startle the listener. Auto-generated chapter markers help re-listeners scrub to their favorite section."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "inLanguage": "en-US",
   "speakable": {
@@ -83,6 +115,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>

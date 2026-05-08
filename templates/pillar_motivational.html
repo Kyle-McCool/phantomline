@@ -49,6 +49,38 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make an AI motivational video",
+  "description": "Produce a motivational Short or long-form mindset video with punchy AI scripts, confident narration, cinematic music, and fast-cut visuals — locally, no per-render meter.",
+  "totalTime": "PT12M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A specific audience and an opposing reality you want to address"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier covers single videos)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline motivational preset"},
+    {"@type": "HowToTool", "name": "Llama 3.1 (script generation)"},
+    {"@type": "HowToTool", "name": "Kokoro TTS (energetic baritone or measured authoritative narrator)"},
+    {"@type": "HowToTool", "name": "MusicGen (cinematic backing)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Pick a motivational format",
+     "text": "Short-form 30-90s punch, long-form 8-15 minute essay, speaker-style monologue, quiet authority, biographical lesson, compilation theme, or audience-specific lane. Each preset tunes structure and pacing."},
+    {"@type": "HowToStep", "position": 2, "name": "Define the specific audience and opposition",
+     "text": "Generic motivational fails. The preset structures around: a specific opposing reality (the audience's actual situation), a concrete shift, and a small immediate call to action. Skip platitudes."},
+    {"@type": "HowToStep", "position": 3, "name": "Generate a structured script",
+     "text": "Llama 3.1 produces output that names a real audience, references specific situations, and avoids generic phrasing that signals algorithmic content."},
+    {"@type": "HowToStep", "position": 4, "name": "Pick a confident narrator voice",
+     "text": "Energetic baritone for hype-format motivational (Eric Thomas register) or measured authoritative narrator for quiet-authority content (After Skool register). The preset auto-applies confident pacing and line-end inflection."},
+    {"@type": "HowToStep", "position": 5, "name": "Render with caption layer on",
+     "text": "Most motivational Shorts viewers watch with sound off. Captions are on by default for the motivational preset. Vertical 1080x1920 for Shorts; horizontal 16:9 for long-form. Renders local."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "inLanguage": "en-US",
   "mainEntity": [
@@ -75,6 +107,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>

@@ -49,6 +49,38 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to make an AI history channel video",
+  "description": "Produce a documentary-style history video with measured narration, period-flavored music, source-cited script, and curated visuals — locally, with a fact-check workflow.",
+  "totalTime": "PT60M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "A historical topic and primary or scholarly sources"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier covers single videos)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline history preset"},
+    {"@type": "HowToTool", "name": "Llama 3.1 (documentary-register script generation)"},
+    {"@type": "HowToTool", "name": "Kokoro TTS (measured documentary narrator)"},
+    {"@type": "HowToTool", "name": "MusicGen (period-flavored ambient backing)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Pick a history format",
+     "text": "Single-topic deep dive (15-30 min), long-form documentary (30-60 min), this-day-in-history Shorts, biographical episodes, everyday-life series, counter-narrative episodes, or comparison episodes. Each preset has its own structure."},
+    {"@type": "HowToStep", "position": 2, "name": "Generate a draft with embedded claim markers",
+     "text": "Llama 3.1 with the history preset writes in measured documentary register. Each non-trivial claim is wrapped in a bracketed marker that the narrator skips but you can use for fact-checking."},
+    {"@type": "HowToStep", "position": 3, "name": "Run the four fact-check passes",
+     "text": "Verify dates and proper nouns; verify causal claims; identify oversimplifications; assign each claim to an authoritative source. Replace weak claims with verified-and-sourced versions or cut them."},
+    {"@type": "HowToStep", "position": 4, "name": "Pick a documentary narrator voice",
+     "text": "Measured male documentary narrator (BBC/PBS register), measured female narrator (Tasting History energy), or slightly dramatic baritone for military or epic-scale topics."},
+    {"@type": "HowToStep", "position": 5, "name": "Render with period-flavored music and sources file",
+     "text": "MusicGen composes period-appropriate ambient backing. Phantomline emits a sources.txt mapping each claim to its source. Paste that into the video description for audience trust."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "inLanguage": "en-US",
   "mainEntity": [
@@ -75,6 +107,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>

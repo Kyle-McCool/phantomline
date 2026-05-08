@@ -19,6 +19,50 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Blog", "item": "{{ site_url }}/blog"},
+    {"@type": "ListItem", "position": 3, "name": "Fact-checking workflow", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Fact-checking workflow for AI-assisted history channels",
+  "description": "A practical fact-checking workflow for history YouTube channels using AI script tools. Source citation, claim atomicity, primary-source bias, and corrections.",
+  "totalTime": "PT60M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "Authoritative historical sources (primary documents, scholarly works)"},
+    {"@type": "HowToSupply", "name": "AI script draft (e.g. from Phantomline's history preset)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Sketch your own outline first",
+     "text": "Before generating with AI, write a bullet-point outline of what you already know about the topic. This anchors the fact-check pass against your existing knowledge."},
+    {"@type": "HowToStep", "position": 2, "name": "Generate a draft with embedded claim markers",
+     "text": "Use AI (Phantomline's history preset) to expand your outline into a draft script with bracketed claim markers around each non-trivial assertion. The narrator skips these markers; they are visible only in the editor for fact-checking."},
+    {"@type": "HowToStep", "position": 3, "name": "Read the draft critically against your knowledge",
+     "text": "Mark anything that surprises you. It might be a genuine insight, but it might also be a hallucination. Either way, flag it for verification."},
+    {"@type": "HowToStep", "position": 4, "name": "Run the dates and proper-nouns pass",
+     "text": "Verify all dates, names, places, and quoted titles against an authoritative reference. AI gets ~95% of these right; the 5% errors are the most embarrassing."},
+    {"@type": "HowToStep", "position": 5, "name": "Run the causal-claims pass",
+     "text": "Verify any claim that says A caused B, A led to B, or A explains B. These are interpretive and often contested. Default to attributing the interpretation."},
+    {"@type": "HowToStep", "position": 6, "name": "Run the simplifications pass",
+     "text": "Identify any place where the script simplifies a complex situation past the misleading threshold. Mark for revision."},
+    {"@type": "HowToStep", "position": 7, "name": "Run the source-check pass",
+     "text": "Assign each non-trivial claim to an authoritative source. Replace weak claims with verified sourced versions or cut them entirely. Compile the source list for the description."},
+    {"@type": "HowToStep", "position": 8, "name": "Final read-through, render, publish",
+     "text": "Adjust narration pacing markers. Render. Phantomline emits a sources file alongside the MP4 — paste it into the description. Publish, then watch comments for substantive corrections in the first 48 hours and respond promptly."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "A Fact-Checking Workflow for AI-Assisted History Channels",
   "datePublished": "2026-05-08",
