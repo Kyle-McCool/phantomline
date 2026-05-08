@@ -94,9 +94,84 @@ The project was rebranded from Ghostline to Phantomline. Internal names were int
 - **Domain**: `phantomline.xyz` (A record → `216.24.57.1`, CNAME `www` → `phantomline.onrender.com`).
 - **Mobile**: Capacitor wraps the live site. `npx cap sync android && npx cap open android`.
 
-## Branching
+## Branching & multi-agent workflow
 
-`main` is production (auto-deploys on push). Always branch first. Kyle holds production secrets (ask via Signal / 1Password, not Slack or email).
+`main` is production (every push auto-deploys to Render). Multiple Claude Code sessions work this codebase in parallel — Kyle on backend / SEO / license infra, Cesar on landing-page UI. To keep merges seamless:
+
+### Hard rules
+
+1. **Never force-push `main`.** Force-pushing rewrites shared history. Even when the content is identical, the SHA changes break everyone else's local. If you need to fix a mistake on main, push a NEW commit (revert, fix-up, etc.) — never `--force` or `--force-with-lease` to main. (Branch protection should also block this at the GitHub level.)
+
+2. **Never commit directly to `main`.** Always work on a branch named `<owner>/<short-purpose>`:
+   - `kyle/license-sync` (backend)
+   - `kyle/seo-pillars` (content)
+   - `cesar/landing-redesign` (UI)
+   - `cesar/studio-refresh` (UI on the studio page, only after Kyle clears it per the working rules)
+
+3. **Pull before you start.** First action of any session: `git fetch origin && git status` to see what landed since your last push. Rebase or merge `origin/main` into your branch before starting work.
+
+4. **Always merge to main from a branch, with `--no-ff`.** This preserves the branch context in history and makes reverts surgical.
+
+### The standard ship-a-feature flow
+
+```bash
+# 1. Start clean
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+
+# 2. Branch
+git checkout -b cesar/landing-hero-redesign
+
+# 3. Work, commit small + often, push
+git add ...
+git commit -m "Hero: ..."
+git push -u origin cesar/landing-hero-redesign
+
+# 4. When ready to ship — merge cleanly
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git merge --no-ff cesar/landing-hero-redesign -m "Merge hero redesign"
+git push origin main
+```
+
+If `git pull --ff-only origin main` errors because main moved while you were working, **don't force**. Instead:
+```bash
+git checkout cesar/landing-hero-redesign
+git rebase origin/main      # replay your work onto fresh main
+# resolve any conflicts on the branch (not on main)
+git checkout main
+git merge --ff-only cesar/landing-hero-redesign  # now fast-forward
+git push origin main
+```
+
+### Conflict resolution philosophy
+
+- **Resolve on the branch, never on main.** A messy main = broken site.
+- **`git checkout --theirs <file>` when the conflict is spurious** (someone force-pushed and SHAs got rewritten — content is actually identical).
+- **Read both versions first** when conflicts overlap real changes from both sides. Don't `--theirs` blindly if the other person added something legitimate.
+
+### Coordinating across two Claude sessions
+
+Both Kyle's and Cesar's Claude sessions work this repo. To avoid collision:
+- Stay in your lane: Kyle = backend/SEO/license/scheduler/research; Cesar = landing/studio UI/CSS/JS for those two pages.
+- Brand docs (`docs/brand-brief.md`, `docs/style-guide.md`) live local-only — gitignored. Don't try to commit them.
+- If you find yourself touching the OTHER person's files, stop and check in via Slack first.
+
+### What to do if you discover a force-push happened
+
+```bash
+git fetch origin
+git status        # if your local branch is ahead by mysterious commits, that's a sign
+# back up your work
+git branch backup-pre-force-pull main
+# preserve any local-only files (gitignored ones are safe; tracked-but-removed need rescue)
+# reset to origin's version
+git reset --hard origin/main
+# re-apply your work
+git merge backup-pre-force-pull   # OR cherry-pick the commits you need
+```
 
 ## Working rules (from Kyle)
 
