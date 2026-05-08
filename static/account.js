@@ -532,6 +532,10 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
       $("#signin-card").hidden = true;
       $("#signed-in").hidden = false;
+      // Desktop-activation nudge: show on hosted, hide on localhost (where
+      // the auto-sync below handles activation transparently).
+      const desktopCard = document.getElementById("desktop-activate-card");
+      if (desktopCard) desktopCard.hidden = _isLocal;
       setStatus("Loading your account…");
 
       // If we just came back from the YouTube incremental-auth grant,
@@ -559,6 +563,34 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
         renderHeaderAndOverview(me.user || { email: session.user.email }, cachedSummary);
         renderLicenses(cachedLicenses);
         setStatus("");
+        // Phase 1 of the first-run UX fix: when /account is loaded on a
+        // localhost desktop install, auto-activate the buyer's license
+        // by hitting /api/license/sync. The endpoint validates the JWT
+        // server-side and writes the best license to output/license.json.
+        // Hosted (phantomline.xyz) skips this — there's no local app to
+        // activate; the deep-link button shown to local users handles it.
+        if (_isLocal) {
+          try {
+            const sync = await authedFetch("/api/license/sync", { method: "POST" });
+            if (sync.synced) {
+              setStatus(
+                `Desktop license activated: ${tierLabel(sync.license?.tier)}.`,
+                "success"
+              );
+            }
+            // sync.synced === false is fine — means "no license on file
+            // yet, you're free tier"; the licenses-list already shows
+            // the friendly empty state.
+          } catch (err) {
+            // Non-fatal: the user can still paste a key manually in
+            // Settings if sync fails. Surface the error so it's visible.
+            setStatus(
+              "Couldn't auto-activate license: " + err.message +
+              " You can paste a key manually in Settings.",
+              "error"
+            );
+          }
+        }
       } catch (err) {
         setStatus("Couldn't load account data: " + err.message, "error");
         // Still render whatever we know from the session so the page isn't blank.
