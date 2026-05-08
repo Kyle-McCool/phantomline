@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Science Explainer Video Generator — AI Science Channel Tool | Phantomline</title>
+<meta name="description" content="Generate science explainer videos locally with AI: structured pedagogical scripts, clear narration, supporting visuals, technical-accurate pacing. Built for faceless science channels covering physics, biology, computing, and applied sciences." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Science Explainer Video Generator | Phantomline" />
+<meta property="og:description" content="AI science explainer scripts, clear narration, supporting visuals. Local pipeline for faceless science channels." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Science Explainer Video Generator", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Science Explainer Video Generator for Faceless YouTube",
+  "description": "Pedagogically-structured AI scripts, clear narration, supporting visuals. Local pipeline for the faceless science channel niche.",
+  "datePublished": "2026-05-08",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {"@type": "Organization", "name": "Phantomline", "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}},
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "mainEntity": [
+    {"@type": "Question", "name": "What is a science explainer channel?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Faceless or face-on YouTube channels that explain scientific topics — physics, biology, chemistry, computing, engineering, math, applied sciences — in 8-25 minute episodes structured around a single concept or question. Examples: Veritasium, Kurzgesagt, 3Blue1Brown, Real Engineering, Up and Atom. The format rewards genuine explanatory clarity; viewers will tolerate mediocre production for a clear concept but won't tolerate confused exposition for any production value."}},
+    {"@type": "Question", "name": "Can AI write technically-accurate science scripts?",
+     "acceptedAnswer": {"@type": "Answer", "text": "AI writes fluent science prose at a popular-science level. Llama 3.1 with the science preset handles concept introductions, analogies, and standard explanatory structures well for established topics. It does not reliably get edge-case technical details right; it does not know the most recent papers; and it sometimes reproduces common misconceptions. Technical accuracy is a creator-side review responsibility. The preset structures scripts for easy fact-checking — claim-by-claim — rather than as a single block of prose."}},
+    {"@type": "Question", "name": "Which voice works for science explainers?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Three Kokoro voices fit the niche: a measured male narrator with academic register, a measured female narrator with a slightly more conversational tone, and a more energetic baritone for channels in the Veritasium / Real Engineering register. The science preset auto-applies measured pacing, careful enunciation of technical terms, and inserts pauses around concept transitions so the listener can absorb the new framing."}},
+    {"@type": "Question", "name": "How long should a science explainer video be?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Two formats dominate: 8-12 minute single-concept episodes (Up and Atom / SciShow norm) and 15-25 minute deep dives (Veritasium / Kurzgesagt norm). Shorts are useful for top-of-funnel reach but rarely match the conversion rate of long-form for science channels because the format requires explanation that 60 seconds can't sustain. Phantomline supports both formats."}},
+    {"@type": "Question", "name": "What music works for science videos?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Three reliable patterns: minimal electronic with subtle motion (the Kurzgesagt aesthetic), warm orchestral with a curious tone (Veritasium aesthetic), and sparse piano for math-focused content (3Blue1Brown aesthetic). MusicGen produces all three from prompts. The bundled music pack adds 5-7 royalty-free tracks for fallback. Avoid generic 'tech / corporate' library tracks — they signal genericness to a science-fluent audience."}}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article" style="max-width: 820px;">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <span class="current">Science Explainer Video Generator</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Use case</div>
+        <h1>Science Explainer Video Generator for Faceless YouTube</h1>
+        <p class="article-lede">Phantomline's science preset generates pedagogically-structured AI scripts, measured narration, supporting visual sourcing, and tonally-matched MusicGen backing — all locally. Built for faceless science channels where clarity outperforms spectacle and fact-checking is a publish requirement.</p>
+        <p class="article-meta">Published May 8, 2026 · Updated <time datetime="{{ today_iso }}">{{ today_iso }}</time></p>
+      </header>
+
+      <h2>The science explainer niche on YouTube</h2>
+      <p>Science explainer is a smaller niche than horror or motivation but pound-for-pound one of the strongest on the platform. Audience loyalty is unusually high; CPMs in tech and education verticals are above average; and the upper-tier channels (Veritasium, Kurzgesagt, 3Blue1Brown) command brand-deal economics most other niches can't reach. The format is also unusually meritocratic — viewers reward clear thinking over production polish, which means a mid-budget channel with strong explanations can compete with much larger studios on retention and engagement.</p>
+      <p>The constraints are also stricter. Audiences in this niche are typically scientifically literate and notice errors immediately. A single high-profile factual mistake can kick off correction threads that take more energy to address than the original video took to make. The best channels operate with a research and review pass: draft, verify, illustrate, narrate, fact-check again, publish. AI tooling helps with output speed but does not relax the editorial bar.</p>
+
+      <h2>Science explainer formats Phantomline ships presets for</h2>
+      <ul>
+        <li><strong>Single-concept episode (8-12 min)</strong> — one idea explained from first principles. The SciShow / Up and Atom format. Highest cycle frequency.</li>
+        <li><strong>Deep dive (15-25 min)</strong> — single topic with multiple perspectives, history of the question, current state. The Veritasium / Kurzgesagt long-form format.</li>
+        <li><strong>How does X work</strong> — mechanism-focused episodes (how does mRNA work, how does GPS calculate position). Strong evergreen performer.</li>
+        <li><strong>Common misconception correction</strong> — single-misconception episodes structured around the wrong intuition, the right model, and why the wrong intuition is sticky. High share rate.</li>
+        <li><strong>Recent paper or breakthrough</strong> — explainer for a specific recent finding. Higher fact-check overhead because the topic is fresh; the preset flags this and biases toward conservative claims.</li>
+        <li><strong>Math visualization</strong> — math-focused content closer to the 3Blue1Brown lane. Phantomline can render the script and narration; visualization graphics are typically still produced in dedicated math-animation tools and supplied as input.</li>
+        <li><strong>Engineering teardown</strong> — how a system or device works, broken into modules. Strong on the Real Engineering / Practical Engineering pattern.</li>
+        <li><strong>Biographical episodes (scientists)</strong> — single-figure life and contributions episodes. Crosses with the history pillar.</li>
+      </ul>
+
+      <h2>How Phantomline's science explainer pipeline differs from the standard stack</h2>
+      <p>The standard science channel stack — research time + ChatGPT for drafting + ElevenLabs for narration + a stock visual subscription + a music library + thumbnail tools + a scheduler — runs $80-180/month before per-character TTS. Science scripts run long and require careful editing; a 15-minute episode is 2,200-3,000 spoken words, and most channels rewrite multiple times before recording. The cost compounds against a niche where the quality bar is high and shortcuts are noticed.</p>
+
+      <h3>Pedagogically-structured script generation</h3>
+      <p>The science preset prompts Llama 3.1 with templates that emphasize explanatory structure: a concrete hook, a clear problem statement, an established intuition, the working model, evidence, edge cases, summary. The model is instructed to structure each claim atomically so a fact-check pass can mark each line individually. Output reads as a strong popular-science draft, not a publishable script — review and revision is still expected.</p>
+
+      <h3>Measured narrator voices</h3>
+      <p>Three Kokoro voices fit science narration: measured male academic narrator, measured female narrator with conversational tone, and an energetic baritone for the Veritasium / Real Engineering register. The preset auto-applies measured pacing, careful enunciation of technical vocabulary, and concept-transition pauses.</p>
+
+      <h3>Tonally-matched music</h3>
+      <p>MusicGen composes minimal electronic, warm orchestral, or sparse piano backing depending on the channel's chosen aesthetic (set in the preset). The bundled music pack adds 5-7 royalty-free tracks across the same patterns. All run locally.</p>
+
+      <h3>Visual sourcing tuned for explainers</h3>
+      <p>Phantomline's stock pull biases toward simple, illustrative imagery for science content — clean equipment shots, cellular imagery, abstract patterns, time-lapses of natural phenomena. The preset also accepts user-supplied diagrams and animations for module-by-module insertion in the timeline. For animation-heavy channels (Kurzgesagt-style motion graphics), Phantomline functions as the script and audio backbone with animations supplied separately.</p>
+
+      <h3>Source citation and fact-check workflow</h3>
+      <p>The preset embeds bracketed claim markers in scripts that Phantomline strips from narration but emits in a sources file. The fact-check pass becomes: read the sources file, verify each claim against an authoritative reference, mark unverified or weak claims for revision, regenerate the section. This workflow is the single biggest reliability win the preset offers compared to generic AI scripting.</p>
+
+      <h2>Science channel economics</h2>
+      <p>A science channel publishing 4 long-form videos a month at 12-minute average runs ~10,000 spoken words / 60,000-70,000 TTS characters. ElevenLabs Pro at $99/month covers it. The full cloud stack runs $1,500-2,500/year for a single channel.</p>
+      <p>Phantomline's Founding Lifetime is $79 one-time. Year-one savings: $1,400-2,400 for a single channel. The bigger payoff in this niche is review-cycle efficiency — local rendering means iterating a script three times across a single afternoon doesn't burn metered TTS spend.</p>
+
+      <h2>Editorial notes that matter for credibility</h2>
+      <ul>
+        <li><strong>Source every non-trivial claim.</strong> The preset's claim-marker workflow makes this efficient. Channels that show their sources earn audience trust faster.</li>
+        <li><strong>Distinguish settled from contested.</strong> The audience is fluent enough to recognize when a contested claim is presented as settled. The preset defaults to acknowledging primary scientific positions on contested topics.</li>
+        <li><strong>Don't over-simplify to the point of inaccuracy.</strong> Popular-science writing has to simplify; the line between simplification and falsehood is the editorial judgment call. The preset flags simplifications that reach the misleading threshold.</li>
+        <li><strong>Update for new findings.</strong> Some topics have specific dates after which older explanations become wrong. The preset surfaces "as of" dates in scripts so retroactive corrections are easier.</li>
+        <li><strong>Use specific examples.</strong> Concrete cases beat abstract claims for retention. The preset structures around named examples wherever the topic allows.</li>
+      </ul>
+
+      <h2>Honest limitations</h2>
+      <ul>
+        <li><strong>No factual verification.</strong> Llama 3.1 produces plausible scientific prose; it does not verify claims against papers or reference materials. Fact-checking is the creator's responsibility.</li>
+        <li><strong>Out-of-date training cutoff.</strong> Open-weight model knowledge has a cutoff. For current research or very recent breakthroughs, scripts will need supplementary input from the creator.</li>
+        <li><strong>Animation and visualization remain external.</strong> Phantomline orchestrates voice, music, and basic stock visuals. Custom animations and math visualizations are still typically produced in dedicated tools (After Effects, Manim, custom motion graphics).</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>What is a science explainer channel?</summary>
+          <p>A YouTube channel that explains scientific topics in 8-25 minute episodes. Examples: Veritasium, Kurzgesagt, 3Blue1Brown, SciShow.</p>
+        </details>
+        <details>
+          <summary>Can AI write accurate science scripts?</summary>
+          <p>AI writes fluent prose; it does not verify facts or know recent papers. Fact-checking is the creator's responsibility.</p>
+        </details>
+        <details>
+          <summary>Which voice works for science explainers?</summary>
+          <p>Measured male academic, measured female conversational, or energetic baritone. The preset adjusts pacing and pronunciation automatically.</p>
+        </details>
+        <details>
+          <summary>How long should a science video be?</summary>
+          <p>8-12 minutes for single-concept episodes; 15-25 for deep dives.</p>
+        </details>
+        <details>
+          <summary>What music for science explainers?</summary>
+          <p>Minimal electronic, warm orchestral, or sparse piano. MusicGen handles all three.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin: 36px 0 24px;" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/faceless-youtube">Faceless YouTube tool pillar</a></li>
+        <li><a href="/local-ai-video-generator">Local AI video generator pillar</a></li>
+        <li><a href="/ai-voice-generator">AI voice generator pillar</a></li>
+        <li><a href="/mystery-docs-tool">Mystery docs creation tool</a></li>
+        <li><a href="/youtube-seo-tool">YouTube SEO tool</a></li>
+        <li><a href="/alternatives/elevenlabs">ElevenLabs alternative</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

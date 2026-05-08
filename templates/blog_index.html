@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Phantomline Blog — Faceless YouTube Strategy &amp; Production | Phantomline</title>
+<meta name="description" content="Strategy, production notes, and editorial guidance for faceless YouTube creators. Cadence, voice selection, monetization, niche-specific workflow, and AI-assisted content." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Phantomline Blog" />
+<meta property="og:description" content="Strategy and production notes for faceless YouTube creators." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "Phantomline Blog",
+  "url": "{{ canonical_url }}",
+  "publisher": {"@type": "Organization", "name": "Phantomline"},
+  "blogPost": [
+    {%- for a in articles %}
+    {
+      "@type": "BlogPosting",
+      "headline": "{{ a.title|e }}",
+      "description": "{{ a.meta_description|e }}",
+      "datePublished": "{{ a.published_date }}",
+      "url": "{{ site_url }}/blog/{{ a.slug }}"
+    }{% if not loop.last %},{% endif %}
+    {%- endfor %}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog" aria-current="page">Blog</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article" style="max-width: 820px;">
+      <header class="article-head">
+        <div class="eyebrow">Phantomline blog</div>
+        <h1>Strategy, production, and editorial notes for faceless YouTube creators</h1>
+        <p class="article-lede">Cadence patterns, voice selection, monetization, niche-specific workflows, and the editorial choices that separate channels that last from channels that flame out. Written for working operators, not for SEO bait.</p>
+      </header>
+
+      <ul class="blog-list" style="list-style:none; padding:0; margin: 24px 0 0;">
+        {% for a in articles %}
+        <li style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <h2 style="margin: 0 0 6px;"><a href="/blog/{{ a.slug }}">{{ a.title }}</a></h2>
+          <p class="article-meta" style="margin: 0 0 8px;">{{ a.published_date }} · {{ a.reading_time }} read</p>
+          <p style="margin: 0; color: var(--text-2);">{{ a.subtitle }}</p>
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

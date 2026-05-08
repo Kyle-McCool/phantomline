@@ -323,6 +323,21 @@
               <a href="mailto:support@phantomline.xyz">support@phantomline.xyz</a> with your Stripe receipt.
             </p>
           </div>
+          <!-- Desktop activation card. Hidden by default; account.js shows it
+               only when this page is NOT running on localhost (i.e. user is on
+               phantomline.xyz). Local installs auto-activate after sign-in. -->
+          <div class="card" id="desktop-activate-card" hidden>
+            <h3>Running the desktop app?</h3>
+            <p class="meta">
+              Open <code>http://localhost:5000/account</code> on the same computer where Phantomline desktop is running, then sign in with the same Google account. Your license auto-activates — no key to copy.
+            </p>
+            <div class="row-actions">
+              <a class="cta secondary" id="desktop-activate-btn" href="http://localhost:5000/account" target="_blank" rel="noopener">Open desktop /account</a>
+            </div>
+            <p class="meta" style="margin-top: 10px; font-size: 12px;">
+              No desktop app yet? <a href="/install/phantomline">Install Phantomline desktop</a> first.
+            </p>
+          </div>
         </div>
 
         <!-- Licenses ----------------------------------------------------- -->

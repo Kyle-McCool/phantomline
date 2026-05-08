@@ -19,17 +19,40 @@ from urllib.parse import quote
 import requests
 
 
+# Publishable defaults so a fresh `python server.py` works without any .env
+# editing. Both values are public by design — the URL is the project REST
+# endpoint, and the anon key is the publishable browser key (RLS-gated, ships
+# in deployed JS already). Env vars still win when set.
+#
+# The anon key intentionally lives in code, not in a placeholder string,
+# because every desktop install needs it to talk to Supabase Auth, and
+# asking users to copy/paste a JWT before they sign in is exactly the
+# UX wall this whole change is removing. If you ever rotate the anon key,
+# update this constant.
+DEFAULT_SUPABASE_URL = "https://vdzydhrgazqeyaalguuy.supabase.co"
+# Publishable Supabase anon key. Same value that ships in the deployed JS at
+# phantomline.xyz/account in the <meta name="supabase-anon-key"> tag — RLS-gated,
+# safe to embed. If you rotate the anon key in Supabase, update both here and
+# Render's SUPABASE_ANON_KEY env var.
+DEFAULT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkenlkaHJnYXpxZXlhYWxndXV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzE5OTEsImV4cCI6MjA5MzM0Nzk5MX0.tDZYgABNm5WH4iVWhxBPXM1JiEUt-Rhr2XQoM6OlD1A"
+
+
 def _env(name: str) -> str | None:
     v = os.environ.get(name)
     return v if v else None
 
 
 def supabase_url() -> str | None:
-    return _env("SUPABASE_URL")
+    """Project REST endpoint. Falls back to the baked-in default so a
+    fresh local install works without editing .env."""
+    return _env("SUPABASE_URL") or (DEFAULT_SUPABASE_URL or None)
 
 
 def supabase_anon_key() -> str | None:
-    return _env("SUPABASE_ANON_KEY")
+    """Publishable anon key. Falls back to the baked-in default. Note:
+    DEFAULT_SUPABASE_ANON_KEY is intentionally empty in source so a fresh
+    clone needs Kyle to paste it once — see the FIXME above."""
+    return _env("SUPABASE_ANON_KEY") or (DEFAULT_SUPABASE_ANON_KEY or None)
 
 
 def supabase_service_role_key() -> str | None:
