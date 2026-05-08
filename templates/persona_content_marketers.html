@@ -29,6 +29,46 @@
   ]
 }
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Phantomline for Content Marketers",
+  "description": "Brand YouTube production at near-zero marginal cost per video. Local pipeline for content marketers managing brand video at volume.",
+  "datePublished": "2026-05-08",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "mainEntity": [
+    {"@type": "Question", "name": "How does Phantomline fit a content-marketing team's stack?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Phantomline handles the volume content layer — top-of-funnel YouTube, repurposing long-form into Shorts, A/B testing variants, recurring series, webinar redistribution. It does not replace agency-produced marquee assets, talking-head executive video, customer testimonials, or animation-heavy motion-graphics work. Most teams adopt it for the volume layer while keeping agency relationships for premium assets."}},
+    {"@type": "Question", "name": "What does Phantomline replace in a typical marketing stack?",
+     "acceptedAnswer": {"@type": "Answer", "text": "A typical content-marketing team stack runs $1,000-2,000/month: stock visuals, music library, video editor seats, ElevenLabs or similar TTS, scheduler, SEO tool, thumbnail tool. Phantomline replaces most of that for $79 per install. Multi-seat pricing is per-install (no per-seat ladder), so a five-person team licensing five installs is $395 once."}},
+    {"@type": "Question", "name": "Is it secure for regulated industries?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Local processing is the security argument. Scripts, narration, and rendering happen on the user's machine; no cloud upload of the content layer. The only external dependency in the default pipeline is the YouTube publish step, which uses standard OAuth. Phantomline ships as Python source, so security teams can review the code, dependencies, and data flow directly."}},
+    {"@type": "Question", "name": "Does Phantomline have SSO and role-based permissions?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Not yet. SSO, role-based permissions, and centralized usage analytics are on the roadmap but not in the current build. Teams that strictly require these enterprise features today are early for the current product. Teams that can defer them benefit from the cost asymmetry now."}},
+    {"@type": "Question", "name": "Can it handle multi-aspect-ratio output for cross-platform distribution?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Phantomline renders 16:9 (YouTube long-form), 9:16 (Shorts/TikTok/Reels), and 1:1 (LinkedIn native, Instagram feed) from the same project. The script and audio layer is shared; the visual layer reframes for each aspect."}}
+  ]
+}
+</script>
 </head>
 <body>
 <div class="wrap">
@@ -39,6 +79,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>
@@ -107,6 +148,30 @@
         <li><strong>It's a desktop install.</strong> Each user runs the studio locally. Teams used to fully-cloud workflows need to budget the install/onboarding step (typically 30 minutes per user).</li>
         <li><strong>Not yet enterprise-feature-complete.</strong> SSO, role-based permissions, and centralized usage analytics are on the roadmap but not in the current build. Teams that strictly require these today are early for the current product; teams that can defer them benefit from the cost asymmetry now.</li>
       </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>How does this fit our existing stack?</summary>
+          <p>Phantomline handles the volume content layer — top-of-funnel YouTube, repurposing, A/B variants, recurring series. Agency relationships stay for marquee assets and motion-graphics work.</p>
+        </details>
+        <details>
+          <summary>What does it replace in subscriptions?</summary>
+          <p>Most of $1,000-2,000/month per team: stock visuals, music, editors, TTS, scheduler, SEO tool, thumbnails. Phantomline is $79 per install with no per-seat ladder.</p>
+        </details>
+        <details>
+          <summary>Is it secure for regulated industries?</summary>
+          <p>Local processing is the argument. Scripts and rendering stay on the user's machine; only the YouTube publish step touches the network (standard OAuth). Phantomline ships as Python source for security review.</p>
+        </details>
+        <details>
+          <summary>SSO and team permissions?</summary>
+          <p>Not yet. On the roadmap. Teams strictly requiring these today are early; teams that can defer them get the cost asymmetry now.</p>
+        </details>
+        <details>
+          <summary>Multi-aspect-ratio output?</summary>
+          <p>Yes — 16:9, 9:16, and 1:1 from the same project. Audio shared; visual reframed for each aspect.</p>
+        </details>
+      </div>
 
       <h2>Try it</h2>
       <p>Free tier needs no card. Run a single brand video through the pipeline before approving the team license. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>

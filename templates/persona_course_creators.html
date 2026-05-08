@@ -29,6 +29,46 @@
   ]
 }
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Phantomline for Course Creators",
+  "description": "Educational video production at one-time-license speed. Local pipeline for course creators using YouTube as top-of-funnel.",
+  "datePublished": "2026-05-08",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "mainEntity": [
+    {"@type": "Question", "name": "Will Phantomline replace my course delivery videos?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Phantomline produces YouTube top-of-funnel content (topic introductions, adjacent-topic explainers, common-mistake videos) that markets your course. Your actual course videos still need your direct teaching. Phantomline is the marketing/funnel layer, not the course content layer."}},
+    {"@type": "Question", "name": "How does this fit a course creator's funnel?",
+     "acceptedAnswer": {"@type": "Answer", "text": "YouTube content does three jobs in a course funnel: discovery (algorithm finding new viewers), qualification (viewers self-selecting whether your subject matches their need), and trust-building (cumulative effect of consistent helpful content). Phantomline doesn't change the dynamics; it removes the production cost ceiling that usually limits how many shots you get at all three."}},
+    {"@type": "Question", "name": "Won't AI-generated content hurt my course's authority?",
+     "acceptedAnswer": {"@type": "Answer", "text": "It depends on how you use it. Generic AI content does hurt authority. Phantomline's educational presets default to introducing topics rather than delivering full explanations, which is the right level for funnel content. The depth-to-conversion balance is your editorial call. Many course creators run hybrid: faceless body + face-on intro/outro recorded themselves."}},
+    {"@type": "Question", "name": "How quickly does the tool pay for itself?",
+     "acceptedAnswer": {"@type": "Answer", "text": "For a course creator with a $200-500 product, one or two YouTube-driven course sales pays the $79 Founding Lifetime in full. After that the marginal cost per funnel video is essentially your time."}},
+    {"@type": "Question", "name": "Can I tie videos to specific course modules?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Phantomline's metadata bundle supports custom link patterns in the description and end-screen, so each funnel video can link directly to the specific course module it introduces."}}
+  ]
+}
+</script>
 </head>
 <body>
 <div class="wrap">
@@ -39,6 +79,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>
@@ -105,6 +146,30 @@
         <li><strong>It doesn't replace the conversion infrastructure.</strong> Email capture, landing pages, payment processing, course delivery — these still need their own tools. Phantomline is the content layer feeding the rest.</li>
         <li><strong>Faceless changes the trust equation.</strong> Some course audiences expect the instructor to be visible. Phantomline can produce hybrid (faceless body + face-on intro/outro) but the editorial judgment is yours.</li>
       </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Will Phantomline replace my course delivery videos?</summary>
+          <p>No. Phantomline is for YouTube top-of-funnel content that markets your course. Your actual course videos still need your direct teaching.</p>
+        </details>
+        <details>
+          <summary>How does this fit a course funnel?</summary>
+          <p>YouTube content does three jobs in a course funnel: discovery, qualification, and trust-building. Phantomline removes the production cost ceiling that usually caps how many shots you get at each.</p>
+        </details>
+        <details>
+          <summary>Won't AI content hurt my course authority?</summary>
+          <p>Generic AI does. Phantomline's educational presets default to introducing topics, not delivering full explanations. Many course creators run hybrid: faceless body + face-on intro recorded themselves.</p>
+        </details>
+        <details>
+          <summary>How fast does it pay for itself?</summary>
+          <p>For a $200-500 course, 1-2 YouTube-driven sales covers the $79 license in full. After that, marginal cost per funnel video is essentially your time.</p>
+        </details>
+        <details>
+          <summary>Can I link videos to course modules?</summary>
+          <p>Yes — Phantomline's metadata bundle supports custom link patterns in description and end-screen, so each video links directly to the module it introduces.</p>
+        </details>
+      </div>
 
       <h2>Try it</h2>
       <p>Free tier needs no card. Test the pipeline on a single funnel video before deciding. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>

@@ -29,6 +29,46 @@
   ]
 }
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Phantomline for Solopreneurs",
+  "description": "A complete one-person faceless YouTube studio that runs locally. No team, no subscription stack, no per-render fees.",
+  "datePublished": "2026-05-08",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "mainEntity": [
+    {"@type": "Question", "name": "Can a single creator really run a faceless YouTube channel without a team?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes, and most successful faceless YouTube channels are exactly that: a single creator running everything. The constraint isn't talent or strategy; it's hours per video. Phantomline collapses the typical seven-tool stack (script generator, voiceover, music library, stock visuals, video editor, scheduler, thumbnail tool) into one local pipeline so a typical 8-12 minute faceless video moves from roughly 2.5 hours of production time on the standard cloud workflow to about 45 minutes."}},
+    {"@type": "Question", "name": "What hardware do I need to run Phantomline as a solopreneur?",
+     "acceptedAnswer": {"@type": "Answer", "text": "A laptop or desktop from the last 4-5 years runs Phantomline comfortably. Recommended specs: 16 GB RAM, modern CPU (M-series Mac, Ryzen 5/Intel i5 or better on PC), 50 GB free disk for model weights and rendered output. A discrete GPU helps render speed but is not required — the pipeline works on integrated graphics, just slower."}},
+    {"@type": "Question", "name": "How much does Phantomline replace in monthly subscriptions?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The standard solopreneur stack runs $200-300/month: ChatGPT Plus, ElevenLabs, music subscription, stock visuals, video editor, scheduler, thumbnail tool, and an SEO tool like vidIQ or TubeBuddy. Phantomline replaces all of those for a one-time $79 Founding Lifetime license. Year-one savings are roughly $1,800-2,800."}},
+    {"@type": "Question", "name": "Does it work for multi-channel operators?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes — licenses are per install, not per channel. A solopreneur running three faceless channels in different niches uses one Phantomline install and pays $79 once. There is no per-channel scaling fee."}},
+    {"@type": "Question", "name": "Can I produce a video while completely offline?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Mostly yes. Script generation, narration, music, and rendering all run locally with no internet required. The two steps that need network access are the optional Pexels stock visual pull (free, your own key) and the YouTube publish step (OAuth). Both are optional; you can produce a complete video offline and upload manually later."}}
+  ]
+}
+</script>
 </head>
 <body>
 <div class="wrap">
@@ -39,6 +79,7 @@
     <div class="navlinks">
       <a href="/alternatives">Alternatives</a>
       <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
       <a href="/#faq">FAQ</a>
       <a class="cta" href="/app">Open Studio</a>
     </div>
@@ -108,6 +149,30 @@
         <li><strong>Analytics depth is YouTube-bounded.</strong> Phantomline reads YouTube analytics; it doesn't add a separate analytics database. Channels that need deep cross-platform analytics still want a dedicated tool.</li>
         <li><strong>Brand-new channels still need to find an audience.</strong> Phantomline accelerates production; it doesn't substitute for finding a niche the algorithm wants to recommend.</li>
       </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Can a solo creator run a faceless YouTube channel?</summary>
+          <p>Yes — most successful faceless channels are solo. The constraint is hours per video, not talent. Phantomline collapses the typical seven-tool stack into one local pipeline so production drops from ~2.5 hours to ~45 minutes per video.</p>
+        </details>
+        <details>
+          <summary>What hardware do I need?</summary>
+          <p>A laptop from the last 4-5 years. 16 GB RAM, modern CPU, 50 GB free disk. A GPU helps render speed but isn't required.</p>
+        </details>
+        <details>
+          <summary>How much does it replace in subscriptions?</summary>
+          <p>Roughly $200-300/month worth of ChatGPT, ElevenLabs, music, stock visuals, editor, scheduler, thumbnails, and SEO tools. Phantomline is $79 once.</p>
+        </details>
+        <details>
+          <summary>Does it work for multi-channel operators?</summary>
+          <p>Yes. Licenses are per install, not per channel. One license covers however many channels you run.</p>
+        </details>
+        <details>
+          <summary>Can I produce videos offline?</summary>
+          <p>Mostly. Script, narration, music, and rendering all work offline. The optional Pexels visuals and YouTube publish need network; both can be deferred.</p>
+        </details>
+      </div>
 
       <h2>Try it</h2>
       <p>Free tier needs no card. Render up to 5 videos a month to verify the pipeline before paying. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
