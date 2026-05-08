@@ -418,15 +418,33 @@ def _seo_globals():
 _SITEMAP_ROUTES = [
     ("/",                              "1.0", "weekly"),
     ("/pricing",                       "0.9", "monthly"),
+    # Original category pillars (broad keywords).
     ("/local-ai-video-generator",      "0.85", "monthly"),
     ("/faceless-youtube",              "0.85", "monthly"),
     ("/ai-voice-generator",            "0.85", "monthly"),
     ("/youtube-scheduler",             "0.85", "monthly"),
     ("/youtube-seo-tool",              "0.85", "monthly"),
+    # Original niche use-case pillars.
     ("/reddit-stories-video-tool",     "0.8", "monthly"),
     ("/horror-narration-tool",         "0.8", "monthly"),
     ("/mystery-docs-tool",             "0.8", "monthly"),
+    # Phase 1 audience-expansion niche pillars (added 2026-05-08).
+    ("/asmr-sleep-story-generator",    "0.8", "monthly"),
+    ("/true-crime-video-generator",    "0.8", "monthly"),
+    ("/motivational-video-generator",  "0.8", "monthly"),
+    ("/history-video-generator",       "0.8", "monthly"),
+    ("/science-explainer-video-generator", "0.8", "monthly"),
+    # Persona pages.
+    ("/for-solopreneurs",              "0.75", "monthly"),
+    ("/for-course-creators",           "0.75", "monthly"),
+    ("/for-content-marketers",         "0.75", "monthly"),
+    # Listicle.
+    ("/best-faceless-youtube-tools",   "0.85", "monthly"),
+    # Blog index. Per-article URLs are appended dynamically below.
+    ("/blog",                          "0.7", "weekly"),
+    # Comparison hub.
     ("/alternatives",                  "0.8", "monthly"),
+    # Static.
     ("/about",                         "0.7", "monthly"),
     ("/privacy",                       "0.4", "yearly"),
     ("/terms",                         "0.4", "yearly"),
@@ -581,11 +599,15 @@ def sitemap_xml():
     every render — fine for a small site; revisit if we ever add
     programmatic page generation (then track per-page mtimes)."""
     from alternatives import COMPETITORS
+    from blog import published_articles
     today = time.strftime("%Y-%m-%d")
     routes = list(_SITEMAP_ROUTES)
     # Each competitor alternative page is a real ranking target.
     for c in COMPETITORS:
         routes.append((f"/alternatives/{c['slug']}", "0.7", "monthly"))
+    # Each published blog article ships in the sitemap.
+    for a in published_articles():
+        routes.append((f"/blog/{a['slug']}", "0.65", "monthly"))
     urls = "\n".join(
         f"  <url>\n"
         f"    <loc>{SITE_URL}{path}</loc>\n"
@@ -2586,6 +2608,115 @@ def pillar_mystery_docs():
     responsibility notes for real cases, and the LEMMiNO/Wendigoon
     long-form format economics."""
     return render_template("pillar_mystery_docs.html")
+
+
+# -----------------------------------------------------------------------
+# Niche pillars added 2026-05-08 (audience expansion phase 1).
+# Each is a long-form (~2000 word) pillar targeting a specific faceless
+# YouTube niche the original 8 pillars didn't address. Internal-links
+# back to the existing pillars + alternatives + pricing.
+# -----------------------------------------------------------------------
+
+@app.route("/asmr-sleep-story-generator")
+def pillar_asmr_sleep():
+    """Sleep / ASMR niche pillar. Long-form sleep stories, guided meditations,
+    cozy ambient. The watch-time goldmine economics make this an unusually
+    valuable wedge. ~2200 words."""
+    return render_template("pillar_asmr_sleep.html")
+
+
+@app.route("/true-crime-video-generator")
+def pillar_true_crime():
+    """True crime niche pillar. Cold case retrospectives, unsolved deep dives,
+    forensic-format episodes. Editorial-responsibility-aware preset is the
+    differentiator. ~2200 words."""
+    return render_template("pillar_true_crime.html")
+
+
+@app.route("/motivational-video-generator")
+def pillar_motivational():
+    """Motivational / mindset niche pillar. Shorts-first audience, paired
+    Shorts + long-form publishing pattern. ~2000 words."""
+    return render_template("pillar_motivational.html")
+
+
+@app.route("/history-video-generator")
+def pillar_history():
+    """History niche pillar. Documentary-register scripts, source citation
+    workflow, fact-check-friendly atomic claim structure. ~2100 words."""
+    return render_template("pillar_history.html")
+
+
+@app.route("/science-explainer-video-generator")
+def pillar_science_explainer():
+    """Science / explainer niche pillar. Pedagogically-structured scripts,
+    measured narrator voices, source-citation workflow. ~2100 words."""
+    return render_template("pillar_science_explainer.html")
+
+
+# -----------------------------------------------------------------------
+# Persona pages — buyer-intent pages for specific creator personas. These
+# convert higher than category pages because they pre-qualify the buyer.
+# -----------------------------------------------------------------------
+
+@app.route("/for-solopreneurs")
+def persona_solopreneurs():
+    """Solopreneur persona page. One-person YouTube studio framing.
+    ~1700 words."""
+    return render_template("persona_solopreneurs.html")
+
+
+@app.route("/for-course-creators")
+def persona_course_creators():
+    """Course creator persona page. YouTube-as-funnel framing.
+    ~1700 words."""
+    return render_template("persona_course_creators.html")
+
+
+@app.route("/for-content-marketers")
+def persona_content_marketers():
+    """Content marketer persona page. Brand video at volume framing,
+    compliance/security notes for enterprise teams. ~1900 words."""
+    return render_template("persona_content_marketers.html")
+
+
+# -----------------------------------------------------------------------
+# Listicle — "best of" page that lists Phantomline alongside named
+# competitors with honest reviews. High-ROI page for AEO answers.
+# -----------------------------------------------------------------------
+
+@app.route("/best-faceless-youtube-tools")
+def best_faceless_youtube_tools():
+    """Comparative listicle of leading faceless YouTube tools in 2026.
+    Phantomline first, then 11 named competitors with honest reviews.
+    ~2300 words."""
+    return render_template("best_faceless_youtube_tools.html")
+
+
+# -----------------------------------------------------------------------
+# Blog routes. Articles registered in blog.py; per-article template lives
+# at templates/blog_<slug>.html so each one can carry custom schema.
+# -----------------------------------------------------------------------
+
+@app.route("/blog")
+@app.route("/blog/")
+def blog_index():
+    """Blog landing — lists published articles newest first."""
+    from blog import published_articles
+    return render_template("blog_index.html", articles=published_articles())
+
+
+@app.route("/blog/<slug>")
+def blog_article(slug):
+    """Per-article blog post. Each post has its own template at
+    templates/blog_<slug>.html so the per-post schema and meta tags can be
+    custom without having to template them through a shared layer."""
+    from blog import ARTICLES_BY_SLUG
+    article = ARTICLES_BY_SLUG.get(slug)
+    if not article or not article.get("published"):
+        return jsonify({"ok": False, "error": "Article not found"}), 404
+    template_name = f"blog_{slug}.html"
+    return render_template(template_name, article=article)
 
 
 @app.route("/app")
