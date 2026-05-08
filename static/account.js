@@ -91,6 +91,93 @@ const _isLocal =
   _hostname === "" ||
   _hostname.endsWith(".local");
 
+// ---------------------------------------------------------------------------
+// Desktop-server probe + card state machine.
+//
+// On hosted phantomline.xyz/account, we fetch http://localhost:5000/api/system/ping
+// to detect whether the user has Phantomline running on their machine. The
+// local server returns explicit CORS + Private-Network-Access headers so the
+// HTTPS→HTTP probe is allowed.
+//
+// Three states reflected on the card via data-state:
+//   - probing      : initial, while the fetch is in flight
+//   - running      : ping resolved → show "Open in desktop app" CTA
+//   - not_running  : timeout / error → show coaching panel + retry button
+//
+// We deliberately use a short timeout (~1.2s). A user with the server up gets
+// a near-instant green path; a user without it gets a clear "start it first"
+// message before they've had time to wonder what's broken.
+// ---------------------------------------------------------------------------
+function _setDesktopCardState(state) {
+  const card = document.getElementById("desktop-activate-card");
+  if (!card) return;
+  card.dataset.state = state;
+  card.querySelectorAll("[data-card-state]").forEach((el) => {
+    el.hidden = el.dataset.cardState !== state;
+  });
+}
+
+async function probeLocalDesktop() {
+  const card = document.getElementById("desktop-activate-card");
+  if (!card) return;
+  _setDesktopCardState("probing");
+
+  // AbortController so we can cap the probe at ~1.2s. Real local installs
+  // respond in <50ms; anything slower is almost certainly an unreachable
+  // host (DNS / firewall / not running).
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 1200);
+  try {
+    const res = await fetch("http://localhost:5000/api/system/ping", {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      _setDesktopCardState("not_running");
+      return;
+    }
+    const body = await res.json().catch(() => ({}));
+    if (body && body.service === "phantomline") {
+      _setDesktopCardState("running");
+    } else {
+      // Something is on :5000 but not Phantomline (rare; treat as not running).
+      _setDesktopCardState("not_running");
+    }
+  } catch (err) {
+    clearTimeout(timer);
+    _setDesktopCardState("not_running");
+  }
+}
+
+// Wire up the coaching-panel buttons (idempotent — guarded against
+// re-firing if the page state changes).
+(function wireDesktopCardButtons() {
+  const showBtn = document.getElementById("desktop-show-launch-btn");
+  const retryBtn = document.getElementById("desktop-retry-btn");
+  const helpPanel = document.getElementById("desktop-launch-help");
+  if (showBtn && helpPanel) {
+    showBtn.addEventListener("click", () => {
+      helpPanel.hidden = !helpPanel.hidden;
+      showBtn.textContent = helpPanel.hidden
+        ? "Show me how to start it"
+        : "Hide instructions";
+    });
+  }
+  if (retryBtn) {
+    retryBtn.addEventListener("click", () => {
+      retryBtn.disabled = true;
+      retryBtn.textContent = "Checking…";
+      probeLocalDesktop().finally(() => {
+        retryBtn.disabled = false;
+        retryBtn.textContent = "I started it — retry";
+      });
+    });
+  }
+})();
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   if (_isLocal) {
     // Friendly local message: cloud sync is opt-in on local installs
@@ -535,7 +622,14 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       // Desktop-activation nudge: show on hosted, hide on localhost (where
       // the auto-sync below handles activation transparently).
       const desktopCard = document.getElementById("desktop-activate-card");
-      if (desktopCard) desktopCard.hidden = _isLocal;
+      if (desktopCard) {
+        desktopCard.hidden = _isLocal;
+        if (!_isLocal) {
+          // Kick off the localhost probe in the background; updates the
+          // card state to "running" or "not_running" once it resolves.
+          probeLocalDesktop();
+        }
+      }
       setStatus("Loading your account…");
 
       // If we just came back from the YouTube incremental-auth grant,

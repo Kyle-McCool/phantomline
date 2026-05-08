@@ -2368,9 +2368,9 @@ INSTALL_TOOLS = {
             {"title": "Install Ollama if you haven't yet",
              "body": "Phantomline uses your local Ollama for script + idea + title generation. Get the friendly install guide at <a href=\"/install/ollama\">/install/ollama</a>.",
              "command": "ollama pull llama3.1"},
-            {"title": "Start Phantomline (one-time test)",
-             "body": "It runs as a local web server on port 5000. Leave the terminal open while you confirm everything works, then we'll set up auto-start so you never have to do this manually again.",
-             "command": "python server.py"},
+            {"title": "Start Phantomline",
+             "body": "<strong>Easiest:</strong> double-click the launcher file in your phantomline folder. <ul style=\"margin:6px 0 0 20px;\"><li><strong>Windows:</strong> double-click <code>start-phantomline.bat</code></li><li><strong>macOS:</strong> double-click <code>start-phantomline.command</code> (right-click → Open the first time)</li><li><strong>Linux:</strong> run <code>./start-phantomline.sh</code></li></ul>The launcher activates the venv, starts the server on port 5000, and opens your browser automatically. Leave the terminal window open — closing it stops Phantomline. (For an always-on background service, see step 6.)",
+             "command": "# Or, if you'd rather run it manually:\npython server.py"},
             {"title": "Set up auto-start so it always runs in the background",
              "body": "Once-and-done. After this, Phantomline runs on every login and the phantomline.xyz toggle can switch to your local install with one click. Pick the command for your OS. Replace <code>&lt;ABSOLUTE_PATH&gt;</code> with the full path to your phantomline folder.",
              "command": "# Windows (PowerShell as Administrator):\nschtasks /create /tn Phantomline /tr \"<ABSOLUTE_PATH>\\.venv\\Scripts\\pythonw.exe <ABSOLUTE_PATH>\\server.py\" /sc onlogon /rl highest\n\n# macOS (creates a LaunchAgent):\ncat > ~/Library/LaunchAgents/com.phantomline.server.plist <<'EOF'\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<plist version=\"1.0\"><dict>\n  <key>Label</key><string>com.phantomline.server</string>\n  <key>ProgramArguments</key>\n  <array>\n    <string><ABSOLUTE_PATH>/.venv/bin/python</string>\n    <string><ABSOLUTE_PATH>/server.py</string>\n  </array>\n  <key>RunAtLoad</key><true/>\n  <key>KeepAlive</key><true/>\n</dict></plist>\nEOF\nlaunchctl load ~/Library/LaunchAgents/com.phantomline.server.plist\n\n# Linux (systemd user service):\nmkdir -p ~/.config/systemd/user\ncat > ~/.config/systemd/user/phantomline.service <<EOF\n[Unit]\nDescription=Phantomline desktop server\n[Service]\nExecStart=<ABSOLUTE_PATH>/.venv/bin/python <ABSOLUTE_PATH>/server.py\nRestart=always\n[Install]\nWantedBy=default.target\nEOF\nsystemctl --user enable --now phantomline"},
@@ -2454,6 +2454,11 @@ def _build_source_zip() -> Path:
                 return True
         return False
 
+    # Files we want extracted with the executable bit set on macOS/Linux.
+    # Python's zipfile doesn't propagate file modes by default, so we
+    # explicitly set the Unix permissions in the ZipInfo external_attr.
+    EXECUTABLE_NAMES = {"start-phantomline.command", "start-phantomline.sh"}
+
     with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
         for root, dirs, files in os.walk(src_root):
             root_path = Path(root)
@@ -2465,7 +2470,16 @@ def _build_source_zip() -> Path:
                     continue
                 arcname = "phantomline/" + str(fpath.relative_to(src_root)).replace("\\", "/")
                 try:
-                    zf.write(fpath, arcname)
+                    if fname in EXECUTABLE_NAMES:
+                        # Build a ZipInfo manually so we can set the executable bit.
+                        # 0o100755 = regular file + rwxr-xr-x, shifted into external_attr.
+                        info = zipfile.ZipInfo.from_file(fpath, arcname)
+                        info.external_attr = (0o100755 << 16)
+                        info.compress_type = zipfile.ZIP_DEFLATED
+                        with open(fpath, "rb") as f:
+                            zf.writestr(info, f.read())
+                    else:
+                        zf.write(fpath, arcname)
                 except OSError:
                     # Some files (locked, permission-denied) get skipped silently.
                     pass
