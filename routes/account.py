@@ -58,6 +58,17 @@ def _service_role_key() -> str | None:
     return _supabase_service_role_key_helper()
 
 
+def _bearer_from_request() -> str | None:
+    """Extract the raw bearer token from the current request. Mirrors the
+    parsing in _validate_jwt; returns None when the header is missing or
+    malformed. Used to pass the user JWT through to JWT-scoped Postgrest
+    calls on local installs (no service_role)."""
+    auth = request.headers.get("Authorization") or ""
+    if not auth.lower().startswith("bearer "):
+        return None
+    return auth.split(" ", 1)[-1].strip() or None
+
+
 def _validate_jwt(authorization: str | None) -> dict[str, Any] | None:
     """Hit Supabase's `/auth/v1/user` with the user's bearer token. If the JWT
     is valid Supabase returns 200 with the user object (id, email, ...). Any
@@ -87,32 +98,43 @@ def _validate_jwt(authorization: str | None) -> dict[str, Any] | None:
         return None
 
 
-def _query_licenses_by_email(email: str) -> list[dict[str, Any]]:
-    """Postgrest GET against the licenses table. service_role bypasses RLS so
-    the server can return licenses for any verified email without policy
-    plumbing.
+def _query_licenses_by_email(email: str, jwt: str | None = None) -> list[dict[str, Any]]:
+    """Postgrest GET against the licenses table. Two auth paths:
+
+      - JWT path: when `jwt` is provided AND the licenses_select_own_by_email
+        RLS policy from migration 0004 is in place. Used by local installs
+        (no service_role on user laptops by design).
+      - service_role path: bypasses RLS. Used by hosted Render where the
+        service_role key is available.
+
+    Returns [] if neither path is usable.
 
     Email is lowercased before the eq filter — the issue-license edge function
     lowercases on insert, but historical rows or odd Stripe casing could still
-    drift, and Postgrest eq is case-sensitive."""
+    drift, and Postgrest eq is case-sensitive.
+    """
     base = _supabase_url()
-    key = _service_role_key()
-    if not base or not key:
+    if not base:
         return []
     email_norm = (email or "").strip().lower()
     if not email_norm:
         return []
+    anon = _supabase_anon_key_helper()
+    service = _service_role_key()
+
+    if jwt and anon:
+        # Local-install / JWT-scoped: RLS gates rows to JWT email automatically.
+        headers = {"apikey": anon, "Authorization": f"Bearer {jwt}"}
+    elif service:
+        # Hosted: service_role bypasses RLS.
+        headers = {"apikey": service, "Authorization": f"Bearer {service}"}
+    else:
+        return []
+
     fields = "id,license_id,tier,lifetime,is_founding,founding_seat,issued_at,expires_at,stripe_customer_id,stripe_price_id,created_at,key"
     url = f"{base}/rest/v1/licenses?email=eq.{quote(email_norm)}&select={fields}&order=created_at.desc"
     try:
-        res = requests.get(
-            url,
-            headers={
-                "apikey": key,
-                "Authorization": f"Bearer {key}",
-            },
-            timeout=8,
-        )
+        res = requests.get(url, headers=headers, timeout=8)
     except requests.RequestException:
         return []
     if res.status_code != 200:
@@ -143,7 +165,7 @@ def api_account_licenses():
     if not user or not user.get("email"):
         return jsonify({"ok": False, "error": "Not signed in."}), 401
     email = user["email"]
-    rows = _query_licenses_by_email(email)
+    rows = _query_licenses_by_email(email, jwt=_bearer_from_request())
     # Mark expired vs active in a way the UI can render without re-doing the
     # math, and decide whether the row owns a Customer Portal handle.
     now = time.time()
@@ -185,7 +207,7 @@ def api_account_portal():
         return jsonify({"ok": False, "error": "Not signed in."}), 401
     email = user["email"]
 
-    rows = _query_licenses_by_email(email)
+    rows = _query_licenses_by_email(email, jwt=_bearer_from_request())
     customer_id: str | None = None
     for row in rows:
         cid = row.get("stripe_customer_id")
@@ -229,7 +251,7 @@ def api_account_me():
         return jsonify({"ok": False, "error": "Not signed in."}), 401
 
     email = user["email"]
-    rows = _query_licenses_by_email(email)
+    rows = _query_licenses_by_email(email, jwt=_bearer_from_request())
 
     now = time.time()
     active_tier = "free"
@@ -291,7 +313,7 @@ def api_account_invoices():
     if not user or not user.get("email"):
         return jsonify({"ok": False, "error": "Not signed in."}), 401
 
-    rows = _query_licenses_by_email(user["email"])
+    rows = _query_licenses_by_email(user["email"], jwt=_bearer_from_request())
     customer_id: str | None = None
     for row in rows:
         cid = row.get("stripe_customer_id")
