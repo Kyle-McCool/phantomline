@@ -25,6 +25,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import requests
 from flask import Blueprint, jsonify, request
 
 from core import BASE_DIR
@@ -33,6 +34,7 @@ from core import BASE_DIR
 library_bp = Blueprint("library", __name__)
 
 MANIFEST_PATH = Path(BASE_DIR) / "static" / "library" / "footage-manifest.json"
+CACHE_DIR = Path(BASE_DIR) / "output" / "footage-cache"
 
 
 def _load_manifest() -> dict[str, Any]:
@@ -90,3 +92,64 @@ def api_library_footage_one(clip_id: str):
         if c.get("id") == clip_id:
             return jsonify({"ok": True, "clip": c})
     return jsonify({"ok": False, "error": "Clip not found"}), 404
+
+
+def find_clip(clip_id: str) -> dict[str, Any] | None:
+    """Look up a clip by id in the manifest. Public so server.py can use it
+    when bridging library picks into the upload/registration pipeline."""
+    for c in _load_manifest().get("clips") or []:
+        if c.get("id") == clip_id:
+            return c
+    return None
+
+
+def cache_clip(clip_id: str) -> tuple[Path | None, bool, str | None]:
+    """Ensure the clip is cached locally at output/footage-cache/<id>.mp4.
+
+    Returns (path, cached, error). `cached=True` means the file already
+    existed at the expected size. `error` is None on success.
+    Idempotent — safe to call multiple times for the same clip_id."""
+    clip = find_clip(clip_id)
+    if not clip:
+        return None, False, "Clip not found"
+
+    url = clip.get("url")
+    expected_size = int(clip.get("size_bytes") or 0)
+    if not url:
+        return None, False, "Clip has no URL"
+
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cached = CACHE_DIR / f"{clip_id}.mp4"
+
+    if cached.exists() and (expected_size == 0 or cached.stat().st_size == expected_size):
+        return cached, True, None
+
+    try:
+        with requests.get(url, stream=True, timeout=60) as r:
+            r.raise_for_status()
+            tmp = cached.with_suffix(".mp4.part")
+            with open(tmp, "wb") as f:
+                for chunk in r.iter_content(chunk_size=1024 * 256):
+                    if chunk:
+                        f.write(chunk)
+            tmp.replace(cached)
+    except (requests.RequestException, OSError) as exc:
+        return None, False, f"Download failed: {exc}"
+
+    return cached, False, None
+
+
+@library_bp.route("/api/library/footage/<clip_id>/download", methods=["POST"])
+def api_library_footage_download(clip_id: str):
+    """Cache a library clip locally and return its server-side path.
+    Used as a primitive by the studio's footage-picker flow."""
+    path, cached, error = cache_clip(clip_id)
+    if error:
+        status = 404 if error == "Clip not found" else (422 if "no URL" in error else 502)
+        return jsonify({"ok": False, "error": error}), status
+    return jsonify({
+        "ok": True,
+        "cached": cached,
+        "local_path": str(path.relative_to(BASE_DIR)).replace("\\", "/"),
+        "size_bytes": path.stat().st_size,
+    })

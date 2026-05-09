@@ -77,7 +77,7 @@ from routes.optimize import optimize_bp
 from routes.billing import billing_bp, consume_quota, enforce_tier
 from routes.account import account_bp
 from routes.profile import profile_bp
-from routes.library import library_bp
+from routes.library import library_bp, cache_clip as _cache_library_clip, find_clip as _find_library_clip
 
 
 app = Flask(__name__)
@@ -323,7 +323,7 @@ def _security_headers(response):
     csp = (
         "default-src 'self'; "
         "img-src 'self' data: blob: https://images.pexels.com; "
-        "media-src 'self' blob: https://*.pexels.com https://cdn.pixabay.com; "
+        "media-src 'self' blob: https://*.pexels.com https://cdn.pixabay.com https://*.supabase.co; "
         # Google Fonts (fonts.googleapis.com for the @import CSS, fonts.gstatic.com
         # for the actual woff2 binaries). Used for Geist Mono/Sans on the
         # 2026-05 brand-aligned landing + studio. Self-hosting was considered
@@ -3982,6 +3982,63 @@ def api_upload_source_video():
         "height": height,
         "project_id": proj["id"] if proj else None,
         "project": proj,
+    })
+
+
+@app.route("/api/upload/source-video-from-library/<clip_id>", methods=["POST"])
+def api_upload_source_video_from_library(clip_id: str):
+    """Bridge a library clip into the source-video pipeline.
+
+    Caches the clip locally (idempotent), registers it as a project with
+    role='source_video' so the existing render path works unchanged, and
+    returns the same JSON shape as /api/upload/source-video."""
+    clip = _find_library_clip(clip_id)
+    if not clip:
+        return jsonify({"ok": False, "error": "Clip not found"}), 404
+
+    path, cached, error = _cache_library_clip(clip_id)
+    if error or path is None:
+        status = 404 if (error or "").startswith("Clip not") else 502
+        return jsonify({"ok": False, "error": error or "cache failed"}), status
+
+    size_mb = path.stat().st_size / (1024 * 1024)
+    duration_seconds = clip.get("duration_seconds") or None
+    width = clip.get("width") or None
+    height = clip.get("height") or None
+    title = clip.get("title") or clip_id
+
+    proj = _register_project(
+        kind=project_store.KIND_UPLOAD,
+        title=title,
+        file_path=str(path),
+        role="source_video",
+        params={
+            "original_name": clip.get("filename") or f"{clip_id}.mp4",
+            "size_mb": round(size_mb, 1),
+            "upload_type": "video",
+            "width": width,
+            "height": height,
+            "library_clip_id": clip_id,
+            "library_attribution": clip.get("attribution") or "",
+        },
+        duration_seconds=duration_seconds,
+        copy=True,
+    )
+    final_path = PROJECTS.file_path(proj["id"], "source_video") if proj else path
+
+    return jsonify({
+        "ok": True,
+        "cached": cached,
+        "path": str(final_path),
+        "filename": Path(final_path).name,
+        "original_name": clip.get("filename") or f"{clip_id}.mp4",
+        "size_mb": round(size_mb, 1),
+        "duration_seconds": duration_seconds,
+        "width": width,
+        "height": height,
+        "project_id": proj["id"] if proj else None,
+        "project": proj,
+        "library_clip_id": clip_id,
     })
 
 

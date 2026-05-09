@@ -1676,10 +1676,13 @@ function setMakeNextAction(text, label, handler) {
 }
 
 function updateMakeNextAction(score) {
-  const sourceMode = $('makeVideoMode').value === 'source';
+  const mode = $('makeVideoMode').value;
+  const sourceMode = mode === 'source';
+  const libraryMode = mode === 'library';
+  const usesVideoSource = sourceMode || libraryMode;
   const hasIdea = $('makeTopic').value.trim().length > 20;
   const hasTitle = $('makePreferredTitle').value.trim().length > 8;
-  const hasSource = !!($('makeSourceVideoFile')?.files && $('makeSourceVideoFile').files[0]);
+  const hasSource = !!(($('makeSourceVideoFile')?.files && $('makeSourceVideoFile').files[0]) || makeSourceLibraryPick);
   if (!hasIdea) {
     setMakeNextAction('Start with a proven package: load a demo or generate fresh ideas for this niche.', 'Generate ideas', () => {
       $('makeShuffleIdeaBtn')?.closest('.make-stage')?.scrollIntoView({behavior:'smooth', block:'center'});
@@ -1692,6 +1695,10 @@ function updateMakeNextAction(score) {
   } else if (!hasTitle) {
     setMakeNextAction('Generate titles from the selected idea so the upload package stays specific and clickable.', 'Generate titles', () => {
       $('makeTitleIdeasBtn')?.click();
+    });
+  } else if (libraryMode && !hasSource) {
+    setMakeNextAction('Pick a Phantomline footage clip to use as your visual layer.', 'Browse footage', () => {
+      $('browseFootageLibraryBtn')?.click();
     });
   } else if (sourceMode && !hasSource) {
     setMakeNextAction('Upload the retention footage that will carry the short-form visual layer.', 'Upload footage', () => {
@@ -1709,9 +1716,16 @@ function updateMakeNextAction(score) {
 }
 
 function updateMakeReadiness() {
-  const sourceMode = $('makeVideoMode').value === 'source';
+  const mode = $('makeVideoMode').value;
+  const sourceMode = mode === 'source';
+  const libraryMode = mode === 'library';
+  const usesVideoSource = sourceMode || libraryMode;
   const viralMode = isViralStoryMode();
   const titleWords = $('makePreferredTitle').value.trim().split(/\s+/).filter(Boolean).length;
+  const sourceLabel = libraryMode ? 'Phantomline footage chosen' : (sourceMode ? 'Source video chosen' : 'Local visuals ready');
+  const sourceOk = usesVideoSource
+    ? !!(($('makeSourceVideoFile').files && $('makeSourceVideoFile').files[0]) || makeSourceLibraryPick)
+    : true;
   const checks = [
     { label: 'Idea selected', ok: $('makeTopic').value.trim().length > 20 },
     { label: 'Title/package chosen', ok: $('makePreferredTitle').value.trim().length > 8 },
@@ -1724,8 +1738,8 @@ function updateMakeReadiness() {
       { label: 'Short title shape', ok: titleWords > 0 && titleWords <= 6 },
       { label: 'Pinned comment ready', ok: $('makePinnedComment').value.trim().length > 8 },
     ] : []),
-    { label: sourceMode ? 'Source video chosen' : 'Local visuals ready', ok: sourceMode ? !!($('makeSourceVideoFile').files && $('makeSourceVideoFile').files[0]) : true },
-    { label: 'Captions / keywords configured', ok: !sourceMode || $('makeCaptions').value === '1' },
+    { label: sourceLabel, ok: sourceOk },
+    { label: 'Captions / keywords configured', ok: !usesVideoSource || $('makeCaptions').value === '1' },
   ];
   const score = Math.round((checks.filter(c => c.ok).length / checks.length) * 100);
   const scoreEl = $('makeReadinessScore');
@@ -2978,9 +2992,14 @@ $('draftVideoDownloadBtn').addEventListener('click', () => {
 
 let makeVideoJob = null;
 let makeSourceVideoProjectId = null;
+var makeSourceLibraryPick = null;
+var makeSourceLibraryMeta = null;
 let latestMakeVideoProjectId = null;
 
 async function uploadMakeSourceVideo() {
+  if (makeSourceLibraryPick && makeSourceVideoProjectId && makeSourceLibraryMeta) {
+    return makeSourceLibraryMeta;
+  }
   const file = $('makeSourceVideoFile').files && $('makeSourceVideoFile').files[0];
   if (!file) throw new Error('Choose a source video first');
   $('makeSourceVideoStatus').textContent = `Uploading ${file.name}...`;
@@ -3000,12 +3019,27 @@ async function uploadMakeSourceVideo() {
 }
 
 function updateMakeVideoMode() {
-  const sourceMode = $('makeVideoMode').value === 'source';
-  $('makeSourceVideoPanel').style.display = sourceMode ? '' : 'none';
-  $('makeOpenAdvancedBtn').textContent = sourceMode ? 'Open Library' : 'Edit scenes';
+  const mode = $('makeVideoMode').value;
+  const sourceMode = mode === 'source';
+  const libraryMode = mode === 'library';
+  const usesVideoSource = sourceMode || libraryMode;
+  $('makeSourceVideoPanel').style.display = usesVideoSource ? '' : 'none';
+  const uploadRow = $('makeSourceUploadRow');
+  const libraryRow = $('makeSourceLibraryRow');
+  if (uploadRow) uploadRow.hidden = !sourceMode;
+  if (libraryRow) libraryRow.hidden = !libraryMode;
+  if (libraryMode && makeSourceLibraryPick === null && $('makeSourceVideoFile')?.files?.[0]) {
+    $('makeSourceVideoFile').value = '';
+  }
+  if (sourceMode && makeSourceLibraryPick) clearLibrarySourcePick();
+  $('makeOpenAdvancedBtn').textContent = usesVideoSource ? 'Open Library' : 'Edit scenes';
   const visualStep = $('makeStepScenes')?.querySelector('span');
   if (visualStep) {
-    visualStep.textContent = sourceMode ? 'Upload and prep your chosen footage.' : 'Generate scene art locally.';
+    visualStep.textContent = libraryMode
+      ? 'Pick a Phantomline clip as your visual layer.'
+      : sourceMode
+        ? 'Upload and prep your chosen footage.'
+        : 'Generate scene art locally.';
   }
   updateMakeChoiceCards();
   updateMakeReadiness();
@@ -3150,14 +3184,16 @@ async function makeVideoWorkflow() {
     cancelBtn.removeAttribute('data-blocked-reason');
   }
   try {
-    const useSourceVideo = $('makeVideoMode').value === 'source';
+    const videoModeValue = $('makeVideoMode').value;
+    const useSourceVideo = videoModeValue === 'source' || videoModeValue === 'library';
     let sourceVideoProjectId = makeSourceVideoProjectId;
     let sourceVideoMeta = null;
     if (useSourceVideo) {
-      setMakeStep('makeStepScenes', 'running', 'uploading video');
+      const isLibrary = videoModeValue === 'library' && makeSourceLibraryPick;
+      setMakeStep('makeStepScenes', 'running', isLibrary ? 'caching library clip' : 'uploading video');
       sourceVideoMeta = await uploadMakeSourceVideo();
       sourceVideoProjectId = sourceVideoMeta.project_id;
-      setMakeStep('makeStepScenes', 'done', 'source video ready');
+      setMakeStep('makeStepScenes', 'done', isLibrary ? 'library clip ready' : 'source video ready');
     }
 
     setMakeStep('makeStepScript', 'running', 'writing');
@@ -3462,11 +3498,153 @@ $('makeVideoBtn').addEventListener('click', makeVideoWorkflow);
 $('makeVideoMode').addEventListener('change', updateMakeVideoMode);
 $('makeSourceVideoFile').addEventListener('change', () => {
   makeSourceVideoProjectId = null;
+  if (makeSourceLibraryPick) clearLibrarySourcePick();
   const file = $('makeSourceVideoFile').files && $('makeSourceVideoFile').files[0];
   $('makeSourceVideoStatus').textContent = file
     ? `Ready to upload: ${file.name}`
     : 'Upload gameplay, parkour, drone footage, screen recordings, or any clip you want narrated.';
   updateMakeReadiness();
+});
+
+/* ─── Footage library picker ───────────────────────────────────────────── */
+function clearLibrarySourcePick() {
+  makeSourceLibraryPick = null;
+  makeSourceLibraryMeta = null;
+  makeSourceVideoProjectId = null;
+  const pick = $('makeSourceLibraryPick');
+  if (pick) {
+    pick.hidden = true;
+    pick.querySelector('.source-library-pick-id').textContent = '';
+    pick.querySelector('.source-library-pick-id').dataset.clipId = '';
+  }
+  $('makeSourceVideoStatus').textContent = 'Upload gameplay, parkour, drone footage, screen recordings, or any clip you want narrated.';
+  updateMakeReadiness();
+}
+
+var _footageLibraryLoaded = false;
+async function openFootageLibrary() {
+  const modal = $('footageLibraryModal');
+  if (!modal) return;
+  modal.classList.add('shown');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  if (!_footageLibraryLoaded) {
+    await loadFootageLibrary();
+    _footageLibraryLoaded = true;
+  }
+}
+
+function closeFootageLibrary() {
+  const modal = $('footageLibraryModal');
+  if (!modal) return;
+  modal.classList.remove('shown');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+async function loadFootageLibrary() {
+  const grid = $('footageLibraryGrid');
+  const status = $('footageLibraryStatus');
+  if (!grid) return;
+  grid.setAttribute('aria-busy', 'true');
+  grid.innerHTML = '';
+  status.classList.remove('error');
+  status.textContent = 'Loading library…';
+  try {
+    const r = await fetch('/api/library/footage?aspect=9:16');
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Failed to load library');
+    if (!d.clips || d.clips.length === 0) {
+      grid.innerHTML = '<div class="gh-footage-empty">No footage in the library yet.</div>';
+      status.textContent = '';
+      return;
+    }
+    grid.innerHTML = '';
+    d.clips.forEach(clip => grid.appendChild(buildFootageThumb(clip)));
+    status.textContent = `${d.clips.length} clips · click one to use as your source video.`;
+  } catch (e) {
+    status.classList.add('error');
+    status.textContent = e.message || 'Failed to load library';
+  } finally {
+    grid.setAttribute('aria-busy', 'false');
+  }
+}
+
+function buildFootageThumb(clip) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'gh-footage-thumb';
+  card.dataset.clipId = clip.id;
+  card.setAttribute('aria-label', `Use ${clip.id} as source video`);
+  const video = document.createElement('video');
+  video.src = clip.url;
+  video.preload = 'metadata';
+  video.muted = true;
+  video.playsInline = true;
+  video.addEventListener('loadedmetadata', () => { video.currentTime = Math.min(0.5, (video.duration || 1) * 0.05); }, { once: true });
+  card.appendChild(video);
+  const meta = document.createElement('div');
+  meta.className = 'gh-footage-thumb-meta';
+  const dur = clip.duration_seconds ? `${Math.round(clip.duration_seconds)}s` : '';
+  const size = clip.size_bytes ? `${(clip.size_bytes / (1024 * 1024)).toFixed(0)}MB` : '';
+  meta.innerHTML = `<span>${clip.id}</span><span>${dur}${dur && size ? ' · ' : ''}${size}</span>`;
+  card.appendChild(meta);
+  card.addEventListener('click', () => pickFootageClip(clip));
+  return card;
+}
+
+async function pickFootageClip(clip) {
+  const status = $('footageLibraryStatus');
+  status.classList.remove('error');
+  status.textContent = `Caching ${clip.id}…`;
+  try {
+    const r = await fetch(`/api/upload/source-video-from-library/${encodeURIComponent(clip.id)}`, { method: 'POST' });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Pick failed');
+    makeSourceLibraryPick = clip.id;
+    makeSourceLibraryMeta = d;
+    makeSourceVideoProjectId = d.project_id;
+    const fileInput = $('makeSourceVideoFile');
+    if (fileInput) fileInput.value = '';
+    const pick = $('makeSourceLibraryPick');
+    if (pick) {
+      pick.hidden = false;
+      const idEl = pick.querySelector('.source-library-pick-id');
+      idEl.textContent = clip.id;
+      idEl.dataset.clipId = clip.id;
+    }
+    const dur = d.duration_seconds ? `, ${Math.round(d.duration_seconds)}s` : '';
+    const dim = d.width && d.height ? `, ${d.width}x${d.height}` : '';
+    $('makeSourceVideoStatus').innerHTML =
+      `<strong style="color:var(--text);">Library:</strong> ${escapeHtml(clip.id)} (${d.size_mb} MB${dur}${dim})${d.cached ? ' · cached' : ' · downloaded'}`;
+    closeFootageLibrary();
+    updateMakeReadiness();
+    loadLibrary?.();
+  } catch (e) {
+    status.classList.add('error');
+    status.textContent = e.message || 'Pick failed';
+  }
+}
+
+const _browseFootageBtn = document.getElementById('browseFootageLibraryBtn');
+if (_browseFootageBtn) _browseFootageBtn.addEventListener('click', openFootageLibrary);
+
+const _footageModal = document.getElementById('footageLibraryModal');
+if (_footageModal) {
+  _footageModal.querySelector('.gh-footage-close')?.addEventListener('click', closeFootageLibrary);
+  _footageModal.addEventListener('click', (e) => {
+    if (e.target === _footageModal) closeFootageLibrary();
+  });
+}
+
+const _libraryPickClear = document.querySelector('#makeSourceLibraryPick .source-library-pick-clear');
+if (_libraryPickClear) _libraryPickClear.addEventListener('click', clearLibrarySourcePick);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('footageLibraryModal');
+    if (modal && modal.classList.contains('shown')) closeFootageLibrary();
+  }
 });
 updateMakeVideoMode();
 $('makeDuration').addEventListener('change', updateMakeDurationHint);
