@@ -463,6 +463,7 @@ _SITEMAP_ROUTES = [
     # Comparison hub.
     ("/alternatives",                  "0.8", "monthly"),
     # Static.
+    ("/llms.txt",                      "0.5", "monthly"),
     ("/about",                         "0.7", "monthly"),
     ("/privacy",                       "0.4", "yearly"),
     ("/terms",                         "0.4", "yearly"),
@@ -499,6 +500,71 @@ def robots_txt():
         "Allow: /\n"
         "\n"
         f"Sitemap: {SITE_URL}/sitemap.xml\n"
+    )
+    response = app.response_class(body, mimetype="text/plain")
+    response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400"
+    return response
+
+
+@app.route("/llms.txt")
+def llms_txt():
+    body = (
+        "# Phantomline\n"
+        "\n"
+        "> Phantomline is a local-first AI video studio for faceless YouTube creators.\n"
+        "> It replaces the typical 7-tool SaaS stack (script generator, voiceover,\n"
+        "> music library, stock visuals, video editor, scheduler, thumbnail tool)\n"
+        "> with one local install. All AI inference runs on the creator's own hardware\n"
+        "> via Ollama (Llama 3.1), Kokoro TTS, MusicGen, and ffmpeg. No per-render\n"
+        "> API fees, no usage caps. A browser-only version runs entirely via WebGPU\n"
+        "> and WebAssembly with no server dependency.\n"
+        "\n"
+        "## Key facts\n"
+        "\n"
+        "- One-time $79 Founding Lifetime license (replaces ~$200-300/month in subscriptions)\n"
+        "- Free tier: 5 videos/month, no credit card required\n"
+        "- Desktop install: Python + Ollama + ffmpeg on Mac, Windows, or Linux\n"
+        "- Browser version: phantomline.xyz/app (WebLLM + Web Speech + ffmpeg.wasm)\n"
+        "- Supports 10+ faceless YouTube niches: Reddit stories, horror narration,\n"
+        "  true crime, ASMR sleep stories, motivational, history, science explainers,\n"
+        "  mystery documentaries, and more\n"
+        "- Built by Kyle Makarski (kyle@makko.ai)\n"
+        "\n"
+        "## Core capabilities\n"
+        "\n"
+        "- Script generation (local Llama 3.1 with niche-tuned presets)\n"
+        "- Narration (local Kokoro TTS, 16 voice profiles, unlimited renders)\n"
+        "- Music generation (local MusicGen for ambient backing tracks)\n"
+        "- Stock visuals (Pexels API, free key)\n"
+        "- Auto-generated captions with niche-appropriate styles\n"
+        "- Local MP4 rendering via ffmpeg\n"
+        "- YouTube publishing (direct OAuth, schedule + queue)\n"
+        "- Optimization Library (detect underperformers, rebuild titles/thumbnails/scripts)\n"
+        "- Channel analytics ingest + SEO tuning\n"
+        "\n"
+        "## Pages\n"
+        "\n"
+        f"- [Home]({SITE_URL}/)\n"
+        f"- [Pricing]({SITE_URL}/pricing)\n"
+        f"- [About]({SITE_URL}/about)\n"
+        f"- [Blog]({SITE_URL}/blog)\n"
+        f"- [Alternatives]({SITE_URL}/alternatives)\n"
+        f"- [Faceless YouTube Tool]({SITE_URL}/faceless-youtube)\n"
+        f"- [Local AI Video Generator]({SITE_URL}/local-ai-video-generator)\n"
+        f"- [AI Voice Generator]({SITE_URL}/ai-voice-generator)\n"
+        f"- [YouTube Scheduler]({SITE_URL}/youtube-scheduler)\n"
+        f"- [YouTube SEO Tool]({SITE_URL}/youtube-seo-tool)\n"
+        f"- [Text to Video]({SITE_URL}/text-to-video)\n"
+        f"- [AI Video Editing]({SITE_URL}/ai-video-editing)\n"
+        f"- [AI Script Writing]({SITE_URL}/ai-script-writing)\n"
+        f"- [YouTube Automation Tools]({SITE_URL}/youtube-automation-tools)\n"
+        f"- [Best Faceless YouTube Tools]({SITE_URL}/best-faceless-youtube-tools)\n"
+        f"- [For Solopreneurs]({SITE_URL}/for-solopreneurs)\n"
+        f"- [For Content Creators]({SITE_URL}/for-content-creators)\n"
+        f"- [For Agencies]({SITE_URL}/for-agencies)\n"
+        f"- [For Educators]({SITE_URL}/for-educators)\n"
+        f"- [For Course Creators]({SITE_URL}/for-course-creators)\n"
+        f"- [For Content Marketers]({SITE_URL}/for-content-marketers)\n"
     )
     response = app.response_class(body, mimetype="text/plain")
     response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400"
