@@ -2402,6 +2402,12 @@ INSTALL_TOOLS = {
 }
 
 
+@app.route("/install")
+def install_index():
+    """Bare /install redirects to the Phantomline desktop install guide."""
+    return redirect("/install/phantomline", code=301)
+
+
 @app.route("/install/<tool>")
 def install_page(tool):
     """Friendly OS-detected install guide for an optional Phantomline engine
@@ -2798,15 +2804,22 @@ def manifest_root():
 def api_error(exc):
     """Log full detail server-side; return a generic message to the client.
     Don't leak Python class names, file paths, or internal exception text."""
+    from werkzeug.exceptions import HTTPException
     if request.path.startswith("/api/"):
         app.logger.exception("API error on %s", request.path)
-        # Werkzeug's HTTPException carries an explicit status the client should
-        # see; let it propagate. Everything else is a generic 500.
-        from werkzeug.exceptions import HTTPException
         if isinstance(exc, HTTPException):
             return jsonify({"ok": False, "error": exc.description or "Request failed."}), exc.code
         return jsonify({"ok": False, "error": "Server error. Check the local server log."}), 500
+    if isinstance(exc, HTTPException):
+        return exc
     raise exc
+
+
+@app.errorhandler(404)
+def page_not_found(exc):
+    """Render a branded 404 page for missing URLs instead of Flask's
+    default plaintext error. Returns proper 404 status for crawlers."""
+    return render_template("404.html"), 404
 
 
 @app.route("/api/models")
