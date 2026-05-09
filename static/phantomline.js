@@ -3604,6 +3604,33 @@ function renderFootageFilters(clipsForUnion) {
   });
 }
 
+// SVG icons for the Shorts chrome — copied verbatim from the landing-page
+// hero so the picker tiles read as the same Shorts mock.
+const _GH_FOOTAGE_SVG = {
+  signal: '<svg viewBox="0 0 16 10" width="14" height="9" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="3" height="4"/><rect x="4" y="4" width="3" height="6"/><rect x="8" y="2" width="3" height="8"/><rect x="12" y="0" width="3" height="10"/></svg>',
+  wifi: '<svg viewBox="0 0 16 12" width="13" height="10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 5a9 9 0 0 1 12 0M4.5 7.5a5 5 0 0 1 7 0M7 10a1.5 1.5 0 0 1 2 0"/></svg>',
+  battery: '<svg viewBox="0 0 22 10" width="18" height="8" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><rect x="0.5" y="0.5" width="18" height="9" rx="2"/><rect x="2" y="2" width="14" height="6" rx="1" fill="currentColor"/><rect x="19.5" y="3" width="2" height="4" rx="0.5" fill="currentColor"/></svg>',
+  search: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>',
+  kebab: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>',
+  like: '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9A2 2 0 0 0 19.7 9zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
+  dislike: '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9A2 2 0 0 0 4.32 15zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>',
+  comment: '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.38 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.5 8.5 0 0 1 4 12 8.38 8.38 0 0 1 12.5 3.5 8.38 8.38 0 0 1 21 11.5z"/></svg>',
+  share: '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>',
+  remix: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+  yt: '<svg viewBox="0 0 28 20" width="22" height="16"><rect width="28" height="20" rx="5" fill="#ff0033"/><polygon points="11,5 11,15 19,10" fill="#fff"/></svg>',
+};
+
+// Stable pseudo-random metric per clip id so the rail counts don't
+// change between reloads or after a filter click. Returns "1.4M" / "812K".
+function _ghFakeMetric(seed, salt) {
+  let h = 0;
+  const s = seed + ':' + salt;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  const n = Math.abs(h) % 9500 + 100;   // 100..9599
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'M';
+  return n + 'K';
+}
+
 function buildFootageThumb(clip) {
   const card = document.createElement('button');
   card.type = 'button';
@@ -3621,6 +3648,7 @@ function buildFootageThumb(clip) {
 
   let video = null;
   let videoLoaded = false;
+  let isHovering = false;
   const ensureVideo = () => {
     if (video) return video;
     video = document.createElement('video');
@@ -3632,17 +3660,21 @@ function buildFootageThumb(clip) {
     video.style.opacity = '0';
     video.addEventListener('loadeddata', () => {
       videoLoaded = true;
-      video.style.opacity = '1';
+      // Only reveal if the user is still hovering — otherwise the user
+      // already moved on and we'd flash a paused video frame over the JPG.
+      if (isHovering) video.style.opacity = '1';
     }, { once: true });
     card.appendChild(video);
     return video;
   };
   const playPreview = () => {
+    isHovering = true;
     const v = ensureVideo();
     if (videoLoaded) v.style.opacity = '1';
     v.play().catch(() => {});
   };
   const stopPreview = () => {
+    isHovering = false;
     if (!video) return;
     video.pause();
     video.style.opacity = '0';
@@ -3652,10 +3684,9 @@ function buildFootageThumb(clip) {
   card.addEventListener('mouseleave', stopPreview);
   card.addEventListener('blur', stopPreview);
 
-  // Static-thumbnail 404 fallback: show the video poster frame instead so the
-  // tile is never blank if a new clip ships without a bundled thumb. Use
-  // visibility:hidden (not display:none) so the img keeps its aspect-ratio
-  // layout box and the grid row stays the right height.
+  // Static-thumbnail 404 fallback: show the video poster frame instead.
+  // visibility:hidden (not display:none) keeps the img's aspect-ratio
+  // layout box so the grid row stays the right height.
   img.addEventListener('error', () => {
     img.style.visibility = 'hidden';
     const v = ensureVideo();
@@ -3665,19 +3696,43 @@ function buildFootageThumb(clip) {
     }, { once: true });
   }, { once: true });
 
+  // Shorts chrome overlay — same structure as the landing-page hero
+  // (hero-shorts-*). Bottom strip uses the curated clip title so each
+  // tile reads as a unique Short.
   const firstCat = (clip.categories && clip.categories[0]) || '';
-  if (firstCat) {
-    const chip = document.createElement('span');
-    chip.className = 'gh-footage-cat';
-    chip.textContent = firstCat;
-    card.appendChild(chip);
-  }
-
-  const meta = document.createElement('div');
-  meta.className = 'gh-footage-thumb-meta';
-  const dur = clip.duration_seconds ? `${Math.round(clip.duration_seconds)}s` : '';
-  meta.innerHTML = `<span class="gh-footage-thumb-title">${escapeHtml(labelTitle)}</span><span>${dur}</span>`;
-  card.appendChild(meta);
+  const I = _GH_FOOTAGE_SVG;
+  const likes = _ghFakeMetric(clip.id, 'l');
+  const cmts = _ghFakeMetric(clip.id, 'c');
+  const shrs = _ghFakeMetric(clip.id, 's');
+  const rmx = _ghFakeMetric(clip.id, 'r');
+  const desc = firstCat
+    ? `${labelTitle} · #${firstCat}`
+    : `${labelTitle} · #shorts`;
+  const chrome = document.createElement('div');
+  chrome.className = 'gh-footage-thumb-chrome';
+  chrome.innerHTML = `
+    <div class="gh-footage-top">
+      <span class="gh-footage-time">9:41</span>
+      <span class="gh-footage-system">${I.signal}${I.wifi}${I.battery}</span>
+    </div>
+    <div class="gh-footage-topactions" aria-hidden="true">${I.search}${I.kebab}</div>
+    <div class="gh-footage-rail" aria-hidden="true">
+      <div class="gh-footage-action">${I.like}<span>${likes}</span></div>
+      <div class="gh-footage-action">${I.dislike}<span>Dislike</span></div>
+      <div class="gh-footage-action">${I.comment}<span>${cmts}</span></div>
+      <div class="gh-footage-action">${I.share}<span>${shrs}</span></div>
+      <div class="gh-footage-action">${I.remix}<span>${rmx}</span></div>
+      <div class="gh-footage-yt">${I.yt}</div>
+    </div>
+    <div class="gh-footage-bottom">
+      <span class="gh-footage-creator">
+        <span class="gh-footage-avatar"><img src="/static/phantomline-logo-square.png" alt="" width="22" height="22"></span>
+        <strong>@phantomline.xyz</strong>
+      </span>
+      <span class="gh-footage-desc">${escapeHtml(desc)}</span>
+    </div>
+  `;
+  card.appendChild(chrome);
 
   card.addEventListener('click', () => pickFootageClip(clip));
   return card;
