@@ -3955,14 +3955,14 @@
 }
 .gh-footage-modal.shown { display: flex; }
 .gh-footage-card {
-  width: min(1180px, 100%);
-  max-height: 88vh;
+  width: min(1280px, 100%);
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
   background: rgba(15, 19, 20, 0.98);
   border: 1px solid rgba(238, 246, 241, 0.14);
   border-radius: 12px;
-  padding: 22px;
+  padding: 18px 22px;
   overflow: hidden;
 }
 .gh-footage-head {
@@ -4014,8 +4014,12 @@
   flex: 1 1 auto;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* Cap tile width at 280 so 9:16 phones never grow taller than the
+     visible grid height — full tile (status bar to creator strip)
+     stays inside the viewport at typical desktop sizes. */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 280px));
   grid-auto-rows: max-content;
+  justify-content: center;
   gap: 24px 20px;
   padding: 6px;
 }
@@ -4062,7 +4066,7 @@
 .gh-footage-thumb img {
   display: block;
   width: 100%;
-  aspect-ratio: 9 / 14;     /* shorter than real phones so full tile fits in viewport */
+  aspect-ratio: 9 / 16;     /* real-phone aspect — capped tile width keeps the height in viewport */
   object-fit: cover;
   border-radius: inherit;
 }
