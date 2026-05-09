@@ -728,7 +728,7 @@
   input[type=datetime-local]::-webkit-calendar-picker-indicator,
   input[type=date]::-webkit-calendar-picker-indicator,
   input[type=time]::-webkit-calendar-picker-indicator {
-    filter: invert(1) brightness(1.8);
+    filter: brightness(0) saturate(100%) invert(85%) sepia(16%) saturate(3000%) hue-rotate(148deg) brightness(101%) contrast(93%);
     cursor: pointer;
   }
   input:focus, textarea:focus, select:focus {
