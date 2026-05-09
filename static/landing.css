@@ -380,6 +380,20 @@ select:focus-visible {
   color: #fff;
   font-family: var(--font-sans);
 }
+/* Dynamic island — matches footage card .gh-footage-thumb::before */
+.hero-video-placeholder::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58px;
+  height: 16px;
+  border-radius: 999px;
+  background: #000;
+  z-index: 5;
+  pointer-events: none;
+}
 .hero-video {
   width: 100%;
   height: 100%;

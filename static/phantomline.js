@@ -1522,73 +1522,7 @@ function selectedCardText(selector, fallback) {
   return active ? active.textContent.trim() : fallback;
 }
 
-let makePreviewPlatform = 'tiktok';
-
-const PLATFORM_PREVIEWS = {
-  tiktok: {
-    tabs: '<span>Explore</span><span>Following</span><strong>For You</strong>',
-    topLeft: 'Q',
-    topIcons: '',
-    actions: [
-      ['profile', '2.8M'],
-      ['like', '2.8M'],
-      ['chat', '2.8M'],
-      ['save', '2.8M'],
-      ['send', '2.8M'],
-    ],
-    meta: '<strong>@your_channel</strong><span>Caption safe preview. Keep subtitles clear of the action rail and description area.</span>',
-  },
-  shorts: {
-    tabs: '',
-    topLeft: '',
-    topIcons: '<span>Q</span><span>...</span>',
-    actions: [
-      ['like', '2.8M'],
-      ['dislike', 'Dislike'],
-      ['chat', '2.8M'],
-      ['send', '2.8M'],
-      ['mix', '2.8M'],
-    ],
-    meta: '<strong>@your_channel</strong><span>Shorts preview. Captions should sit above the handle and away from buttons.</span>',
-  },
-  reels: {
-    tabs: '',
-    topLeft: 'Q',
-    topIcons: '<span>Q</span><span>cam</span>',
-    actions: [
-      ['like', '2.8M'],
-      ['chat', '2.8M'],
-      ['send', '2.8M'],
-      ['more', ''],
-      ['camera', ''],
-    ],
-    meta: '<strong>@your_channel</strong><span>Reels preview. Safe captions avoid the lower caption stack.</span><br><span>Music name</span>',
-  },
-};
-
-function updatePlatformPreview(platform = makePreviewPlatform) {
-  makePreviewPlatform = PLATFORM_PREVIEWS[platform] ? platform : 'tiktok';
-  const config = PLATFORM_PREVIEWS[makePreviewPlatform];
-  const shell = $('makePhonePreviewInner');
-  if (shell) shell.dataset.platform = makePreviewPlatform;
-  const tabs = document.querySelector('#makePlatformUi .platform-tabs');
-  const topLeft = document.querySelector('#makePlatformUi .platform-top-left');
-  const topIcons = document.querySelector('#makePlatformUi .platform-top-icons');
-  const actions = $('makePlatformActions');
-  const meta = $('makePlatformMeta');
-  if (tabs) tabs.innerHTML = config.tabs;
-  if (topLeft) topLeft.textContent = config.topLeft;
-  if (topIcons) topIcons.innerHTML = config.topIcons;
-  if (actions) {
-    actions.innerHTML = config.actions.map(([icon, count]) => `
-      <div class="platform-action"><span class="icon" data-icon="${escapeHtml(icon)}"></span>${count ? `<small>${escapeHtml(count)}</small>` : ''}</div>
-    `).join('');
-  }
-  if (meta) meta.innerHTML = config.meta;
-  document.querySelectorAll('#makePlatformPreviewToggle button').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.platform === makePreviewPlatform);
-  });
-}
+// Studio preview is YouTube Shorts-only — chrome is static in the HTML.
 
 function updateStudioPreview() {
   const title = $('makePreferredTitle')?.value.trim() || selectedCardText('[id^="makeRecipeCards"]','Phantomline short');
@@ -1608,12 +1542,7 @@ function updateStudioPreview() {
   if ($('makeSpecFormat')) $('makeSpecFormat').textContent = selectedCardText('[id^="makeRecipeCards"]','Custom');
   if ($('makeSpecVisual')) $('makeSpecVisual').textContent = $('makeVideoMode')?.value === 'source' ? 'Retention' : 'AI scenes';
   if ($('makeSpecLength')) $('makeSpecLength').textContent = durationLabels[$('makeDuration')?.value] || 'Custom';
-  updatePlatformPreview();
 }
-
-document.querySelectorAll('#makePlatformPreviewToggle button').forEach(btn => {
-  btn.addEventListener('click', () => updatePlatformPreview(btn.dataset.platform || 'tiktok'));
-});
 
 document.querySelectorAll('[id^="makeRecipeCards"] .choice-card').forEach(card => {
   card.addEventListener('click', () => {
