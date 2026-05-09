@@ -8,6 +8,10 @@
   color: var(--text);
   font-size: 16px;
   line-height: 1.65;
+  scroll-margin-top: 72px;
+}
+.article h2[id] {
+  scroll-margin-top: 72px;
 }
 .article-head {
   margin-bottom: 36px;
@@ -220,3 +224,30 @@
 /* Pricing cards have full styling in landing.css; keep article context
    from inheriting the prose `a { underline }` rule on the embedded CTAs. */
 .article .alt-card { text-decoration: none; }
+
+/* Blog index list — replaces inline styles on blog_index.html. */
+.blog-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+}
+.blog-list li {
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.blog-list li:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.blog-list h2 {
+  margin: 0 0 6px;
+}
+.blog-list .article-meta {
+  margin: 0 0 8px;
+}
+.blog-list .blog-list-desc {
+  margin: 0;
+  color: var(--text-2, rgba(244,248,245,0.55));
+}

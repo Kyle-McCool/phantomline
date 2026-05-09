@@ -71,12 +71,12 @@
         <p class="article-lede">Cadence patterns, voice selection, monetization, niche-specific workflows, and the editorial choices that separate channels that last from channels that flame out. Written for working operators, not for SEO bait.</p>
       </header>
 
-      <ul class="blog-list" style="list-style:none; padding:0; margin: 24px 0 0;">
+      <ul class="blog-list">
         {% for a in articles %}
-        <li style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08);">
-          <h2 style="margin: 0 0 6px;"><a href="/blog/{{ a.slug }}">{{ a.title }}</a></h2>
-          <p class="article-meta" style="margin: 0 0 8px;">{{ a.published_date }} · {{ a.reading_time }} read</p>
-          <p style="margin: 0; color: var(--text-2);">{{ a.subtitle }}</p>
+        <li>
+          <h2><a href="/blog/{{ a.slug }}">{{ a.title }}</a></h2>
+          <p class="article-meta">{{ a.published_date }} · {{ a.reading_time }} read</p>
+          <p class="blog-list-desc">{{ a.subtitle }}</p>
         </li>
         {% endfor %}
       </ul>
