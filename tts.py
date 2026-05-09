@@ -70,24 +70,72 @@ def synthesize(text, voice="af_heart", speed=1.0, progress_cb=None):
 
     progress_cb is invoked once per generated segment with:
         {"segment": int, "chars_done": int, "chars_total": int}
+
+    Use synthesize_with_timing() if you also need per-segment text + start +
+    duration metadata for caption-audio sync.
     """
-    text = text.strip()
+    audio, sr, _segments = synthesize_with_timing(text, voice=voice, speed=speed, progress_cb=progress_cb)
+    return audio, sr
+
+
+def synthesize_with_timing(text, voice="af_heart", speed=1.0, progress_cb=None):
+    """Like synthesize(), but ALSO returns per-segment timing metadata captured
+    directly from Kokoro's internal segmentation. Returns:
+
+        (mono float32 audio, sample_rate, segments)
+
+    where `segments` is a list of dicts:
+
+        [
+            {"text": "I work nights at a museum.", "start": 0.0, "duration": 1.83},
+            {"text": "Last Tuesday, ...",          "start": 1.83, "duration": 3.27},
+            ...
+        ]
+
+    Each segment's `duration` is measured directly from the audio array Kokoro
+    yielded for that text — so caption sync downstream is exact at segment
+    boundaries (typically sentence-level), eliminating the proportional-
+    distribution drift that pure-text caption timing has.
+
+    Within a segment, captions can still sub-chunk the text for short readable
+    screens — sub-chunk start times are then linearly interpolated within the
+    segment's exact start/duration window. Sub-second drift only, bounded by
+    segment length, vs the unbounded drift the old text-only path could hit
+    over a 60-second narration.
+    """
+    text = (text or "").strip()
     if not text:
-        return np.zeros(0, dtype=np.float32), 24000
+        return np.zeros(0, dtype=np.float32), 24000, []
 
     lang = LANG_BY_VOICE.get(voice, "a")
     pipeline = get_pipeline(lang)
 
     chunks = []
+    segments = []
     total_chars = max(1, len(text))
     chars_done = 0
+    cursor_seconds = 0.0
+    sample_rate = 24000
 
     generator = pipeline(text, voice=voice, speed=speed)
     for i, (graphemes, _phonemes, audio) in enumerate(generator):
         arr = _to_numpy(audio)
         if arr.ndim > 1:
-            arr = arr.mean(axis=-1)  # collapse stereo just in case
+            arr = arr.mean(axis=-1)
         chunks.append(arr)
+
+        # Measured duration straight from the audio array length. This is the
+        # ground-truth wall-clock time Kokoro spent on this text segment.
+        segment_duration = float(len(arr)) / float(sample_rate) if len(arr) else 0.0
+        segment_text = (graphemes or "").strip()
+        if segment_text:
+            segments.append({
+                "text": segment_text,
+                "start": cursor_seconds,
+                "duration": segment_duration,
+            })
+        cursor_seconds += segment_duration
+
         if graphemes:
             chars_done += len(graphemes)
         if progress_cb:
@@ -98,9 +146,10 @@ def synthesize(text, voice="af_heart", speed=1.0, progress_cb=None):
             })
 
     if not chunks:
-        return np.zeros(0, dtype=np.float32), 24000
+        return np.zeros(0, dtype=np.float32), sample_rate, []
 
-    return np.concatenate(chunks).astype(np.float32, copy=False), 24000
+    audio_concat = np.concatenate(chunks).astype(np.float32, copy=False)
+    return audio_concat, sample_rate, segments
 
 
 def to_wav_bytes(audio_f32, sample_rate):

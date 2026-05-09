@@ -612,6 +612,7 @@
             <label for="makeVideoMode">Visual source</label>
             <select id="makeVideoMode">
               <option value="generated" selected>Generate scene images</option>
+              <option value="library">Use Phantomline footage</option>
               <option value="source">Use retention/source footage</option>
             </select>
           </div>
@@ -646,8 +647,19 @@
             <strong>3b. Source video</strong>
             <span>Gameplay, parkour, clips, screen recordings.</span>
           </div>
-          <label for="makeSourceVideoFile">Source video</label>
-          <input type="file" id="makeSourceVideoFile" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-msvideo,video/x-matroska" />
+          <div id="makeSourceUploadRow">
+            <label for="makeSourceVideoFile">Source video</label>
+            <input type="file" id="makeSourceVideoFile" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-msvideo,video/x-matroska" />
+          </div>
+          <div id="makeSourceLibraryRow" class="source-library-row" hidden>
+            <label>Phantomline footage</label>
+            <button type="button" id="browseFootageLibraryBtn" class="btn secondary">Browse videos</button>
+            <div id="makeSourceLibraryPick" class="source-library-pick" hidden>
+              <span class="source-library-pick-label">Library:</span>
+              <span class="source-library-pick-id" data-clip-id=""></span>
+              <button type="button" class="source-library-pick-clear" aria-label="Clear library pick">×</button>
+            </div>
+          </div>
           <div class="row">
             <div>
               <label for="makeSourceFit">Video fit</label>
@@ -2047,6 +2059,17 @@ window.GHOSTLINE_DEFAULTS = {
   model: {{ defaults.model | tojson }},
 };
 </script>
+<div id="footageLibraryModal" class="gh-footage-modal" role="dialog" aria-modal="true" aria-labelledby="footageLibraryTitle" aria-hidden="true">
+  <div class="gh-footage-card">
+    <div class="gh-footage-head">
+      <h3 id="footageLibraryTitle">Browse footage library</h3>
+      <button type="button" class="gh-footage-close" aria-label="Close">×</button>
+    </div>
+    <p class="gh-footage-sub">Pick a clip to use as the rolling visual layer. Cached locally on first use.</p>
+    <div id="footageLibraryGrid" class="gh-footage-grid" aria-busy="false"></div>
+    <div id="footageLibraryStatus" class="gh-footage-status" aria-live="polite"></div>
+  </div>
+</div>
 <script src="{{ '/static/phantomline.js' | versioned }}" defer></script>
 <script src="{{ '/static/profile-widget.js' | versioned }}" defer></script>
 <script src="{{ '/static/sync-status.js' | versioned }}" defer></script>

@@ -364,35 +364,176 @@ select:focus-visible {
    "Faceless" rather than at the eyebrow. */
 .hero-video-placeholder {
   aspect-ratio: 9 / 16;
-  max-height: 420px;
+  max-height: 480px;
   background: var(--bg-base);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  border-radius: 22px;
   position: relative;
-  display: grid;
-  place-items: center;
-  padding: var(--s-5);
+  overflow: hidden;
   justify-self: center;
+  box-shadow: 0 0 0 6px #0e1418, 0 24px 60px rgba(0, 0, 0, 0.5);
 }
-.hero-video-inner {
+.hero-shorts-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-family: var(--font-sans);
+}
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+
+/* Top status bar ------------------------------------------------------ */
+.hero-shorts-top {
+  position: absolute;
+  inset: 0 70px auto 0;
+  z-index: 2;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+.hero-shorts-system {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.hero-shorts-topactions {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  pointer-events: none;
+}
+.hero-shorts-topactions svg { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
+
+/* Unmute button — bottom-left so it never collides with on-video title */
+.hero-shorts-unmute {
+  position: absolute;
+  left: 12px;
+  bottom: 78px;
+  z-index: 4;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 160ms ease;
+}
+.hero-shorts-unmute:hover { background: rgba(0, 0, 0, 0.85); }
+.hero-shorts-unmute .hero-shorts-icon-unmuted { display: none; }
+.hero-shorts-unmute.is-unmuted .hero-shorts-icon-muted { display: none; }
+.hero-shorts-unmute.is-unmuted .hero-shorts-icon-unmuted { display: block; }
+
+/* Right action rail — anchored to bottom, lives in the lower 45% of the frame */
+.hero-shorts-rail {
+  position: absolute;
+  right: 8px;
+  bottom: 30px;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s-4);
+  gap: 8px;
+  pointer-events: none;
 }
-.hero-video-inner svg {
-  color: var(--text-muted);
-  opacity: 0.8;
+.hero-shorts-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
-.hero-video-inner span {
+.hero-shorts-action svg { width: 18px; height: 18px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)); }
+.hero-shorts-yt {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+}
+.hero-shorts-yt svg { width: 100%; height: 100%; }
+
+/* Bottom creator strip ----------------------------------------------- */
+.hero-shorts-bottom {
   position: absolute;
-  bottom: var(--s-5);
-  left: var(--s-5);
-  right: var(--s-5);
-  font-size: var(--text-body-sm);
+  inset: auto 56px 14px 12px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+}
+.hero-shorts-creator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.hero-shorts-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0e1418;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.hero-shorts-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero-shorts-desc {
   font-weight: 450;
-  color: var(--text-muted);
-  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Compact chrome at small frame heights ------------------------------ */
+@media (max-width: 540px) {
+  .hero-video-placeholder { box-shadow: 0 0 0 4px #0e1418, 0 16px 36px rgba(0, 0, 0, 0.5); border-radius: 16px; }
+  .hero-shorts-action svg { width: 18px; height: 18px; }
+  .hero-shorts-yt { width: 24px; height: 24px; }
+  .hero-shorts-rail { bottom: 64px; gap: 12px; }
+  .hero-shorts-bottom { inset: auto 44px 10px 10px; font-size: 10px; }
+  .hero-shorts-creator { font-size: 11px; }
+  .hero-shorts-avatar { width: 18px; height: 18px; }
 }
 
 .hero-mark {
@@ -1165,7 +1306,7 @@ h4 {
   .hero-grid { grid-template-columns: 1fr; gap: var(--s-6); }
   .hero-mark { max-width: 220px; margin: 0 auto; }
   .hero-mark img { max-width: 200px; }
-  .hero-video-placeholder { display: none; }
+  .hero-video-placeholder { max-height: 360px; max-width: 240px; margin: 0 auto; }
   .section { padding: 64px 0; }
   .section-head { grid-template-columns: 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
   .workflow { grid-template-columns: 1fr 1fr; }
@@ -1196,7 +1337,7 @@ h4 {
   .lede { font-size: 16px; }
   /* Hide atmospheric mark on true mobile — typography is the focal point. */
   .hero-mark { display: none; }
-  .hero-video-placeholder { display: none; }
+  .hero-video-placeholder { max-height: 280px; max-width: 180px; }
   .workflow { grid-template-columns: 1fr; }
   .step { border-right: 0; }
   .step:not(:first-child) { border-top: 1px solid var(--rule); }

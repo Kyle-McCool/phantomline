@@ -559,6 +559,88 @@ def _caption_phrase_weight(text):
     return max(0.18, char_cost + word_cost + pause_cost)
 
 
+def _caption_chunks_from_segments(segments, max_words=5):
+    """Build caption display chunks from pre-timed Kokoro TTS segments.
+
+    `segments` is a list of {"text", "start", "duration"} dicts straight from
+    tts.synthesize_with_timing(). Each segment is one Kokoro-internal
+    pronunciation unit (typically a sentence), with start/duration measured
+    directly from the synthesized audio.
+
+    For short segments (single short sentence), emit one caption screen
+    spanning the full segment. For longer segments, sub-chunk into ~max_words
+    word screens and linearly distribute their start times within the
+    segment's known time window — that keeps individual screens readable
+    without breaking sync at segment boundaries.
+
+    Result has the same shape as _caption_chunks(): list of
+    {"text", "start", "duration"} ready for the video assembler to
+    rasterize and timeline.
+    """
+    if not segments:
+        return []
+
+    out = []
+    for seg in segments:
+        text = re.sub(r"\s+", " ", (seg.get("text") or "")).strip()
+        if not text:
+            continue
+        seg_start = float(seg.get("start", 0.0))
+        seg_duration = float(seg.get("duration", 0.0))
+        if seg_duration <= 0:
+            continue
+
+        words = text.split()
+        if len(words) <= max_words:
+            # Short segment: one caption screen, exact segment timing.
+            out.append({
+                "text": text,
+                "start": max(0.0, seg_start),
+                "duration": max(0.18, seg_duration),
+            })
+            continue
+
+        # Longer segment: split into sub-chunks. Use the same break logic as
+        # _caption_chunks (sentence-end / soft-pause / max_words) but constrained
+        # to this segment's text only.
+        sub_chunks = []
+        current = []
+        for w in words:
+            current.append(w)
+            sentence_end = bool(re.search(r"[.!?][\"')\]]?$", w))
+            soft_pause = bool(re.search(r"[,;:][\"')\]]?$", w))
+            if (len(current) >= max_words
+                    or (sentence_end and len(current) >= 2)
+                    or (soft_pause and len(current) >= 4)):
+                sub_chunks.append(" ".join(current))
+                current = []
+        if current:
+            sub_chunks.append(" ".join(current))
+        if not sub_chunks:
+            continue
+
+        # Distribute sub-chunk durations weighted by character count so a
+        # 2-word sub-chunk doesn't get the same screen time as a 5-word one.
+        weights = [max(1, len(c)) for c in sub_chunks]
+        total_w = sum(weights) or 1
+        cursor = seg_start
+        for j, (chunk, w) in enumerate(zip(sub_chunks, weights)):
+            if j == len(sub_chunks) - 1:
+                # Last sub-chunk takes the remainder so totals match exactly
+                # — sub-second floor errors don't accumulate across segments.
+                chunk_dur = max(0.18, (seg_start + seg_duration) - cursor)
+            else:
+                chunk_dur = max(0.30, seg_duration * (w / total_w))
+            out.append({
+                "text": chunk,
+                "start": max(0.0, cursor),
+                "duration": chunk_dur,
+            })
+            cursor += chunk_dur
+
+    return out
+
+
 def _caption_chunks(text, duration, max_words=5):
     cleaned = re.sub(r"\s+", " ", text or "").strip()
     if not cleaned or duration <= 0:
@@ -687,9 +769,18 @@ def _draw_caption_frame(text, out_path, target_size, style="tiktok", keyword_mod
     center_x = left_safe + safe_w / 2
     x1 = int(left_safe + (safe_w - box_w) / 2)
     x1 = max(left_safe, min(x1, target_w - right_safe - box_w))
-    y1 = int(target_h * (0.56 if is_vertical else 0.78))
-    bottom_safe = int(target_h * (0.73 if is_vertical else 0.93))
-    y1 = max(int(target_h * 0.32), min(y1, bottom_safe - box_h))
+    # Caption vertical anchor.
+    # Vertical (9:16): place block lower-third — above platform UI strips
+    # (TikTok ~18% from bottom, Reels ~22%, Shorts ~18%) but below the
+    # visual focal point. Previous 0.56 (effectively center) collided with
+    # subjects in shot.
+    # Horizontal (16:9): 0.78 works since there's no platform UI overlay.
+    y1 = int(target_h * (0.66 if is_vertical else 0.78))
+    # bottom_safe is the lowest the caption block bottom edge is allowed to
+    # reach. 0.80 keeps captions clear of the bottom 20% strip on TikTok /
+    # Shorts / Reels (they each reserve 18-22% for description + CTAs).
+    bottom_safe = int(target_h * (0.80 if is_vertical else 0.93))
+    y1 = max(int(target_h * 0.40), min(y1, bottom_safe - box_h))
     x2 = x1 + box_w
     y2 = y1 + box_h
     draw.rounded_rectangle((x1, y1, x2, y2), radius=18, fill=palette["box"])
@@ -784,8 +875,16 @@ def render_source_video(source_video_path, narration_path, output_path, *,
                         caption_text="", title_text="", captions=False, aspect="9:16",
                         fit="cover", fps=30, caption_style="tiktok",
                         keyword_mode="auto", pattern_interrupts=False,
-                        source_enhance="none", title_style="top", progress_cb=None):
-    """Render an uploaded/source video with narration audio and optional captions."""
+                        source_enhance="none", title_style="top", progress_cb=None,
+                        caption_segments=None):
+    """Render an uploaded/source video with narration audio and optional captions.
+
+    caption_segments: optional list of {"text", "start", "duration"} dicts with
+    PRE-MEASURED timings (typically straight from tts.synthesize_with_timing).
+    When supplied, these are used as the ground truth for caption timing so
+    captions stay locked to the audio at segment boundaries — this is the
+    precise sync path. When None, captions fall back to the heuristic
+    proportional-distribution path which can drift over long narrations."""
     source_video_path = Path(source_video_path)
     narration_path = Path(narration_path)
     output_path = Path(output_path)
@@ -835,7 +934,12 @@ def render_source_video(source_video_path, narration_path, output_path, *,
                 progress_cb("Adding title overlay")
             title_frame = tmp_dir / "title_overlay.png"
             _draw_title_frame(title_text, title_frame, target_size)
-            title_clip = ImageClip(str(title_frame)).with_duration(min(duration, 4.0))
+            # Title overlay persists for the full video length so it acts as a
+            # standing brand/topic anchor — works as the always-visible header
+            # on a Shorts-style render. Previously capped at 4s which made
+            # discoverability much weaker (viewer scrolling past at second 5
+            # had no context for what they were watching).
+            title_clip = ImageClip(str(title_frame)).with_duration(duration)
             layers.append(title_clip)
             caption_clips.append(title_clip)
         if pattern_interrupts:
@@ -844,10 +948,20 @@ def render_source_video(source_video_path, narration_path, output_path, *,
             interrupts = _pattern_interrupt_clips(duration, target_size)
             layers.extend(interrupts)
             caption_clips.extend(interrupts)
-        if captions and caption_text.strip():
+        if captions and (caption_text.strip() or caption_segments):
             if progress_cb:
                 progress_cb("Building captions")
-            for idx, chunk in enumerate(_caption_chunks(caption_text, duration), start=1):
+            # Prefer pre-measured segments if the caller passed them in. That's
+            # the precise-sync path: each chunk's start time is anchored to the
+            # exact wall-clock time Kokoro spent on the corresponding text.
+            # Fallback path (heuristic proportional distribution from raw text)
+            # remains for callers that don't have timing info — e.g. when the
+            # narration audio came from a non-Phantomline source.
+            if caption_segments:
+                chunks_iter = _caption_chunks_from_segments(caption_segments)
+            else:
+                chunks_iter = _caption_chunks(caption_text, duration)
+            for idx, chunk in enumerate(chunks_iter, start=1):
                 frame = tmp_dir / f"caption_{idx:04d}.png"
                 _draw_caption_frame(chunk["text"], frame, target_size,
                                     style=caption_style, keyword_mode=keyword_mode)

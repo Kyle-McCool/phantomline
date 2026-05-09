@@ -169,15 +169,62 @@
             <a class="cta secondary" href="#workflow">See the workflow</a>
           </div>
         </div>
-        <!-- Hero atmospheric mark. Simple ghost icon framed by two
-             horizontal hairlines (top + bottom) that anchor to the
-             top of the headline and the bottom of the buttons. The
-             mark column stretches to match the copy column's height
-             (eyebrow → buttons row), with the icon centered inside. -->
         <div class="hero-video-placeholder">
-          <div class="hero-video-inner">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            <span>Product demo coming soon</span>
+          <div class="hero-shorts-frame">
+            <video class="hero-video" id="heroDemoVideo"
+                   src="https://vdzydhrgazqeyaalguuy.supabase.co/storage/v1/object/public/public-videos/demo_the_statue_started_crying.mp4"
+                   autoplay muted loop playsinline preload="metadata"
+                   aria-label="Phantomline demo: a vertical short rendered fully on a local machine"></video>
+            <div class="hero-shorts-top">
+              <span class="hero-shorts-time">9:41</span>
+              <span class="hero-shorts-system">
+                <svg viewBox="0 0 16 10" width="14" height="9" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="3" height="4"/><rect x="4" y="4" width="3" height="6"/><rect x="8" y="2" width="3" height="8"/><rect x="12" y="0" width="3" height="10"/></svg>
+                <svg viewBox="0 0 16 12" width="13" height="10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 5a9 9 0 0 1 12 0M4.5 7.5a5 5 0 0 1 7 0M7 10a1.5 1.5 0 0 1 2 0"/></svg>
+                <svg viewBox="0 0 22 10" width="18" height="8" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><rect x="0.5" y="0.5" width="18" height="9" rx="2"/><rect x="2" y="2" width="14" height="6" rx="1" fill="currentColor"/><rect x="19.5" y="3" width="2" height="4" rx="0.5" fill="currentColor"/></svg>
+              </span>
+            </div>
+            <div class="hero-shorts-topactions" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+            </div>
+            <button class="hero-shorts-unmute" id="heroDemoUnmute" type="button" aria-label="Unmute demo video">
+              <svg class="hero-shorts-icon-muted" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+              <svg class="hero-shorts-icon-unmuted" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            </button>
+            <div class="hero-shorts-rail">
+              <div class="hero-shorts-action">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9A2 2 0 0 0 19.7 9zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                <span>2.8M</span>
+              </div>
+              <div class="hero-shorts-action">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9A2 2 0 0 0 4.32 15zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
+                <span>Dislike</span>
+              </div>
+              <div class="hero-shorts-action">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.38 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.5 8.5 0 0 1 4 12 8.38 8.38 0 0 1 12.5 3.5 8.38 8.38 0 0 1 21 11.5z"/></svg>
+                <span>2.8M</span>
+              </div>
+              <div class="hero-shorts-action">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+                <span>2.8M</span>
+              </div>
+              <div class="hero-shorts-action">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                <span>2.8M</span>
+              </div>
+              <div class="hero-shorts-yt" aria-hidden="true">
+                <svg viewBox="0 0 28 20" width="22" height="16"><rect width="28" height="20" rx="5" fill="#ff0033"/><polygon points="11,5 11,15 19,10" fill="#fff"/></svg>
+              </div>
+            </div>
+            <div class="hero-shorts-bottom">
+              <span class="hero-shorts-creator">
+                <span class="hero-shorts-avatar">
+                  <img src="{{ '/static/phantomline-logo-square.png' | versioned }}" alt="" width="22" height="22" />
+                </span>
+                <strong>@phantomline.xyz</strong>
+              </span>
+              <span class="hero-shorts-desc">The statue started crying — built locally with Phantomline · #shorts</span>
+            </div>
           </div>
         </div>
       </div>

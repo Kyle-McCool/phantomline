@@ -84,3 +84,32 @@ if (hamburger && overlay) {
     link.addEventListener('click', closeMenu);
   });
 }
+
+/* ─── Hero video: respect prefers-reduced-motion ──────────────────────── */
+const heroVideo = document.querySelector('.hero-video');
+if (heroVideo) {
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const apply = () => {
+    if (mq.matches) {
+      heroVideo.pause();
+      heroVideo.removeAttribute('autoplay');
+    } else if (heroVideo.paused) {
+      heroVideo.play().catch(() => {});
+    }
+  };
+  apply();
+  mq.addEventListener?.('change', apply);
+}
+
+/* ─── Hero Shorts-frame unmute toggle ─────────────────────────────────── */
+const heroUnmuteBtn = document.getElementById('heroDemoUnmute');
+const heroDemoVideo = document.getElementById('heroDemoVideo');
+if (heroUnmuteBtn && heroDemoVideo) {
+  heroUnmuteBtn.addEventListener('click', () => {
+    const willUnmute = heroDemoVideo.muted;
+    heroDemoVideo.muted = !willUnmute;
+    heroUnmuteBtn.classList.toggle('is-unmuted', willUnmute);
+    heroUnmuteBtn.setAttribute('aria-label', willUnmute ? 'Mute demo video' : 'Unmute demo video');
+    if (willUnmute) heroDemoVideo.play().catch(() => {});
+  });
+}
