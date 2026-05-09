@@ -436,10 +436,26 @@ _SITEMAP_ROUTES = [
     ("/motivational-video-generator",  "0.8", "monthly"),
     ("/history-video-generator",       "0.8", "monthly"),
     ("/science-explainer-video-generator", "0.8", "monthly"),
+    # Phase 2 audience-expansion pillars (added 2026-05-09).
+    ("/faceless-youtube-niches",       "0.85", "monthly"),
+    ("/ai-video-editing",              "0.85", "monthly"),
+    ("/text-to-video",                 "0.85", "monthly"),
+    ("/ai-voice-over",                 "0.8", "monthly"),
+    ("/youtube-automation-tools",      "0.85", "monthly"),
+    ("/faceless-video-production",     "0.85", "monthly"),
+    ("/ai-content-creation",           "0.85", "monthly"),
+    ("/youtube-growth-strategy",       "0.8", "monthly"),
+    ("/video-monetization",            "0.8", "monthly"),
+    ("/ai-script-writing",             "0.8", "monthly"),
+    ("/short-form-video",              "0.8", "monthly"),
+    ("/content-repurposing",           "0.8", "monthly"),
     # Persona pages.
     ("/for-solopreneurs",              "0.75", "monthly"),
     ("/for-course-creators",           "0.75", "monthly"),
     ("/for-content-marketers",         "0.75", "monthly"),
+    ("/for-content-creators",          "0.75", "monthly"),
+    ("/for-agencies",                  "0.75", "monthly"),
+    ("/for-educators",                 "0.75", "monthly"),
     # Listicle.
     ("/best-faceless-youtube-tools",   "0.85", "monthly"),
     # Blog index. Per-article URLs are appended dynamically below.
@@ -2693,6 +2709,97 @@ def pillar_science_explainer():
 
 
 # -----------------------------------------------------------------------
+# Niche pillars added 2026-05-09 (audience expansion phase 2).
+# Broader keyword targets: ai-video-editing, text-to-video, etc.
+# Each is a long-form (~2000 word) pillar. Internal-links back to the
+# existing pillars + alternatives + pricing.
+# -----------------------------------------------------------------------
+
+@app.route("/faceless-youtube-niches")
+def pillar_faceless_youtube_niches():
+    """Niche ranking pillar. Best faceless YouTube niches in 2026 with
+    revenue expectations, difficulty, and Phantomline preset support."""
+    return render_template("pillar_faceless_youtube_niches.html")
+
+
+@app.route("/ai-video-editing")
+def pillar_ai_video_editing():
+    """AI video editing pillar. How AI automates the editing workflow
+    for faceless channels vs manual editing in Premiere/DaVinci."""
+    return render_template("pillar_ai_video_editing.html")
+
+
+@app.route("/text-to-video")
+def pillar_text_to_video():
+    """Text-to-video pillar. The script-to-finished-video pipeline,
+    comparing cloud tools vs Phantomline's local-first approach."""
+    return render_template("pillar_text_to_video.html")
+
+
+@app.route("/ai-voice-over")
+def pillar_ai_voice_over():
+    """AI voiceover pillar. AI voiceover for YouTube, ElevenLabs vs
+    Kokoro TTS, voice selection per niche, cost comparison at volume."""
+    return render_template("pillar_ai_voice_over.html")
+
+
+@app.route("/youtube-automation-tools")
+def pillar_youtube_automation():
+    """YouTube automation tools pillar. Automating the YouTube workflow
+    (scripting, rendering, scheduling, publishing) locally."""
+    return render_template("pillar_youtube_automation.html")
+
+
+@app.route("/faceless-video-production")
+def pillar_faceless_video_production():
+    """Faceless video production pillar. End-to-end production workflow,
+    equipment needed, quality tips, local AI vs hiring a team."""
+    return render_template("pillar_faceless_video_production.html")
+
+
+@app.route("/ai-content-creation")
+def pillar_ai_content_creation():
+    """AI content creation pillar. The AI content creation pipeline for
+    YouTube from idea to upload."""
+    return render_template("pillar_ai_content_creation.html")
+
+
+@app.route("/youtube-growth-strategy")
+def pillar_youtube_growth():
+    """YouTube growth strategy pillar. Growth strategies specific to
+    faceless channels — volume, consistency, niche selection, SEO."""
+    return render_template("pillar_youtube_growth.html")
+
+
+@app.route("/video-monetization")
+def pillar_video_monetization():
+    """Video monetization pillar. Monetization paths for faceless
+    channels — AdSense, affiliates, digital products, sponsorships."""
+    return render_template("pillar_video_monetization.html")
+
+
+@app.route("/ai-script-writing")
+def pillar_ai_script_writing():
+    """AI script writing pillar. AI-generated scripts for YouTube —
+    hooks, structure, retention, LLM comparison for scriptwriting."""
+    return render_template("pillar_ai_script_writing.html")
+
+
+@app.route("/short-form-video")
+def pillar_short_form_video():
+    """Short-form video pillar. YouTube Shorts production workflow,
+    9:16 format, hook-first structure, Shorts vs long-form faceless."""
+    return render_template("pillar_short_form_video.html")
+
+
+@app.route("/content-repurposing")
+def pillar_content_repurposing():
+    """Content repurposing pillar. Turning one video into multiple
+    formats, cross-platform distribution, ratio controls."""
+    return render_template("pillar_content_repurposing.html")
+
+
+# -----------------------------------------------------------------------
 # Persona pages — buyer-intent pages for specific creator personas. These
 # convert higher than category pages because they pre-qualify the buyer.
 # -----------------------------------------------------------------------
@@ -2716,6 +2823,35 @@ def persona_content_marketers():
     """Content marketer persona page. Brand video at volume framing,
     compliance/security notes for enterprise teams. ~1900 words."""
     return render_template("persona_content_marketers.html")
+
+
+@app.route("/for-content-creators")
+def persona_content_creators():
+    """Content creator persona page. Individual YouTubers and social media
+    creators looking to speed up production. ~1800 words."""
+    return render_template("persona_content_creators.html")
+
+
+@app.route("/for-agencies")
+def persona_agencies():
+    """Agency persona page. Multi-client YouTube management, data privacy,
+    batch production workflows. ~1800 words."""
+    return render_template("persona_agencies.html")
+
+
+@app.route("/for-educators")
+def persona_educators():
+    """Educator persona page. Educational video content, research-heavy
+    scripts, student data privacy. ~1800 words."""
+    return render_template("persona_educators.html")
+
+
+@app.route("/for/<slug>")
+def persona_redirect(slug):
+    """Redirect /for/<slug> to /for-<slug> for any persona pages that were
+    linked with the nested URL format."""
+    target = f"/for-{slug}"
+    return redirect(target, code=301)
 
 
 # -----------------------------------------------------------------------

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AI Script Writing for YouTube — Hooks, Structure, and Retention | Phantomline</title>
+<meta name="description" content="How to use AI to write YouTube scripts that retain viewers: hook formulas, retention structure, CTA placement, LLM comparison, and niche-specific presets." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="AI Script Writing for YouTube — Hooks, Structure, and Retention | Phantomline" />
+<meta property="og:description" content="AI-generated scripts for YouTube: hook formulas, retention architecture, CTA placement, and which LLMs produce the best faceless content scripts." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "AI Script Writing", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "AI Script Writing for YouTube — Hooks, Structure, and Retention",
+  "description": "How to use AI to write YouTube scripts that retain viewers: hook formulas, retention structure, CTA placement, LLM comparison, and niche-specific presets.",
+  "datePublished": "2026-05-09",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "mainEntity": [
+    {"@type": "Question", "name": "Can AI write good YouTube scripts?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes, for most faceless YouTube formats. Modern LLMs produce coherent, well-structured scripts in narrative, listicle, explainer, and documentary styles. The quality is production-ready for formats like Reddit storytime, horror narration, and listicles. Scripts requiring deep original research or personal experience still benefit from human editing."}},
+    {"@type": "Question", "name": "Which AI model is best for YouTube script writing?",
+     "acceptedAnswer": {"@type": "Answer", "text": "For local generation, Llama 3.1 8B offers the best balance of quality and speed on consumer hardware. For cloud APIs, Claude and GPT-4 produce the highest quality scripts but cost per generation. Mistral 7B is a strong local alternative for shorter scripts. Phantomline defaults to Llama 3.1 via Ollama for local generation and supports WebLLM for browser-based generation."}},
+    {"@type": "Question", "name": "How long should a YouTube script be?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Script length maps to video length at roughly 150 words per minute of narration. A 5-minute video needs a 750-word script. A 10-minute video needs 1,500 words. A 20-minute horror narration or documentary needs 3,000 words. Longer scripts are harder for AI to maintain consistency on — the quality ceiling is highest for scripts under 2,000 words."}},
+    {"@type": "Question", "name": "What is a YouTube hook and why does it matter?",
+     "acceptedAnswer": {"@type": "Answer", "text": "A hook is the opening 5-15 seconds of a video that determines whether a viewer keeps watching. YouTube's retention graphs show the steepest drop-off in the first 30 seconds. A strong hook creates a curiosity gap, states a surprising fact, or makes a promise that the video will fulfill. AI can generate multiple hook variants for the same topic, letting the creator choose the strongest opening."}},
+    {"@type": "Question", "name": "How do you structure a YouTube script for retention?",
+     "acceptedAnswer": {"@type": "Answer", "text": "High-retention scripts follow a pattern: strong hook (0-15 seconds), context/setup (15-60 seconds), main content with pattern interrupts every 60-90 seconds, mid-roll CTA around the 40-60% mark, escalating tension or value toward the end, and a closing loop that calls back to the hook. Each pattern interrupt re-engages viewers who are about to click away."}},
+    {"@type": "Question", "name": "Does Phantomline have script presets for different niches?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Phantomline ships with prompt presets for Reddit storytime, horror narration, mystery docs, mythology, listicles, science explainers, motivational content, true crime, ASMR/sleep stories, and custom genres. Each preset encodes the hook structure, pacing, tone, and retention beats specific to that format. The creator can also modify presets or build custom ones."}}
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <span class="current">AI Script Writing</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Pillar</div>
+        <h1>AI Script Writing for YouTube — Hooks, Structure, and Retention</h1>
+        <p class="article-lede">The script is the spine of every faceless YouTube video. A strong script with mediocre visuals outperforms a weak script with cinematic production. AI now writes scripts that are production-ready for most faceless formats — but only if you understand hook formulas, retention architecture, and which models handle which formats best.</p>
+        <p class="article-meta">Published May 9, 2026 · Updated May 9, 2026</p>
+      </header>
+
+      <h2>Why the script matters more for faceless content</h2>
+      <p>In a talking-head video, the script shares the spotlight with the presenter's charisma, facial expressions, and delivery. Viewers will watch a mediocre script delivered by an engaging personality. Faceless content has no such safety net. The narration is the only voice, the script is the only structure, and if the writing is weak, there is nothing else to hold the viewer's attention.</p>
+      <p>This makes script quality the single highest-leverage improvement a faceless creator can make. A 10% improvement in script hook quality might translate to a 15-20% improvement in retention, which compounds across every video the channel publishes. And script generation is the step where AI provides the most consistent, production-ready output today.</p>
+
+      <h2>The anatomy of a high-retention YouTube script</h2>
+      <p>YouTube's retention algorithm rewards videos that keep viewers watching. The retention graph for a successful video has a specific shape: a small initial drop in the first 30 seconds, a gradual slope through the middle, and ideally a flat or rising line in the final third. Scripts that produce this graph share a common structure:</p>
+
+      <h3>1. The hook (0-15 seconds)</h3>
+      <p>The hook is the most important 15 seconds of the entire video. YouTube shows the steepest viewer drop-off in the first 30 seconds — a weak opening loses 30-50% of viewers before they reach the main content. An effective hook does one of three things:</p>
+      <ul>
+        <li><strong>Creates a curiosity gap:</strong> States something surprising or counterintuitive that the viewer needs resolved. "In 1987, a man walked into a bank with no weapon, no mask, and walked out with $4 million. Nobody stopped him."</li>
+        <li><strong>Makes a promise:</strong> Tells the viewer exactly what they'll gain by watching. "By the end of this video, you'll know the three signals that predict whether a relationship will last."</li>
+        <li><strong>Stakes a contrarian claim:</strong> Challenges conventional wisdom. "Everything you've been told about sleep is wrong — and it's costing you ten years of your life."</li>
+      </ul>
+      <p>AI excels at generating hook variants. Phantomline's script presets produce 3-5 hook options per topic, each using a different formula, so the creator can pick the strongest opening for their audience.</p>
+
+      <h3>2. Context and setup (15-60 seconds)</h3>
+      <p>After the hook, the script needs to ground the viewer: who is involved, what's at stake, why should they care. This section is where most AI scripts need the most editing — language models tend to over-explain context, which slows the pacing. The best practice is to keep the setup to 2-3 sentences that bridge the hook to the main content.</p>
+
+      <h3>3. Main content with pattern interrupts (60 seconds to 75% mark)</h3>
+      <p>The body of the script delivers on the hook's promise. For a listicle, this is the list items. For a narrative, this is the story arc. For an explainer, this is the argument structure. The key technique for maintaining retention through this section is the <strong>pattern interrupt</strong> — a moment every 60-90 seconds that re-engages a viewer who is drifting.</p>
+      <p>Effective pattern interrupts include:</p>
+      <ul>
+        <li>A surprising fact or statistic that reframes the topic</li>
+        <li>A rhetorical question directed at the viewer</li>
+        <li>A shift in tone or intensity (quiet moment followed by heightened tension)</li>
+        <li>A callback to the hook that adds new information</li>
+        <li>A micro-cliffhanger before transitioning to the next section</li>
+      </ul>
+      <p>Phantomline's script engine places retention beats at regular intervals based on the target video length. For a 10-minute script, this means 6-8 pattern interrupts distributed through the body. The creator can review and adjust the placement, but the automated spacing prevents the common mistake of front-loading all the interesting content and letting the back half drag.</p>
+
+      <h3>4. Mid-roll CTA (40-60% mark)</h3>
+      <p>The mid-roll call to action asks viewers to subscribe, like, or comment. Placement matters: too early (before 30%) and it interrupts the flow before the viewer is invested. Too late (after 70%) and you've already lost the viewers who drop off in the middle third. The 40-60% sweet spot catches viewers at peak engagement.</p>
+      <p>For faceless channels, the CTA should be woven into the script rather than inserted as an obvious break. "If you want to know what happened next — and trust me, it gets stranger — hit subscribe because we cover stories like this every day" is more effective than "Don't forget to like and subscribe."</p>
+
+      <h3>5. Escalation and closing loop (75-100%)</h3>
+      <p>The final quarter of the script should escalate — higher stakes, bigger revelation, or the resolution of the central tension. The worst thing a script can do is peak at the midpoint and coast to the end. Viewers who made it to the 75% mark are the most valuable audience segment; the script needs to reward them for staying.</p>
+      <p>The closing loop calls back to the hook, resolving the curiosity gap or delivering on the promise. This creates a sense of completion that viewers associate with a satisfying experience, which improves the likelihood they'll watch the next video.</p>
+
+      <h2>LLM comparison for YouTube scripts</h2>
+      <p>Different language models have different strengths for script writing. Here's how the major options compare for faceless YouTube content:</p>
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Script quality</th><th>Speed</th><th>Cost</th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Llama 3.1 8B (local)</td><td>Good</td><td>30-60 seconds</td><td>Free (hardware)</td><td>Daily-volume production, storytime, listicles</td></tr>
+          <tr><td>Llama 3.1 70B (local)</td><td>Very good</td><td>2-5 minutes</td><td>Free (needs 48GB+ VRAM)</td><td>Long-form narration, research-heavy topics</td></tr>
+          <tr><td>Mistral 7B (local)</td><td>Good</td><td>20-45 seconds</td><td>Free (hardware)</td><td>Short scripts, Shorts content, quick ideation</td></tr>
+          <tr><td>GPT-4 (cloud)</td><td>Excellent</td><td>15-30 seconds</td><td>$0.03-0.06 per script</td><td>Complex narratives, nuanced topics</td></tr>
+          <tr><td>Claude (cloud)</td><td>Excellent</td><td>15-30 seconds</td><td>$0.02-0.05 per script</td><td>Long-form, analytical content, structured arguments</td></tr>
+        </tbody>
+      </table>
+      <p>For most faceless creators producing at volume, the local Llama 3.1 8B model via Ollama provides the best balance of quality, speed, and cost. The quality gap between 8B and 70B models matters more for research-heavy scripts (true crime, science explainers) and less for format-driven scripts (storytime, listicles, horror narration).</p>
+      <p>Phantomline defaults to whatever Ollama model is available locally, with WebLLM as the fallback for browser-based generation. The prompt presets are tuned for Llama 3.1 but work with any instruction-following model.</p>
+
+      <h2>Niche-specific script structures</h2>
+
+      <h3>Reddit storytime scripts</h3>
+      <p>First-person narrative voice. 1,000-3,000 words. Hook structure: start with the most dramatic moment, then rewind. Body: chronological narrative with dialogue and internal monologue. Retention beats: cliffhangers at act breaks ("But I hadn't noticed what was behind the door"). Closing: resolution plus a reflective beat. Phantomline's Reddit storytime preset handles this structure automatically.</p>
+
+      <h3>Horror narration scripts</h3>
+      <p>Atmospheric, slow-paced prose. 2,000-5,000 words for long-form (15-30 minute videos). Hook: a single unsettling image or event described in visceral detail. Body: escalating dread with environmental description between plot beats. Retention beats: false resolutions followed by escalation. Closing: ambiguous or open-ended for maximum unease. The horror preset adjusts sentence length and pacing — shorter sentences during tense moments, longer during atmospheric passages.</p>
+
+      <h3>Listicle scripts</h3>
+      <p>Structured around numbered items (Top 10, 7 Facts, 5 Reasons). 800-1,500 words for a 5-8 minute video. Hook: tease the most surprising item without revealing it. Body: items ranked by ascending interest, with the most compelling saved for last. Retention beat: a quick callback or comparison between items. The listicle preset numbers each segment and includes a transition phrase between items to maintain flow.</p>
+
+      <h3>Mystery and documentary scripts</h3>
+      <p>Question-driven structure. 2,000-4,000 words. Hook: present the central mystery in its most intriguing form. Body: alternate between evidence presentation and theory exploration. Retention beats: introduce new evidence that reframes earlier assumptions. Closing: present the strongest theory while acknowledging what remains unknown. These scripts benefit from the most human editing because factual accuracy matters.</p>
+
+      <h3>Science explainer scripts</h3>
+      <p>Conceptual progression from simple to complex. 1,200-2,500 words. Hook: a surprising implication of the topic. Body: build understanding layer by layer, using analogies to bridge complex concepts. Retention beats: counterintuitive facts that challenge the viewer's existing understanding. The science preset emphasizes analogies and avoids jargon.</p>
+
+      <h2>Common AI script mistakes and how to fix them</h2>
+      <p>AI-generated scripts have recurring weaknesses that creators should learn to identify and correct during the review step:</p>
+      <ul>
+        <li><strong>Over-summarizing instead of narrating.</strong> LLMs default to summary prose ("He was a brave man who faced many challenges") instead of narrative prose ("The flashlight beam caught the edge of something metal in the darkness"). Fix: edit for specificity and sensory detail.</li>
+        <li><strong>Pacing collapse in the middle third.</strong> Many AI scripts front-load the interesting content and let the middle sag. Fix: check that the pattern interrupts are distributed evenly and that the middle section contains its own mini-arcs.</li>
+        <li><strong>Generic CTAs.</strong> "Don't forget to like and subscribe" is a dead phrase. Fix: replace with a CTA that connects to the content ("If you want to see what happened in Part 2, subscribe — we post a new story every day").</li>
+        <li><strong>Inconsistent voice.</strong> Longer scripts sometimes drift between formal and casual registers. Fix: pick a voice archetype at the start (calm narrator, excited host, mysterious storyteller) and check each paragraph against it.</li>
+        <li><strong>Missing the closing loop.</strong> AI scripts often end with a generic wrap-up instead of calling back to the hook. Fix: manually add a 1-2 sentence callback that resolves the opening question or promise.</li>
+      </ul>
+
+      <h2>Batch scripting for high-volume channels</h2>
+      <p>Creators publishing daily benefit from batch scripting: generating 5-7 scripts in one session rather than one per day. Batch production reduces context-switching and lets you compare scripts side by side for quality consistency.</p>
+      <p>Phantomline supports this workflow through its ideation and script generation steps. Generate 5-7 topic ideas, select the batch, then generate scripts for all of them sequentially. Review and edit the full batch, then produce the videos over the following week. Total time for a week's worth of scripts: 30-60 minutes of review and editing, versus 2-3 hours of writing them manually.</p>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Can AI write good YouTube scripts?</summary>
+          <p>Yes, for most faceless formats. Modern LLMs produce coherent scripts in narrative, listicle, explainer, and documentary styles. The quality is production-ready for formats like Reddit storytime, horror narration, and listicles. Scripts requiring deep original research or personal experience still benefit from human editing.</p>
+        </details>
+        <details>
+          <summary>Which AI model is best for YouTube script writing?</summary>
+          <p>For local generation, Llama 3.1 8B offers the best quality-to-speed balance on consumer hardware. For cloud APIs, Claude and GPT-4 produce the highest quality scripts but cost per generation. Phantomline defaults to Llama 3.1 via Ollama for local generation and supports WebLLM for browser-based generation.</p>
+        </details>
+        <details>
+          <summary>How long should a YouTube script be?</summary>
+          <p>Script length maps to video length at roughly 150 words per minute of narration. A 5-minute video needs a 750-word script. A 10-minute video needs 1,500 words. A 20-minute narration needs 3,000 words. Quality is highest for scripts under 2,000 words — longer scripts are harder for AI to keep consistent.</p>
+        </details>
+        <details>
+          <summary>What is a YouTube hook and why does it matter?</summary>
+          <p>A hook is the opening 5-15 seconds that determines whether a viewer keeps watching. YouTube's retention data shows the steepest drop-off in the first 30 seconds. A strong hook creates a curiosity gap, states a surprising fact, or makes a promise the video will fulfill. AI can generate multiple hook variants for the same topic.</p>
+        </details>
+        <details>
+          <summary>How do you structure a YouTube script for retention?</summary>
+          <p>Strong hook in the first 15 seconds, quick context setup, main content with pattern interrupts every 60-90 seconds, mid-roll CTA at the 40-60% mark, escalating value toward the end, and a closing loop that calls back to the hook. Each pattern interrupt re-engages viewers who are about to leave.</p>
+        </details>
+        <details>
+          <summary>Does Phantomline have script presets for different niches?</summary>
+          <p>Yes. Presets are available for Reddit storytime, horror narration, mystery docs, mythology, listicles, science explainers, motivational content, true crime, ASMR/sleep stories, and custom genres. Each preset encodes the hook structure, pacing, tone, and retention beats specific to that format.</p>
+        </details>
+      </div>
+
+      <h2>Try the workflow</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/ai-content-creation">AI content creation for YouTube</a></li>
+        <li><a href="/youtube-growth-strategy">YouTube growth strategy for faceless channels</a></li>
+        <li><a href="/video-monetization">Video monetization for faceless channels</a></li>
+        <li><a href="/short-form-video">Short-form video creation with AI</a></li>
+        <li><a href="/content-repurposing">Content repurposing guide</a></li>
+        <li><a href="/faceless-youtube">Faceless YouTube tool</a></li>
+        <li><a href="/local-ai-video-generator">Local AI video generator</a></li>
+        <li><a href="/ai-voice-generator">AI voice generator</a></li>
+        <li><a href="/horror-narration-tool">Horror narration tool</a></li>
+        <li><a href="/reddit-stories-video-tool">Reddit stories video tool</a></li>
+        <li><a href="/blog">Phantomline blog</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
