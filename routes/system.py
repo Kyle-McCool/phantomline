@@ -30,6 +30,19 @@ system_bp = Blueprint("system", __name__)
 _BOOT_TIME = time.time()
 
 
+def _read_local_version() -> str:
+    """Single source of truth for the running install's version: the VERSION
+    file at the repo root. Returns '0.0.0' if the file is missing or unreadable
+    (treat unknown installs as ancient — they'll always show as needing
+    update against the hosted version). Never raises."""
+    try:
+        from pathlib import Path
+        v = (Path(__file__).resolve().parent.parent / "VERSION").read_text(encoding="utf-8").strip()
+        return v if v else "0.0.0"
+    except OSError:
+        return "0.0.0"
+
+
 @system_bp.route("/api/system/health", methods=["GET"])
 def api_system_health():
     return jsonify({
@@ -37,6 +50,108 @@ def api_system_health():
         "status": "healthy",
         "service": "phantomline",
         "uptime_seconds": int(time.time() - _BOOT_TIME),
+        "version": _read_local_version(),
+    })
+
+
+@system_bp.route("/api/system/version", methods=["GET", "OPTIONS"])
+def api_system_version():
+    """Public version endpoint. Two consumers:
+      - phantomline.xyz reports its current production version here so local
+        installs can compare against it.
+      - Local installs report their own version so the hosted /account UI can
+        show 'this user is on vX.Y.Z, latest is vA.B.C' (future enhancement).
+
+    Permissive CORS: any origin can read it (the value is public anyway).
+    Cache-Control: short max-age to balance freshness vs hammering the
+    hosted server when many local installs poll simultaneously."""
+    response = jsonify({
+        "ok": True,
+        "service": "phantomline",
+        "version": _read_local_version(),
+    })
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
+    return response
+
+
+def _semver_tuple(v: str) -> tuple[int, int, int]:
+    """Parse 'X.Y.Z' into a sortable tuple. Tolerates leading 'v', extra
+    components (drops them), and missing components (pads with 0). Returns
+    (0,0,0) for completely unparseable input rather than raising."""
+    if not v or not isinstance(v, str):
+        return (0, 0, 0)
+    s = v.strip().lstrip("v").lstrip("V")
+    parts = s.split(".")
+    out: list[int] = []
+    for p in parts[:3]:
+        try:
+            out.append(int(p.split("-")[0].split("+")[0]))
+        except (ValueError, IndexError):
+            out.append(0)
+    while len(out) < 3:
+        out.append(0)
+    return (out[0], out[1], out[2])
+
+
+@system_bp.route("/api/system/update-check", methods=["GET"])
+def api_system_update_check():
+    """Compare the local install's version against phantomline.xyz's current
+    production version. Returns enough for the studio banner to render:
+      {
+        "ok": true,
+        "current": "1.0.0",
+        "latest": "1.1.0",
+        "update_available": true,
+        "download_url": "https://phantomline.xyz/download/phantomline-source.zip",
+        "release_notes_url": "https://phantomline.xyz/releases",
+        "checked_at": <unix>
+      }
+
+    Network failures degrade gracefully — returns update_available=false
+    and an error field, so the banner just stays hidden when offline.
+    Capped at a 4-second timeout so the studio's polling never blocks the UI.
+    """
+    current = _read_local_version()
+    latest = current
+    update_available = False
+    error: str | None = None
+
+    # Don't self-poll: when this endpoint is hit on phantomline.xyz itself,
+    # the "latest" is whatever this server reports. Skip the round-trip and
+    # always return update_available=false. Detection is by request host.
+    from flask import request as _req
+    host = (_req.host or "").lower()
+    is_hosted = host.endswith("phantomline.xyz")
+
+    if not is_hosted:
+        try:
+            r = requests.get(
+                "https://phantomline.xyz/api/system/version",
+                timeout=4,
+                headers={"User-Agent": "phantomline-update-check"},
+            )
+            if r.status_code == 200:
+                body = r.json() or {}
+                latest = (body.get("version") or current).strip() or current
+            else:
+                error = f"Hosted version endpoint returned {r.status_code}"
+        except requests.RequestException as exc:
+            error = f"Network error: {exc}"
+        except (ValueError, KeyError) as exc:
+            error = f"Bad response from hosted version endpoint: {exc}"
+
+    update_available = _semver_tuple(latest) > _semver_tuple(current)
+
+    return jsonify({
+        "ok": error is None,
+        "current": current,
+        "latest": latest,
+        "update_available": update_available,
+        "download_url": "https://phantomline.xyz/download/phantomline-source.zip",
+        "release_notes_url": "https://phantomline.xyz/releases",
+        "checked_at": int(time.time()),
+        "error": error,
     })
 
 
