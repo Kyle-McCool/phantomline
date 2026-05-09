@@ -725,6 +725,7 @@ h4 {
   padding: 64px 0;
   border-bottom: 1px solid var(--rule);
   position: relative;
+  scroll-margin-top: 72px;
 }
 /* Section heading row: h2 left, lede right.
    align-items: start so the lede sits at the TOP of the heading box,
@@ -735,7 +736,7 @@ h4 {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--s-6);
-  align-items: start;
+  align-items: end;
   margin-bottom: var(--s-6);
 }
 .section-head h2 {
@@ -756,21 +757,15 @@ h4 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
-  border-top: 1px solid var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
 }
+#workflow.section { border-bottom: none; padding-bottom: 0; }
 .step {
   position: relative;
-  /* Bible §03: symmetric padding inside cells. The right-border is
-     the vertical divider; cells need equal left+right insets so text
-     doesn't collide with the line. */
   padding: var(--s-6) var(--s-5);
   border-right: 1px solid var(--rule);
 }
-/* First cell aligns to grid edge (no left padding contributing to
-   excess inset). but still needs a small breathing margin so text
-   doesn't sit against the section's outer padding. Handled by
-   the .wrap container's own side padding. */
-.step:first-child { padding-left: 0; }
 .step:last-child { border-right: 0; }
 .step:not(:nth-child(-n+4)) { border-top: 1px solid var(--rule); }
 .step b {
@@ -837,15 +832,30 @@ h4 {
 .product-band,
 .publish-preview {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: var(--s-7);
   align-items: stretch;
 }
 .mock {
-  padding: var(--s-6);
+  padding: var(--s-5);
   border: 1px solid var(--border-default);
   background: var(--bg-surface-1);
   border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+}
+.mock > .feature {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 0;
+  border-bottom: 0;
+  padding: var(--s-5) 0;
+  margin: 0;
+}
+.mock > .feature + .feature {
+  border-top: 1px solid var(--border-default);
 }
 .mock-top {
   display: flex;
@@ -855,8 +865,8 @@ h4 {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-muted);
-  padding-bottom: var(--s-4);
-  margin-bottom: var(--s-5);
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-4);
   border-bottom: 1px solid var(--border-default);
 }
 .mock-grid {
@@ -865,7 +875,7 @@ h4 {
   gap: var(--s-5);
 }
 .mock-panel {
-  padding: var(--s-4) 0;
+  padding: var(--s-3) 0;
 }
 .mock-panel h3 {
   font-family: var(--font-mono);
@@ -874,7 +884,7 @@ h4 {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--brand);
-  margin-bottom: var(--s-3);
+  margin-bottom: var(--s-2);
 }
 .package-list {
   display: flex;
@@ -926,22 +936,47 @@ h4 {
 .mini-phone .caption span { color: var(--brand); display: block; font-weight: 400; }
 
 /* Calendar mock. ASCII-grid style instead of decorative dots */
+.publish-preview .mock:first-child {
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.publish-preview .mock:first-child .mock-top {
+  padding: var(--s-5) var(--s-5) var(--s-3);
+  margin-bottom: 0;
+}
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: auto repeat(6, 1fr);
   gap: 0;
   font-family: var(--font-mono);
   font-size: 12px;
   border-top: 1px solid var(--rule);
-  border-left: 1px solid var(--rule);
 }
 .day {
   position: relative;
-  padding: var(--s-3) var(--s-2);
-  border-right: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-2);
   border-bottom: 1px solid var(--rule);
   color: var(--text-2);
   text-align: center;
+}
+.day:not(:nth-child(7n)) {
+  border-right: 1px solid var(--rule);
+}
+.day-header {
+  height: 1.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.day-empty {
+  background: transparent;
 }
 .dot {
   position: absolute;
@@ -1121,7 +1156,7 @@ h4 {
   grid-template-columns: minmax(0, 1.3fr) auto;
   align-items: start;
   gap: var(--s-7);
-  padding: var(--s-8) 0;
+  padding: 0 0 var(--s-8) 0;
   border-bottom: 1px solid var(--rule);
 }
 /* Bible §01: section h2 = 32px / 600 / 36px LH / -0.015em.
@@ -1151,7 +1186,7 @@ h4 {
    the brand stays visually anchored to the columns instead of
    floating in 144px of empty space above them. */
 .site-footer {
-  padding: var(--s-7) 0 var(--s-5);
+  padding: var(--s-7) 0 var(--s-3);
   border-top: 1px solid var(--rule);
   color: var(--text-secondary);
   font-size: var(--text-caption);
@@ -1206,8 +1241,8 @@ h4 {
   grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
-  margin-top: var(--s-6);
-  padding-top: var(--s-4);
+  margin-top: var(--s-4);
+  padding-top: var(--s-3);
   border-top: 1px solid var(--rule);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -1303,12 +1338,11 @@ h4 {
 @media (max-width: 900px) {
   .wrap { width: min(100% - 32px, 1180px); padding-bottom: 64px; }
   .hero { padding: 64px 0 56px; }
-  .hero-grid { grid-template-columns: 1fr; gap: var(--s-6); }
   .hero-mark { max-width: 220px; margin: 0 auto; }
   .hero-mark img { max-width: 200px; }
-  .hero-video-placeholder { max-height: 360px; max-width: 240px; margin: 0 auto; }
   .section { padding: 64px 0; }
   .section-head { grid-template-columns: 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
+  .section-head p { text-align: left; margin-left: 0; }
   .workflow { grid-template-columns: 1fr 1fr; }
   .step { border-right: 1px solid var(--rule); }
   .step:nth-child(2n) { border-right: 0; }
@@ -1336,8 +1370,9 @@ h4 {
   h3 { font-size: 20px; line-height: 28px; }
   .lede { font-size: 16px; }
   /* Hide atmospheric mark on true mobile — typography is the focal point. */
+  .hero-grid { grid-template-columns: 1fr; gap: var(--s-6); }
   .hero-mark { display: none; }
-  .hero-video-placeholder { max-height: 280px; max-width: 180px; }
+  .hero-video-placeholder { max-height: 360px; max-width: 240px; margin: 0 auto; }
   .workflow { grid-template-columns: 1fr; }
   .step { border-right: 0; }
   .step:not(:first-child) { border-top: 1px solid var(--rule); }
@@ -1378,7 +1413,7 @@ h4 {
 /* ─── Pricing responsive (1024px breakpoint between 4-up and 1-up) ────── */
 /* 4 cards × 280-ish px on a 1180 grid is tight. Add a 2-up breakpoint
    so cards breathe at typical laptop widths. */
-@media (max-width: 1024px) and (min-width: 901px) {
+@media (max-width: 1280px) and (min-width: 901px) {
   .pricing-grid { grid-template-columns: 1fr 1fr; }
   .pricing-card:nth-child(2n) { border-right: 0; }
 }
