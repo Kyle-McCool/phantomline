@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Phantomline for Agencies — Scalable Video Production Without Cloud Dependencies | Phantomline</title>
+<meta name="description" content="Phantomline for agencies: manage multiple client YouTube channels from one local install. No per-render fees, no data leaving your network, no per-seat scaling costs." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Phantomline for Agencies" />
+<meta property="og:description" content="Scalable video production for agencies managing multiple YouTube channels. Local-first, no per-render fees." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "For Agencies", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Phantomline for Agencies",
+  "description": "Scalable video production for agencies managing multiple client YouTube channels. Local processing, no per-render fees, no cloud data exposure.",
+  "datePublished": "2026-05-09",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "mainEntity": [
+    {"@type": "Question", "name": "How does Phantomline pricing work for agencies with multiple producers?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Phantomline licenses are per install, not per seat. An agency workstation running Phantomline can be used by any number of team members. If your agency operates three production machines, you need three licenses at $79 each — $237 total, once. No monthly per-seat fees and no per-render charges regardless of how many client channels you manage."}},
+    {"@type": "Question", "name": "Can we manage multiple client channels from one install?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Phantomline projects are isolated by folder. Each client gets a separate project directory with its own scripts, voice settings, visual presets, and YouTube OAuth connection. You switch between clients by switching projects. There is no per-channel fee."}},
+    {"@type": "Question", "name": "Does client data leave our network?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Script generation, narration, music, and rendering all happen on your local machine. The only network calls are optional: Pexels stock visual pulls (using your own API key) and YouTube OAuth publishing. Client scripts, strategy documents, and analytics never touch a third-party server."}},
+    {"@type": "Question", "name": "Can we white-label the output?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Phantomline output is a standard MP4 file with no watermarks, branding, or attribution requirements. The video is yours. You can deliver it under your agency's brand, your client's brand, or no brand at all."}},
+    {"@type": "Question", "name": "What hardware does an agency workstation need?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Recommended specs: 32 GB RAM, modern multi-core CPU (Ryzen 7/Intel i7 or better, or M-series Mac), discrete GPU for faster renders, and 200+ GB free disk for model weights and rendered output across multiple client projects. A mid-range workstation from the last 3 years handles batch production comfortably."}},
+    {"@type": "Question", "name": "Can we batch-render videos for multiple clients overnight?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. You can queue scripts from multiple client projects and run them sequentially. Phantomline processes each render in order, writing finished MP4s to the respective client project folders. An overnight batch of 10-15 videos on a workstation with a discrete GPU is typical."}},
+    {"@type": "Question", "name": "How does this compare to hiring freelance editors?",
+     "acceptedAnswer": {"@type": "Answer", "text": "A freelance editor for faceless YouTube content typically charges $50-150 per video. An agency producing 20 client videos per month spends $1,000-3,000 on editing alone. Phantomline's per-workstation license is $79 once, and the pipeline handles script-to-render in about 45 minutes of active time per video. The economics shift dramatically at volume."}}
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <span class="current">For Agencies</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Persona</div>
+        <h1>Phantomline for Agencies</h1>
+        <p class="article-lede">Your agency manages five, ten, maybe thirty client YouTube channels. Each one needs consistent output, brand-specific voice settings, and a publishing cadence you can actually sustain. Cloud video platforms charge you per render, per seat, or per minute — costs that scale linearly with the volume you're paid to produce. Phantomline flips that model: pay once per workstation, render unlimited, keep every client's data on your own network.</p>
+        <p class="article-meta">Published May 9, 2026 · Updated May 9, 2026</p>
+      </header>
+
+      <h2>The agency cost problem</h2>
+      <p>Video agencies operate on margins. The revenue per client channel is fixed by the retainer, but production costs scale with every tool in the stack. Cloud TTS services charge per character. Cloud render platforms charge per minute of output. Stock libraries charge per download or per seat. When you're producing 40 videos a month across eight clients, those per-unit charges compound into a line item that eats directly into profit.</p>
+      <p>Consider a mid-size agency producing 30 faceless YouTube videos per month across six client channels. A typical cloud stack runs: ElevenLabs Business at $99/month for five seats, a stock footage subscription at $50/month, an AI script tool at $20-40/seat/month, a cloud video renderer at $0.50-2.00/render, plus a scheduling tool. At 30 renders a month, the tool stack alone costs $400-700/month before labor. That's $5,000-8,400/year in tooling overhead.</p>
+      <p>Phantomline replaces the entire stack with a per-workstation license at $79 once. Three agency workstations: $237 total. No recurring charges, no per-render fees, no per-seat scaling. The tool cost drops from a monthly drain to a one-time purchase, and the savings go straight to the bottom line.</p>
+
+      <h2>Client isolation and data privacy</h2>
+      <p>Agencies carry an implicit data trust. When a client hands you their YouTube channel, their content strategy, and their audience analytics, they expect that data stays within your organization. Cloud-based video tools make that promise harder to keep. Every script you generate, every keyword you research, every voiceover you render passes through a third-party server. Some cloud tools explicitly state in their terms that they may use your inputs to improve their models.</p>
+      <p>Phantomline processes everything locally. Script generation runs through Ollama on your machine. Narration runs through Kokoro TTS on your machine. Music generation, rendering, and caption generation — all local. The only network calls are optional: Pexels stock pulls (using your own API key) and YouTube OAuth publishing. Client strategies, scripts, and analytics never touch a server you don't control.</p>
+      <p>Each client gets a separate project directory. Voice settings, visual presets, niche configurations, and OAuth tokens are stored per-project. Switching between clients means switching folders, not logging into a different account. There's no risk of one client's settings bleeding into another's output.</p>
+
+      <h2>Batch production workflows</h2>
+      <p>Agency production is batch production. You don't produce one video at a time — you produce a week's worth for three clients in a single production session. Phantomline supports this natively.</p>
+      <h3>Script batching</h3>
+      <p>Open a client project, generate five scripts from five topic briefs, review and approve them as a batch. The script generator runs locally, so there's no rate limiting and no per-prompt fee. An experienced producer can move through five script generations in 30 minutes, editing and approving as they go.</p>
+      <h3>Narration and visual batching</h3>
+      <p>Queue narration generation for all approved scripts. Phantomline processes them sequentially, writing each narration track to the project folder. Visual matching runs in parallel where hardware allows. A five-video batch typically completes narration in 15-20 minutes on a workstation with a discrete GPU.</p>
+      <h3>Overnight rendering</h3>
+      <p>Queue the renders and let the workstation run overnight. Each 10-minute video takes 8-15 minutes to render depending on hardware. A batch of 10 videos finishes in 2-3 hours. By morning, the finished MP4s are in each client's project folder, ready for QA and publishing.</p>
+
+      <h2>Per-seat vs. per-install economics</h2>
+      <p>Most cloud tools charge per seat. When a junior producer joins the team, you add a seat. When a freelancer comes on for a campaign, you add a seat. Each seat multiplies the monthly cost. At five seats across three tools, you're managing 15 subscription line items with 15 potential billing surprises.</p>
+      <p>Phantomline licenses are per install, not per seat. A workstation running Phantomline can be used by any number of team members. If your agency operates three production machines, you need three licenses — $237 total, paid once. A new hire sits down at the same machine and starts producing. No seat provisioning, no per-user cost, no license management overhead.</p>
+
+      <h2>Consistent brand output across producers</h2>
+      <p>The hardest part of agency video production isn't making one good video. It's making the fiftieth video look and sound like it came from the same channel as the first. When three different producers work on the same client channel, style drift is inevitable — unless the tooling enforces consistency.</p>
+      <p>Phantomline stores each client's style profile in the project: voice selection, narration speed, caption font and color, music style preference, intro and outro templates. When any producer opens that client's project, they inherit the full style configuration. The output matches because the settings are locked to the project, not to the individual producer's memory.</p>
+
+      <h2>Comparison: freelance editors vs. Phantomline</h2>
+      <p>Many agencies outsource faceless video editing to freelancers at $50-150 per video. At 30 videos a month, that's $1,500-4,500 in editing costs. The freelancer workflow also introduces turnaround delays (24-72 hours per revision cycle), file transfer overhead (uploading scripts, downloading renders), and quality variance across different editors.</p>
+      <p>Phantomline doesn't replace a skilled editor for premium productions that need custom motion graphics or complex compositing. But for the bulk of faceless YouTube content — narrated footage with captions, music, and clean transitions — the pipeline produces broadcast-ready output in 45 minutes of active producer time per video. At agency volumes, the labor and cost savings are substantial.</p>
+
+      <h2>Scaling without scaling costs</h2>
+      <p>When an agency signs a new client, the production overhead with cloud tools increases: new seats, more renders, higher storage. With Phantomline, a new client means a new project folder. The per-client marginal cost is zero (assuming the workstation has capacity). This changes the math on which clients are profitable. Small retainers that barely covered cloud tooling costs now generate clean margin because the tooling cost is already paid.</p>
+
+      <h2>Honest limitations</h2>
+      <ul>
+        <li><strong>Not a team collaboration platform.</strong> Phantomline is a production tool, not a project management system. Agencies still need their existing tools for client communication, approval workflows, and content calendars. Phantomline handles the script-to-render pipeline; everything before and after it stays in your existing workflow.</li>
+        <li><strong>Hardware-dependent throughput.</strong> Render speed depends on your workstation. A mid-range machine handles 2-3 concurrent client channels comfortably. Agencies producing 50+ videos a week may want a dedicated render machine with a high-end GPU.</li>
+        <li><strong>Single-machine projects.</strong> Project files live on the local filesystem. Syncing projects across machines requires manual file transfer or a shared network drive. There's no built-in cloud sync or multi-machine collaboration.</li>
+        <li><strong>TTS, not voice cloning.</strong> Kokoro produces natural narration across seven profiles, but it doesn't clone a client's specific voice. Clients who require their own voice provide pre-recorded audio, which Phantomline can align to visuals and captions.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>How does pricing work for agencies?</summary>
+          <p>Per install, not per seat. One license per workstation at $79 each, paid once. No monthly fees, no per-render charges, no per-channel scaling costs.</p>
+        </details>
+        <details>
+          <summary>Can we manage multiple clients from one install?</summary>
+          <p>Yes. Each client gets a separate project directory with isolated settings, voice profiles, and OAuth connections. Switch clients by switching projects.</p>
+        </details>
+        <details>
+          <summary>Does client data leave our network?</summary>
+          <p>No. All processing is local. The only optional network calls are Pexels stock pulls and YouTube OAuth publishing.</p>
+        </details>
+        <details>
+          <summary>Can we white-label the output?</summary>
+          <p>Yes. Output is a standard MP4 with no watermarks or attribution. Deliver under any brand.</p>
+        </details>
+        <details>
+          <summary>What hardware does an agency workstation need?</summary>
+          <p>32 GB RAM, modern multi-core CPU, discrete GPU recommended, 200+ GB free disk. A mid-range workstation from the last 3 years handles batch production well.</p>
+        </details>
+        <details>
+          <summary>Can we batch-render overnight?</summary>
+          <p>Yes. Queue scripts from multiple client projects and render them sequentially. A batch of 10-15 videos on a workstation with a discrete GPU is typical for an overnight run.</p>
+        </details>
+        <details>
+          <summary>How does this compare to hiring freelance editors?</summary>
+          <p>Freelance editors charge $50-150 per video. At 30 videos/month, that's $1,500-4,500. Phantomline's license is $79 once per machine, and production takes about 45 minutes of active time per video.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. Render up to 5 videos a month to verify the pipeline before paying. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/faceless-youtube">Faceless YouTube tool pillar</a></li>
+        <li><a href="/local-ai-video-generator">Local AI video generator pillar</a></li>
+        <li><a href="/for-content-creators">For content creators</a></li>
+        <li><a href="/for-content-marketers">For content marketers</a></li>
+        <li><a href="/for-solopreneurs">For solopreneurs</a></li>
+        <li><a href="/best-faceless-youtube-tools">Best faceless YouTube tools</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
