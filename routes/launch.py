@@ -271,7 +271,13 @@ def _readiness_local():
     ollama_unreachable = models is None
     ollama_no_models = models == []
 
-    voices = getattr(tts_mod, "VOICES", []) or [] if tts_mod is not None else []
+    voices = []
+    if tts_mod is not None:
+        try:
+            import kokoro  # noqa: F401
+            voices = getattr(tts_mod, "VOICES", []) or []
+        except ImportError:
+            pass
     projects = PROJECTS.all()[:200]
     videos = [p for p in projects if p.get("kind") == project_store.KIND_VIDEO]
     narrations = [p for p in projects if p.get("kind") == project_store.KIND_NARRATION]

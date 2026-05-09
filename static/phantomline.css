@@ -3037,6 +3037,7 @@
     border-radius: 12px;
     background: rgba(4,7,8,0.34);
     border: 1px solid rgba(238,246,241,0.10);
+    top: 100px;
   }
   .publish-nav-label {
     margin: 14px 4px 4px;
