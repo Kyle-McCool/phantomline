@@ -2799,10 +2799,6 @@ $('optimizeSearch').addEventListener('input', (e) => {
   renderOptimizeList();
 });
 
-document.querySelector('.tab-btn[data-tab="optimize"]').addEventListener('click', async () => {
-  const connected = await checkOptimizeConnection();
-  if (connected && !optimizeVideos.length) loadOptimizeVideos();
-});
 
 $('videoPlanBtn').addEventListener('click', async () => {
   const script = $('videoScript').value.trim();
@@ -4059,6 +4055,7 @@ function switchPublishView(view) {
   document.querySelectorAll('.publish-view').forEach(v => v.style.display = v.id === 'pubView-' + view ? '' : 'none');
   if (view === 'calendar') renderPublishCalendar();
   if (view === 'analytics') renderPublishAnalytics();
+  if (view === 'optimize') checkOptimizeConnection().then(c => { if (c && !optimizeVideos.length) loadOptimizeVideos(); });
 }
 
 document.querySelectorAll('.publish-nav button').forEach(btn => {

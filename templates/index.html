@@ -307,19 +307,6 @@
       <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg></span>
       Advanced Tools <span class="chev">v</span>
     </button>
-    <div class="nav-section secondary-nav">Intelligence</div>
-    <button class="tab-btn secondary-nav" data-tab="publish" data-pub-jump="seo">
-      <span class="ico"><svg viewBox="0 0 24 24"><path d="M10 18a8 8 0 1 1 5.7-2.3L21 21"/><path d="M8 10h8M8 13h5"/></svg></span>
-      SEO Finder
-    </button>
-    <button class="tab-btn secondary-nav" data-tab="publish" data-pub-jump="analytics">
-      <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-9"/></svg></span>
-      Analytics
-    </button>
-    <button class="tab-btn secondary-nav" data-tab="optimize">
-      <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 12l4 4 12-12"/><path d="M2 18h20"/></svg></span>
-      Optimize
-    </button>
     <div class="nav-section secondary-nav">Advanced</div>
     <button class="tab-btn secondary-nav engine-server-only" data-tab="generate">
       <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 19h16M5 17l8-8 4 4-8 8H5v-4zM13 9l3-3 4 4-3 3"/></svg></span>
@@ -1667,6 +1654,7 @@
         <div class="publish-nav-label">Intelligence</div>
         <button data-pub-view="seo">SEO Finder</button>
         <button data-pub-view="analytics">Analytics</button>
+        <button data-pub-view="optimize">Optimize</button>
         <div class="publish-nav-label">Settings</div>
         <button data-pub-view="connections">Connections</button>
       </div>
@@ -1844,6 +1832,45 @@
             </div>
           </div>
         </div>
+        <div id="pubView-optimize" class="publish-view" style="display:none;">
+          <h2>Optimize Library</h2>
+          <p class="hint" style="margin-top:0;">
+            Pull every video on your connected channel, then deep-analyze them one at a time. Phantomline grades each video against your channel insights and proposes a single tightly-scoped repackaging. Phase 1 is read-only: suggestions only, no writes back to YouTube yet.
+          </p>
+
+          <div id="optimizeConnect" class="ip-empty" style="margin-bottom:14px;">
+            Connecting to YouTube is required. Open <button type="button" class="ip-link" onclick="switchPublishView('connections')">Connections</button> to connect a channel.
+          </div>
+
+          <div id="optimizeWorkspace" style="display:none;">
+            <div class="optimize-toolbar">
+              <button id="optimizeRefreshBtn" type="button" class="btn secondary" style="width:auto; margin-top:0;">Refresh videos</button>
+              <span id="optimizeChannelLabel" class="hint" style="align-self:center;"></span>
+              <span id="optimizeCount" class="hint" style="margin-left:auto; align-self:center;"></span>
+            </div>
+
+            <div class="optimize-filter-row">
+              <button class="filter-btn active" data-vfilter="all" type="button">All</button>
+              <button class="filter-btn" data-vfilter="winner" type="button">Winners</button>
+              <button class="filter-btn" data-vfilter="mid" type="button">Mid-tier</button>
+              <button class="filter-btn" data-vfilter="underperformer" type="button">Underperformers</button>
+              <input id="optimizeSearch" placeholder="Search title..." class="optimize-search" />
+            </div>
+
+            <div class="optimize-layout">
+              <div id="optimizeList" class="optimize-list">
+                <div class="ip-empty" style="padding:30px 12px;">No videos loaded yet. Click <strong>Refresh videos</strong>.</div>
+              </div>
+              <div id="optimizeDetail" class="optimize-detail">
+                <div class="ip-empty" style="padding:60px 18px; text-align:center;">
+                  <div style="font-size:36px; opacity:0.45; margin-bottom:12px;">🎯</div>
+                  <h3 style="margin:0 0 4px;">Pick a video</h3>
+                  <p style="margin:0; font-size:13px;">Select a video from the list to deep-analyze with Ollama.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="pubView-connections" class="publish-view" style="display:none;">
           <div class="publish-card"><div class="make-section-title"><strong>Connections</strong><span>OAuth accounts</span></div><p id="connectionsText" class="hint"></p><button id="connectionsYoutubeBtn" class="btn" type="button">Connect YouTube</button></div>
         </div>
@@ -1907,7 +1934,7 @@
           <div class="make-section-title"><strong>Interface</strong><span>show only what you need</span></div>
           <label class="toggle-row">
             <input id="settingsSimpleMode" type="checkbox" checked />
-            <span><strong>Simple mode:</strong> hide Advanced tools (Long Story, Short Script, Narrate Text, Music &amp; Mix, Video Studio, SEO Finder, Analytics, Optimize) from the sidebar. Toggle off when you want every tool visible.</span>
+            <span><strong>Simple mode:</strong> hide Advanced tools (Long Story, Short Script, Narrate Text, Music &amp; Mix, Video Studio) from the sidebar. Toggle off when you want every tool visible.</span>
           </label>
           <label class="toggle-row">
             <input id="settingsTelemetry" type="checkbox" checked />
@@ -1993,47 +2020,6 @@
     </section>
   </div>
 
-  <div id="tab-optimize" class="tab-content">
-    <section class="panel">
-      <h2>Optimize Library</h2>
-      <p class="hint" style="margin-top:0;">
-        Pull every video on your connected channel, then deep-analyze them one at a time. Phantomline grades each video against your channel insights and proposes a single tightly-scoped repackaging. Phase 1 is read-only: suggestions only, no writes back to YouTube yet.
-      </p>
-
-      <div id="optimizeConnect" class="ip-empty" style="margin-bottom:14px;">
-        Connecting to YouTube is required. Open the <button type="button" class="ip-link" data-go-tab="publish">Publish tab</button> to connect a channel, then return here.
-      </div>
-
-      <div id="optimizeWorkspace" style="display:none;">
-        <div class="optimize-toolbar">
-          <button id="optimizeRefreshBtn" type="button" class="btn secondary" style="width:auto; margin-top:0;">Refresh videos</button>
-          <span id="optimizeChannelLabel" class="hint" style="align-self:center;"></span>
-          <span id="optimizeCount" class="hint" style="margin-left:auto; align-self:center;"></span>
-        </div>
-
-        <div class="optimize-filter-row">
-          <button class="filter-btn active" data-vfilter="all" type="button">All</button>
-          <button class="filter-btn" data-vfilter="winner" type="button">Winners</button>
-          <button class="filter-btn" data-vfilter="mid" type="button">Mid-tier</button>
-          <button class="filter-btn" data-vfilter="underperformer" type="button">Underperformers</button>
-          <input id="optimizeSearch" placeholder="Search title..." class="optimize-search" />
-        </div>
-
-        <div class="optimize-layout">
-          <div id="optimizeList" class="optimize-list">
-            <div class="ip-empty" style="padding:30px 12px;">No videos loaded yet. Click <strong>Refresh videos</strong>.</div>
-          </div>
-          <div id="optimizeDetail" class="optimize-detail">
-            <div class="ip-empty" style="padding:60px 18px; text-align:center;">
-              <div style="font-size:36px; opacity:0.45; margin-bottom:12px;">🎯</div>
-              <h3 style="margin:0 0 4px;">Pick a video</h3>
-              <p style="margin:0; font-size:13px;">Select a video from the list to deep-analyze with Ollama.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
 
   <div class="footer">
     Phantomline runs on your machine via Ollama, Kokoro, MusicGen, and optional local Forge. No paid APIs required.
