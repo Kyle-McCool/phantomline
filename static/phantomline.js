@@ -1798,6 +1798,7 @@ async function shuffleMakeIdeas() {
   const status = $('makeIdeaStatus');
   btn.disabled = true;
   status.textContent = 'Asking Ollama for fresh angles...';
+  status.classList.add('loading-status');
   deck.style.display = 'none';
   deck.innerHTML = '';
   $('makeTitleDeck').style.display = 'none';
@@ -1876,8 +1877,10 @@ async function shuffleMakeIdeas() {
     }
     deck.style.display = deck.children.length ? 'grid' : 'none';
     status.textContent = deck.children.length ? 'Pick one to load it.' : 'No ideas returned.';
+    status.classList.remove('loading-status');
   } catch (e) {
-    status.textContent = '';
+    status.textContent = e.message || 'Could not generate ideas. Check Ollama is running.';
+    status.classList.remove('loading-status');
     toast(e.message || 'Could not generate ideas', true);
   } finally {
     btn.disabled = false;
@@ -1894,7 +1897,9 @@ async function generateMakeTitles() {
   const deck = $('makeTitleDeck');
   const status = $('makeIdeaStatus');
   btn.disabled = true;
+  btn.removeAttribute('data-blocked-reason');
   status.textContent = 'Generating title options...';
+  status.classList.add('loading-status');
   deck.style.display = 'none';
   deck.innerHTML = '';
   try {
@@ -1958,10 +1963,13 @@ async function generateMakeTitles() {
     deck.style.display = deck.children.length ? 'grid' : 'none';
     $('makeTitlePackage').style.display = 'block';
     status.textContent = deck.children.length ? 'Pick a title to package the video.' : 'No titles returned.';
+    status.classList.remove('loading-status');
   } catch (e) {
-    status.textContent = '';
+    status.textContent = e.message || 'Could not generate titles. Check Ollama is running.';
+    status.classList.remove('loading-status');
     toast(e.message || 'Could not generate titles', true);
   } finally {
+    btn.setAttribute('data-blocked-reason', 'Generate and pick an idea first');
     updateTitleIdeaGate();
   }
 }
@@ -2600,6 +2608,7 @@ function renderOptimizeDetail(video, analysis = null) {
       ${hasAnalysis ? '<button id="optReanalyzeBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Re-analyze</button>' : ''}
       <a class="btn secondary" type="button" style="width:auto; margin-top:0; text-decoration:none;" href="https://youtube.com/watch?v=${encodeURIComponent(video.id)}" target="_blank" rel="noopener">Open on YouTube ↗</a>
     </div>
+    <div id="optAnalyzeStatus" style="display:none; margin-top:10px;"></div>
   `;
 
   if (hasAnalysis && ana) {
@@ -2710,7 +2719,13 @@ function renderOptimizeDetail(video, analysis = null) {
 
 async function analyzeOptimizeVideo(video) {
   const btn = document.getElementById('optAnalyzeBtn') || document.getElementById('optReanalyzeBtn');
+  const statusEl = document.getElementById('optAnalyzeStatus');
   if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
+  if (statusEl) {
+    statusEl.className = 'loading-status';
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Running deep analysis with Ollama… this takes ~30–60s';
+  }
   try {
     // Always pull fresh detail so the model sees current title/desc/tags.
     const dr = await fetch('/api/optimize/video/' + encodeURIComponent(video.id));
@@ -2729,6 +2744,7 @@ async function analyzeOptimizeVideo(video) {
   } catch (e) {
     toast(e.message || 'Analyze failed', true);
     if (btn) { btn.disabled = false; btn.textContent = 'Deep Analyze with Ollama'; }
+    if (statusEl) { statusEl.style.display = 'none'; statusEl.textContent = ''; }
   }
 }
 
@@ -4321,10 +4337,24 @@ function renderSeoResults(data) {
         <button id="seoApplyToMakeBtn" class="btn secondary" type="button">Use in Make Video</button>
       </div>
     </div>` : '';
-  $('seoResult').innerHTML = contextCard + packageCard + rows.map(row => {
-    const score = row.opportunityScore == null ? 'Candidate' : `${row.opportunityScore}/100`;
+  const _fmtAngle = s => {
+    if (!s || typeof s !== 'string' || !s.trim().startsWith('{')) return s || '';
+    const p = (s.match(/'(?:phrase|angle|topic|title)':\s*'([^']+)'/) || [])[1] || '';
+    const d = (s.match(/'(?:payoff|description|viewer_payoff)':\s*'([^']+)'/) || [])[1] || '';
+    return p && d ? `${p} — ${d}` : p || d || s;
+  };
+  const anglesCard = (data.content_angles || []).length ? `
+    <div class="publish-card">
+      <div class="make-section-title"><strong>Content angles</strong><span>AI-generated</span></div>
+      ${(data.content_angles || []).map(a => `<div class="hint" style="margin-bottom:6px;">• ${escapeHtml(_fmtAngle(a))}</div>`).join('')}
+    </div>` : '';
+  $('seoResult').innerHTML = contextCard + packageCard + anglesCard + rows.map(row => {
+    const scoreVal = row.opportunityScore;
+    const scoreCls = scoreVal == null ? 'seo-score-muted' : scoreVal >= 65 ? 'seo-score-good' : scoreVal >= 40 ? 'seo-score-warn' : 'seo-score-muted';
+    const scoreLabel = scoreVal == null ? 'Candidate' : `${scoreVal}/100`;
+    const score = `<span class="${scoreCls}">${scoreLabel}</span>`;
     const fit = row.channelFitScore == null ? '' : ` - Channel fit ${row.channelFitScore}/100`;
-    const meta = row.opportunityScore == null
+    const meta = scoreVal == null
       ? escapeHtml(row.why || 'Candidate phrase')
       : `Demand ${row.demandScore}/100 - Velocity ${row.velocityScore}/100 - Shorts fit ${row.shortsFitScore}/100 - Competition penalty ${row.competitionPenalty}/100${fit}`;
     const reasons = (row.analyticsFitReasons || []).slice(0, 2).map(r => `<div class="hint">Analytics fit: ${escapeHtml(r)}</div>`).join('');
@@ -4333,7 +4363,7 @@ function renderSeoResults(data) {
     `).join('');
     return `
       <div class="publish-card">
-        <div class="make-section-title"><strong>${escapeHtml(row.phrase || '')}</strong><span>${score}</span></div>
+        <div class="make-section-title"><strong>${escapeHtml(row.phrase || '')}</strong>${score}</div>
         <div class="hint">${meta}</div>
         ${reasons}
         ${row.medianViews != null ? `<div class="status-grid" style="margin-top:12px;">
@@ -4367,6 +4397,7 @@ async function runSeoResearch() {
   $('seoResearchStatus').textContent = useAnalytics
     ? 'Expanding phrases, checking YouTube opportunity, and weighting against your analytics...'
     : 'Expanding phrases with Ollama and checking YouTube opportunity...';
+  $('seoResearchStatus').classList.add('loading-status');
   $('seoResult').innerHTML = '';
   try {
     const d = await apiJson('/api/research/youtube/seo', {
@@ -4382,9 +4413,11 @@ async function runSeoResearch() {
     $('seoResearchStatus').textContent = d.mode === 'ranked'
       ? `Checked ${d.candidates_checked || 0} phrases. Sorted by best ranking opportunity${d.analytics_context_used ? ' + channel fit.' : '.'}`
       : d.message || 'Candidate phrases generated.';
+    $('seoResearchStatus').classList.remove('loading-status');
     renderSeoResults(d);
   } catch (e) {
-    $('seoResearchStatus').textContent = '';
+    $('seoResearchStatus').textContent = e.message || 'SEO research failed. Check Ollama is running.';
+    $('seoResearchStatus').classList.remove('loading-status');
     toast(e.message || 'SEO research failed', true);
   } finally {
     $('seoResearchBtn').disabled = false;

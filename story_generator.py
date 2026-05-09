@@ -84,6 +84,46 @@ SYSTEM_PROMPT = (
     "Plain spoken prose only."
 )
 
+
+def build_system_prompt(insights=None):
+    """Return SYSTEM_PROMPT enriched with channel-level constraints when insights are loaded.
+
+    The channel data block gives the model a hard operating frame — which content
+    territory this channel actually owns, which performance rules override defaults,
+    and which hook patterns have proven out. Per-generation signal (titles, keywords,
+    search terms) still goes in the user prompt via channel_insights.to_prompt_block().
+    """
+    if not insights:
+        return SYSTEM_PROMPT
+
+    lines = []
+
+    keywords = (insights.get("seo_keywords") or [])[:4]
+    if keywords:
+        lines.append(
+            f"This channel's proven content territory: {', '.join(str(k) for k in keywords)}. "
+            "Anchor all topic choices, angles, and keyword selection here unless the user explicitly overrides."
+        )
+
+    next_rules = (insights.get("next_video_rules") or [])[:3]
+    if next_rules:
+        lines.append("Channel performance rules (override generic defaults when they conflict):")
+        lines.extend(f"- {str(r).strip()}" for r in next_rules)
+
+    hook_rules = (insights.get("hook_guidance") or [])[:2]
+    if hook_rules:
+        lines.append("Proven hook patterns for this channel:")
+        lines.extend(f"- {str(h).strip()}" for h in hook_rules)
+
+    if not lines:
+        return SYSTEM_PROMPT
+
+    return (
+        SYSTEM_PROMPT
+        + "\n\nCHANNEL CONSTRAINTS (treat as hard rules, not suggestions):\n"
+        + "\n".join(lines)
+    )
+
 STYLE_RULES = """\
 Style and rules for the narration:
 - YouTube voiceover written for one narrator and one clear audience.
@@ -858,6 +898,10 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
     if inputs.get("description"):
         topic = f"{topic}\n\nCreative direction to honor:\n{inputs['description']}"
 
+    # Load insights once — used for both title scoring and system prompt enrichment.
+    insights = _load_insights_safely()
+    active_system = build_system_prompt(insights)
+
     if resume_state:
         title = resume_state["title"]
         plan = resume_state["plan"]
@@ -874,12 +918,13 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
         raw_titles = generate(
             model,
             title_batch_prompt(topic, inputs["genre"], inputs["tone"], count=5),
+            system=active_system,
             label="titles",
             temperature=0.9,
             num_predict=420,
         )
         candidates = parse_title_batch(raw_titles)
-        title, scored = pick_best_title(candidates, insights=_load_insights_safely())
+        title, scored = pick_best_title(candidates, insights=insights)
         print(f"      Title: {title}  ({len(candidates)} candidate(s))")
         emit("title", title=title, candidates=scored or candidates)
 
@@ -889,6 +934,7 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
         plan = generate(
             model,
             plan_prompt(topic, inputs["genre"], inputs["tone"], title, target_words),
+            system=active_system,
             label="plan",
             temperature=0.8,
             num_predict=900,
@@ -941,7 +987,7 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
         )
         # num_predict in tokens is roughly 1.4x word count. Give it slack.
         raw = generate(
-            model, prompt, label="write",
+            model, prompt, system=active_system, label="write",
             temperature=0.85,
             num_predict=int(sec_target * 2),
         )
@@ -953,7 +999,7 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
             print("  (section came back unusually short - retrying once)")
             emit("status", message=f"Section {section_num} came back short - retrying...")
             raw = generate(
-                model, prompt, label="retry",
+                model, prompt, system=active_system, label="retry",
                 temperature=0.9,
                 num_predict=int(sec_target * 2),
             )
@@ -1031,16 +1077,20 @@ def generate_short_script(inputs, out_dir, progress_cb=None):
     model = inputs["model"]
     target_words = int(inputs["word_count"])
 
+    insights = _load_insights_safely()
+    active_system = build_system_prompt(insights)
+
     print(f"\n[short] Generating {target_words}-word script via {model}...")
 
     emit("status", message="Generating title candidates...")
     raw_titles = generate(
         model,
         title_batch_prompt(inputs["topic"], inputs["genre"], inputs["tone"], count=5),
+        system=active_system,
         label="titles", temperature=0.9, num_predict=420,
     )
     candidates = parse_title_batch(raw_titles)
-    title, scored = pick_best_title(candidates, insights=_load_insights_safely())
+    title, scored = pick_best_title(candidates, insights=insights)
     print(f"        Title: {title}  ({len(candidates)} candidate(s))")
     emit("title", title=title, candidates=scored or candidates)
 
@@ -1056,6 +1106,7 @@ def generate_short_script(inputs, out_dir, progress_cb=None):
         short_script_prompt(inputs["topic"], inputs["genre"], inputs["tone"],
                             title, target_words,
                             description=inputs.get("description", "")),
+        system=active_system,
         label="write", temperature=0.85,
         # Generous token cap so the model isn't truncated; tokens ≈ 1.4 × words.
         num_predict=int(target_words * 2 + 300),
