@@ -2046,20 +2046,34 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
   }
   .phone-preview {
+    position: relative;
     width: min(230px, 72%);
     aspect-ratio: 9 / 16;
     margin: 4px auto 16px;
-    border-radius: 12px;
-    padding: 12px;
-    background: #050606;
-    border: 1px solid rgba(255,255,255,0.13);
-    box-shadow: 0 28px 70px rgba(0,0,0,0.45);
+    border-radius: 22px;
+    overflow: hidden;
+    background: #0e1418;
+    box-shadow: 0 0 0 4px #0e1418, 0 28px 70px rgba(0,0,0,0.45);
+  }
+  /* Dynamic island */
+  .phone-preview::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 14px;
+    border-radius: 999px;
+    background: #000;
+    z-index: 6;
+    pointer-events: none;
   }
   .phone-preview-inner {
     position: relative;
     height: 100%;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: inherit;
     background:
       radial-gradient(circle at 50% 18%, rgba(105,207,240,0.22), transparent 22%),
       radial-gradient(circle at 20% 52%, rgba(34, 231, 245,0.18), transparent 24%),
@@ -2134,156 +2148,100 @@
     font-size: 10px;
     font-weight: 700;
   }
-  .platform-preview-toggle {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    margin: -4px auto 14px;
-    width: min(300px, 100%);
-  }
-  .platform-preview-toggle button {
-    border: 1px solid var(--border);
-    background: rgba(0,0,0,0.18);
-    color: var(--muted);
-    border-radius: 4px;
-    padding: 7px 8px;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-  }
-  .platform-preview-toggle button.active {
-    color: var(--text);
-    border-color: rgba(34, 231, 245,0.78);
-    background: rgba(34, 231, 245,0.12);
-    /* box-shadow removed (Bible §02: depth via bg-color) */
-  }
-  .platform-ui {
+  /* ── Shorts chrome (matches footage cards + hero) ──────────────── */
+  .shorts-chrome {
     position: absolute;
     inset: 0;
     z-index: 3;
     pointer-events: none;
-    color: rgba(255,255,255,0.82);
-    font-size: 10px;
-    font-weight: 800;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.85);
+    border-radius: inherit;
+    color: #fff;
+    font-family: var(--font-sans, system-ui, -apple-system, "Segoe UI", sans-serif);
   }
-  .platform-ui:after {
-    content: "";
+  .shorts-chrome-top {
     position: absolute;
-    inset: auto 0 0;
-    height: 42%;
-    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.66));
-    z-index: -1;
-  }
-  .platform-status {
-    position: absolute;
-    top: 9px;
-    left: 13px;
-    right: 12px;
+    top: 0;
+    left: 0;
+    right: 70px;
+    z-index: 3;
+    padding: 8px 14px 8px 16px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  }
+  .shorts-chrome-system { display: inline-flex; align-items: center; gap: 4px; }
+  .shorts-chrome-topactions {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 4;
+    display: flex;
     align-items: center;
-    opacity: 0.88;
-    letter-spacing: 0.2px;
+    gap: 10px;
+    color: #fff;
   }
-  .platform-status .status-icons {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-  }
-  .platform-tabs {
+  .shorts-chrome-topactions svg { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
+  .shorts-chrome-rail {
     position: absolute;
-    top: 32px;
-    left: 44px;
-    right: 44px;
-    display: flex;
-    justify-content: center;
-    gap: 11px;
-    color: rgba(255,255,255,0.58);
-  }
-  .platform-tabs strong {
-    color: rgba(255,255,255,0.92);
-    position: relative;
-  }
-  .platform-tabs strong:after {
-    content: "";
-    position: absolute;
-    left: 20%;
-    right: 20%;
-    bottom: -5px;
-    height: 2px;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.78);
-  }
-  .platform-top-icons {
-    position: absolute;
-    top: 36px;
-    right: 13px;
-    display: flex;
-    gap: 9px;
-    font-size: 16px;
-  }
-  .platform-top-left {
-    position: absolute;
-    top: 36px;
-    left: 14px;
-    font-size: 16px;
-  }
-  .platform-actions {
-    position: absolute;
-    right: 10px;
-    bottom: 92px;
+    right: 8px;
+    bottom: 30px;
+    z-index: 3;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
   }
-  .platform-action {
-    display: grid;
-    justify-items: center;
-    gap: 2px;
-    color: rgba(255,255,255,0.78);
+  .shorts-chrome-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
   }
-  .platform-action .icon {
-    width: 27px;
-    height: 27px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.12);
-    font-size: 14px;
+  .shorts-chrome-action svg { width: 18px; height: 18px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)); }
+  .shorts-chrome-yt {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
   }
-  .platform-action .icon:before {
-    content: attr(data-icon);
-  }
-  .platform-action .icon[data-icon="profile"]:before { content: "\25CF"; }
-  .platform-action .icon[data-icon="like"]:before { content: "\2665"; }
-  .platform-action .icon[data-icon="chat"]:before { content: "\2026"; }
-  .platform-action .icon[data-icon="save"]:before { content: "\25A0"; }
-  .platform-action .icon[data-icon="send"]:before { content: "\2197"; }
-  .platform-action .icon[data-icon="dislike"]:before { content: "\2193"; }
-  .platform-action .icon[data-icon="mix"]:before { content: "\21C4"; }
-  .platform-action .icon[data-icon="more"]:before { content: "\2026"; }
-  .platform-action .icon[data-icon="camera"]:before { content: "\25A3"; }
-  .platform-action small {
-    font-size: 10px;
-    color: rgba(255,255,255,0.63);
-  }
-  .platform-meta-block {
+  .shorts-chrome-yt svg { width: 100%; height: 100%; }
+  .shorts-chrome-bottom {
     position: absolute;
-    left: 15px;
-    right: 58px;
-    bottom: 20px;
-    color: rgba(255,255,255,0.74);
-    font-size: 10px;
-    line-height: 1.35;
-  }
-  .platform-meta-block strong {
-    display: block;
-    color: rgba(255,255,255,0.86);
+    inset: auto 56px 14px 12px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     font-size: 11px;
-    margin-bottom: 4px;
+    line-height: 1.3;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+  }
+  .shorts-chrome-creator {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .shorts-chrome-desc {
+    font-weight: 450;
+    color: rgba(255, 255, 255, 0.92);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
   .caption-safe-guide {
     position: absolute;
@@ -2299,23 +2257,6 @@
   }
   .phone-preview-inner.has-video .caption-safe-guide {
     opacity: 0.45;
-  }
-  .phone-preview-inner[data-platform="shorts"] .platform-tabs,
-  .phone-preview-inner[data-platform="shorts"] .platform-top-left,
-  .phone-preview-inner[data-platform="reels"] .platform-tabs {
-    display: none;
-  }
-  .phone-preview-inner[data-platform="tiktok"] .platform-top-icons,
-  .phone-preview-inner[data-platform="tiktok"] .platform-top-left {
-    display: none;
-  }
-  .phone-preview-inner[data-platform="reels"] .platform-top-icons {
-    left: 14px;
-    right: 14px;
-    justify-content: space-between;
-  }
-  .phone-preview-inner[data-platform="reels"] .platform-actions {
-    bottom: 84px;
   }
   .studio-specs {
     display: grid;
@@ -3087,13 +3028,13 @@
     text-shadow: 0 0 28px rgba(34, 231, 245,0.24);
   }
   .phone-preview {
-    border-radius: 12px;
-    border: 1px solid rgba(244,248,245,0.16);
-    background: linear-gradient(145deg, #020303, #151b1c);
-    box-shadow: 0 34px 95px rgba(0,0,0,0.52), -16px 0 70px rgba(34, 231, 245,0.14);
+    border-radius: 22px;
+    border: 0;
+    background: #0e1418;
+    box-shadow: 0 0 0 4px #0e1418, 0 34px 95px rgba(0,0,0,0.52), -16px 0 70px rgba(34, 231, 245,0.14);
   }
   .phone-preview-inner {
-    border-radius: 12px;
+    border-radius: inherit;
     background:
       linear-gradient(180deg, rgba(34, 231, 245,0.10), transparent 34%),
       radial-gradient(circle at 72% 18%, rgba(105,207,240,0.18), transparent 24%),
@@ -3227,15 +3168,13 @@
   .publish-pill,
   .iconbtn,
   .notification-actions button,
-  .publish-nav button,
-  .platform-preview-toggle button {
+  .publish-nav button {
     color: #dbe7e1;
   }
   .tab-btn.active,
   .filter-btn.active,
   .dur-btn.active,
-  .publish-nav button.active,
-  .platform-preview-toggle button.active {
+  .publish-nav button.active {
     color: var(--text-primary);
   }
   @media (max-width: 1100px) {
