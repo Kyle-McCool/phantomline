@@ -2093,6 +2093,22 @@ def pricing_page():
     return render_template("pricing.html", pricing=PRICING)
 
 
+@app.route("/releases")
+@app.route("/releases/")
+def releases_page():
+    """Renders RELEASES.md as a simple HTML page. Linked from the in-studio
+    update banner ('What's new') so users can read the changelog before
+    deciding to apply an update. Also useful for SEO + auditability."""
+    from pathlib import Path
+    md_path = Path(__file__).resolve().parent / "RELEASES.md"
+    raw = ""
+    try:
+        raw = md_path.read_text(encoding="utf-8")
+    except OSError:
+        raw = "# Phantomline Release Notes\n\nNo release notes available yet."
+    return render_template("releases.html", releases_md=raw)
+
+
 @app.route("/about")
 def about_page():
     """Long-form 'who and why' page. Important for E-E-A-T signals and

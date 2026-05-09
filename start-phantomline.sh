@@ -8,9 +8,9 @@
 # If the file isn't executable yet:
 #     chmod +x start-phantomline.sh
 #
-# If a `.venv` exists alongside this script, we use it so the system-wide
-# Python install isn't required to be the right version. Otherwise we fall
-# back to whatever `python3` resolves to.
+# Before starting the server, _updater.py checks phantomline.xyz for a
+# newer version and applies it if available. Update failures don't block
+# server start. Skip the update check with --no-update.
 #
 # After ~3 seconds we open http://localhost:5000 in your default browser
 # (uses xdg-open). Close this terminal (or press Ctrl+C) to stop the server.
@@ -29,6 +29,15 @@ fi
 
 echo
 echo "=== Phantomline ==="
+echo
+
+# Auto-update check. _updater.py exits 0 even on failure so this never
+# blocks the server start. Pass --no-update to skip.
+if [ "$1" != "--no-update" ]; then
+    "$PY" _updater.py || true
+fi
+
+echo
 echo "Starting local server on http://localhost:5000"
 echo "Opening your browser in 3 seconds. Leave this terminal open while you use Phantomline."
 echo

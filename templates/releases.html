@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Release Notes | Phantomline</title>
+<meta name="description" content="Phantomline desktop release notes — what shipped in each version, sorted newest first." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<meta name="robots" content="noindex" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+<style>
+  /* Render markdown as monospace plaintext — no markdown processor in
+     production deps and we don't want to add one just for this page.
+     Looks like a terminal output / changelog file, which is fitting for
+     a release notes page. */
+  .releases-shell { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+  .releases-meta { color: var(--text-2); font-size: 13px; margin-bottom: 16px; }
+  .releases-md {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    color: var(--paper-dim);
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 24px;
+    border-radius: 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/releases" aria-current="page">Releases</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article" style="max-width: 880px;">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>›</span>
+        <span class="current">Release notes</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Release notes</div>
+        <h1>Phantomline release notes</h1>
+        <p class="article-lede">What shipped in each version of the Phantomline desktop install. Newest first. Bookmarked from the in-studio update banner.</p>
+      </header>
+
+      <div class="releases-shell">
+        <p class="releases-meta">Source of truth: <a href="https://github.com/daculturedswine/phantomline/blob/main/RELEASES.md" target="_blank" rel="noopener">RELEASES.md</a> in the repo.</p>
+        <pre class="releases-md">{{ releases_md }}</pre>
+      </div>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

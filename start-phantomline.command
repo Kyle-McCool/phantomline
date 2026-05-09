@@ -7,19 +7,17 @@
 # first time, right-click the file → Open → Open in the dialog. macOS only
 # asks once per script.
 #
-# If a `.venv` exists alongside this script, we use it so the system-wide
-# Python install isn't required to be the right version. Otherwise we fall
-# back to whatever `python3` resolves to.
+# Before starting the server, _updater.py checks phantomline.xyz for a
+# newer version and applies it if available. Update failures don't block
+# server start. Skip the update check with --no-update.
 #
 # After ~3 seconds we open http://localhost:5000 in your default browser.
 # Close this Terminal window (or press Ctrl+C) to stop the server.
 
 set -e
 
-# cd to the directory this script lives in (handles spaces in the path).
 cd "$(dirname "$0")"
 
-# Prefer the project venv.
 if [ -x ".venv/bin/python" ]; then
     PY=".venv/bin/python"
 elif command -v python3 >/dev/null 2>&1; then
@@ -30,12 +28,19 @@ fi
 
 echo
 echo "=== Phantomline ==="
+echo
+
+# Auto-update check. _updater.py exits 0 even on failure so this never
+# blocks the server start. Pass --no-update to skip.
+if [ "$1" != "--no-update" ]; then
+    "$PY" _updater.py || true
+fi
+
+echo
 echo "Starting local server on http://localhost:5000"
 echo "Opening your browser in 3 seconds. Leave this window open while you use Phantomline."
 echo
 
-# Open the browser in the background after a short delay so the server has
-# time to bind. The subshell + & makes it non-blocking.
 ( sleep 3 && open "http://localhost:5000" ) &
 
 exec "$PY" server.py
