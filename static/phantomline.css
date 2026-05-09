@@ -4014,10 +4014,10 @@
   flex: 1 1 auto;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   grid-auto-rows: max-content;
-  gap: 28px 24px;          /* extra row gap = breathing room between phone frames */
-  padding: 6px 6px 6px 6px;
+  gap: 24px 20px;
+  padding: 6px;
 }
 /* Tile = phone-frame: rounded body, dark bezel via box-shadow, dynamic
    island pseudo-element at top center. Mirrors the landing-hero phone
@@ -4062,7 +4062,7 @@
 .gh-footage-thumb img {
   display: block;
   width: 100%;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 9 / 14;     /* shorter than real phones so full tile fits in viewport */
   object-fit: cover;
   border-radius: inherit;
 }
