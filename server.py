@@ -77,6 +77,7 @@ from routes.optimize import optimize_bp
 from routes.billing import billing_bp, consume_quota, enforce_tier
 from routes.account import account_bp
 from routes.profile import profile_bp
+from routes.library import library_bp
 
 
 app = Flask(__name__)
@@ -89,6 +90,7 @@ app.register_blueprint(optimize_bp)
 app.register_blueprint(billing_bp)
 app.register_blueprint(account_bp)
 app.register_blueprint(profile_bp)
+app.register_blueprint(library_bp)
 
 
 # -----------------------------------------------------------------------
