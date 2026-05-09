@@ -501,7 +501,7 @@ def robots_txt():
         f"Sitemap: {SITE_URL}/sitemap.xml\n"
     )
     response = app.response_class(body, mimetype="text/plain")
-    response.headers["Cache-Control"] = "public, max-age=3600"
+    response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400"
     return response
 
 
@@ -642,7 +642,7 @@ def sitemap_xml():
         "</urlset>\n"
     )
     response = app.response_class(body, mimetype="application/xml")
-    response.headers["Cache-Control"] = "public, max-age=3600"
+    response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400"
     return response
 
 # In-memory job tables. One Python process = one user, so this is fine.
