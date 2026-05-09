@@ -944,10 +944,13 @@ h4 {
   z-index: 5;
   pointer-events: none;
 }
-.mini-phone img {
-  width: 56px;
-  height: auto;
-  opacity: 0.8;
+.mini-phone-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
 }
 /* Shorts chrome overlay */
 .mini-phone-chrome {
@@ -1011,27 +1014,27 @@ h4 {
   line-height: 1.3;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
 }
+.mini-phone-creator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.mini-phone-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.mini-phone-avatar img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .mini-phone-bottom strong { font-size: 10px; }
 .mini-phone-bottom span {
   color: rgba(255, 255, 255, 0.88);
   font-weight: 450;
 }
-.mini-phone .caption {
-  position: absolute;
-  bottom: 44px;
-  left: var(--s-5);
-  right: 48px;
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: var(--text-body-sm);
-  color: var(--text-primary);
-  text-transform: none;
-  text-align: left;
-  text-shadow: 0 3px 0 #000, 0 0 18px rgba(0, 0, 0, 0.8);
-  line-height: 1.3;
-  z-index: 3;
-}
-.mini-phone .caption span { color: var(--brand); display: block; font-weight: 400; }
 
 /* Calendar mock. ASCII-grid style instead of decorative dots */
 .publish-preview .mock:first-child {
