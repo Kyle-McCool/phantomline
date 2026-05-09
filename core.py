@@ -515,13 +515,15 @@ def _pick_focus_keyword(*, topic="", title="", niche="", research_keyword="",
     sorted_insights = sorted(insight_pool, key=lambda p: -overlap(p)) if seed_words else list(insight_pool)
     best_insight = next((p for p in sorted_insights if seed_words and overlap(p) > 0), "")
 
+    topic_head = (topic or title or "").strip().split(".")[0].strip()
+    topic_short = " ".join(topic_head.split()[:4]) if topic_head else ""
     focus = (
         best_insight
         or (research_keyword or "").strip()
         or (sorted_insights[0] if sorted_insights else "")
         or next((p.strip() for p in extra_phrases if str(p).strip()), "")
+        or topic_short
         or (niche or "").strip()
-        or (topic or title or "").strip().split(".")[0]
     )
     focus = re.sub(r"\s+", " ", focus).strip().lower()[:60]
 

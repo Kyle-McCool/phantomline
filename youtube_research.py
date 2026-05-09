@@ -779,8 +779,10 @@ def suggest_research_keyword(recipe="", niche="", topic="", video_format=""):
         return "reddit story narration"
     if "space" in text or "alien" in text:
         return "space facts narration"
-    if "mystery" in text or "horror" in text or "true crime" in text:
+    if "mystery" in text or "horror" in text:
         return "unsolved mysteries narration"
+    if "true-crime" in text or "true crime" in text:
+        return "true crime documentary"
     if "finance" in text or "money" in text:
         return "finance tips shorts"
     if "tech" in text or "ai" in text:
@@ -789,6 +791,26 @@ def suggest_research_keyword(recipe="", niche="", topic="", video_format=""):
         return "history facts shorts"
     if "survival" in text:
         return "survival tips shorts"
+    if "asmr" in text or "sleep" in text:
+        return "sleep narration ASMR"
+    if "science" in text:
+        return "science explained shorts"
+    if "conspiracy" in text or "what if" in text:
+        return "conspiracy theory documentary"
+    if "top" in text and ("list" in text or "10" in text or "ranked" in text):
+        return "top 10 facts shorts"
+    if "travel" in text or "geography" in text:
+        return "travel documentary narration"
+    if "philosophy" in text:
+        return "philosophy explained shorts"
+    if "urban legend" in text or "folklore" in text:
+        return "urban legend narration"
+    if "news" in text or "recap" in text:
+        return "news recap shorts"
+    if "product review" in text or "review" in text:
+        return "product review shorts"
+    if "motivat" in text:
+        return "motivational shorts narration"
     return (niche or topic or "faceless YouTube shorts").strip()[:80]
 
 

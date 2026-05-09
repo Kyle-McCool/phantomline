@@ -338,6 +338,106 @@ const CHANNEL_RECIPES = {
     ambience: 'modern everyday settings, clean readable scenes, expressive but not chaotic',
     music: 'light suspense bed, soft plucks, gentle pulse, no vocals',
   },
+  'true-crime': {
+    niche: 'true crime narration',
+    audience: 'viewers who follow cases, evidence, and justice outcomes',
+    format: 'documentary',
+    tone: 'serious, measured, empathetic, factual, investigative',
+    direction: 'Structure like a case file: cold open with a detail that hooks, then timeline, evidence, suspects, and resolution or open questions. Avoid sensationalism.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'dim evidence-room light, crime scene tape, cold blue tones, restrained mood',
+    music: 'dark investigative drone, sparse piano, slow pulse, no vocals',
+  },
+  'asmr-sleep': {
+    niche: 'ASMR and sleep narration',
+    audience: 'listeners who use YouTube for relaxation, sleep, and calm backgrounds',
+    format: 'story',
+    tone: 'slow, gentle, soothing, warm, whisper-adjacent',
+    direction: 'Write calm, descriptive narration with gentle imagery. Pace is slow and deliberate. No conflict, no tension, no urgency. Paint serene scenes the listener can drift into.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'soft candlelight, warm blankets, rain on windows, cozy interiors, muted earth tones',
+    music: 'ambient sleep pad, slow warm drone, distant rain texture, no percussion, no vocals',
+  },
+  science: {
+    niche: 'science explainer',
+    audience: 'curious viewers who want complex science made visual and clear',
+    format: 'explainer',
+    tone: 'smart, fascinated, clear, visual, wonder-driven',
+    direction: 'Open with a surprising fact or question. Use concrete analogies and visual metaphors. Build from simple to complex. End with an implication that sticks.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'clean lab light, macro detail, cosmic scale shifts, vivid scientific imagery',
+    music: 'wonder-driven ambient bed, soft synth, light pulse, no vocals',
+  },
+  conspiracy: {
+    niche: 'conspiracy theories and what-if scenarios',
+    audience: 'viewers who enjoy alternative theories, thought experiments, and rabbit holes',
+    format: 'documentary',
+    tone: 'curious, neutral, slightly ominous, thought-provoking, non-committal',
+    direction: 'Present the theory fairly without endorsing it. Use "what if" framing. Show the evidence people cite, then the counterpoints. Let the viewer decide.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'dimly lit office, corkboard with pins and string, blue monitor glow, paranoid mood',
+    music: 'low suspense drone, distant radio static, sparse piano, no vocals',
+  },
+  'top-list': {
+    niche: 'top 10 and ranked list videos',
+    audience: 'casual viewers who enjoy countdowns, rankings, and quick-hit facts',
+    format: 'explainer',
+    tone: 'energetic, clear, snappy, each entry hooks independently',
+    direction: 'Each list item is a mini-hook. Open with a teaser for the #1 pick. Give each entry a strong opening line, a key fact, and a visual moment. Build anticipation toward the top.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'bold graphic energy, clean backgrounds, strong subject isolation, countdown momentum',
+    music: 'upbeat editorial bed, light percussion, steady momentum, no vocals',
+  },
+  travel: {
+    niche: 'travel and geography',
+    audience: 'armchair travelers and culture enthusiasts',
+    format: 'explainer',
+    tone: 'warm, awe-struck, informative, immersive, respectful',
+    direction: 'Transport the viewer. Open with a vivid sense-of-place moment. Mix geography, culture, food, and one surprising local detail. End with a reason to visit or care.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'golden hour landscapes, bustling markets, aerial vistas, rich local color',
+    music: 'world-tinged ambient bed, light acoustic textures, warm reverb, no vocals',
+  },
+  philosophy: {
+    niche: 'philosophy and deep questions',
+    audience: 'viewers who enjoy existential questions, ethics, and thought experiments',
+    format: 'explainer',
+    tone: 'thoughtful, cinematic, accessible, contemplative, not preachy',
+    direction: 'Open with a question that feels personal. Introduce the thinker or framework simply. Use everyday examples to ground abstract ideas. End with a question, not an answer.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'quiet library light, marble halls, starry skies, contemplative solitude',
+    music: 'slow cinematic ambient, soft strings, deep reverb, no vocals',
+  },
+  'urban-legend': {
+    niche: 'urban legends and local folklore',
+    audience: 'viewers who love creepy local myths, folklore, and unexplained stories',
+    format: 'story',
+    tone: 'eerie, conversational, campfire-storyteller, atmospheric',
+    direction: 'Tell it like a local who knows the story. Start with the place and the rule everyone follows. Build with specific sensory details. End ambiguously.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'foggy backroads, abandoned buildings, flickering streetlights, rural dread',
+    music: 'creepy ambient bed, distant wind, sparse piano, low drone, no vocals',
+  },
+  'news-recap': {
+    niche: 'news recap and current events',
+    audience: 'busy viewers who want fast, neutral news summaries',
+    format: 'explainer',
+    tone: 'fast, neutral, clear, no editorializing, headline-driven',
+    direction: 'Cover 3-5 stories. Each gets a one-line hook, the key facts, and why it matters. No opinion. Keep transitions fast. End with a forward-looking line.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'clean newsroom aesthetic, blue-white light, headline graphics, sharp modern mood',
+    music: 'news-style editorial bed, light pulse, clean energy, no vocals',
+  },
+  'product-review': {
+    niche: 'product reviews and honest breakdowns',
+    audience: 'buyers researching before purchase, comparison shoppers',
+    format: 'explainer',
+    tone: 'honest, practical, direct, balanced, not sponsored-sounding',
+    direction: 'Open with who this product is for. Cover build, features, daily use, and value. Give clear pros and cons. End with a verdict and who should skip it.',
+    visualPreset: 'cinematic-photoreal',
+    ambience: 'clean desk setup, product close-ups, natural daylight, minimal background',
+    music: 'minimal corporate bed, soft pulse, clean tone, no vocals',
+  },
 };
 
 function applyChannelRecipe(force=false) {
@@ -473,7 +573,7 @@ const BRAND_FIELDS = [
   'makeTensionFormat', 'makeLoopType',
   'makeTone', 'makeVoice', 'makeAspect', 'makeVisualPreset', 'makeAmbience',
   'makeVisualStyle', 'makeVisualCharacter', 'makeMusicPrompt', 'makeCaptionStyle',
-  'makePatternInterrupts', 'makeSourceEnhance', 'makeTitleStyle', 'makeKeywordMode',
+  'makeTitleStyle', 'makeKeywordMode',
   'makePreferredTitle', 'makePinnedComment', 'makeHashtags',
 ];
 
@@ -1726,6 +1826,7 @@ async function shuffleMakeIdeas() {
   const deck = $('makeIdeaDeck');
   const status = $('makeIdeaStatus');
   btn.disabled = true;
+  btn.classList.add('generating');
   status.textContent = 'Asking Ollama for fresh angles...';
   status.classList.add('loading-status');
   deck.style.display = 'none';
@@ -1813,6 +1914,7 @@ async function shuffleMakeIdeas() {
     toast(e.message || 'Could not generate ideas', true);
   } finally {
     btn.disabled = false;
+    btn.classList.remove('generating');
   }
 }
 $('makeShuffleIdeaBtn').addEventListener('click', shuffleMakeIdeas);
@@ -1826,6 +1928,7 @@ async function generateMakeTitles() {
   const deck = $('makeTitleDeck');
   const status = $('makeIdeaStatus');
   btn.disabled = true;
+  btn.classList.add('generating');
   btn.removeAttribute('data-blocked-reason');
   status.textContent = 'Generating title options...';
   status.classList.add('loading-status');
@@ -1898,6 +2001,7 @@ async function generateMakeTitles() {
     status.classList.remove('loading-status');
     toast(e.message || 'Could not generate titles', true);
   } finally {
+    btn.classList.remove('generating');
     btn.setAttribute('data-blocked-reason', 'Generate and pick an idea first');
     updateTitleIdeaGate();
   }
@@ -3368,12 +3472,15 @@ async function makeVideoWorkflow() {
     loadRecentWork();
     loadLibrary();
     toast('Video ready');
-    // Auto-pull-forward to the handoff card so the user immediately sees
-    // "preview / download / publish draft" without scrolling.
-    const handoff = $('makeHandoffChecklist') || $('makeOpenPublishBtn');
-    if (handoff) {
-      handoff.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => $('makePreviewFinalBtn')?.focus({ preventScroll: true }), 400);
+    // Scroll to the phone preview (YouTube chrome) so the user sees their
+    // finished video in-context instead of scrolling to a raw <video> tag.
+    const previewDetails = document.querySelector('.studio-preview-collapse');
+    if (previewDetails && !previewDetails.open) previewDetails.open = true;
+    const phoneInner = $('makePhonePreviewInner');
+    if (phoneInner) {
+      phoneInner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const pv = $('makePhonePreviewVideo');
+      if (pv) setTimeout(() => { try { pv.play(); } catch {} }, 600);
     }
     // Telemetry: capture render success so we can build ETAs over time.
     window.ghTelemetry && window.ghTelemetry('render-complete', {
@@ -3742,7 +3849,7 @@ updateMakeDurationHint();
 [
   'makeTopic', 'makePreferredTitle', 'makeNiche', 'makeAudience', 'makeFormat',
   'makeHookStyle', 'makeKeywordMode', 'makeVoice', 'makeTone', 'makeAspect',
-  'makeCaptions', 'makeCaptionStyle', 'makePatternInterrupts', 'makeSourceEnhance',
+  'makeCaptions', 'makeCaptionStyle',
   'makeTitleStyle', 'makeVisualPreset', 'makeAmbience', 'makeVisualStyle',
   'makeVisualCharacter', 'makeMusicPrompt', 'makeDuration', 'makeTensionFormat', 'makeLoopType',
   'makePinnedComment', 'makeHashtags'
@@ -3808,6 +3915,14 @@ $('makePublishDraftBtn')?.addEventListener('click', () => {
   loadPublishWorkspace();
 });
 $('makePreviewFinalBtn')?.addEventListener('click', () => {
+  const previewDetails = document.querySelector('.studio-preview-collapse');
+  if (previewDetails && !previewDetails.open) previewDetails.open = true;
+  const phoneVideo = $('makePhonePreviewVideo');
+  if (phoneVideo && phoneVideo.src) {
+    $('makePhonePreviewInner')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    try { phoneVideo.play(); } catch {}
+    return;
+  }
   const video = $('makePreviewVideo');
   if (!video) return;
   video.scrollIntoView({ behavior: 'smooth', block: 'center' });

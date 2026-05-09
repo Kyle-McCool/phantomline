@@ -2527,6 +2527,47 @@ INSTALL_TOOLS = {
         "verify_text": "Open <a href=\"http://localhost:5000/app\" target=\"_blank\" rel=\"noopener\">http://localhost:5000/app</a> in your browser. You should see the Phantomline studio with your local Ollama detected. Make a quick test video to confirm everything works.",
         "verify_command": "curl http://localhost:5000/api/health",
     },
+    "youtube-api": {
+        "label": "YouTube Data API key",
+        "subtitle": "Free API key from Google. Unlocks live keyword ranking, competitor research, and SEO signals in your video packages.",
+        "downloads": [],
+        "windows_oneliner": "",
+        "unix_oneliner": "",
+        "claude_prompt": (
+            "Help me get a YouTube Data API v3 key from Google Cloud Console and add it to "
+            "my Phantomline .env file.\n\n"
+            "1. Open https://console.cloud.google.com/ and sign in with my Google account.\n"
+            "2. Create a new project called 'Phantomline' (or use an existing one).\n"
+            "3. Go to APIs & Services > Library, search for 'YouTube Data API v3', and enable it.\n"
+            "4. Go to APIs & Services > Credentials, click 'Create Credentials' > 'API key'.\n"
+            "5. Copy the key. Optionally restrict it to YouTube Data API v3 only.\n"
+            "6. Open my Phantomline .env file and add: YOUTUBE_API_KEY=<the key>\n"
+            "7. Restart Phantomline (python server.py) so it picks up the new key.\n"
+            "8. Verify by checking the Launch Setup tab — YouTube research API should show READY."
+        ),
+        "manual_steps": [
+            {"title": "Sign in to Google Cloud Console",
+             "body": "Open <a href=\"https://console.cloud.google.com/\" target=\"_blank\" rel=\"noopener\">console.cloud.google.com</a> and sign in with any Google account. The YouTube Data API is free (10,000 units/day — Phantomline uses ~5 units per research query, so you'll never hit the limit).",
+             "command": ""},
+            {"title": "Create a project",
+             "body": "Click the project dropdown at the top of the page, then <strong>New Project</strong>. Name it anything (e.g. 'Phantomline'). If you already have a project you can reuse it.",
+             "command": ""},
+            {"title": "Enable the YouTube Data API v3",
+             "body": "Go to <a href=\"https://console.cloud.google.com/apis/library/youtube.googleapis.com\" target=\"_blank\" rel=\"noopener\">APIs &amp; Services → Library</a>, search for <strong>YouTube Data API v3</strong>, click it, then click <strong>Enable</strong>. This takes a few seconds.",
+             "command": ""},
+            {"title": "Create an API key",
+             "body": "Go to <a href=\"https://console.cloud.google.com/apis/credentials\" target=\"_blank\" rel=\"noopener\">APIs &amp; Services → Credentials</a>. Click <strong>Create Credentials → API key</strong>. A key will appear in a popup — copy it. Optionally click 'Restrict key' and limit it to YouTube Data API v3 only (recommended but not required).",
+             "command": ""},
+            {"title": "Add the key to Phantomline",
+             "body": "Open the <code>.env</code> file in your Phantomline folder (create it if it doesn't exist) and add the line below. Replace <code>YOUR_KEY_HERE</code> with the key you copied.",
+             "command": "YOUTUBE_API_KEY=YOUR_KEY_HERE"},
+            {"title": "Restart Phantomline",
+             "body": "Stop the server (Ctrl+C in the terminal) and start it again. The new key is loaded on startup.",
+             "command": "python server.py"},
+        ],
+        "verify_text": "Reload the studio and open the Launch Setup tab. 'YouTube research API' should show a green dot with 'Live keyword ranking available'.",
+        "verify_command": "curl http://localhost:5000/api/launch/readiness",
+    },
 }
 
 
@@ -3262,13 +3303,19 @@ Schema:
   }}
 ]
 
-Rules:
-- Ideas must be concrete, varied, and production-ready.
+DIVERSITY IS CRITICAL — each idea must feel like a completely different video:
+- All 6 ideas must use DIFFERENT subjects, settings, time periods, and emotional tones. If idea 1 is about space, idea 2 cannot be about space. If idea 1 is a mystery, idea 2 must be a different genre angle.
+- Vary the scale: mix personal/intimate stories with big-picture topics, historical with modern, real with hypothetical.
+- Vary the hook style across the 6: use a mix of questions, shocking facts, confessions, countdowns, impossible scenarios, and "what if" premises.
+- NEVER repeat the same subject, theme, or narrative structure across ideas. A user who sees 6 variations of the same concept will leave.
+- Each topic must name a specific person, place, event, object, or scenario — never a vague category like "exploring the concept of X" or "examining the phenomenon of Y."
+
+Additional rules:
 - Avoid generic topics like "tips for success" unless there is a specific angle.
 - Make each idea easy to visualize in short-form video.
 - If this is a viral story short, every idea must create unresolved tension under 45 seconds.
 - First-frame clarity matters: the hook must immediately identify a person/topic, a problem, and a broken expectation.
-- Do not write normal topic ideas. Package each idea as a viewer retention bet: why someone stops scrolling, why they keep watching, and why they comment or replay.
+- Package each idea as a viewer retention bet: why someone stops scrolling, why they keep watching, and why they comment or replay.
 - Caption beats are not transcripts. They should be punchy on-screen attention anchors with 2-5 words and one obvious highlight word.
 - Pinned comments must create engagement through judgment, dilemma, prediction, or confession.
 - If YouTube market signals are present, use their patterns and demand signals but do not copy exact competitor titles.

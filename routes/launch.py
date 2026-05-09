@@ -209,7 +209,7 @@ def _readiness_hosted():
             "detail": "Live keyword ranking available" if youtube_api.get("available") else "Optional. SEO works in candidate mode without a key.",
             "actions": [] if youtube_api.get("available") else [
                 {"kind": "link", "label": "Get free API key",
-                 "value": "https://console.cloud.google.com/apis/credentials"},
+                 "value": "/install/youtube-api"},
             ],
         },
         # The items below need per-user state that the single-tenant hosted
@@ -322,7 +322,7 @@ def _readiness_local():
     youtube_api_actions = []
     if not youtube_api.get("available"):
         youtube_api_actions.append({"kind": "link", "label": "Get free API key",
-                                    "value": "https://console.cloud.google.com/apis/credentials"})
+                                    "value": "/install/youtube-api"})
         youtube_api_actions.append({"kind": "copy", "label": "Add to .env",
                                     "value": "YOUTUBE_API_KEY_2=YOUR_KEY_HERE"})
 

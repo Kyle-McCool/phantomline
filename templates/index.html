@@ -508,7 +508,7 @@
             <button class="choice-card" type="button" data-recipe="survival"><strong>Survival tips</strong><span>Actionable steps with a visual host.</span></button>
           </div>
           <details style="margin-top: 12px;">
-            <summary style="cursor: pointer; font-family: var(--font-mono); font-size: 12px; color: var(--text-2); letter-spacing: 0.04em; padding: 8px 0;">More formats (6 more) ▾</summary>
+            <summary style="cursor: pointer; font-family: var(--font-mono); font-size: 12px; color: var(--text-2); letter-spacing: 0.04em; padding: 8px 0;">More formats (16 more) ▾</summary>
             <div class="choice-grid" id="makeRecipeCardsExtra" style="margin-top: 12px;">
               <button class="choice-card" type="button" data-recipe="scary-story"><strong>Scary story</strong><span>Slow-burn narration with eerie visuals.</span></button>
               <button class="choice-card" type="button" data-recipe="mystery"><strong>Mystery doc</strong><span>Facts, theories, and unresolved tension.</span></button>
@@ -516,6 +516,16 @@
               <button class="choice-card" type="button" data-recipe="history"><strong>History</strong><span>Dramatic explainers with clear stakes.</span></button>
               <button class="choice-card" type="button" data-recipe="kids-edu"><strong>Kids edu</strong><span>Friendly, visual, parent-safe explainers.</span></button>
               <button class="choice-card" type="button" data-recipe="motivational"><strong>Motivation</strong><span>Punchy emotional shorts.</span></button>
+              <button class="choice-card" type="button" data-recipe="true-crime"><strong>True crime</strong><span>Case breakdowns with timeline and evidence.</span></button>
+              <button class="choice-card" type="button" data-recipe="asmr-sleep"><strong>ASMR / Sleep</strong><span>Soothing narration for bedtime and relaxation.</span></button>
+              <button class="choice-card" type="button" data-recipe="science"><strong>Science explainer</strong><span>Complex topics made visual and simple.</span></button>
+              <button class="choice-card" type="button" data-recipe="conspiracy"><strong>Conspiracy / What if</strong><span>Wild theories presented neutrally.</span></button>
+              <button class="choice-card" type="button" data-recipe="top-list"><strong>Top 10 / Ranked</strong><span>Countdown lists with hooks per item.</span></button>
+              <button class="choice-card" type="button" data-recipe="travel"><strong>Travel / Geography</strong><span>Beautiful places, culture facts, wanderlust.</span></button>
+              <button class="choice-card" type="button" data-recipe="philosophy"><strong>Philosophy</strong><span>Deep questions with cinematic narration.</span></button>
+              <button class="choice-card" type="button" data-recipe="urban-legend"><strong>Urban legends</strong><span>Local myths and creepy folklore.</span></button>
+              <button class="choice-card" type="button" data-recipe="news-recap"><strong>News recap</strong><span>Fast daily or weekly news breakdown.</span></button>
+              <button class="choice-card" type="button" data-recipe="product-review"><strong>Product review</strong><span>Honest breakdowns with pros and cons.</span></button>
             </div>
           </details>
           <select id="makeRecipe" style="display:none;">
@@ -530,6 +540,16 @@
             <option value="scary-story">Scary story narration</option>
             <option value="motivational">Motivational shorts</option>
             <option value="reddit-story">Reddit-style story</option>
+            <option value="true-crime">True crime</option>
+            <option value="asmr-sleep">ASMR / Sleep</option>
+            <option value="science">Science explainer</option>
+            <option value="conspiracy">Conspiracy / What if</option>
+            <option value="top-list">Top 10 / Ranked</option>
+            <option value="travel">Travel / Geography</option>
+            <option value="philosophy">Philosophy</option>
+            <option value="urban-legend">Urban legends</option>
+            <option value="news-recap">News recap</option>
+            <option value="product-review">Product review</option>
           </select>
         </div>
 
@@ -611,8 +631,8 @@
           <div>
             <label for="makeVideoMode">Visual source</label>
             <select id="makeVideoMode">
-              <option value="generated" selected>Generate scene images</option>
-              <option value="library">Use Phantomline footage</option>
+              <option value="generated">Generate scene images</option>
+              <option value="library" selected>Use Phantomline footage</option>
               <option value="source">Use retention/source footage</option>
             </select>
           </div>
@@ -688,24 +708,6 @@
               </select>
             </div>
             <div>
-              <label for="makePatternInterrupts">Pattern interrupts</label>
-              <select id="makePatternInterrupts">
-                <option value="1" selected>Every few seconds</option>
-                <option value="0">Off</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div>
-              <label for="makeSourceEnhance">Source enhancer</label>
-              <select id="makeSourceEnhance">
-                <option value="vivid" selected>Vivid short-form</option>
-                <option value="warm">Warm</option>
-                <option value="dark">Dark mystery</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-            <div>
               <label for="makeTitleStyle">Title style</label>
               <select id="makeTitleStyle">
                 <option value="top" selected>Top badge</option>
@@ -713,6 +715,8 @@
               </select>
             </div>
           </div>
+          <select id="makePatternInterrupts" style="display:none;"><option value="0" selected>Off</option></select>
+          <select id="makeSourceEnhance" style="display:none;"><option value="none" selected>None</option></select>
           <div class="hint" id="makeSourceVideoStatus" style="margin-top:6px;">Upload gameplay, parkour, drone footage, screen recordings, or any clip you want narrated.</div>
         </div>
 
@@ -1018,7 +1022,7 @@
             <button class="btn secondary" id="makeOpenLibraryBtn">Open Library</button>
             <button class="btn secondary" id="makeOpenAdvancedBtn">Edit scenes</button>
           </div>
-          <video id="makePreviewVideo" controls></video>
+          <video id="makePreviewVideo" controls style="display:none;"></video>
           <p class="hint" id="makeResultHint"></p>
         </div>
       </section>
