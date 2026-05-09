@@ -181,25 +181,189 @@ STYLE_OVERRIDES = {
         "- Use one running analogy throughout — don't switch metaphors mid-script.\n"
         "- End with the cleanest one-sentence version of the answer, then one implication."
     ),
+    "true_crime": (
+        "TRUE-CRIME-FORMAT OVERRIDE:\n"
+        "- Structure like a case file: cold open on one haunting detail, then timeline, evidence, suspects, resolution or open questions.\n"
+        "- Name the victim, the date, and the location within the first two sentences.\n"
+        "- Present evidence without sensationalizing — let the facts carry the weight.\n"
+        "- Never speculate about guilt; use 'investigators believe' or 'evidence suggests.'\n"
+        "- End with what remains unanswered or what happened at sentencing — never editorialize justice."
+    ),
+    "asmr": (
+        "ASMR/SLEEP-FORMAT OVERRIDE:\n"
+        "- Write at half the normal pacing — longer sentences, gentle rhythm, no urgency.\n"
+        "- Zero conflict, zero tension, zero stakes. The viewer is trying to fall asleep.\n"
+        "- Paint serene sensory scenes: warm light, soft textures, quiet sounds, slow movement.\n"
+        "- Avoid sudden shifts in tone, volume cues, or dramatic reveals.\n"
+        "- Repetition is a feature, not a bug — revisit calming images and phrases like a lullaby.\n"
+        "- End by trailing off gently, not with a conclusion or call to action."
+    ),
+    "science": (
+        "SCIENCE-EXPLAINER-FORMAT OVERRIDE:\n"
+        "- Open with a surprising fact or counterintuitive question that makes the viewer lean in.\n"
+        "- Use one concrete analogy per concept — scale abstract numbers to everyday objects.\n"
+        "- Build from simple to complex: each paragraph adds one layer of understanding.\n"
+        "- Name specific researchers, experiments, dates, or papers when possible.\n"
+        "- Never dumb it down with hedging like 'basically' or 'sort of' — be precise and clear.\n"
+        "- End with an implication or unanswered frontier question that makes the viewer feel smarter."
+    ),
+    "conspiracy": (
+        "CONSPIRACY/WHAT-IF-FORMAT OVERRIDE:\n"
+        "- Present the theory with genuine curiosity, never endorsement or mockery.\n"
+        "- Use 'what if' and 'some researchers point to' framing — never state theories as fact.\n"
+        "- For each claim, present the evidence proponents cite AND the mainstream counterpoint.\n"
+        "- Name specific documents, dates, declassified files, or quotes — vague claims feel lazy.\n"
+        "- Build the rabbit hole in layers: surface oddity → deeper pattern → the big question.\n"
+        "- End with 'the question remains' or 'you decide' — never a verdict."
+    ),
+    "travel": (
+        "TRAVEL/GEOGRAPHY-FORMAT OVERRIDE:\n"
+        "- Open with a vivid sense-of-place moment: a sound, a smell, a view, a taste.\n"
+        "- Mix geography, culture, food, history, and one surprising local detail the internet hasn't beaten to death.\n"
+        "- Write as an immersive narrator who has been there, not a Wikipedia summary.\n"
+        "- Name specific streets, dishes, landmarks, seasons, or local customs.\n"
+        "- Vary the scale: pull from a macro aerial view to a close-up human detail.\n"
+        "- End with a single image or moment that captures why this place stays with you."
+    ),
+    "philosophy": (
+        "PHILOSOPHY-FORMAT OVERRIDE:\n"
+        "- Open with a question that feels personal and urgent, not academic.\n"
+        "- Introduce the thinker or framework with a one-sentence biography, then their core idea.\n"
+        "- Ground every abstract concept in an everyday scenario the viewer has experienced.\n"
+        "- Present at least one strong counterargument — philosophy without tension is a lecture.\n"
+        "- Never preach or tell the viewer what to believe. Pose the dilemma and let it sit.\n"
+        "- End with a question, not an answer. The best philosophy videos haunt the viewer after."
+    ),
+    "urban_legend": (
+        "URBAN-LEGEND/FOLKLORE-FORMAT OVERRIDE:\n"
+        "- Tell it like a local who grew up hearing the story — campfire register, not Wikipedia.\n"
+        "- Start with the place and the rule everyone in town follows.\n"
+        "- Build with specific sensory details: the creaking, the cold spot, the smell, the sound.\n"
+        "- Use pacing tricks: slow down before the reveal, speed up during the scare.\n"
+        "- Never fully explain the supernatural element — ambiguity is the engine.\n"
+        "- End with a 'they say if you go there today...' or a detail that makes the viewer check behind them."
+    ),
+    "news": (
+        "NEWS-RECAP-FORMAT OVERRIDE:\n"
+        "- Cover 3-5 stories. Each gets a one-line hook, the key facts, and one 'why it matters' sentence.\n"
+        "- Zero opinion, zero editorializing. Report, don't react.\n"
+        "- Use present tense for active stories, past tense for concluded events.\n"
+        "- Transitions between stories are one sentence max — no filler bridges.\n"
+        "- Name specific people, organizations, numbers, and dates in every story.\n"
+        "- End with a forward-looking line about what to watch next, not a sign-off."
+    ),
+    "review": (
+        "PRODUCT-REVIEW-FORMAT OVERRIDE:\n"
+        "- Open with who this product is for and what problem it solves — not the unboxing.\n"
+        "- Cover build quality, key features, daily-use experience, and value for money in that order.\n"
+        "- Give clear, specific pros and cons — 'the screen is good' is useless; 'the 120Hz display eliminates scroll jitter' is useful.\n"
+        "- Compare to one or two named competitors at the same price point.\n"
+        "- Never sound sponsored. If something is bad, say it plainly.\n"
+        "- End with a verdict and one sentence on who should skip it."
+    ),
+    "motivational": (
+        "MOTIVATIONAL-FORMAT OVERRIDE:\n"
+        "- Open with a specific person, moment, or failure — not a generic 'we all face challenges.'\n"
+        "- Earn the emotional beat: show the struggle in concrete detail before delivering the lesson.\n"
+        "- Use short, punchy sentences that land like spoken-word. Every line should caption well.\n"
+        "- One core message per video — don't stack three life lessons into one script.\n"
+        "- Avoid clichés: 'believe in yourself,' 'never give up,' 'chase your dreams' are banned unless reframed with a specific twist.\n"
+        "- End with a line the viewer wants to screenshot and save, not a generic call to action."
+    ),
+    "survival": (
+        "SURVIVAL-FORMAT OVERRIDE:\n"
+        "- Open with the scenario: where you are, what went wrong, and what you have.\n"
+        "- Each tip gets a clear 'do this, because' structure — action first, then the reason.\n"
+        "- Name specific materials, quantities, temperatures, or time windows.\n"
+        "- Order by priority: immediate danger first, comfort last.\n"
+        "- Include one counterintuitive tip that contradicts common instinct.\n"
+        "- End with the one thing the viewer should remember if they forget everything else."
+    ),
+    "horror": (
+        "HORROR-FORMAT OVERRIDE:\n"
+        "- Open in the middle of something wrong — a sound, a detail, a feeling that shouldn't be there.\n"
+        "- Build dread through what ISN'T shown or said. The scariest detail is the one left to imagination.\n"
+        "- Pace the reveals: one unsettling detail per paragraph, escalating in wrongness.\n"
+        "- Ground the horror in a real, mundane setting — the familiar made wrong is scarier than fantasy.\n"
+        "- Use sensory language: cold, wet, the smell of copper, static on skin.\n"
+        "- End ambiguously — did it stop, or did the narrator just stop noticing?"
+    ),
+    "history": (
+        "HISTORY-FORMAT OVERRIDE:\n"
+        "- Open with a specific moment in time: a date, a person making a decision, a door opening.\n"
+        "- Anchor every claim in primary sources: letters, speeches, records, eyewitness accounts.\n"
+        "- Make historical figures feel human — mention their age, their doubts, their personal stakes.\n"
+        "- Connect past events to something the modern viewer recognizes or feels.\n"
+        "- Use dramatic irony: tell the viewer what the historical figure didn't know yet.\n"
+        "- End with the consequence that echoes into today, or the detail history forgot."
+    ),
+    "kids_edu": (
+        "KIDS-EDU-FORMAT OVERRIDE:\n"
+        "- Write for ages 6-12: clear vocabulary, short sentences, no jargon without immediate explanation.\n"
+        "- Open with a 'did you know' or 'imagine if' that makes a kid say 'whoa.'\n"
+        "- Use comparisons to things kids know: school buses, swimming pools, pizza, dinosaurs.\n"
+        "- One concept per video — don't overload. Depth over breadth.\n"
+        "- Keep it parent-safe: no violence, no fear, no anxiety-inducing content.\n"
+        "- End with a fun challenge or question the kid can try or think about after watching."
+    ),
+    "reddit": (
+        "REDDIT-STORY-FORMAT OVERRIDE:\n"
+        "- Write in casual first-person as if reading a real post — 'So this happened at work today.'\n"
+        "- The hook is the most unbelievable part of the story, stated matter-of-factly.\n"
+        "- Include specific mundane details that make it feel real: the time, the coworker's reaction, the exact text message.\n"
+        "- Build to a moral dilemma or a 'was I wrong?' moment that divides the audience.\n"
+        "- Use conversational asides: 'I know how this sounds, but hear me out.'\n"
+        "- End with an unresolved question that makes viewers rush to the comments."
+    ),
 }
 
 
 def _detect_format(genre, tone, recipe=""):
     """Best-effort format detection from the user-supplied genre/tone strings.
-    Order matters — a 'sci-fi documentary tutorial' should resolve to tutorial
-    (most actionable). Returns None if no override applies, in which case the
-    prompts use STYLE_RULES alone."""
+    Order: recipe-specific matches first (most precise), then broader keyword
+    fallbacks. Returns None if no override applies, in which case the prompts
+    use STYLE_RULES alone."""
     blob = f"{genre} {tone} {recipe}".lower()
+    if "true-crime" in blob or "true crime" in blob or "case file" in blob:
+        return "true_crime"
+    if "asmr" in blob or "sleep" in blob:
+        return "asmr"
+    if "conspiracy" in blob or "what-if" in blob or "what if" in blob:
+        return "conspiracy"
+    if "urban-legend" in blob or "urban legend" in blob or "folklore" in blob:
+        return "urban_legend"
+    if "news-recap" in blob or "news recap" in blob or "current events" in blob:
+        return "news"
+    if "product-review" in blob or "product review" in blob or "review" in blob:
+        return "review"
+    if "motivat" in blob or "mindset" in blob:
+        return "motivational"
+    if "reddit" in blob or "aita" in blob or "storytime" in blob:
+        return "reddit"
+    if "kids-edu" in blob or "kids edu" in blob or "children" in blob:
+        return "kids_edu"
+    if "survival" in blob or "prepper" in blob:
+        return "survival"
     if "tutorial" in blob or "how to" in blob or "how-to" in blob or "guide" in blob:
         return "tutorial"
-    if "listicle" in blob or "top " in blob or "ranked" in blob or "list of" in blob:
+    if "listicle" in blob or "top-list" in blob or "top 10" in blob or "ranked" in blob or "list of" in blob:
         return "listicle"
-    if "documentary" in blob or "true story" in blob or "case file" in blob or "investigation" in blob:
+    if "travel" in blob or "geography" in blob or "wanderlust" in blob:
+        return "travel"
+    if "philosophy" in blob or "existential" in blob or "ethics" in blob:
+        return "philosophy"
+    if "science" in blob or "physics" in blob or "biology" in blob or "chemistry" in blob:
+        return "science"
+    if "history" in blob or "historical" in blob or "ancient" in blob:
+        return "history"
+    if "documentary" in blob or "true story" in blob or "investigation" in blob:
         return "documentary"
     if "explainer" in blob or "explain" in blob or "why does" in blob or "how does" in blob:
         return "explainer"
+    if "horror" in blob or "scary" in blob or "creepypasta" in blob:
+        return "horror"
     story_signals = (
-        "story", "narration", "horror", "mystery", "fiction", "tale",
+        "story", "narration", "mystery", "fiction", "tale",
         "thriller", "drama", "sci-fi", "scifi", "supernatural", "cosmic",
         "creepy", "eerie",
     )

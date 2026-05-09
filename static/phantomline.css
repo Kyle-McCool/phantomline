@@ -707,7 +707,8 @@
     color: var(--muted);
     margin: 14px 0 6px 0;
   }
-  input[type=text], input[type=number], textarea, select {
+  input[type=text], input[type=number], input[type=datetime-local],
+  input[type=date], input[type=time], textarea, select {
     width: 100%;
     background: var(--panel-2);
     color: var(--text);
@@ -718,6 +719,17 @@
     font-family: inherit;
     outline: none;
     transition: border 0.15s, box-shadow 0.15s;
+  }
+  input[type=datetime-local],
+  input[type=date],
+  input[type=time] {
+    color-scheme: dark;
+  }
+  input[type=datetime-local]::-webkit-calendar-picker-indicator,
+  input[type=date]::-webkit-calendar-picker-indicator,
+  input[type=time]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.8);
+    cursor: pointer;
   }
   input:focus, textarea:focus, select:focus {
     border-color: var(--accent);

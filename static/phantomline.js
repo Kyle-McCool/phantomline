@@ -1806,19 +1806,23 @@ function renderMakeHandoffChecklist() {
 }
 
 function renderPublishReadinessChecklist() {
-  const el = $('publishReadinessChecklist');
-  if (!el) return;
   const checks = [
-    { label: 'MP4 selected', ok: !!$('publishVideoProject')?.value },
+    { label: 'MP4', ok: !!$('publishVideoProject')?.value },
     { label: 'Title', ok: $('publishTitle')?.value.trim().length > 8 },
     { label: 'Description', ok: $('publishCaption')?.value.trim().length > 40 },
-    { label: 'Tags', ok: $('publishTags')?.value.trim().length > 3 },
     { label: 'Schedule', ok: !!$('publishScheduledAt')?.value },
     { label: 'YouTube', ok: !!publishStatus?.youtube_connected },
   ];
-  el.innerHTML = checks.map(item =>
-    `<div class="check-chip ${item.ok ? 'ok' : ''}">${item.ok ? 'Ready' : 'Needs'} - ${escapeHtml(item.label)}</div>`
-  ).join('');
+  const missing = checks.filter(c => !c.ok);
+  const line = $('publishReadinessLine');
+  const btn = $('publishScheduleBtn');
+  if (line) {
+    line.textContent = missing.length
+      ? 'Needs: ' + missing.map(c => c.label).join(', ')
+      : 'Ready to publish';
+    line.style.color = missing.length ? '' : 'var(--accent, #22E7F5)';
+  }
+  if (btn) btn.disabled = missing.length > 0;
 }
 
 async function shuffleMakeIdeas() {
@@ -4054,11 +4058,7 @@ function switchPublishView(view) {
   document.querySelectorAll('.publish-nav button').forEach(b => b.classList.toggle('active', b.dataset.pubView === view));
   document.querySelectorAll('.publish-view').forEach(v => v.style.display = v.id === 'pubView-' + view ? '' : 'none');
   if (view === 'calendar') renderPublishCalendar();
-  if (view === 'queue') renderPublishQueue();
-  if (view === 'templates') loadPublishTemplates();
-  if (view === 'recurring') loadPublishRecurring();
   if (view === 'analytics') renderPublishAnalytics();
-  if (view === 'media') renderPublishMedia();
 }
 
 document.querySelectorAll('.publish-nav button').forEach(btn => {
@@ -4115,7 +4115,6 @@ async function loadPublishVideos() {
   }
   if (latestMakeVideoProjectId) sel.value = latestMakeVideoProjectId;
   else if (prev) sel.value = prev;
-  renderPublishMedia();
 }
 
 async function loadPublishPosts() {
@@ -4149,7 +4148,6 @@ async function loadPublishPosts() {
   knownPublishStatuses = Object.fromEntries(nextPosts.map(p => [p.id || p.externalPostId || p.title, p.status || '']));
   publishStatusWatchReady = true;
   publishPosts = nextPosts;
-  renderPublishQueue();
   renderPublishCalendar();
   renderPublishAnalytics();
 }
@@ -4258,40 +4256,13 @@ async function schedulePublishPost() {
     });
     $('publishStatusLine').textContent = `Scheduled: ${d.post.title}`;
     await loadPublishPosts();
-    switchPublishView('queue');
+    switchPublishView('calendar');
     toast('Post scheduled');
   } catch (e) {
     toast(e.message || 'Could not schedule post', true);
   } finally {
     $('publishScheduleBtn').disabled = false;
   }
-}
-
-function renderPublishQueue() {
-  const el = $('publishQueue');
-  if (!el) return;
-  if (!publishPosts.length) { el.innerHTML = '<div class="hint">No scheduled posts yet.</div>'; return; }
-  el.innerHTML = publishPosts.map(p => `
-    <div class="publish-item">
-      <strong>${escapeHtml(p.title || 'Untitled')}</strong>
-      <div class="hint">${escapeHtml(p.status || 'SCHEDULED')} - ${escapeHtml(p.scheduled_at || 'no time')}</div>
-      ${p.externalUrl ? `<a href="${escapeHtml(p.externalUrl)}" target="_blank">Open YouTube post</a>` : ''}
-      ${p.error ? `<div class="hint" style="color:var(--bad);">${escapeHtml(p.error)}</div>` : ''}
-      ${p.status === 'SCHEDULED' ? `<button class="btn secondary" type="button" data-upload-now="${p.id}">Upload now</button>` : ''}
-    </div>
-  `).join('');
-  el.querySelectorAll('[data-upload-now]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      btn.disabled = true;
-      const d = await apiJson('/api/publish/upload-now', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ post_id: btn.dataset.uploadNow }),
-      });
-      if (!d.ok) toast(d.error || 'Upload failed', true);
-      await loadPublishPosts();
-    });
-  });
 }
 
 function renderPublishCalendar() {
@@ -4492,27 +4463,6 @@ async function analyzeYouTubeAnalyticsUpload() {
   }
 }
 
-function renderPublishMedia() {
-  const el = $('publishMediaList');
-  if (!el) return;
-  el.innerHTML = publishVideos.length ? publishVideos.map(v => `
-    <div class="publish-item"><strong>${escapeHtml(v.title || 'Video')}</strong><div class="hint">${escapeHtml(v.id)}</div></div>
-  `).join('') : '<div class="hint">No rendered videos yet.</div>';
-}
-
-async function loadPublishTemplates() {
-  const d = await apiJson('/api/publish/templates');
-  $('templateList').innerHTML = (d.templates || []).length ? (d.templates || []).map(t => `
-    <div class="publish-item"><strong>${escapeHtml(t.name)}</strong><div class="hint">${escapeHtml(t.title || '')}</div></div>
-  `).join('') : '<div class="hint">No templates yet.</div>';
-}
-
-async function loadPublishRecurring() {
-  const d = await apiJson('/api/publish/recurring');
-  $('recurringList').innerHTML = (d.recurring || []).length ? (d.recurring || []).map(r => `
-    <div class="publish-item"><strong>${escapeHtml(r.name)}</strong><div class="hint">${escapeHtml(r.time)} - ${escapeHtml((r.days || []).join(', '))}</div></div>
-  `).join('') : '<div class="hint">No recurring slots yet.</div>';
-}
 
 // Connect YouTube routing. Two paths:
 // 1. Single-OAuth (PRIORITY 5). hosted user with a Supabase session
@@ -4703,29 +4653,6 @@ $('publishNewPostBtn').addEventListener('click', () => {
   $('publishTags').value = '';
   $('publishPinnedComment').value = '';
   updatePublishPreview();
-});
-$('publishSaveTemplateBtn').addEventListener('click', async () => {
-  await apiJson('/api/publish/templates', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      name: $('publishTitle').value.trim() || 'Phantomline template',
-      title: $('publishTitle').value.trim(),
-      caption: $('publishCaption').value.trim(),
-      tags: $('publishTags').value.trim(),
-      privacy: $('publishPrivacy').value,
-    }),
-  });
-  toast('Template saved');
-});
-$('recurringSaveBtn').addEventListener('click', async () => {
-  await apiJson('/api/publish/recurring', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ name: $('recurringName').value.trim(), time: $('recurringTime').value }),
-  });
-  await loadPublishRecurring();
-  toast('Recurring slot saved');
 });
 $('analyticsAnalyzeBtn').addEventListener('click', analyzeYouTubeAnalyticsUpload);
 $('seoResearchBtn').addEventListener('click', runSeoResearch);

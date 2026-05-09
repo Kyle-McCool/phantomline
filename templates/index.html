@@ -1664,14 +1664,9 @@
         <button class="active" data-pub-view="compose">Compose</button>
         <div class="publish-nav-label">Schedule</div>
         <button data-pub-view="calendar">Calendar</button>
-        <button data-pub-view="queue">Queue</button>
-        <button data-pub-view="recurring">Recurring</button>
         <div class="publish-nav-label">Intelligence</div>
         <button data-pub-view="seo">SEO Finder</button>
         <button data-pub-view="analytics">Analytics</button>
-        <div class="publish-nav-label">Library</div>
-        <button data-pub-view="media">Media</button>
-        <button data-pub-view="templates">Templates</button>
         <div class="publish-nav-label">Settings</div>
         <button data-pub-view="connections">Connections</button>
       </div>
@@ -1679,7 +1674,7 @@
         <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:16px;">
           <div>
             <h2 style="margin-bottom:4px;">Publish Studio</h2>
-            <p class="hint" style="margin:0;">Cadence tools inside Phantomline: package, schedule, queue, and publish finished videos.</p>
+            <p class="hint" style="margin:0;">Package, schedule, and publish finished videos to YouTube.</p>
           </div>
           <button id="publishNewPostBtn" class="btn secondary" type="button">+ New post</button>
         </div>
@@ -1773,13 +1768,8 @@
             </div>
             <div>
               <div class="publish-card">
-                <div class="make-section-title"><strong>Platforms</strong><span id="publishConnectionStatus">checking...</span></div>
+                <div class="make-section-title"><strong>YouTube</strong><span id="publishConnectionStatus">checking...</span></div>
                 <button id="publishConnectYouTubeBtn" class="btn secondary" type="button" style="width:100%;">Connect YouTube</button>
-                <div class="publish-pill-row">
-                  <span class="publish-pill">Instagram not connected</span>
-                  <span class="publish-pill">Facebook not connected</span>
-                  <span class="publish-pill">TikTok not connected</span>
-                </div>
               </div>
               <div class="publish-card">
                 <div class="make-section-title"><strong>Schedule</strong><span>local time</span></div>
@@ -1790,9 +1780,8 @@
                   <button class="publish-pill" type="button" data-schedule-quick="tonight">Tonight 7pm</button>
                   <button class="publish-pill" type="button" data-schedule-quick="tomorrow">Tomorrow 9am</button>
                 </div>
-                <div class="readiness-checklist" id="publishReadinessChecklist"></div>
-                <button id="publishScheduleBtn" class="btn" type="button">Schedule post</button>
-                <button id="publishSaveTemplateBtn" class="btn secondary" type="button" style="width:100%; margin-top:10px;">Save as template</button>
+                <div class="hint" id="publishReadinessLine" style="margin-top:8px;"></div>
+                <button id="publishScheduleBtn" class="btn" type="button" style="margin-top:10px;">Schedule &amp; upload</button>
                 <div class="hint" id="publishStatusLine"></div>
               </div>
               <div class="publish-card">
@@ -1801,26 +1790,13 @@
                 <h3 id="publishPreviewTitle" style="font-size:15px; margin:12px 0 4px;">Untitled video</h3>
                 <div class="hint" id="publishPreviewCaption">Description preview</div>
               </div>
+              <div id="publishReadinessChecklist" style="display:none;"></div>
             </div>
           </div>
         </div>
 
         <div id="pubView-calendar" class="publish-view" style="display:none;">
           <div class="publish-card"><div class="make-section-title"><strong>Calendar</strong><span>Scheduled Phantomline posts</span></div><div class="calendar-grid" id="publishCalendar"></div></div>
-        </div>
-        <div id="pubView-queue" class="publish-view" style="display:none;">
-          <div class="publish-card"><div class="make-section-title"><strong>Queue</strong><span>Due posts upload automatically</span></div><div class="publish-list" id="publishQueue"></div></div>
-        </div>
-        <div id="pubView-recurring" class="publish-view" style="display:none;">
-          <div class="publish-card">
-            <div class="make-section-title"><strong>Recurring</strong><span>Posting slots</span></div>
-            <div class="row"><input id="recurringName" type="text" placeholder="Daily Shorts slot" /><input id="recurringTime" type="time" value="09:00" /></div>
-            <button id="recurringSaveBtn" class="btn secondary" type="button">Save recurring slot</button>
-            <div class="publish-list" id="recurringList"></div>
-          </div>
-        </div>
-        <div id="pubView-templates" class="publish-view" style="display:none;">
-          <div class="publish-card"><div class="make-section-title"><strong>Templates</strong><span>Reusable post packages</span></div><div class="publish-list" id="templateList"></div></div>
         </div>
         <div id="pubView-analytics" class="publish-view" style="display:none;">
           <div class="publish-card">
@@ -1867,9 +1843,6 @@
               <p>Type any niche, product, or topic. Use analytics context when you want keywords ranked against your actual channel winners.</p>
             </div>
           </div>
-        </div>
-        <div id="pubView-media" class="publish-view" style="display:none;">
-          <div class="publish-card"><div class="make-section-title"><strong>Media</strong><span>Rendered MP4 library</span></div><div class="publish-list" id="publishMediaList"><div class="empty-state" style="padding:22px 14px;"><h3>No rendered videos yet</h3><p>Create Video will place finished MP4s here automatically.</p></div></div></div>
         </div>
         <div id="pubView-connections" class="publish-view" style="display:none;">
           <div class="publish-card"><div class="make-section-title"><strong>Connections</strong><span>OAuth accounts</span></div><p id="connectionsText" class="hint"></p><button id="connectionsYoutubeBtn" class="btn" type="button">Connect YouTube</button></div>
