@@ -506,6 +506,52 @@ def robots_txt():
     return response
 
 
+@app.route("/feed.xml")
+def rss_feed():
+    """RSS 2.0 feed of site pages. Doubles as an alternative sitemap
+    format that GSC accepts — useful when the XML sitemap submission
+    is stuck in a cached error state."""
+    from alternatives import COMPETITORS
+    from blog import published_articles
+    today = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
+    items = []
+    for path, _, _ in _SITEMAP_ROUTES:
+        items.append(
+            f"    <item>\n"
+            f"      <link>{SITE_URL}{path}</link>\n"
+            f"      <pubDate>{today}</pubDate>\n"
+            f"    </item>"
+        )
+    for c in COMPETITORS:
+        items.append(
+            f"    <item>\n"
+            f"      <link>{SITE_URL}/alternatives/{c['slug']}</link>\n"
+            f"      <pubDate>{today}</pubDate>\n"
+            f"    </item>"
+        )
+    for a in published_articles():
+        items.append(
+            f"    <item>\n"
+            f"      <link>{SITE_URL}/blog/{a['slug']}</link>\n"
+            f"      <pubDate>{today}</pubDate>\n"
+            f"    </item>"
+        )
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<rss version="2.0">\n'
+        "  <channel>\n"
+        "    <title>Phantomline</title>\n"
+        f"    <link>{SITE_URL}/</link>\n"
+        "    <description>Local-first AI video studio for faceless YouTube creators</description>\n"
+        f"{''.join(chr(10) + i for i in items)}\n"
+        "  </channel>\n"
+        "</rss>\n"
+    )
+    response = app.response_class(body, mimetype="application/rss+xml")
+    response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400"
+    return response
+
+
 @app.route("/llms.txt")
 def llms_txt():
     body = (
