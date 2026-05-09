@@ -3726,7 +3726,7 @@ function buildFootageThumb(clip) {
     </div>
     <div class="gh-footage-bottom">
       <span class="gh-footage-creator">
-        <span class="gh-footage-avatar"><img src="/static/phantomline-favicon.png" alt="" width="22" height="22"></span>
+        <span class="gh-footage-avatar"><img src="/static/phantomline-app-icon.png" alt="" width="22" height="22"></span>
         <strong>@phantomline.xyz</strong>
       </span>
       <span class="gh-footage-desc">${escapeHtml(desc)}</span>
