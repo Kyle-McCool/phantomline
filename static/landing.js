@@ -49,3 +49,38 @@ if (canvas) {
     requestAnimationFrame(tick);
   });
 }
+
+/* ─── Hamburger menu toggle ─────────────────────────────────────────── */
+const hamburger = document.querySelector('.nav-hamburger');
+const overlay = document.querySelector('.nav-mobile-overlay');
+
+const iconMenu = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
+const iconClose = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>';
+
+function closeMenu() {
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (hamburger) {
+    hamburger.setAttribute('aria-expanded', 'false');
+    hamburger.innerHTML = iconMenu;
+  }
+  document.body.style.overflow = '';
+}
+
+if (hamburger && overlay) {
+  hamburger.addEventListener('click', () => {
+    overlay.classList.add('open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    hamburger.innerHTML = iconClose;
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  });
+
+  const closeBtn = overlay.querySelector('.nav-mobile-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+
+  overlay.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+}
