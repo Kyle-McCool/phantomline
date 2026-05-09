@@ -121,7 +121,18 @@
 </script>
 </head>
 <body>
-<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="nav-mobile-overlay" aria-hidden="true">
+  <button class="nav-mobile-close" aria-label="Close menu">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+  </button>
+  <div class="nav-mobile-links">
+    <a href="#workflow">Workflow</a>
+    <a href="#platforms">Platforms</a>
+    <a href="/pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="/account">Account</a>
+  </div>
+</div>
 <div class="wrap">
   <nav class="top">
     <a class="brand" href="/" aria-label="Phantomline home">
@@ -135,6 +146,12 @@
       <a href="/account">Account</a>
       <a class="cta secondary" href="/app">Open Studio</a>
       <a class="cta" href="/download">Download</a>
+    </div>
+    <div class="nav-mobile-actions">
+      <a class="cta nav-download-mobile" href="/download">Download</a>
+      <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </button>
     </div>
   </nav>
 
@@ -157,10 +174,11 @@
              top of the headline and the bottom of the buttons. The
              mark column stretches to match the copy column's height
              (eyebrow → buttons row), with the icon centered inside. -->
-        <div class="hero-mark" aria-hidden="true">
-          <span class="hero-mark-line hero-mark-line--top"></span>
-          <span class="hero-mark-line hero-mark-line--bottom"></span>
-          <img src="{{ '/static/phantomline-logo-square.png' | versioned }}" alt="" width="320" height="320" loading="eager" decoding="async" />
+        <div class="hero-video-placeholder">
+          <div class="hero-video-inner">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>Product demo coming soon</span>
+          </div>
         </div>
       </div>
       <!-- Proof strip: pulled OUT of .hero-grid so the mark column
@@ -199,7 +217,7 @@
                 <span>Captions and music</span>
                 <span>SEO publish draft</span>
               </div>
-              <p style="color:var(--muted); margin:14px 0 0;">Hook, title, captions, music, and visual layer generated together.</p>
+              <p style="color:var(--text-muted); margin:16px 0 0;">Hook, title, captions, music, and visual layer generated together.</p>
             </div>
             <div class="mock-panel">
               <div class="mini-phone">
@@ -212,8 +230,8 @@
         <div class="mock">
           <div class="mock-top"><span>What it replaces</span><span>One local flow</span></div>
           <div class="feature"><strong>Script generator</strong><p>Ideas, hooks, voiceover, and platform package.</p></div>
-          <div class="feature" style="margin-top:10px;"><strong>Audio studio</strong><p>Local narration, background music, and mixed final audio.</p></div>
-          <div class="feature" style="margin-top:10px;"><strong>Posting assistant</strong><p>Calendar, queue, templates, recurring slots, and YouTube upload.</p></div>
+          <div class="feature" style="margin-top:8px;"><strong>Audio studio</strong><p>Local narration, background music, and mixed final audio.</p></div>
+          <div class="feature" style="margin-top:8px;"><strong>Posting assistant</strong><p>Calendar, queue, templates, recurring slots, and YouTube upload.</p></div>
         </div>
       </div>
     </section>
@@ -249,8 +267,8 @@
         <div class="mock">
           <div class="mock-top"><span>Auto-filled details</span><span>Review first</span></div>
           <div class="mock-panel"><h3>Title</h3><p style="color:var(--text); margin:0;">I Opened His Second Phone</p></div>
-          <div class="mock-panel" style="margin-top:10px;"><h3>Description</h3><p style="color:var(--muted); margin:0;">Hook, CTA, hashtags, disclosure, and pinned comment ready to edit.</p></div>
-          <div class="mock-panel" style="margin-top:10px;"><h3>Analytics + SEO</h3><p style="color:var(--muted); margin:0;">Import YouTube Studio exports and let SEO Finder rank keywords against your actual winners.</p></div>
+          <div class="mock-panel" style="margin-top:8px;"><h3>Description</h3><p style="color:var(--muted); margin:0;">Hook, CTA, hashtags, disclosure, and pinned comment ready to edit.</p></div>
+          <div class="mock-panel" style="margin-top:8px;"><h3>Analytics + SEO</h3><p style="color:var(--muted); margin:0;">Import YouTube Studio exports and let SEO Finder rank keywords against your actual winners.</p></div>
         </div>
       </div>
     </section>
@@ -285,7 +303,7 @@
           <p>The hard part is shipping a render pipeline that doesn't drain your battery. We'll publish the early-access list when in-browser preview is ready. Until then, treat mobile as your library + dashboard.</p>
         </div>
       </div>
-      <div class="features" style="margin-top:14px;">
+      <div class="features" style="margin-top:16px;">
         <div class="feature">
           <strong>Royalty-free music, bundled</strong>
           <p>Eight mood-tagged tracks (cinematic, mystery, horror, uplifting, chill, dark, hopeful, tense) ship with the app. Public domain. No licensing footnote on your YouTube channel.</p>
@@ -333,7 +351,7 @@
             {% for f in tier.features %}<li>{{ f }}</li>{% endfor %}
           </ul>
           {% if tier.checkout_url %}
-            <a class="cta {% if tier.id == 'founding' or tier.id == 'pro' %}signal{% else %}secondary{% endif %}" href="{{ tier.checkout_url }}" target="_blank" rel="noopener">{{ tier.cta }}</a>
+            <a class="cta {% if tier.id == 'pro' %}{% else %}secondary{% endif %}" href="{{ tier.checkout_url }}" target="_blank" rel="noopener">{{ tier.cta }}</a>
           {% else %}
             <a class="cta secondary" href="/app">{{ tier.cta }}</a>
           {% endif %}
@@ -389,7 +407,7 @@
         <h2>Ship a video today</h2>
         <p>Open Phantomline. Generate, render, schedule.</p>
       </div>
-      <a class="cta signal" href="/app">Open Studio</a>
+      <a class="cta" href="/app">Open Studio</a>
     </section>
   </main>
 

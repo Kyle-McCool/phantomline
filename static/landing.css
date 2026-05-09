@@ -174,12 +174,12 @@ img { max-width: 100%; display: block; }
 .top {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 18px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--rule);
   background: rgba(11, 15, 17, 0.88);
   backdrop-filter: saturate(140%) blur(8px);
@@ -191,22 +191,13 @@ img { max-width: 100%; display: block; }
   line-height: 0;
 }
 .brand .brand-img {
-  /* Brand mark in nav. Bumped from 32px to 56px for stronger
-     presence (per-direction Bible §05 caps at 28px in 60px nav, but
-     the actual logo asset uses padding inside its bbox so the
-     visible mark is closer to 36-40px equivalent. 56px lands the
-     visible glyphs near where 40px would in a tighter asset). */
-  height: 56px;
+  height: 40px;
   width: auto;
   max-width: min(60vw, 320px);
   object-fit: contain;
 }
-/* Bible §05 mobile rule: drop the wordmark on phones, ghost icon only. */
-@media (max-width: 767px) {
+@media (max-width: 360px) {
   .brand .brand-img {
-    /* Crop horizontally so only the leading icon glyph remains visible.
-       Logo asset is wide (icon + wordmark); object-position keeps the
-       icon while max-width clips the wordmark. */
     max-width: 28px;
     object-position: left center;
   }
@@ -214,7 +205,7 @@ img { max-width: 100%; display: block; }
 .navlinks {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 32px;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
@@ -246,46 +237,46 @@ img { max-width: 100%; display: block; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 46px;
-  padding: 0 22px;
-  border-radius: 0;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: lowercase;
-  color: var(--ink);
-  background: var(--brand);
-  border: 1px solid var(--brand);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-on-accent);
+  background: var(--accent-default);
+  border: 1px solid var(--accent-default);
   cursor: pointer;
-  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 60ms ease;
+  transition: all 200ms ease;
 }
-.cta::after { content: "→"; font-family: var(--font-mono); }
+.cta::after { content: "→"; }
 .cta:hover {
-  background: var(--brand-deep);
-  border-color: var(--brand-deep);
-  color: var(--paper);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
-.cta:active { transform: translateY(1px); }
+.cta:active { transform: scale(0.98); }
 .cta.secondary {
   background: transparent;
-  color: var(--paper);
-  border-color: var(--rule-strong);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 .cta.secondary:hover {
-  background: transparent;
-  color: var(--brand);
-  border-color: var(--brand);
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 .cta.signal {
-  background: var(--signal);
-  border-color: var(--signal);
-  color: var(--ink);
+  background: var(--accent-default);
+  border-color: var(--accent-default);
+  color: var(--text-on-accent);
 }
 .cta.signal:hover {
-  background: var(--signal-deep);
-  border-color: var(--signal-deep);
-  color: var(--paper);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--text-on-accent);
 }
 
 /* ─── Focus-visible (keyboard-only focus indicators) ─────────────────── */
@@ -338,18 +329,8 @@ select:focus-visible {
 /* ─── Hero ───────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  padding: 120px 0 96px;
+  padding: 64px 0 0;
   border-bottom: 1px solid var(--rule);
-}
-.hero::before {
-  /* Subtle warm gradient wash. keeps the corner from feeling dead.
-     Single direction, single color, low opacity. nothing like the
-     prior multi-radial soup. */
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 100% 0%, var(--brand-faint), transparent 60%);
 }
 /* Hero is a 2-col grid on desktop: copy left, atmospheric mark right.
    align-items: stretch so the mark column matches the copy column's
@@ -381,6 +362,39 @@ select:focus-visible {
    The eyebrow above the h1 is short (~16px); we offset the top
    hairline by that amount so it lands at the top of the "F" in
    "Faceless" rather than at the eyebrow. */
+.hero-video-placeholder {
+  aspect-ratio: 9 / 16;
+  max-height: 420px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: var(--s-5);
+  justify-self: center;
+}
+.hero-video-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+}
+.hero-video-inner svg {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+.hero-video-inner span {
+  position: absolute;
+  bottom: var(--s-5);
+  left: var(--s-5);
+  right: var(--s-5);
+  font-size: var(--text-body-sm);
+  font-weight: 450;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 .hero-mark {
   position: relative;
   display: flex;
@@ -431,7 +445,7 @@ select:focus-visible {
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -516,10 +530,9 @@ h4 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
-  margin-top: var(--s-8);
+  margin-top: var(--s-6);
   padding-top: var(--s-5);
-  border-top: 1px solid var(--rule);
-  max-width: 880px;
+  padding-bottom: var(--s-5);
 }
 .proof div {
   border: 0;
@@ -568,7 +581,7 @@ h4 {
 
 /* ─── Generic section + heading ──────────────────────────────────────── */
 .section {
-  padding: 96px 0;
+  padding: 64px 0;
   border-bottom: 1px solid var(--rule);
   position: relative;
 }
@@ -579,7 +592,7 @@ h4 {
    the heading visually attached to the section content below. */
 .section-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--s-6);
   align-items: start;
   margin-bottom: var(--s-6);
@@ -589,11 +602,12 @@ h4 {
 }
 .section-head p {
   margin: 0;
+  margin-left: auto;
   color: var(--text-secondary);
   font-size: var(--text-body);
   font-weight: 450;
   line-height: 24px;
-  max-width: 520px;
+  text-align: right;
 }
 
 /* ─── Workflow steps ─────────────────────────────────────────────────── */
@@ -688,9 +702,9 @@ h4 {
 }
 .mock {
   padding: var(--s-6);
-  border: 1px solid var(--rule);
-  background: var(--ink-2);
-  border-radius: 0;
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface-1);
+  border-radius: var(--radius-md);
 }
 .mock-top {
   display: flex;
@@ -699,10 +713,10 @@ h4 {
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-2);
+  color: var(--text-muted);
   padding-bottom: var(--s-4);
   margin-bottom: var(--s-5);
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border-default);
 }
 .mock-grid {
   display: grid;
@@ -728,10 +742,10 @@ h4 {
 }
 .package-list span {
   font-family: var(--font-sans);
-  font-size: 14px;
-  color: var(--paper);
+  font-size: var(--text-body-sm);
+  color: var(--text-primary);
   padding: 6px 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border-default);
 }
 .package-list span::before {
   content: "✓ ";
@@ -741,8 +755,9 @@ h4 {
 }
 .mini-phone {
   aspect-ratio: 9 / 16;
-  background: var(--ink);
-  border: 1px solid var(--rule);
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   position: relative;
   display: grid;
   place-items: center;
@@ -760,8 +775,8 @@ h4 {
   right: var(--s-5);
   font-family: var(--font-sans);
   font-weight: 600;
-  font-size: 14px;
-  color: var(--paper);
+  font-size: var(--text-body-sm);
+  color: var(--text-primary);
   text-transform: none;
   text-align: left;
   text-shadow: none;
@@ -893,14 +908,15 @@ h4 {
   position: absolute;
   top: 0;
   right: 0;
-  padding: 6px 10px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  padding: 4px 8px;
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  background: var(--brand);
-  color: var(--ink);
-  font-weight: 600;
+  background: var(--accent-default);
+  color: var(--text-on-accent);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
 }
 .pricing-badge--accent {
   background: var(--signal);
@@ -1059,15 +1075,97 @@ h4 {
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────── */
+/* ─── Hamburger + mobile menu ────────────────────────────────────────── */
+.nav-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 200ms ease;
+  position: relative;
+  z-index: 101;
+}
+.nav-hamburger:hover { color: var(--accent-default); }
+.nav-mobile-actions {
+  display: none;
+  align-items: center;
+  gap: var(--s-2);
+  margin-left: auto;
+}
+.nav-download-mobile { display: none; }
+
+.nav-mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: var(--bg-base);
+  flex-direction: column;
+  padding: 96px 24px 32px;
+  gap: var(--s-4);
+}
+.nav-mobile-overlay.open {
+  display: flex;
+}
+.nav-mobile-close {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+.nav-mobile-close:hover { color: var(--accent-default); }
+.nav-mobile-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+.nav-mobile-links a {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  font-size: var(--text-h4);
+  font-weight: 500;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: color 200ms ease;
+}
+.nav-mobile-links a:hover { color: var(--accent-default); }
+
+@media (max-width: 1024px) {
+  .nav-mobile-actions { display: flex; }
+  .nav-hamburger { display: flex; }
+  .nav-download-mobile { display: inline-flex; }
+  .navlinks { display: none; }
+}
+
 @media (max-width: 900px) {
   .wrap { width: min(100% - 32px, 1180px); padding-bottom: 64px; }
   .hero { padding: 64px 0 56px; }
   .hero-grid { grid-template-columns: 1fr; gap: var(--s-6); }
-  .brand .brand-img { height: 44px; }  /* Slightly smaller nav logo on mobile so the nav row still fits. */
-  /* When the grid stacks at ≤900px, scale the mark down so it sits
-     comfortably below the headline. Hidden entirely at ≤540px. */
   .hero-mark { max-width: 220px; margin: 0 auto; }
   .hero-mark img { max-width: 200px; }
+  .hero-video-placeholder { display: none; }
   .section { padding: 64px 0; }
   .section-head { grid-template-columns: 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
   .workflow { grid-template-columns: 1fr 1fr; }
@@ -1079,10 +1177,8 @@ h4 {
   .product-band, .publish-preview { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; border-left: 0; }
   .pricing-card { border-right: 0; }
-  .proof { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .proof { grid-template-columns: repeat(4, 1fr); }
   .final { grid-template-columns: 1fr; padding: var(--s-7) 0; }
-  .navlinks { display: none; }
-  .navlinks .cta { display: inline-flex; }
   .top { gap: 12px; }
   /* Bible §06 footer: stack brand above columns on tablet/mobile,
      but columns themselves stay 3-wide (Bible mandates no stacking). */
@@ -1100,6 +1196,7 @@ h4 {
   .lede { font-size: 16px; }
   /* Hide atmospheric mark on true mobile — typography is the focal point. */
   .hero-mark { display: none; }
+  .hero-video-placeholder { display: none; }
   .workflow { grid-template-columns: 1fr; }
   .step { border-right: 0; }
   .step:not(:first-child) { border-top: 1px solid var(--rule); }
