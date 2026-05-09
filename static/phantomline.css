@@ -3212,6 +3212,15 @@
     border-color: rgba(238,246,241,0.18) !important;
     cursor: wait;
   }
+  /* Prerequisite-locked buttons (data-blocked-reason) look clearly muted,
+     not busy — cursor:not-allowed, not wait. */
+  button.btn[data-blocked-reason]:disabled,
+  a.btn[data-blocked-reason]:disabled {
+    opacity: 0.38 !important;
+    background: rgba(244,248,245,0.04) !important;
+    border-color: rgba(238,246,241,0.12) !important;
+    cursor: not-allowed !important;
+  }
   .tab-btn,
   .filter-btn,
   .dur-btn,
@@ -4230,6 +4239,23 @@
   min-height: 18px;
 }
 .gh-footage-status.error { color: #F87171; }
+
+/* Loading pulse for status text lines across the studio */
+.loading-status {
+  animation: statusPulse 1.6s ease-in-out infinite;
+}
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+/* Pulsing animation on actively-running workflow step state label */
+.workflow-step.running .state {
+  animation: statusPulse 1.6s ease-in-out infinite;
+}
+/* Color-coded SEO score spans — !important overrides .make-section-title span */
+.seo-score-good  { color: var(--good,  #34D399) !important; font-weight: 700; }
+.seo-score-warn  { color: var(--warn,  #FBBF24) !important; font-weight: 700; }
+.seo-score-muted { color: var(--muted, #6b7c75); }
 .gh-footage-empty {
   grid-column: 1 / -1;
   text-align: center;

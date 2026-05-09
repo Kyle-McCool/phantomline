@@ -2904,6 +2904,42 @@ VIRAL SHORTS PLAYBOOK:
 """.strip()
 
 
+# ---------------------------------------------------------------------------
+# System prompts for LLM-backed studio routes.
+# Extracted here so they are reviewable and improvable without hunting through
+# route handlers. All three are JSON-mode prompts — the key constraint is that
+# the model must return strict JSON and nothing else.
+# ---------------------------------------------------------------------------
+
+_IDEAS_SYSTEM_PROMPT = (
+    "You are Phantomline's faceless-video idea strategist. "
+    "Every idea you generate must be a viewer retention bet: a concrete hook that stops scrolling, "
+    "a structure that sustains watch time, and an ending that drives replay or comment. "
+    "You think in first-frame clarity, unresolved tension, loop mechanics, and caption gravity. "
+    "Prioritize production-ready specificity over generic angles. "
+    "Output strict JSON only. No markdown. No preamble."
+)
+
+_TITLE_IDEAS_SYSTEM_PROMPT = (
+    "You are Phantomline's YouTube title packaging strategist. "
+    "You optimize for two things simultaneously: the focus keyword must appear in every title "
+    "(vidIQ Actionable rule), and the title must earn the click on its own emotional merit. "
+    "A keyword-present title with no tension, curiosity gap, or payoff promise is a failure. "
+    "Avoid generic phrases like 'This Changed Everything' or 'You Won't Believe'. "
+    "Output strict JSON only. No markdown. No preamble."
+)
+
+_DESCRIPTION_SYSTEM_PROMPT = (
+    "You are Phantomline's YouTube SEO strategist. "
+    "You optimize for vidIQ's Actionable axes: keywords-in-title, tripled-keyword "
+    "(focus keyword appears in title + description first line + tags), tag-count (15+ tags), "
+    "tag-volume, and keywords-in-description. "
+    "The description first sentence earns the 'show more' click AND locks in the focus keyword — "
+    "it must read naturally, not like a keyword list. Never spam. Never fake timestamps. "
+    "Output strict JSON only. No markdown. No preamble."
+)
+
+
 @app.route("/api/ideas/video", methods=["POST"])
 def api_video_ideas():
     data = request.get_json(force=True) or {}
@@ -2980,7 +3016,7 @@ Rules:
     raw = sg.generate(
         model,
         prompt,
-        system="You are Phantomline's local faceless-video strategist. You generate strict JSON only and prioritize retention mechanics for short-form video.",
+        system=_IDEAS_SYSTEM_PROMPT,
         label="video ideas",
         show_progress=False,
         temperature=1.0,
@@ -3161,11 +3197,7 @@ def api_title_ideas():
     raw = sg.generate(
         model,
         prompt,
-        system=(
-            "You are a YouTube Shorts packaging strategist optimizing for vidIQ's "
-            "Actionable score. You are ruthless about including the focus keyword "
-            "in every title. Output strict JSON only."
-        ),
+        system=_TITLE_IDEAS_SYSTEM_PROMPT,
         label="title ideas",
         show_progress=False,
         temperature=0.85,
@@ -3290,12 +3322,7 @@ def api_publish_description():
     raw = sg.generate(
         model,
         prompt,
-        system=(
-            "You are a YouTube SEO strategist optimizing for vidIQ's Actionable score "
-            "(keywords-in-title, tripled-keyword, tag-count, tag-volume). You thread a "
-            "single focus keyword through the description first line, the description body, "
-            "and the tag list. You never spam. Output strict JSON only."
-        ),
+        system=_DESCRIPTION_SYSTEM_PROMPT,
         label="publish description",
         show_progress=False,
         temperature=0.6,

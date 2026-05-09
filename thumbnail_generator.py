@@ -672,6 +672,7 @@ def _ollama_reachable() -> bool:
 
 def enhance_prompt_with_ollama(title: str, *, preset_name: str = "faceless_story",
                                subject_hint: str = "",
+                               genre: str = "",
                                model: str = "llama3.1",
                                timeout: float = 30.0) -> str | None:
     """Use a local Ollama model to expand a thumbnail concept into a
@@ -689,16 +690,7 @@ def enhance_prompt_with_ollama(title: str, *, preset_name: str = "faceless_story
     except Exception:
         return None
 
-    preset = get_preset(preset_name)
-    user_prompt = (
-        f"Thumbnail concept: {title.strip()}\n"
-        f"Niche: {preset['label']}\n"
-        f"Subject placement direction: {preset['subject_placement']}\n"
-        f"Atmosphere/composition baseline: {preset['composition_inject']}\n"
-    )
-    if subject_hint.strip():
-        user_prompt += f"User-supplied subject hint (must respect): {subject_hint.strip()}\n"
-    user_prompt += "\nWrite the enhanced prompt now."
+    user_prompt = _build_enhance_user_prompt(title, preset_name, subject_hint, genre=genre)
 
     try:
         raw = _sg.generate(
@@ -725,7 +717,8 @@ def enhance_prompt_with_ollama(title: str, *, preset_name: str = "faceless_story
     return text or None
 
 
-def _build_enhance_user_prompt(title: str, preset_name: str, subject_hint: str) -> str:
+def _build_enhance_user_prompt(title: str, preset_name: str, subject_hint: str,
+                               genre: str = "") -> str:
     """Shared user-side enhance prompt assembly so the Ollama and Pollinations
     text paths stay in lockstep."""
     preset = get_preset(preset_name)
@@ -735,6 +728,10 @@ def _build_enhance_user_prompt(title: str, preset_name: str, subject_hint: str) 
         f"Subject placement direction: {preset['subject_placement']}\n"
         f"Atmosphere/composition baseline: {preset['composition_inject']}\n"
     )
+    if genre.strip():
+        user_prompt += (
+            f"Script genre/tone (let this inform lighting, color, and mood): {genre.strip()}\n"
+        )
     if subject_hint.strip():
         user_prompt += f"User-supplied subject hint (must respect): {subject_hint.strip()}\n"
     user_prompt += "\nWrite the enhanced prompt now."
@@ -750,6 +747,7 @@ _POLLINATIONS_TEXT_BASE = "https://text.pollinations.ai/"
 
 def enhance_prompt_with_pollinations_text(title: str, *, preset_name: str = "faceless_story",
                                           subject_hint: str = "",
+                                          genre: str = "",
                                           model: str = "openai",
                                           timeout: float = 25.0) -> str | None:
     """Free hosted-mode prompt enhancer using text.pollinations.ai. Same
@@ -757,7 +755,7 @@ def enhance_prompt_with_pollinations_text(title: str, *, preset_name: str = "fac
     Used as a fallback when Ollama isn't reachable (i.e. on phantomline.xyz
     where there is no local LLM)."""
     from urllib.parse import quote
-    user_prompt = _build_enhance_user_prompt(title, preset_name, subject_hint)
+    user_prompt = _build_enhance_user_prompt(title, preset_name, subject_hint, genre=genre)
     # POST is more reliable than GET for prompts > a few hundred chars.
     try:
         res = requests.post(
@@ -787,18 +785,19 @@ def enhance_prompt_with_pollinations_text(title: str, *, preset_name: str = "fac
 
 
 def enhance_prompt_best_available(title: str, *, preset_name: str = "faceless_story",
-                                  subject_hint: str = "") -> str | None:
+                                  subject_hint: str = "",
+                                  genre: str = "") -> str | None:
     """Best-available prompt enhancement. Tries local Ollama first
     (free + private + no rate limit), then falls back to text.pollinations.ai
     (free public endpoint). Returns None only if both fail — caller then
     uses the deterministic forge_thumbnail_prompt baseline."""
     enhanced = enhance_prompt_with_ollama(
-        title, preset_name=preset_name, subject_hint=subject_hint
+        title, preset_name=preset_name, subject_hint=subject_hint, genre=genre
     )
     if enhanced:
         return enhanced
     return enhance_prompt_with_pollinations_text(
-        title, preset_name=preset_name, subject_hint=subject_hint
+        title, preset_name=preset_name, subject_hint=subject_hint, genre=genre
     )
 
 
@@ -969,6 +968,7 @@ def generate_thumbnail_hook(title: str, *, preset_name: str = "faceless_story",
 def generate_pollinations_background(title: str, *, aspect: str = "16:9",
                                      preset_name: str = "faceless_story",
                                      subject_hint: str = "",
+                                     genre: str = "",
                                      seed: int | None = None,
                                      enhance_prompt: bool = True,
                                      timeout: float = 90.0) -> bytes:
@@ -997,7 +997,7 @@ def generate_pollinations_background(title: str, *, aspect: str = "16:9",
         # public) → None. Hosted users without a local LLM still get prompt
         # expansion via the free public endpoint.
         enhanced = enhance_prompt_best_available(
-            title, preset_name=preset_name, subject_hint=subject_hint
+            title, preset_name=preset_name, subject_hint=subject_hint, genre=genre
         )
 
     if enhanced:
@@ -2313,7 +2313,7 @@ def generate_thumbnail(title: str, *, aspect: str = "16:9",
         try:
             bg_bytes = generate_pollinations_background(
                 title, aspect=aspect, preset_name=preset_name,
-                subject_hint=subject_hint, seed=seed,
+                subject_hint=subject_hint, genre=genre, seed=seed,
             )
             used_mode = "pollinations"
             bg_is_ai_image = True

@@ -30,6 +30,16 @@ from routes.billing import enforce_tier
 
 optimize_bp = Blueprint("optimize", __name__)
 
+_OPTIMIZE_SYSTEM_PROMPT = (
+    "You are Phantomline's strict-JSON YouTube SEO doctor. "
+    "You reason against vidIQ Actionable scoring axes (keywords-in-title, tripled-keyword, "
+    "tag-count, tag-volume, keywords-in-description) and ground every recommendation in "
+    "the pre-computed axis facts and channel insights provided in the prompt. "
+    "You never invent metrics, never recommend clickbait that misrepresents the video's content, "
+    "and never suggest repackaging a video that is already visibly winning. "
+    "Output strict JSON only. No markdown. No preamble."
+)
+
 
 @optimize_bp.before_request
 def _gate_optimize_to_pro():
@@ -232,13 +242,7 @@ def api_optimize_analyze():
     raw = sg.generate(
         model,
         prompt,
-        system=(
-            "You are Phantomline's strict-JSON YouTube SEO doctor. You reason in vidIQ "
-            "Actionable scoring axes (keywords-in-title, tripled-keyword, tag-count, "
-            "tag-volume, keywords-in-description) and ground every recommendation in "
-            "the provided axis facts and channel insights. No generic advice, no "
-            "clickbait, no emoji-stuffing. Output strict JSON only."
-        ),
+        system=_OPTIMIZE_SYSTEM_PROMPT,
         label="optimize analyze",
         show_progress=False,
         temperature=0.35,

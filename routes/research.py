@@ -27,6 +27,17 @@ from routes.billing import enforce_tier
 
 research_bp = Blueprint("research", __name__)
 
+_SEO_SYSTEM_PROMPT = (
+    "You are Phantomline's YouTube SEO keyword strategist. "
+    "You generate specific, rankable search phrases — not broad head terms, not generic tags. "
+    "You think in searcher intent clusters: problem-aware, beginner/how-to, comparison/alternative, "
+    "review/proof, mistake/warning, template/example, buyer/product, and trend/news. "
+    "Every phrase you output must pair a topic with a concrete viewer job-to-be-done. "
+    "When channel analytics context is supplied, bridge the channel's proven winners to adjacent "
+    "search demand — never blindly copy weak performers. "
+    "Output strict JSON only. No markdown. No preamble."
+)
+
 
 @research_bp.before_request
 def _gate_seo_to_pro():
@@ -248,7 +259,7 @@ def api_youtube_seo_research():
             raw = sg.generate(
                 model,
                 prompt,
-                system="You are Phantomline's YouTube SEO keyword strategist. Output strict JSON only. Generate search phrases, not generic tags.",
+                system=_SEO_SYSTEM_PROMPT,
                 label="seo keyword candidates",
                 show_progress=False,
                 temperature=0.75,
@@ -258,10 +269,26 @@ def api_youtube_seo_research():
             for key in ("phrases", "title_phrases", "description_phrases"):
                 values = parsed.get(key) if isinstance(parsed.get(key), list) else []
                 candidates.extend(str(v) for v in values if str(v).strip())
+            def _angle_to_str(v):
+                import ast as _ast
+                if isinstance(v, str):
+                    stripped = v.strip()
+                    if stripped.startswith("{"):
+                        try:
+                            v = _ast.literal_eval(stripped)
+                        except Exception:
+                            pass
+                if isinstance(v, dict):
+                    phrase = v.get("phrase") or v.get("angle") or v.get("topic") or v.get("title") or ""
+                    payoff = v.get("payoff") or v.get("description") or v.get("viewer_payoff") or ""
+                    if phrase and payoff:
+                        return f"{phrase} — {payoff}"
+                    return phrase or payoff or str(v)
+                return str(v)
             seo_content_angles = [
-                str(v).strip()[:220]
+                _angle_to_str(v).strip()[:220]
                 for v in (parsed.get("content_angles") or [])
-                if str(v).strip()
+                if _angle_to_str(v).strip()
             ][:8]
         except Exception:
             pass
