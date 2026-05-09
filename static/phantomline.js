@@ -3522,6 +3522,7 @@ function clearLibrarySourcePick() {
 }
 
 var _footageLibraryLoaded = false;
+var _footageActiveCategory = '';   // '' = All
 async function openFootageLibrary() {
   const modal = $('footageLibraryModal');
   if (!modal) return;
@@ -3542,26 +3543,31 @@ function closeFootageLibrary() {
   document.body.style.overflow = '';
 }
 
-async function loadFootageLibrary() {
+async function loadFootageLibrary(category) {
   const grid = $('footageLibraryGrid');
   const status = $('footageLibraryStatus');
   if (!grid) return;
+  if (typeof category === 'string') _footageActiveCategory = category;
   grid.setAttribute('aria-busy', 'true');
   grid.innerHTML = '';
   status.classList.remove('error');
   status.textContent = 'Loading library…';
   try {
-    const r = await fetch('/api/library/footage?aspect=9:16');
+    let url = '/api/library/footage?aspect=9:16';
+    if (_footageActiveCategory) url += `&category=${encodeURIComponent(_footageActiveCategory)}`;
+    const r = await fetch(url);
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || 'Failed to load library');
+    if (!_footageLibraryLoaded) renderFootageFilters(d.clips || []);
     if (!d.clips || d.clips.length === 0) {
-      grid.innerHTML = '<div class="gh-footage-empty">No footage in the library yet.</div>';
+      grid.innerHTML = '<div class="gh-footage-empty">No footage in this category.</div>';
       status.textContent = '';
       return;
     }
     grid.innerHTML = '';
     d.clips.forEach(clip => grid.appendChild(buildFootageThumb(clip)));
-    status.textContent = `${d.clips.length} clips · click one to use as your source video.`;
+    const filter = _footageActiveCategory ? ` · filter: ${_footageActiveCategory}` : '';
+    status.textContent = `${d.clips.length} clips${filter} · click one to use as your source video.`;
   } catch (e) {
     status.classList.add('error');
     status.textContent = e.message || 'Failed to load library';
@@ -3570,25 +3576,109 @@ async function loadFootageLibrary() {
   }
 }
 
+function renderFootageFilters(clipsForUnion) {
+  const row = $('footageLibraryFilters');
+  if (!row) return;
+  const cats = new Set();
+  clipsForUnion.forEach(c => (c.categories || []).forEach(t => { if (t) cats.add(t); }));
+  const ordered = ['', ...Array.from(cats).sort()];
+  row.innerHTML = '';
+  ordered.forEach(cat => {
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = 'gh-footage-pill' + (cat === _footageActiveCategory ? ' is-active' : '');
+    pill.dataset.category = cat;
+    pill.setAttribute('role', 'tab');
+    pill.setAttribute('aria-selected', cat === _footageActiveCategory ? 'true' : 'false');
+    pill.textContent = cat || 'All';
+    pill.addEventListener('click', () => {
+      if (cat === _footageActiveCategory) return;
+      Array.from(row.children).forEach(p => {
+        const on = p.dataset.category === cat;
+        p.classList.toggle('is-active', on);
+        p.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      loadFootageLibrary(cat);
+    });
+    row.appendChild(pill);
+  });
+}
+
 function buildFootageThumb(clip) {
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'gh-footage-thumb';
   card.dataset.clipId = clip.id;
-  card.setAttribute('aria-label', `Use ${clip.id} as source video`);
-  const video = document.createElement('video');
-  video.src = clip.url;
-  video.preload = 'metadata';
-  video.muted = true;
-  video.playsInline = true;
-  video.addEventListener('loadedmetadata', () => { video.currentTime = Math.min(0.5, (video.duration || 1) * 0.05); }, { once: true });
-  card.appendChild(video);
+  const labelTitle = clip.title || clip.id;
+  card.setAttribute('aria-label', `Use ${labelTitle} as source video`);
+  card.title = clip.description ? `${labelTitle} — ${clip.description}` : labelTitle;
+
+  const img = document.createElement('img');
+  img.alt = '';
+  img.decoding = 'async';
+  if (clip.thumbnail_url) img.src = clip.thumbnail_url;
+  card.appendChild(img);
+
+  let video = null;
+  let videoLoaded = false;
+  const ensureVideo = () => {
+    if (video) return video;
+    video = document.createElement('video');
+    video.src = clip.url;
+    video.preload = 'metadata';
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.style.opacity = '0';
+    video.addEventListener('loadeddata', () => {
+      videoLoaded = true;
+      video.style.opacity = '1';
+    }, { once: true });
+    card.appendChild(video);
+    return video;
+  };
+  const playPreview = () => {
+    const v = ensureVideo();
+    if (videoLoaded) v.style.opacity = '1';
+    v.play().catch(() => {});
+  };
+  const stopPreview = () => {
+    if (!video) return;
+    video.pause();
+    video.style.opacity = '0';
+  };
+  card.addEventListener('mouseenter', playPreview);
+  card.addEventListener('focus', playPreview);
+  card.addEventListener('mouseleave', stopPreview);
+  card.addEventListener('blur', stopPreview);
+
+  // Static-thumbnail 404 fallback: show the video poster frame instead so the
+  // tile is never blank if a new clip ships without a bundled thumb. Use
+  // visibility:hidden (not display:none) so the img keeps its aspect-ratio
+  // layout box and the grid row stays the right height.
+  img.addEventListener('error', () => {
+    img.style.visibility = 'hidden';
+    const v = ensureVideo();
+    v.style.opacity = '1';
+    v.addEventListener('loadedmetadata', () => {
+      v.currentTime = Math.min(0.5, (v.duration || 1) * 0.05);
+    }, { once: true });
+  }, { once: true });
+
+  const firstCat = (clip.categories && clip.categories[0]) || '';
+  if (firstCat) {
+    const chip = document.createElement('span');
+    chip.className = 'gh-footage-cat';
+    chip.textContent = firstCat;
+    card.appendChild(chip);
+  }
+
   const meta = document.createElement('div');
   meta.className = 'gh-footage-thumb-meta';
   const dur = clip.duration_seconds ? `${Math.round(clip.duration_seconds)}s` : '';
-  const size = clip.size_bytes ? `${(clip.size_bytes / (1024 * 1024)).toFixed(0)}MB` : '';
-  meta.innerHTML = `<span>${clip.id}</span><span>${dur}${dur && size ? ' · ' : ''}${size}</span>`;
+  meta.innerHTML = `<span class="gh-footage-thumb-title">${escapeHtml(labelTitle)}</span><span>${dur}</span>`;
   card.appendChild(meta);
+
   card.addEventListener('click', () => pickFootageClip(clip));
   return card;
 }
