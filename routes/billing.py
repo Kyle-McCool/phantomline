@@ -110,7 +110,7 @@ PRICING = {
         {
             "id": "founding",
             "name": "Founding Lifetime",
-            "tagline": "Pay once, keep forever — limited to first 500",
+            "tagline": "Pay once, keep forever",
             "price_monthly": None,
             "price_yearly": None,
             "price_lifetime": 79,

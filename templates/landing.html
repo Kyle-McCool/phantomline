@@ -128,7 +128,7 @@
   <div class="nav-mobile-links">
     <a href="#workflow">Workflow</a>
     <a href="#platforms">Platforms</a>
-    <a href="/pricing">Pricing</a>
+    <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
     <a href="/account">Account</a>
   </div>
@@ -141,7 +141,7 @@
     <div class="navlinks">
       <a href="#workflow">Workflow</a>
       <a href="#platforms">Platforms</a>
-      <a href="/pricing">Pricing</a>
+      <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
       <a href="/account">Account</a>
       <a class="cta secondary" href="/app">Open Studio</a>
@@ -261,10 +261,14 @@
               <h3>Video package</h3>
               <div class="package-list">
                 <span>Hook and title</span>
+                <span>Script and narration</span>
                 <span>Captions and music</span>
+                <span>Scene visuals</span>
                 <span>SEO publish draft</span>
+                <span>Video description</span>
+                <span>Pinned comment</span>
               </div>
-              <p style="color:var(--text-muted); margin:16px 0 0;">Hook, title, captions, music, and visual layer generated together.</p>
+              <p style="color:var(--text-muted); margin:16px 0 0;">All generated as a single video file.</p>
             </div>
             <div class="mock-panel">
               <div class="mini-phone">
@@ -277,8 +281,8 @@
         <div class="mock">
           <div class="mock-top"><span>What it replaces</span><span>One local flow</span></div>
           <div class="feature"><strong>Script generator</strong><p>Ideas, hooks, voiceover, and platform package.</p></div>
-          <div class="feature" style="margin-top:8px;"><strong>Audio studio</strong><p>Local narration, background music, and mixed final audio.</p></div>
-          <div class="feature" style="margin-top:8px;"><strong>Posting assistant</strong><p>Calendar, queue, templates, recurring slots, and YouTube upload.</p></div>
+          <div class="feature"><strong>Audio studio</strong><p>Local narration, background music, and mixed final audio.</p></div>
+          <div class="feature"><strong>Posting assistant</strong><p>Calendar, queue, templates, recurring slots, and YouTube upload.</p></div>
         </div>
       </div>
     </section>
@@ -307,8 +311,12 @@
         <div class="mock">
           <div class="mock-top"><span>Scheduler</span><span>YouTube</span></div>
           <div class="calendar">
-            <div class="day">Mon<div class="dot"></div></div><div class="day">Tue</div><div class="day">Wed<div class="dot"></div></div><div class="day">Thu</div><div class="day">Fri<div class="dot"></div></div><div class="day">Sat</div><div class="day">Sun</div>
-            <div class="day">8</div><div class="day">9<div class="dot"></div></div><div class="day">10</div><div class="day">11</div><div class="day">12<div class="dot"></div></div><div class="day">13</div><div class="day">14</div>
+            <div class="day day-header">Mon</div><div class="day day-header">Tue</div><div class="day day-header">Wed</div><div class="day day-header">Thu</div><div class="day day-header">Fri</div><div class="day day-header">Sat</div><div class="day day-header">Sun</div>
+            <div class="day day-empty"></div><div class="day day-empty"></div><div class="day day-empty"></div><div class="day day-empty"></div><div class="day">1<div class="dot"></div></div><div class="day">2</div><div class="day">3</div>
+            <div class="day">4</div><div class="day">5<div class="dot"></div></div><div class="day">6</div><div class="day">7</div><div class="day">8<div class="dot"></div></div><div class="day">9</div><div class="day">10</div>
+            <div class="day">11</div><div class="day">12<div class="dot"></div></div><div class="day">13</div><div class="day">14</div><div class="day">15<div class="dot"></div></div><div class="day">16</div><div class="day">17</div>
+            <div class="day">18</div><div class="day">19<div class="dot"></div></div><div class="day">20</div><div class="day">21</div><div class="day">22<div class="dot"></div></div><div class="day">23</div><div class="day">24</div>
+            <div class="day">25</div><div class="day">26<div class="dot"></div></div><div class="day">27</div><div class="day">28</div><div class="day">29<div class="dot"></div></div><div class="day">30</div><div class="day">31</div>
           </div>
         </div>
         <div class="mock">
@@ -334,7 +342,6 @@
     <section class="section" id="platforms">
       <div class="section-head">
         <h2>Built for the desktop. Account follows you anywhere.</h2>
-        <p>Phantomline renders on your computer because that's where the GPU lives. Your account, library, and license follow you to any browser (desktop or phone) for review and management.</p>
       </div>
       <div class="features">
         <div class="feature">
@@ -350,7 +357,7 @@
           <p>The hard part is shipping a render pipeline that doesn't drain your battery. We'll publish the early-access list when in-browser preview is ready. Until then, treat mobile as your library + dashboard.</p>
         </div>
       </div>
-      <div class="features" style="margin-top:16px;">
+      <div class="features">
         <div class="feature">
           <strong>Royalty-free music, bundled</strong>
           <p>Eight mood-tagged tracks (cinematic, mystery, horror, uplifting, chill, dark, hopeful, tense) ship with the app. Public domain. No licensing footnote on your YouTube channel.</p>
@@ -369,7 +376,6 @@
     <section class="section" id="pricing">
       <div class="section-head">
         <h2>One-time license. Local AI forever.</h2>
-        <p>Free tier covers casual use. Creator Pro is $15/month. Founding Lifetime is a one-time $79: pay once, never pay again.</p>
       </div>
       {% if pricing and pricing.tiers %}
       <div class="pricing-grid">
@@ -409,7 +415,7 @@
       <p class="pricing-fineprint">All paid tiers include unlimited renders, no watermark, scheduler, SEO Finder, Optimize Library, and analytics ingest. Lifetime is locked-in pricing forever, even when monthly tiers go up. License keys work offline; no recurring DRM check.</p>
     </section>
 
-    <section class="section" id="faq">
+    <section class="section" id="faq" style="border-bottom:0;">
       <div class="section-head">
         <h2>FAQ</h2>
       </div>
