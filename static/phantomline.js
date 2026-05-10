@@ -2185,8 +2185,8 @@ function renderMakeHandoffChecklist() {
 function renderPublishReadinessChecklist() {
   const checks = [
     { label: 'MP4', ok: !!$('publishVideoProject')?.value },
-    { label: 'Title', ok: $('publishTitle')?.value.trim().length > 8 },
-    { label: 'Description', ok: $('publishCaption')?.value.trim().length > 40 },
+    { label: 'Title (9+ chars)', ok: $('publishTitle')?.value.trim().length > 8 },
+    { label: 'Description (41+ chars)', ok: $('publishCaption')?.value.trim().length > 40 },
     { label: 'Schedule', ok: !!$('publishScheduledAt')?.value },
     { label: 'YouTube', ok: !!publishStatus?.youtube_connected },
   ];
@@ -2524,8 +2524,8 @@ function applyLaunchDemo(key, {openCreate=true} = {}) {
   updateMakeDurationHint();
   updateMakeReadiness();
   $('makeTitlePackage').style.display = 'block';
-  $('launchDemoStatus').textContent = `${demo.label} loaded. Review the Create Video page, upload footage if needed, then render.`;
-  toast(`${demo.label} loaded`);
+  $('launchDemoStatus').textContent = `${demo.label} loaded — opening Create Video.`;
+  toast(`${demo.label} demo loaded → Create Video`);
   if (openCreate) document.querySelector('.tab-btn[data-tab="make"]')?.click();
 }
 
@@ -2554,82 +2554,147 @@ function _evaluateClientCheck(check) {
 }
 
 function renderLaunchReadiness(data) {
-  const isHosted = data.mode === 'hosted';
-  // Resolve any client_check items before deciding score / readiness text,
-  // so the server's "check_client" placeholder never reaches the DOM.
   const checks = (data.checks || []).map(_evaluateClientCheck);
-  // Hosted score: % of required browser checks that resolved "ready".
-  // Local score: server already computed it.
-  let score;
-  if (isHosted) {
-    const required = checks.filter(c => c.required);
-    const ready = required.filter(c => c.status === 'ready');
-    score = required.length ? Math.round((ready.length / required.length) * 100) : 100;
-  } else {
-    score = data.score;
+  const isHosted = data.mode === 'hosted';
+  $('launchScore').textContent = String(data.score ?? '--');
+  $('launchReadinessLabel').textContent = isHosted ? 'Browser readiness' : 'Launch readiness';
+  $('launchReadinessText').textContent = '';
+  $('launchChecks').innerHTML = '';
+  wizardApplyReadiness(checks, isHosted);
+}
+
+/* ── Launch wizard controller ──────────────────────────────── */
+const WIZ_STEPS = ['phantomline', 'ollama', 'kokoro', 'optional', 'test', 'done'];
+let _wizCurrent = 0;
+let _wizChecks = [];
+
+function wizardInit() {
+  const row = $('wizardStepsRow');
+  if (!row) return;
+  row.innerHTML = WIZ_STEPS.map((_, i) =>
+    `<span class="wizard-dot${i === 0 ? ' active' : ''}" data-wiz-dot="${i}"></span>`
+  ).join('');
+  _wizCurrent = 0;
+  wizardShowStep(0);
+  wizardUpdateBar();
+}
+
+function wizardShowStep(idx) {
+  _wizCurrent = idx;
+  WIZ_STEPS.forEach((key, i) => {
+    const el = $('wizStep-' + key);
+    if (el) el.style.display = i === idx ? '' : 'none';
+  });
+  document.querySelectorAll('.wizard-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === idx);
+    dot.classList.toggle('done', i < idx);
+  });
+  wizardUpdateBar();
+}
+
+function wizardUpdateBar() {
+  const fill = $('wizardBarFill');
+  if (fill) fill.style.width = Math.round((_wizCurrent / (WIZ_STEPS.length - 1)) * 100) + '%';
+}
+
+function wizardNext() {
+  if (_wizCurrent < WIZ_STEPS.length - 1) wizardShowStep(_wizCurrent + 1);
+}
+
+function _wizFindCheck(checks, patterns) {
+  for (const p of patterns) {
+    const found = checks.find(c => c.id === p || (c.label || '').toLowerCase().includes(p));
+    if (found) return found;
   }
-  const launchReady = isHosted
-    ? checks.filter(c => c.required).every(c => c.status === 'ready')
-    : !!data.launch_ready;
-  $('launchScore').textContent = String(score ?? '--');
-  // Rename the label so the user reads the score correctly. On hosted
-  // it's BROWSER readiness only, since the page can't detect optional
-  // local installs (CORS blocks HTTPS to localhost). On local desktop
-  // it's overall studio readiness.
-  const labelEl = $('launchReadinessLabel');
-  if (labelEl) labelEl.textContent = isHosted ? 'Browser readiness' : 'Launch readiness';
-  // Make it explicit on hosted: the score is for BROWSER MODE only. Any
-  // optional power-user upgrades (Ollama, Kokoro, Forge) are local
-  // installs the hosted page genuinely cannot detect. Tell the user that
-  // instead of letting the 100 read as "everything installed".
-  if (isHosted) {
-    const optionalInstalls = checks.filter(c => !c.required && (c.actions || []).some(a => (a.value || '').startsWith('/install/')));
-    const upgradeNote = optionalInstalls.length
-      ? ` ${optionalInstalls.length} optional upgrade${optionalInstalls.length === 1 ? '' : 's'} (Ollama, Kokoro voices, Forge) can be installed on your computer for higher quality.`
-      : '';
-    $('launchReadinessText').textContent = launchReady
-      ? `Browser mode ready (${score}/100). Everything below runs in this browser, no install required.${upgradeNote}`
-      : 'Your browser is missing one of the required engines. Try Chrome, Edge, or another modern Chromium.';
-  } else {
-    $('launchReadinessText').textContent = launchReady
-      ? 'Core local studio is ready. Optional tools can be connected when needed.'
-      : 'Finish the required setup items before charging through the full workflow.';
+  return null;
+}
+
+function _wizRenderActions(check) {
+  if (!check || !check.actions || !check.actions.length) return '';
+  return '<div class="launch-check-actions">' + check.actions.map((a, i) => {
+    const primary = i === 0 ? ' primary' : '';
+    const icon = a.kind === 'link' ? '↗' : a.kind === 'copy' ? '⧉' : a.kind === 'pull' ? '⤓' : '→';
+    return `<button type="button" class="launch-action${primary}"
+              data-kind="${escapeHtml(a.kind)}"
+              data-value="${escapeHtml(a.value)}"
+              data-check="${escapeHtml(check.id)}">
+      <span class="launch-action-icon">${icon}</span>
+      <span>${escapeHtml(a.label || '')}</span>
+    </button>`;
+  }).join('') + '</div>';
+}
+
+function _wizApplyStep(elId, check, isReady, readyText, missingText) {
+  const el = $(elId);
+  if (!el) return;
+  el.className = 'wizard-check-status ' + (isReady ? 'ready' : 'missing');
+  let detail = isReady ? readyText : missingText;
+  if (!isReady && check && check.detail) {
+    detail = check.detail;
+    if (detail.includes('Max retries') || detail.includes('HTTPConnectionPool') || detail.includes('ConnectionError')) {
+      detail = missingText;
+    }
   }
-  $('launchChecks').innerHTML = checks.map(c => {
-    // 'desktop_only' renders like 'optional'. gray dot, action button shown.
-    // The status label below ("desktop only") makes the gating obvious.
-    const cls = c.status === 'ready' ? 'ready'
-              : c.status === 'missing' ? 'missing'
-              : c.status === 'desktop_only' ? 'optional desktop-only'
-              : 'optional';
-    // Render action buttons for any non-ready item that has actions.
-    // The dataset attributes carry the action's kind/value back to the
-    // delegated click handler below. keeps this template free of
-    // inline JS so escapeHtml does its job and we don't open XSS.
-    const actions = (c.actions || []).map((a, i) => {
-      const primary = i === 0 ? ' primary' : '';
-      const icon = a.kind === 'link' ? '↗' : a.kind === 'copy' ? '⧉' : a.kind === 'pull' ? '⤓' : '→';
-      return `<button type="button" class="launch-action${primary}"
-                data-kind="${escapeHtml(a.kind)}"
-                data-value="${escapeHtml(a.value)}"
-                data-check="${escapeHtml(c.id)}">
-        <span class="launch-action-icon">${icon}</span>
-        <span>${escapeHtml(a.label || '')}</span>
-      </button>`;
-    }).join('');
-    const actionsBlock = actions ? `<div class="launch-check-actions">${actions}</div>` : '';
-    return `
-      <div class="launch-check ${cls}" data-check-id="${escapeHtml(c.id)}">
-        <span class="launch-dot"></span>
-        <div>
-          <strong>${escapeHtml(c.label || '')}${c.required ? ' *' : ''}</strong>
-          <div class="hint">${escapeHtml(c.detail || '')}</div>
-          ${actionsBlock}
-        </div>
-        <span class="launch-status">${escapeHtml(c.status || '')}</span>
-      </div>
-    `;
-  }).join('');
+  el.innerHTML = `<span class="launch-dot"></span> ${escapeHtml(detail)}`;
+}
+
+function wizardApplyReadiness(checks, isHosted) {
+  _wizChecks = checks;
+
+  const ollamaCheck = _wizFindCheck(checks, ['ollama', 'ollama model', 'script writer']);
+  const kokoroCheck = _wizFindCheck(checks, ['kokoro', 'local voice', 'voice engine']);
+
+  const ollamaReady = ollamaCheck && ollamaCheck.status === 'ready';
+  const kokoroReady = kokoroCheck && kokoroCheck.status === 'ready';
+
+  _wizApplyStep('wizOllamaStatus', ollamaCheck, ollamaReady, 'Ollama is running and model loaded', 'Not detected — install Ollama to continue');
+  const actionsEl = $('wizOllamaActions');
+  if (actionsEl) actionsEl.innerHTML = ollamaReady ? '' : _wizRenderActions(ollamaCheck);
+  const ollamaNext = $('wizOllamaNext');
+  if (ollamaNext) ollamaNext.disabled = !ollamaReady;
+
+  _wizApplyStep('wizKokoroStatus', kokoroCheck, kokoroReady, 'Kokoro voices installed', 'Not detected — install Kokoro voices to continue');
+  const kActionsEl = $('wizKokoroActions');
+  if (kActionsEl) kActionsEl.innerHTML = kokoroReady ? '' : _wizRenderActions(kokoroCheck);
+  const kokoroNext = $('wizKokoroNext');
+  if (kokoroNext) kokoroNext.disabled = !kokoroReady;
+
+  const optContainer = $('wizOptionalChecks');
+  if (optContainer) {
+    const requiredIds = [ollamaCheck?.id, kokoroCheck?.id].filter(Boolean);
+    const optionals = checks.filter(c => !requiredIds.includes(c.id) && c.id !== 'phantomline_running');
+    const friendlyLabels = {
+      'Ollama model': 'Script writer (Ollama)',
+      'Local voice engine': 'Voice narrator (Kokoro)',
+      'Local image generator': 'Scene images (Forge)',
+      'Channel intelligence': 'Channel analytics',
+    };
+    if (optionals.length === 0) {
+      optContainer.innerHTML = '<p class="hint" style="padding:8px 0;">No optional upgrades available in this mode.</p>';
+    } else {
+      optContainer.innerHTML = optionals.map(c => {
+        const ready = c.status === 'ready';
+        const dotCls = ready ? 'ready' : '';
+        const label = friendlyLabels[c.label] || c.label || c.id;
+        let detail = c.detail || '';
+        if (detail.includes('Max retries') || detail.includes('HTTPConnectionPool') || detail.includes('ConnectionError')) {
+          detail = 'Not installed';
+        }
+        return `<div class="wizard-optional-check ${dotCls}">
+          <span class="launch-dot" style="background:${ready ? 'var(--good)' : 'var(--warn)'}; box-shadow:0 0 0 4px ${ready ? 'rgba(89,255,210,0.12)' : 'rgba(243,201,105,0.10)'}"></span>
+          <div>
+            <strong>${escapeHtml(label)}</strong>
+            <div class="hint">${escapeHtml(detail)}</div>
+            ${ready ? '' : _wizRenderActions(c)}
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  if (ollamaReady && kokoroReady && _wizCurrent < 3) {
+    wizardShowStep(3);
+  }
 }
 
 /* Delegated click handler for the per-check action buttons. Lives outside
@@ -2726,7 +2791,10 @@ async function runLaunchTestRender() {
   if (status) status.textContent = 'Rendering a tiny local MP4 test...';
   if (result) {
     result.style.display = 'none';
-    result.innerHTML = '';
+    const prevVid = $('wizPhonePreviewVideo');
+    if (prevVid) { prevVid.style.display = 'none'; prevVid.removeAttribute('src'); prevVid.load(); }
+    const prevInner = $('wizPhonePreviewInner');
+    if (prevInner) prevInner.classList.remove('has-video');
   }
   try {
     const d = await apiJson('/api/launch/test-render', {method:'POST'});
@@ -2734,9 +2802,18 @@ async function runLaunchTestRender() {
     latestMakeVideoProjectId = project.id || latestMakeVideoProjectId;
     if (status) status.textContent = 'Test render worked. Encoding and playback are ready.';
     if (result && d.video_url) {
+      const vid = $('wizPhonePreviewVideo');
+      if (vid) {
+        vid.src = d.video_url;
+        vid.style.display = 'block';
+        vid.load();
+      }
+      const inner = $('wizPhonePreviewInner');
+      if (inner) inner.classList.add('has-video');
       result.style.display = 'block';
-      result.innerHTML = `<video src="${escapeHtml(d.video_url)}" controls></video>`;
     }
+    const wizTestNext = $('wizTestNext');
+    if (wizTestNext) { wizTestNext.style.display = ''; wizTestNext.textContent = 'Finish setup →'; }
     loadLibrary();
     if (typeof loadPublishWorkspace === 'function') loadPublishWorkspace();
     addNotification({type:'info', title:'Test render complete', body:'Phantomline successfully created a local MP4.'});
@@ -2749,26 +2826,33 @@ async function runLaunchTestRender() {
 }
 
 $('launchCheckBtn')?.addEventListener('click', runLaunchReadinessCheck);
-$('launchDemoBtn')?.addEventListener('click', () => applyLaunchDemo('reddit'));
 $('launchStartBtn')?.addEventListener('click', () => document.querySelector('.tab-btn[data-tab="make"]')?.click());
 $('launchTestRenderBtn')?.addEventListener('click', runLaunchTestRender);
-$('launchOpenSettingsBtn')?.addEventListener('click', () => document.querySelector('.tab-btn[data-tab="settings"]')?.click());
-$('launchOpenConnectionsBtn')?.addEventListener('click', () => {
-  document.querySelector('.tab-btn[data-tab="publish"]')?.click();
-  if (typeof switchPublishView === 'function') switchPublishView('connections');
-});
-$('launchUseSourceModeBtn')?.addEventListener('click', () => {
-  document.querySelector('.tab-btn[data-tab="make"]')?.click();
-  $('makeVideoMode').value = 'source';
-  updateMakeVideoMode();
-  updateMakeChoiceCards();
-  updateMakeReadiness();
-});
 $('makeLoadDemoBtn')?.addEventListener('click', () => applyLaunchDemo('reddit', {openCreate:false}));
-document.querySelectorAll('.demo-tile').forEach(tile => {
-  tile.addEventListener('click', () => applyLaunchDemo(tile.dataset.demo || 'reddit'));
+
+document.addEventListener('click', (e) => {
+  const nextBtn = e.target.closest('.wizard-next');
+  if (nextBtn) {
+    if (nextBtn.disabled) return;
+    wizardNext();
+    return;
+  }
+  const recheckBtn = e.target.closest('.wizard-recheck');
+  if (recheckBtn) {
+    recheckBtn.disabled = true;
+    recheckBtn.textContent = 'Checking...';
+    runLaunchReadinessCheck().finally(() => {
+      recheckBtn.disabled = false;
+      recheckBtn.textContent = 'Re-check';
+    });
+    return;
+  }
 });
-document.querySelector('.tab-btn[data-tab="launch"]')?.addEventListener('click', runLaunchReadinessCheck);
+
+document.querySelector('.tab-btn[data-tab="launch"]')?.addEventListener('click', () => {
+  runLaunchReadinessCheck();
+});
+wizardInit();
 runLaunchReadinessCheck();
 
 applyVisualPreset('video');
@@ -4445,9 +4529,19 @@ function updatePublishPreview() {
   $('publishPreviewBox').innerHTML = project
     ? `<video controls src="/api/projects/${project.id}/file/video?inline=1"></video>`
     : '<div class="empty">No media selected</div>';
-  $('publishPreviewTitle').textContent = $('publishTitle').value.trim() || 'Untitled video';
-  $('publishPreviewCaption').textContent = ($('publishCaption').value.trim() || 'Description preview').slice(0, 180);
+  const titleVal = $('publishTitle').value.trim();
+  const captionVal = $('publishCaption').value.trim();
+  $('publishPreviewTitle').textContent = titleVal || 'Untitled video';
+  $('publishPreviewCaption').textContent = (captionVal || 'Description preview').slice(0, 180);
   $('publishCaptionCount').textContent = $('publishCaption').value.length;
+  const ch = publishStatus?.youtube_channel;
+  if ($('publishPreviewCreator')) $('publishPreviewCreator').innerHTML = '<strong>' + escapeHtml(ch?.title ? '@' + ch.title : '@your_channel') + '</strong>';
+  if ($('publishPreviewDesc')) $('publishPreviewDesc').textContent = (captionVal || 'Your video description here').slice(0, 80);
+  const draftEl = $('publishDraftSaved');
+  if (draftEl) {
+    const now = new Date();
+    draftEl.textContent = 'Draft saved ' + now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
   renderMakeHandoffChecklist();
   renderPublishReadinessChecklist();
 }
@@ -4643,13 +4737,15 @@ function renderPublishCalendar() {
   const el = $('publishCalendar');
   if (!el) return;
   const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
   const days = [];
   for (let i = 0; i < 35; i++) {
     const d = new Date(start.getTime() + i * 86400000);
     const key = d.toISOString().slice(0, 10);
+    const isToday = key === todayKey;
     const posts = publishPosts.filter(p => (p.scheduled_at || '').slice(0, 10) === key);
-    days.push(`<div class="calendar-day"><strong>${d.getMonth() + 1}/${d.getDate()}</strong>${posts.map(p => `<div class="calendar-dot">${escapeHtml(p.title || 'Post')}</div>`).join('')}</div>`);
+    days.push(`<div class="calendar-day${isToday ? ' calendar-today' : ''}"><strong>${d.getMonth() + 1}/${d.getDate()}</strong>${posts.map(p => `<div class="calendar-dot">${escapeHtml(p.title || 'Post')}</div>`).join('')}</div>`);
   }
   el.innerHTML = days.join('');
 }
@@ -5016,10 +5112,14 @@ $('thumbDownloadBtn').addEventListener('click', () => {
 document.querySelector('.tab-btn[data-tab="publish"]')?.addEventListener('click', _loadThumbPresets);
 /* ------------------------------------------------------------------------ */
 
+$('publishTitle').addEventListener('input', updatePublishPreview);
 $('publishCaption').addEventListener('input', updatePublishPreview);
 $('publishTags').addEventListener('input', updatePublishPreview);
 $('publishScheduledAt').addEventListener('input', renderPublishReadinessChecklist);
 $('publishScheduleBtn').addEventListener('click', schedulePublishPost);
+const savedPrivacy = localStorage.getItem('ghostline.publish.privacy');
+if (savedPrivacy && $('publishPrivacy')) $('publishPrivacy').value = savedPrivacy;
+$('publishPrivacy').addEventListener('change', () => localStorage.setItem('ghostline.publish.privacy', $('publishPrivacy').value));
 $('publishNewPostBtn').addEventListener('click', () => {
   $('publishVideoProject').value = '';
   $('publishTitle').value = '';

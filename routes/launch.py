@@ -8,7 +8,9 @@ can actually encode video before committing to a real workflow."""
 
 from __future__ import annotations
 
+import json
 import os
+import random
 import uuid
 import wave
 from pathlib import Path
@@ -30,6 +32,10 @@ try:
     import video_assembler
 except Exception:
     video_assembler = None
+try:
+    import music as music_mod
+except Exception:
+    music_mod = None
 import youtube_research
 
 from core import (
@@ -472,55 +478,199 @@ def api_launch_install():
     return jsonify({"ok": False, "error": f"Unknown install action: {action}"}), 400
 
 
+DEMO_SCRIPTS = [
+    {
+        "narration": "Every night, a new Reddit confession goes viral. "
+                     "Millions watch. Nobody knows who's behind the camera.",
+        "voice": "af_heart",
+        "caption_style": "tiktok",
+        "music_mood": "mystery",
+        "title": "Reddit Confessions Demo",
+    },
+    {
+        "narration": "Three survival mistakes that make people panic. "
+                     "Number one: running downhill from a bear.",
+        "voice": "am_adam",
+        "caption_style": "clean",
+        "music_mood": "cinematic",
+        "title": "Survival Tips Demo",
+    },
+    {
+        "narration": "There was one rule in the house. Never open the red door. "
+                     "Last Tuesday, someone did.",
+        "voice": "af_heart",
+        "caption_style": "horror",
+        "music_mood": "horror",
+        "title": "Horror Story Demo",
+    },
+    {
+        "narration": "This AI tool saved our team forty hours a week. "
+                     "Here's the one workflow that changed everything.",
+        "voice": "am_adam",
+        "caption_style": "documentary",
+        "music_mood": "cinematic",
+        "title": "AI Tool Review Demo",
+    },
+    {
+        "narration": "Scientists found something at the bottom of the ocean. "
+                     "It was older than anything on the surface.",
+        "voice": "bf_emma",
+        "caption_style": "tiktok",
+        "music_mood": "mystery",
+        "title": "Science Mystery Demo",
+    },
+]
+
+
+def _download_demo_clip():
+    """Pick a random clip from the public footage library and download it.
+
+    Clips are cached in OUTPUT_DIR so subsequent demo renders are instant.
+    Returns the local path or None on failure."""
+    manifest_path = BASE_DIR / "static" / "library" / "footage-manifest.json"
+    if not manifest_path.exists():
+        return None
+    try:
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        clips = data.get("clips", [])
+        if not clips:
+            return None
+        clip = random.choice(clips)
+        url = clip.get("url", "")
+        filename = clip.get("filename", "")
+        if not url or not filename:
+            return None
+        cached = OUTPUT_DIR / f"demo_footage_{filename}"
+        if cached.exists() and cached.stat().st_size > 100_000:
+            return cached
+        r = requests.get(url, timeout=30, stream=True)
+        r.raise_for_status()
+        cached.parent.mkdir(parents=True, exist_ok=True)
+        with open(cached, "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024 * 256):
+                f.write(chunk)
+        return cached
+    except Exception:
+        return None
+
+
+def _find_bundled_music(mood):
+    """Return the path to a bundled music MP3 matching the mood, or None."""
+    manifest_path = BASE_DIR / "static" / "library" / "music.json"
+    if not manifest_path.exists():
+        return None
+    try:
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        tracks = data.get("tracks", [])
+        match = [t for t in tracks if t.get("mood", "").lower() == mood.lower()]
+        if not match:
+            match = tracks[:1]
+        if not match:
+            return None
+        url_path = match[0].get("url", "")
+        file_path = BASE_DIR / url_path.lstrip("/")
+        if file_path.exists():
+            return file_path
+    except Exception:
+        pass
+    return None
+
+
 @launch_bp.route("/api/launch/test-render", methods=["POST"])
 def api_launch_test_render():
-    """Render a tiny fallback-card MP4 so users can verify encoding works."""
+    """Render an 8-second demo video with real narration, music, and captions."""
+    if video_assembler is None:
+        return jsonify({"ok": False, "error": "Video assembler not available"}), 503
+
+    demo = random.choice(DEMO_SCRIPTS)
     test_id = uuid.uuid4().hex[:8]
-    tmp_audio = OUTPUT_DIR / f"ghostline_test_{test_id}.wav"
-    tmp_video = OUTPUT_DIR / f"ghostline_test_{test_id}.mp4"
+    tmp_narration = OUTPUT_DIR / f"demo_narration_{test_id}.wav"
+    tmp_mixed = OUTPUT_DIR / f"demo_mixed_{test_id}.wav"
+    tmp_video = OUTPUT_DIR / f"demo_render_{test_id}.mp4"
+    cleanup = []
+
     try:
-        sample_rate = 24000
-        seconds = 8
-        with wave.open(str(tmp_audio), "wb") as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(sample_rate)
-            wf.writeframes(b"\x00\x00" * sample_rate * seconds)
-        timeline = {
-            "title": "Phantomline Test Render",
-            "source_plan_title": "Phantomline Test Render",
-            "aspect": "9:16",
-            "scenes": [
-                {
-                    "id": 1,
-                    "start": "00:00",
-                    "end": "00:04",
-                    "duration_seconds": 4,
-                    "narration": "Phantomline local render check.",
-                    "video_prompt": "premium faceless video studio preview, local render check, teal glow, no text",
-                },
-                {
-                    "id": 2,
-                    "start": "00:04",
-                    "end": "00:08",
-                    "duration_seconds": 4,
-                    "narration": "If you can play this, MP4 encoding works.",
-                    "video_prompt": "short-form phone preview, caption safe layout, cinematic dark UI, no text",
-                },
-            ],
-        }
-        video_assembler.render_draft_video(timeline, tmp_audio, tmp_video, fps=24)
+        # 1. Generate narration with Kokoro TTS
+        if tts_mod is None:
+            return jsonify({"ok": False, "error": "Kokoro TTS not available"}), 503
+        import numpy as np
+        audio_f32, sr, segments = tts_mod.synthesize_with_timing(
+            demo["narration"], voice=demo["voice"], speed=1.0,
+        )
+        if len(audio_f32) == 0:
+            return jsonify({"ok": False, "error": "TTS produced no audio"}), 500
+
+        # Save narration WAV
+        wav_bytes = tts_mod.to_wav_bytes(audio_f32, sr)
+        tmp_narration.parent.mkdir(parents=True, exist_ok=True)
+        tmp_narration.write_bytes(wav_bytes)
+        cleanup.append(tmp_narration)
+        narration_seconds = len(audio_f32) / sr
+
+        # 2. Mix with bundled music if available
+        render_audio = tmp_narration
+        music_path = _find_bundled_music(demo.get("music_mood", "cinematic"))
+        if music_path and music_mod is not None:
+            try:
+                m_audio, m_sr = music_mod.load_audio_file(str(music_path))
+                mixed, mixed_sr = music_mod.mix_narration_and_music(
+                    audio_f32, sr, m_audio, m_sr, music_db_below_speech=16.0,
+                )
+                mixed_wav = tts_mod.to_wav_bytes(mixed, mixed_sr)
+                tmp_mixed.write_bytes(mixed_wav)
+                cleanup.append(tmp_mixed)
+                render_audio = tmp_mixed
+            except Exception:
+                pass  # fall back to narration-only
+
+        # 3. Download a public demo clip from the footage library
+        source_video = _download_demo_clip()
+        if source_video:
+            video_assembler.render_source_video(
+                source_video, render_audio, tmp_video,
+                caption_text=demo["narration"],
+                captions=True,
+                caption_style=demo.get("caption_style", "tiktok"),
+                caption_segments=segments,
+                title_text=demo["title"],
+                aspect="9:16",
+                fps=24,
+            )
+        else:
+            # No existing videos — use fallback card render
+            duration = narration_seconds
+            mid = duration / 2
+            timeline = {
+                "title": demo["title"],
+                "source_plan_title": demo["title"],
+                "aspect": "9:16",
+                "scenes": [
+                    {
+                        "id": 1, "start": "00:00",
+                        "end": f"00:{int(mid):02d}",
+                        "duration_seconds": mid,
+                        "narration": demo["narration"][:len(demo["narration"])//2],
+                        "video_prompt": "cinematic dark studio, teal glow, premium faceless content",
+                    },
+                    {
+                        "id": 2, "start": f"00:{int(mid):02d}",
+                        "end": f"00:{int(duration):02d}",
+                        "duration_seconds": duration - mid,
+                        "narration": demo["narration"][len(demo["narration"])//2:],
+                        "video_prompt": "short-form video preview, caption safe, dark cinematic",
+                    },
+                ],
+            }
+            video_assembler.render_draft_video(timeline, render_audio, tmp_video, fps=24)
+
         proj = PROJECTS.create(
             kind=project_store.KIND_VIDEO,
-            title="Phantomline Test Render",
+            title=demo["title"],
             params={"source": "launch_readiness_test", "aspect": "9:16"},
         )
         PROJECTS.attach_file(proj["id"], "video", tmp_video)
-        PROJECTS.update(proj["id"], status="ready", duration_seconds=seconds)
-        try:
-            tmp_audio.unlink()
-        except OSError:
-            pass
+        PROJECTS.update(proj["id"], status="ready", duration_seconds=narration_seconds)
+
         return jsonify({
             "ok": True,
             "project": PROJECTS.get(proj["id"]),
@@ -528,3 +678,9 @@ def api_launch_test_render():
         })
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
+    finally:
+        for f in cleanup:
+            try:
+                f.unlink()
+            except OSError:
+                pass
