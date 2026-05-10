@@ -3387,7 +3387,7 @@ def _title_ideas_prompt(*, focus_keyword, focus_variations, topic,
     return f"""
 Generate 12 clickable YouTube title options for a faceless video.
 
-FOCUS KEYWORD (must appear verbatim or as a tight variation in EVERY title â€” this is the vidIQ "keywords in title" + "tripled keyword" anchor): {focus_keyword}
+FOCUS KEYWORD (must appear verbatim or as a tight variation in EVERY title — this is the vidIQ "keywords in title" + "tripled keyword" anchor): {focus_keyword}
 ACCEPTED VARIATIONS of the focus keyword: {", ".join(focus_variations) if focus_variations else "(use only the focus keyword; minor pluralization or word order is fine)"}
 
 Topic: {topic or "the user has not chosen a topic yet; infer from the niche"}
@@ -3413,21 +3413,21 @@ Schema:
   }}
 ]
 
-Hard rules (titles failing these are unacceptable â€” vidIQ will score them 0):
+Hard rules (titles failing these are unacceptable — vidIQ will score them 0):
 - EVERY title must contain "{focus_keyword}" or one of the accepted variations as a contiguous substring. Match is case-insensitive but the words must appear in order.
 - The focus keyword must appear in the FIRST 50 characters of the title, ideally in the first half.
-- Set "focus_keyword_used" to the exact substring you used. If you cannot include the keyword naturally, drop the title â€” do not return it.
+- Set "focus_keyword_used" to the exact substring you used. If you cannot include the keyword naturally, drop the title — do not return it.
 - {title_length_rule}
 
 Quality rules:
 - Titles should be specific, curiosity-driven, and not clickbait lies.
 - Titles must package the selected idea's hook, twist, and loop promise instead of drifting to a new topic.
 - Avoid all caps, emojis, hashtags, and vague titles.
-- Mix title styles: warning, question, mystery, list, transformation, proof, and story conflict â€” but every variant still contains the focus keyword.
+- Mix title styles: warning, question, mystery, list, transformation, proof, and story conflict — but every variant still contains the focus keyword.
 - Separate title packaging from the in-video hook. Titles sell the click/search fit; hooks win the first second.
 - For Shorts/story formats, prefer relationship nouns, secrets, mistakes, forbidden objects, impossible timing, or one clear conflict. Avoid bland titles like "The Secret", "This Changed Everything", or "A Shocking Story".
-- When channel insights show winning title patterns (e.g. "Why X are switching to Y"), bias 3â€“4 of the 12 toward that pattern.
-- For viral story shorts the focus keyword can ride at the END of a 6â€“10 word hook; that's fine, the rule is presence, not position-first.
+- When channel insights show winning title patterns (e.g. "Why X are switching to Y"), bias 3—4 of the 12 toward that pattern.
+- For viral story shorts the focus keyword can ride at the END of a 6—10 word hook; that's fine, the rule is presence, not position-first.
 - Do not mention AI tools, local generation, or paid APIs.
 """
 
@@ -3669,9 +3669,9 @@ def api_publish_description():
 
         first_8 = " ".join(description.split()[:8]).lower()
         if fk_lower not in first_8:
-            # Prepend a natural lead. Don't break the body â€” just insert a
+            # Prepend a natural lead. Don't break the body — just insert a
             # focus-keyword sentence ahead of whatever the model wrote.
-            description = f"{focus_keyword.capitalize()} â€” {description}"
+            description = f"{focus_keyword.capitalize()} — {description}"
 
     # Ensure we hit the 15-tag floor. Backfill from focus variations + research.
     if len(tags) < 15:
@@ -3768,21 +3768,21 @@ def api_start():
     return jsonify({"ok": True, "job_id": job_id, "inputs": inputs})
 
 
-@app.route(“/api/start_short”, methods=[“POST”])
+@app.route("/api/start_short", methods=["POST"])
 def api_start_short():
-    “””One-shot short-form generation (30sâ€”10min). Reuses the same JOBS table
-    so the existing /api/status/<id> + /api/script/<id> endpoints work.”””
+    """One-shot short-form generation (30s—10min). Reuses the same JOBS table
+    so the existing /api/status/<id> + /api/script/<id> endpoints work."""
     data = request.get_json(force=True) or {}
     insights_loaded = channel_insights.load(BASE_DIR)
-    seo_kws = (insights_loaded.get(“seo_keywords”) or []) + (insights_loaded.get(“gap_keywords”) or [])
+    seo_kws = (insights_loaded.get("seo_keywords") or []) + (insights_loaded.get("gap_keywords") or [])
     inputs = {
-        “topic”: (data.get(“topic”) or sg.DEFAULT_TOPIC).strip(),
-        “genre”: (data.get(“genre”) or sg.DEFAULT_GENRE).strip(),
-        “tone”: (data.get(“tone”) or sg.DEFAULT_TONE).strip(),
-        “description”: (data.get(“description”) or “”).strip(),
-        “word_count”: int(data.get(“word_count”) or 280),
-        “model”: _resolve_ollama_model(data.get(“model”)),
-        “seo_keywords”: [str(k).strip() for k in seo_kws if str(k).strip()][:8],
+        "topic": (data.get("topic") or sg.DEFAULT_TOPIC).strip(),
+        "genre": (data.get("genre") or sg.DEFAULT_GENRE).strip(),
+        "tone": (data.get("tone") or sg.DEFAULT_TONE).strip(),
+        "description": (data.get("description") or "").strip(),
+        "word_count": int(data.get("word_count") or 280),
+        "model": _resolve_ollama_model(data.get("model")),
+        "seo_keywords": [str(k).strip() for k in seo_kws if str(k).strip()][:8],
     }
     if sg.check_ollama() is None:
         return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
@@ -5173,7 +5173,7 @@ def api_youtube_playlists():
 
 
 # ---------------------------------------------------------------------------
-# Optimize Library â€” read existing channel videos and propose per-video
+# Optimize Library — read existing channel videos and propose per-video
 # title/description/tag improvements grounded in channel insights.
 # Phase 1: suggest only. No writes back to YouTube.
 # /api/optimize/* lives in routes/optimize.py.
