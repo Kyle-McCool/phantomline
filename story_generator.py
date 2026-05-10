@@ -528,7 +528,7 @@ Genre: {genre}
 Tone: {tone}
 
 Requirements:
-- 4 to 10 words.
+- 4 to 8 words, under 50 characters (mobile-safe).
 - Intriguing and clickable without sounding spammy.
 - No quotes around the title.
 - No emojis. No markdown. No subtitle.
@@ -580,7 +580,7 @@ Schema:
 ]
 
 Hard rules:
-- 4 to 10 words per title.
+- 4 to 8 words per title, UNDER 50 CHARACTERS (mobile-safe — YouTube truncates at ~50 chars on mobile).
 - No quotes around titles. No emojis. No subtitles. No "Part 1".
 - Each title must use a DIFFERENT strategy. Do not repeat a strategy.
 - "why" stays under 18 words.
@@ -685,8 +685,28 @@ def pick_best_title(candidates, insights=None):
     return scored[0]["title"], scored
 
 
-def plan_prompt(topic, genre, tone, title, target_words):
+def _seo_keyword_block(seo_keywords=None):
+    """Build a prompt block instructing the model to naturally weave SEO
+    keywords into the narration so YouTube's auto-captions index them."""
+    if not seo_keywords:
+        return ""
+    phrases = [str(k).strip() for k in seo_keywords if str(k).strip()][:8]
+    if not phrases:
+        return ""
+    return (
+        "\n\nSEO KEYWORD THREADING (for YouTube closed-caption indexing):\n"
+        "The following keywords/phrases should appear naturally in the spoken narration. "
+        "YouTube auto-generates captions from the audio, and these captions are indexed for search. "
+        "Weave them in where they fit organically — never force them, never list them, never break "
+        "the narrative voice. Aim to use each at least once across the full script. "
+        "Prioritize the first 2-3 keywords; the rest are bonus.\n"
+        "Keywords: " + ", ".join(f'"{p}"' for p in phrases)
+    )
+
+
+def plan_prompt(topic, genre, tone, title, target_words, seo_keywords=None):
     fmt = _detect_format(genre, tone) or "story"
+    kw_block = _seo_keyword_block(seo_keywords)
     return f"""\
 Plan a long-form YouTube voiceover of approximately {target_words} words.
 
@@ -721,11 +741,14 @@ BEATS:
 9. Driving home, she sees the barn's mailbox flag is up again. She does not stop.
 ENDING: Some books only get returned when the right reader notices they were missing — and some readers are still circling.
 
+{kw_block}
+
 Output the plan only. No commentary before or after."""
 
 
 def section_prompt(title, plan, rolling_summary, position, sec_target,
-                   total_words, target_words, topic, genre, tone):
+                   total_words, target_words, topic, genre, tone,
+                   seo_keywords=None):
     if position == "opening":
         position_guidance = (
             "This is the very beginning of the script. Open with the HOOK from the plan "
@@ -772,6 +795,7 @@ Total story target: ~{target_words} words. Approximately {total_words} words wri
 {position_guidance}
 
 {_style_block(genre, tone)}
+{_seo_keyword_block(seo_keywords)}
 
 Hard rules for THIS section:
 - Output narration prose only. Plain text. No markdown, no headings, no scene labels, no chapter titles, no "Section X", no "Part X", no timestamps, no author notes, no asterisks for emphasis.
@@ -791,7 +815,8 @@ Begin like the GOOD examples — straight into something a viewer can see.
 Begin the narration now:"""
 
 
-def short_script_prompt(topic, genre, tone, title, words, description=""):
+def short_script_prompt(topic, genre, tone, title, words, description="",
+                        seo_keywords=None):
     viral_mode = "VIRAL SHORTS PLAYBOOK" in (description or "")
     """Prompt for one-shot short-form scripts (30s–10min)."""
     if words < 150:
@@ -843,6 +868,7 @@ Target length: approximately {words} words (about a {minutes}-minute read at a c
 
 {guide}
 {viral_rules}
+{_seo_keyword_block(seo_keywords)}
 
 Hard rules:
 - Output narration prose ONLY. Plain text. No markdown, no headings, no scene labels, no chapter titles, no timestamps, no "Here is", no author notes, no asterisks for emphasis.
@@ -1061,6 +1087,7 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
     topic = inputs["topic"]
     if inputs.get("description"):
         topic = f"{topic}\n\nCreative direction to honor:\n{inputs['description']}"
+    seo_keywords = inputs.get("seo_keywords") or []
 
     # Load insights once — used for both title scoring and system prompt enrichment.
     insights = _load_insights_safely()
@@ -1097,7 +1124,8 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
         emit("status", message="Generating internal story plan...")
         plan = generate(
             model,
-            plan_prompt(topic, inputs["genre"], inputs["tone"], title, target_words),
+            plan_prompt(topic, inputs["genre"], inputs["tone"], title, target_words,
+                       seo_keywords=seo_keywords),
             system=active_system,
             label="plan",
             temperature=0.8,
@@ -1148,6 +1176,7 @@ def generate_story(inputs, out_dir, resume_state=None, progress_cb=None):
             title, plan, rolling_summary, position, sec_target,
             total_words, target_words,
             topic, inputs["genre"], inputs["tone"],
+            seo_keywords=seo_keywords,
         )
         # num_predict in tokens is roughly 1.4x word count. Give it slack.
         raw = generate(
@@ -1240,6 +1269,7 @@ def generate_short_script(inputs, out_dir, progress_cb=None):
 
     model = inputs["model"]
     target_words = int(inputs["word_count"])
+    seo_keywords = inputs.get("seo_keywords") or []
 
     insights = _load_insights_safely()
     active_system = build_system_prompt(insights)
@@ -1269,7 +1299,8 @@ def generate_short_script(inputs, out_dir, progress_cb=None):
         model,
         short_script_prompt(inputs["topic"], inputs["genre"], inputs["tone"],
                             title, target_words,
-                            description=inputs.get("description", "")),
+                            description=inputs.get("description", ""),
+                            seo_keywords=seo_keywords),
         system=active_system,
         label="write", temperature=0.85,
         # Generous token cap so the model isn't truncated; tokens ≈ 1.4 × words.

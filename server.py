@@ -3415,7 +3415,7 @@ Schema:
 
 Hard rules (titles failing these are unacceptable â€” vidIQ will score them 0):
 - EVERY title must contain "{focus_keyword}" or one of the accepted variations as a contiguous substring. Match is case-insensitive but the words must appear in order.
-- The focus keyword must appear in the FIRST 60 characters of the title, ideally in the first half.
+- The focus keyword must appear in the FIRST 50 characters of the title, ideally in the first half.
 - Set "focus_keyword_used" to the exact substring you used. If you cannot include the keyword naturally, drop the title â€” do not return it.
 - {title_length_rule}
 
@@ -3488,10 +3488,10 @@ def api_title_ideas():
         for word in ("short", "tiktok", "reels", "reddit", "storytime")
     )
     title_length_rule = (
-        "For Shorts/story formats: 4-9 words, 28-62 characters, emotional and incomplete. "
-        "For search/tutorial formats: 40-80 characters, clear payoff, still curiosity-driven."
+        "For Shorts/story formats: 4-8 words, UNDER 50 CHARACTERS (mobile-safe), emotional and incomplete. "
+        "For search/tutorial formats: under 50 characters, clear payoff, still curiosity-driven."
         if short_title_mode else
-        "Title length: 40-80 characters. Hard ceiling 100 characters."
+        "Title length: under 50 characters (mobile-safe — YouTube truncates longer titles on mobile). Hard ceiling 50 characters."
     )
 
     prompt = _title_ideas_prompt(
@@ -3542,7 +3542,7 @@ def api_title_ideas():
                     focus_used = title[idx:idx + len(anchor)]
                     break
         titles.append({
-            "title": title[:120],
+            "title": title[:50],
             "angle": angle[:220],
             "platform": platform[:30],
             "pinned_comment": pinned_comment[:160],
@@ -3702,9 +3702,50 @@ def api_publish_description():
     })
 
 
+@app.route("/api/seo/keyword-check", methods=["POST"])
+def api_seo_keyword_check():
+    """Pre-publish scan: checks how many SEO keywords appear in the script
+    narration. YouTube auto-generates captions from audio, and those captions
+    are indexed — so keywords spoken in the narration get free search juice."""
+    data = request.get_json(force=True) or {}
+    script = (data.get("script") or "").strip()
+    if not script:
+        return jsonify({"ok": False, "error": "No script text provided."}), 400
+
+    insights_loaded = channel_insights.load(BASE_DIR)
+    seo_kws = data.get("seo_keywords") or (
+        (insights_loaded.get("seo_keywords") or [])
+        + (insights_loaded.get("gap_keywords") or [])
+    )
+    keywords = [str(k).strip().lower() for k in seo_kws if str(k).strip()][:12]
+    if not keywords:
+        return jsonify({"ok": True, "message": "No SEO keywords configured.", "results": [], "coverage": 1.0})
+
+    script_lower = script.lower()
+    results = []
+    found = 0
+    for kw in keywords:
+        count = script_lower.count(kw)
+        present = count > 0
+        if present:
+            found += 1
+        results.append({"keyword": kw, "present": present, "count": count})
+
+    coverage = found / len(keywords) if keywords else 1.0
+    return jsonify({
+        "ok": True,
+        "coverage": round(coverage, 2),
+        "found": found,
+        "total": len(keywords),
+        "results": results,
+    })
+
+
 @app.route("/api/start", methods=["POST"])
 def api_start():
     data = request.get_json(force=True) or {}
+    insights_loaded = channel_insights.load(BASE_DIR)
+    seo_kws = (insights_loaded.get("seo_keywords") or []) + (insights_loaded.get("gap_keywords") or [])
     inputs = {
         "topic": (data.get("topic") or sg.DEFAULT_TOPIC).strip(),
         "genre": (data.get("genre") or sg.DEFAULT_GENRE).strip(),
@@ -3712,6 +3753,7 @@ def api_start():
         "description": (data.get("description") or "").strip(),
         "word_count": int(data.get("word_count") or sg.DEFAULT_WORDS),
         "model": _resolve_ollama_model(data.get("model")),
+        "seo_keywords": [str(k).strip() for k in seo_kws if str(k).strip()][:8],
     }
     # Surface a clear error if Ollama is down before kicking off a thread.
     if sg.check_ollama() is None:
@@ -3726,18 +3768,21 @@ def api_start():
     return jsonify({"ok": True, "job_id": job_id, "inputs": inputs})
 
 
-@app.route("/api/start_short", methods=["POST"])
+@app.route(“/api/start_short”, methods=[“POST”])
 def api_start_short():
-    """One-shot short-form generation (30sâ€“10min). Reuses the same JOBS table
-    so the existing /api/status/<id> + /api/script/<id> endpoints work."""
+    “””One-shot short-form generation (30sâ€”10min). Reuses the same JOBS table
+    so the existing /api/status/<id> + /api/script/<id> endpoints work.”””
     data = request.get_json(force=True) or {}
+    insights_loaded = channel_insights.load(BASE_DIR)
+    seo_kws = (insights_loaded.get(“seo_keywords”) or []) + (insights_loaded.get(“gap_keywords”) or [])
     inputs = {
-        "topic": (data.get("topic") or sg.DEFAULT_TOPIC).strip(),
-        "genre": (data.get("genre") or sg.DEFAULT_GENRE).strip(),
-        "tone": (data.get("tone") or sg.DEFAULT_TONE).strip(),
-        "description": (data.get("description") or "").strip(),
-        "word_count": int(data.get("word_count") or 280),
-        "model": _resolve_ollama_model(data.get("model")),
+        “topic”: (data.get(“topic”) or sg.DEFAULT_TOPIC).strip(),
+        “genre”: (data.get(“genre”) or sg.DEFAULT_GENRE).strip(),
+        “tone”: (data.get(“tone”) or sg.DEFAULT_TONE).strip(),
+        “description”: (data.get(“description”) or “”).strip(),
+        “word_count”: int(data.get(“word_count”) or 280),
+        “model”: _resolve_ollama_model(data.get(“model”)),
+        “seo_keywords”: [str(k).strip() for k in seo_kws if str(k).strip()][:8],
     }
     if sg.check_ollama() is None:
         return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
