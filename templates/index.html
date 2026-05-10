@@ -168,6 +168,146 @@
   .pl-mobile-bypass:hover, .pl-mobile-bypass:active { color: #8c8a82; }
 </style>
 <script src="{{ '/static/mobile-gate.js' | versioned }}"></script>
+
+<!-- Onboarding overlay. Full-page flow shown once to new users.
+     Three paths: existing channel, new creator, explorer.
+     Controlled by localStorage 'phantomline-onboarding-complete'.
+     Replayable from Settings. -->
+<div id="onboardingOverlay" class="ob-overlay" hidden>
+  <div class="ob-container">
+    <div class="ob-progress" id="obProgress">
+      <div class="ob-progress-fill" id="obProgressFill"></div>
+    </div>
+
+    <!-- Screen 1: Intent -->
+    <div class="ob-screen active" data-ob-screen="intent">
+      <div class="ob-eyebrow">Welcome to Phantomline</div>
+      <h2 class="ob-heading">What brings you here?</h2>
+      <p class="ob-subtext">This helps us tailor the studio to your workflow.</p>
+      <div class="ob-cards">
+        <button class="ob-card" data-ob-path="existing" type="button">
+          <svg class="ob-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <strong class="ob-card-title">I have a YouTube channel</strong>
+          <span class="ob-card-desc">Plug in your channel and start creating</span>
+        </button>
+        <button class="ob-card" data-ob-path="new" type="button">
+          <svg class="ob-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <strong class="ob-card-title">I want to start a channel</strong>
+          <span class="ob-card-desc">We'll help you pick a niche and get set up</span>
+        </button>
+        <button class="ob-card" data-ob-path="explorer" type="button">
+          <svg class="ob-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          <strong class="ob-card-title">Just exploring</strong>
+          <span class="ob-card-desc">Jump in and look around</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen A2: Connect YouTube (existing channel path) -->
+    <div class="ob-screen" data-ob-screen="connect">
+      <button class="ob-back" type="button" data-ob-goto="intent" aria-label="Go back">← Back</button>
+      <div class="ob-eyebrow">Existing channel</div>
+      <h2 class="ob-heading">Let's plug into your channel</h2>
+      <p class="ob-subtext">We'll pull your niche, recent topics, and audience data to personalize every suggestion.</p>
+      <div class="ob-connect-area">
+        <button id="obConnectYouTubeBtn" class="ob-cta" type="button">
+          <svg class="ob-cta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          Connect YouTube
+        </button>
+        <div id="obConnectStatus" class="ob-connect-status" hidden>
+          <div class="ob-channel-card" id="obChannelCard">
+            <img id="obChannelAvatar" class="ob-channel-avatar" src="" alt="" />
+            <div>
+              <strong id="obChannelName"></strong>
+              <span id="obChannelSubs" class="ob-channel-subs"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="obConnectSkip" class="ob-skip" type="button">Skip for now — I'll connect later</button>
+      <button id="obConnectNext" class="ob-cta ob-cta-next" type="button" hidden>Continue →</button>
+    </div>
+
+    <!-- Screen 2b: Pick niche (shared by new + existing-skip paths) -->
+    <div class="ob-screen" data-ob-screen="niche">
+      <button class="ob-back" type="button" data-ob-goto="intent" aria-label="Go back">← Back</button>
+      <div class="ob-eyebrow">New channel</div>
+      <h2 class="ob-heading">What kind of videos do you want to make?</h2>
+      <p class="ob-subtext">Pick a niche — you can always change this later.</p>
+      <div class="ob-niche-grid">
+        <button class="ob-niche-card" data-ob-niche="tech" type="button"><span class="ob-niche-emoji">⚡</span>Tech / AI</button>
+        <button class="ob-niche-card" data-ob-niche="finance" type="button"><span class="ob-niche-emoji">💰</span>Finance</button>
+        <button class="ob-niche-card" data-ob-niche="science" type="button"><span class="ob-niche-emoji">🔬</span>Science</button>
+        <button class="ob-niche-card" data-ob-niche="history" type="button"><span class="ob-niche-emoji">📜</span>History</button>
+        <button class="ob-niche-card" data-ob-niche="true-crime" type="button"><span class="ob-niche-emoji">🔍</span>True Crime</button>
+        <button class="ob-niche-card" data-ob-niche="motivational" type="button"><span class="ob-niche-emoji">🔥</span>Motivation</button>
+        <button class="ob-niche-card" data-ob-niche="scary-story" type="button"><span class="ob-niche-emoji">👻</span>Horror / Mystery</button>
+        <button class="ob-niche-card" data-ob-niche="travel" type="button"><span class="ob-niche-emoji">🌎</span>Travel</button>
+        <button class="ob-niche-card" data-ob-niche="kids-edu" type="button"><span class="ob-niche-emoji">🎓</span>Kids / Education</button>
+        <button class="ob-niche-card" data-ob-niche="philosophy" type="button"><span class="ob-niche-emoji">🧠</span>Philosophy</button>
+        <button class="ob-niche-card" data-ob-niche="reddit-story" type="button"><span class="ob-niche-emoji">📖</span>Reddit Stories</button>
+        <button class="ob-niche-card" data-ob-niche="custom" data-ob-custom type="button"><span class="ob-niche-emoji">✏️</span>Something else</button>
+      </div>
+      <div id="obCustomNicheWrap" class="ob-custom-niche" hidden>
+        <input id="obCustomNicheInput" class="ob-niche-input" type="text" placeholder="Describe your niche..." />
+        <button id="obCustomNicheConfirm" class="ob-cta" type="button">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Example video showcase -->
+    <div class="ob-screen" data-ob-screen="generating">
+      <div class="ob-eyebrow" id="obShowcaseEyebrow">Here's what you can create</div>
+      <h2 class="ob-heading" id="obShowcaseHeading">This is a Phantomline video</h2>
+      <p class="ob-subtext" id="obShowcaseSubtext">Every part — script, voice, music, captions, visuals — was generated by AI on a local machine.</p>
+      <div class="ob-showcase-layout">
+        <div class="ob-phone-wrap">
+          <div class="ob-phone-frame">
+            <video class="ob-phone-video" id="obShowcaseVideo"
+                   autoplay muted loop playsinline preload="metadata"
+                   aria-label="Example Phantomline video"></video>
+            <div class="ob-phone-top">
+              <span class="ob-phone-time">9:41</span>
+              <span class="ob-phone-system">
+                <svg viewBox="0 0 16 10" width="14" height="9" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="3" height="4"/><rect x="4" y="4" width="3" height="6"/><rect x="8" y="2" width="3" height="8"/><rect x="12" y="0" width="3" height="10"/></svg>
+                <svg viewBox="0 0 16 12" width="13" height="10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 5a9 9 0 0 1 12 0M4.5 7.5a5 5 0 0 1 7 0M7 10a1.5 1.5 0 0 1 2 0"/></svg>
+                <svg viewBox="0 0 22 10" width="18" height="8" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><rect x="0.5" y="0.5" width="18" height="9" rx="2"/><rect x="2" y="2" width="14" height="6" rx="1" fill="currentColor"/><rect x="19.5" y="3" width="2" height="4" rx="0.5" fill="currentColor"/></svg>
+              </span>
+            </div>
+            <div class="ob-phone-topactions" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+            </div>
+            <div class="ob-phone-rail">
+              <div class="ob-phone-action"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9A2 2 0 0 0 19.7 9zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg><span>12K</span></div>
+              <div class="ob-phone-action"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.38 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.5 8.5 0 0 1 4 12 8.38 8.38 0 0 1 12.5 3.5 8.38 8.38 0 0 1 21 11.5z"/></svg><span>847</span></div>
+              <div class="ob-phone-action"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg><span>Share</span></div>
+              <div class="ob-phone-yt"><svg viewBox="0 0 28 20" width="22" height="16"><rect width="28" height="20" rx="5" fill="#ff0033"/><polygon points="11,5 11,15 19,10" fill="#fff"/></svg></div>
+            </div>
+            <div class="ob-phone-bottom">
+              <span class="ob-phone-creator">
+                <span class="ob-phone-avatar"></span>
+                <strong id="obShowcaseCreator">@your_channel</strong>
+              </span>
+              <span class="ob-phone-desc" id="obShowcaseDesc">Made with Phantomline</span>
+            </div>
+          </div>
+        </div>
+        <div class="ob-showcase-info">
+          <div class="ob-gen-steps">
+            <div class="ob-gen-step done" data-ob-gen="script"><span class="ob-gen-dot"></span>Script written by AI</div>
+            <div class="ob-gen-step done" data-ob-gen="narration"><span class="ob-gen-dot"></span>Voice generated locally</div>
+            <div class="ob-gen-step done" data-ob-gen="visuals"><span class="ob-gen-dot"></span>Visuals created by AI</div>
+            <div class="ob-gen-step done" data-ob-gen="music"><span class="ob-gen-dot"></span>Music composed by AI</div>
+            <div class="ob-gen-step done" data-ob-gen="render"><span class="ob-gen-dot"></span>Rendered as MP4</div>
+          </div>
+          <div class="ob-gen-status" id="obGenStatus">100% generated on a local machine — no cloud, no APIs.</div>
+          <button id="obShowcaseGo" class="ob-cta" type="button">Start creating →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <a class="skip-to-main" href="#main" style="position:absolute;top:-40px;left:0;background:#22E7F5;color:#0B0F11;font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;font-weight:600;padding:10px 16px;text-decoration:none;letter-spacing:0.02em;text-transform:lowercase;z-index:9999;transition:top 120ms ease;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to main content</a>
 <div class="wrap">
   <!-- Visually-hidden h1 for screen readers + SEO. The studio's visible
@@ -417,431 +557,417 @@
   <div id="tab-make" class="tab-content active">
     <div class="workflow-grid">
       <section class="panel make-main-panel">
-        <!-- First-run only hero. Hidden for returning users via the
-             body.is-returning class set by phantomline.js when the
-             phantomline-make-hero-seen flag is in localStorage. After
-             the first session a user knows the workflow. the eyebrow,
-             tagline, and 5-step rail just become wallpaper. The Load
-             Demo + Brand controls move to the right rail's
-             next-action-card area in returning-user mode (see CSS).
-             ~280px reclaimed for returning users on every visit. -->
-        <div class="make-hero" data-first-run-only>
-          <div>
-            <div class="make-eyebrow">Local creator studio</div>
-            <h2>Make faceless videos from a few clicks</h2>
-            <p class="hint">Pick a format, choose a visual layer, let Ollama shape the hook and title package, then render a narrated MP4 on your own machine.</p>
-            <div class="workflow-rail" aria-label="Create workflow" style="margin-top: 14px;">
-              <a href="#makeStageFormat" class="rail-step"><b>1</b><strong>Format</strong></a>
-              <a href="#makeStageIdea" class="rail-step"><b>2</b><strong>Idea + title</strong></a>
-              <a href="#makeStageVisuals" class="rail-step"><b>3</b><strong>Visuals</strong></a>
-              <a href="#makeStageRender" class="rail-step"><b>4</b><strong>Render</strong></a>
-              <a href="#tab-publish" class="rail-step"><b>5</b><strong>Publish</strong></a>
-            </div>
-          </div>
-          <div class="make-mini-actions">
-            <button id="makeLoadDemoBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Load Demo</button>
-            <details style="display:inline-block; margin-top:0;">
-              <summary style="cursor:pointer; padding:9px 14px; border:1px solid var(--rule-strong); font-family:var(--font-mono); font-size:13px; font-weight:600; letter-spacing:0.02em; text-transform:lowercase; color:var(--paper); user-select:none;">brand ▾</summary>
-              <div style="display:flex; gap:6px; margin-top:6px;">
-                <button id="makeSaveBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Save Brand</button>
-                <button id="makeLoadBrandBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Load Brand</button>
-              </div>
-            </details>
-          </div>
+        <!-- Wizard step bar -->
+        <div class="wiz-bar" id="wizBar">
+          <button class="wiz-step active" data-wiz="1" type="button"><span class="wiz-num">1</span><span class="wiz-label">Script</span></button>
+          <div class="wiz-line"></div>
+          <button class="wiz-step" data-wiz="2" type="button"><span class="wiz-num">2</span><span class="wiz-label">Style</span></button>
+          <div class="wiz-line"></div>
+          <button class="wiz-step" data-wiz="3" type="button"><span class="wiz-num">3</span><span class="wiz-label">Review</span></button>
         </div>
 
-        <!-- Channel Insights: persistent analytics + SEO state. Wrapped
-             in a <details> expander so it doesn't break the workflow
-             flow on first-time visits. 95% of users skip the CSV
-             upload, and putting it inline above step 1 was making it
-             read as required. When configured, every idea/title
-             generation is automatically informed by the user's
-             channel performance data, so the value is real once the
-             user opts in. -->
-        <details id="insightsPanel" class="insights-panel compact">
-          <summary class="ip-head" style="cursor:pointer; list-style:none;">
-            <span class="ip-title">Optional: channel intelligence</span>
-            <span class="ip-status" id="insightsStatus">not configured</span>
-          </summary>
-          <div id="insightsBody" class="ip-empty">
-            Upload analytics once to make ideas, titles, scripts, SEO, and publish packages follow what already works for your channel.
-          </div>
-          <div class="ip-actions" id="insightsActions">
-            <button type="button" id="insightsImportAnalyticsBtn">Import Overview CSV</button>
-            <button type="button" id="insightsImportTrafficBtn">Import Traffic Sources CSV</button>
-            <button type="button" id="insightsImportSearchBtn">Import Search Terms CSV</button>
-            <button type="button" id="insightsClearBtn" style="margin-left:auto; opacity:0.65;">Clear</button>
-          </div>
-          <input type="file" id="insightsAnalyticsFile" accept=".csv,.tsv" style="display:none;" />
-          <input type="file" id="insightsTrafficFile" accept=".csv,.tsv" style="display:none;" />
-          <input type="file" id="insightsSearchFile" accept=".csv,.tsv" style="display:none;" />
-        </details>
+        <!-- Hidden selects that existing JS depends on -->
+        <select id="makeRecipe" style="display:none;">
+          <option value="custom" selected>Custom faceless channel</option>
+          <option value="viral-story">Viral Story Short</option>
+          <option value="survival">Survival tips</option>
+          <option value="mystery">Mystery documentary</option>
+          <option value="history">History explainer</option>
+          <option value="kids-edu">Kids educational</option>
+          <option value="tech">Tech explainer</option>
+          <option value="finance">Finance explainer</option>
+          <option value="scary-story">Scary story narration</option>
+          <option value="motivational">Motivational shorts</option>
+          <option value="reddit-story">Reddit-style story</option>
+          <option value="true-crime">True crime</option>
+          <option value="asmr-sleep">ASMR / Sleep</option>
+          <option value="science">Science explainer</option>
+          <option value="conspiracy">Conspiracy / What if</option>
+          <option value="top-list">Top 10 / Ranked</option>
+          <option value="travel">Travel / Geography</option>
+          <option value="philosophy">Philosophy</option>
+          <option value="urban-legend">Urban legends</option>
+          <option value="news-recap">News recap</option>
+          <option value="product-review">Product review</option>
+        </select>
+        <div id="makeRecipeCards" style="display:none;"></div>
 
-        <div class="make-stage" id="makeStageFormat">
-          <div class="make-stage-title">
-            <strong>1. Pick the channel format</strong>
-            <span>One click fills the creative direction.</span>
+        <!-- ═══ STEP 1: Script ═══ -->
+        <div class="wiz-panel active" data-wiz-panel="1">
+          <div class="make-stage" id="makeStageIdea">
+            <div class="make-stage-title">
+              <strong>What's the video about?</strong>
+              <span>Generate ideas or type your own.</span>
+            </div>
+            <div class="script-actions" style="margin-top:0;">
+              <button id="makeShuffleIdeaBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Generate Ideas</button>
+              <button id="makeTitleIdeasBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;" disabled data-blocked-reason="Generate and pick an idea first">Generate Titles</button>
+              <span class="hint" id="makeIdeaStatus" style="align-self:center;"></span>
+            </div>
+            <div id="makeIdeaDeck" class="idea-deck"></div>
+            <div id="makeTitleDeck" class="idea-deck"></div>
+            <div class="title-package" id="makeTitlePackage">
+              <label for="makePreferredTitle">Chosen YouTube title</label>
+              <input type="text" id="makePreferredTitle" placeholder="Click a generated title or write your own." />
+            </div>
+            <label for="makeTopic">Video idea</label>
+            <textarea id="makeTopic" rows="3" placeholder="e.g. {{ defaults.topic }}"></textarea>
           </div>
-          <!-- Format picker: 4 most common up-front (Custom is the
-               flexible default; Viral Story / Reddit / Survival are
-               the highest-volume creator niches per the channel data).
-               The other 6 niches live in a 'More formats' expander
-               below. same data-recipe values, same JS wiring, just
-               not visually shouting at first-time users. -->
-          <div class="choice-grid" id="makeRecipeCards">
-            <button class="choice-card active" type="button" data-recipe="custom"><strong>Custom</strong><span>Flexible faceless video for any niche.</span></button>
-            <button class="choice-card" type="button" data-recipe="viral-story"><strong>Viral Story Short</strong><span>Confession, betrayal, horror, or impossible tension in under 45s.</span></button>
-            <button class="choice-card" type="button" data-recipe="reddit-story"><strong>Reddit-style</strong><span>Personal conflict, twist, and payoff.</span></button>
-            <button class="choice-card" type="button" data-recipe="survival"><strong>Survival tips</strong><span>Actionable steps with a visual host.</span></button>
+
+          <div class="make-top-grid">
+            <div>
+              <label for="makeDuration">Length</label>
+              <select id="makeDuration">
+                <option value="70">30 seconds</option>
+                <option value="95">40 seconds</option>
+                <option value="140">1 minute</option>
+                <option value="280" selected>2 minutes</option>
+                <option value="700">5 minutes</option>
+                <option value="1400">10 minutes</option>
+                <option value="2800">20 minutes</option>
+                <option value="4200">30 minutes</option>
+                <option value="8400">60 minutes</option>
+              </select>
+              <div id="makeDurationHint" class="hint" style="margin-top:6px;">Short-form mode.</div>
+            </div>
+            <div>
+              <label for="makeAspect">Video ratio</label>
+              <select id="makeAspect">
+                <option value="16:9" selected>16:9 YouTube</option>
+                <option value="9:16">9:16 Shorts / TikTok</option>
+                <option value="1:1">1:1 square</option>
+              </select>
+            </div>
           </div>
-          <details style="margin-top: 12px;">
-            <summary style="cursor: pointer; font-family: var(--font-mono); font-size: 12px; color: var(--text-2); letter-spacing: 0.04em; padding: 8px 0;">More formats (16 more) ▾</summary>
-            <div class="choice-grid" id="makeRecipeCardsExtra" style="margin-top: 12px;">
-              <button class="choice-card" type="button" data-recipe="scary-story"><strong>Scary story</strong><span>Slow-burn narration with eerie visuals.</span></button>
-              <button class="choice-card" type="button" data-recipe="mystery"><strong>Mystery doc</strong><span>Facts, theories, and unresolved tension.</span></button>
-              <button class="choice-card" type="button" data-recipe="finance"><strong>Finance</strong><span>Simple money lessons without hype.</span></button>
-              <button class="choice-card" type="button" data-recipe="history"><strong>History</strong><span>Dramatic explainers with clear stakes.</span></button>
-              <button class="choice-card" type="button" data-recipe="kids-edu"><strong>Kids edu</strong><span>Friendly, visual, parent-safe explainers.</span></button>
-              <button class="choice-card" type="button" data-recipe="motivational"><strong>Motivation</strong><span>Punchy emotional shorts.</span></button>
-              <button class="choice-card" type="button" data-recipe="true-crime"><strong>True crime</strong><span>Case breakdowns with timeline and evidence.</span></button>
-              <button class="choice-card" type="button" data-recipe="asmr-sleep"><strong>ASMR / Sleep</strong><span>Soothing narration for bedtime and relaxation.</span></button>
-              <button class="choice-card" type="button" data-recipe="science"><strong>Science explainer</strong><span>Complex topics made visual and simple.</span></button>
-              <button class="choice-card" type="button" data-recipe="conspiracy"><strong>Conspiracy / What if</strong><span>Wild theories presented neutrally.</span></button>
-              <button class="choice-card" type="button" data-recipe="top-list"><strong>Top 10 / Ranked</strong><span>Countdown lists with hooks per item.</span></button>
-              <button class="choice-card" type="button" data-recipe="travel"><strong>Travel / Geography</strong><span>Beautiful places, culture facts, wanderlust.</span></button>
-              <button class="choice-card" type="button" data-recipe="philosophy"><strong>Philosophy</strong><span>Deep questions with cinematic narration.</span></button>
-              <button class="choice-card" type="button" data-recipe="urban-legend"><strong>Urban legends</strong><span>Local myths and creepy folklore.</span></button>
-              <button class="choice-card" type="button" data-recipe="news-recap"><strong>News recap</strong><span>Fast daily or weekly news breakdown.</span></button>
-              <button class="choice-card" type="button" data-recipe="product-review"><strong>Product review</strong><span>Honest breakdowns with pros and cons.</span></button>
+
+          <div class="make-stage" id="makeViralStage" style="display:none;">
+            <div class="make-stage-title">
+              <strong>Story engine</strong>
+              <span>Phantomline uses this to shape the hook, twist, captions, and loop.</span>
+            </div>
+            <div class="choice-grid" id="makeTensionCards">
+              <button class="choice-card active" type="button" data-tension="betrayal_drama"><strong>Betrayal / Drama</strong><span>Wrong screenshots, hidden phones, secrets.</span></button>
+              <button class="choice-card" type="button" data-tension="confession_secret"><strong>Confession / Secret</strong><span>A private lie or secret finally leaks.</span></button>
+              <button class="choice-card" type="button" data-tension="rule_horror"><strong>Rule Horror</strong><span>A clear rule gets broken.</span></button>
+              <button class="choice-card" type="button" data-tension="impossible_situation"><strong>Impossible Situation</strong><span>A text, person, or event that should not exist.</span></button>
+            </div>
+            <div class="row">
+              <div>
+                <label for="makeTensionFormat">Tension format</label>
+                <select id="makeTensionFormat">
+                  <option value="betrayal_drama" selected>Betrayal / Drama</option>
+                  <option value="confession_secret">Confession / Secret</option>
+                  <option value="rule_horror">Rule-Based Horror</option>
+                  <option value="impossible_situation">Impossible Situation</option>
+                </select>
+              </div>
+              <div>
+                <label for="makeLoopType">Loop ending</label>
+                <select id="makeLoopType">
+                  <option value="circular" selected>Circular callback</option>
+                  <option value="missing-info">Missing information</option>
+                  <option value="hard-cut">Fast hard cut</option>
+                  <option value="question">Question ending</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <details class="advanced-box">
+            <summary>Advanced script controls</summary>
+            <div class="advanced-inner">
+              <div class="row">
+                <div>
+                  <label for="makeNiche">Niche</label>
+                  <input type="text" id="makeNiche" value="{{ defaults.genre }}" />
+                </div>
+                <div>
+                  <label for="makeAudience">Audience</label>
+                  <input type="text" id="makeAudience" value="curious general viewers" />
+                </div>
+              </div>
+              <div class="row">
+                <div>
+                  <label for="makeFormat">Video format</label>
+                  <select id="makeFormat">
+                    <option value="story">Narrated story</option>
+                    <option value="listicle">Listicle</option>
+                    <option value="tutorial">Step-by-step tutorial</option>
+                    <option value="documentary">Mini documentary</option>
+                    <option value="explainer">Explainer</option>
+                    <option value="short-hook">Short-form hook</option>
+                    <option value="viral-short">Viral story short</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="makeModel">Ollama model</label>
+                  <select id="makeModel"><option value="{{ defaults.model }}">{{ defaults.model }}</option></select>
+                </div>
+              </div>
+              <label for="makeDesc">Script direction</label>
+              <textarea id="makeDesc" rows="3">Open with a strong hook, keep each section visual, avoid filler, and write for a single narrator.</textarea>
+              <div class="row">
+                <div>
+                  <label for="makeHookStyle">Hook style</label>
+                  <select id="makeHookStyle">
+                    <option value="mistake" selected>Mistake warning</option>
+                    <option value="question">Shocking question</option>
+                    <option value="secret">Most people don't know</option>
+                    <option value="cold-open">Visual cold open</option>
+                    <option value="countdown">Countdown / list</option>
+                    <option value="conflict">Story conflict</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="makeKeywordMode">Keyword emphasis</label>
+                  <select id="makeKeywordMode">
+                    <option value="auto" selected>Auto highlight</option>
+                    <option value="minimal">Minimal</option>
+                    <option value="off">Off</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div>
+                  <label for="makeTone">Narration tone</label>
+                  <input type="text" id="makeTone" value="{{ defaults.tone }}" />
+                </div>
+              </div>
             </div>
           </details>
-          <select id="makeRecipe" style="display:none;">
-            <option value="custom" selected>Custom faceless channel</option>
-            <option value="viral-story">Viral Story Short</option>
-            <option value="survival">Survival tips</option>
-            <option value="mystery">Mystery documentary</option>
-            <option value="history">History explainer</option>
-            <option value="kids-edu">Kids educational</option>
-            <option value="tech">Tech explainer</option>
-            <option value="finance">Finance explainer</option>
-            <option value="scary-story">Scary story narration</option>
-            <option value="motivational">Motivational shorts</option>
-            <option value="reddit-story">Reddit-style story</option>
-            <option value="true-crime">True crime</option>
-            <option value="asmr-sleep">ASMR / Sleep</option>
-            <option value="science">Science explainer</option>
-            <option value="conspiracy">Conspiracy / What if</option>
-            <option value="top-list">Top 10 / Ranked</option>
-            <option value="travel">Travel / Geography</option>
-            <option value="philosophy">Philosophy</option>
-            <option value="urban-legend">Urban legends</option>
-            <option value="news-recap">News recap</option>
-            <option value="product-review">Product review</option>
-          </select>
+
+          <div class="wiz-nav">
+            <div></div>
+            <button class="btn wiz-next" type="button" data-wiz-to="2">Next: Style →</button>
+          </div>
         </div>
 
-        <div class="make-stage" id="makeViralStage" style="display:none;">
-          <div class="make-stage-title">
-            <strong>Story engine</strong>
-            <span>Phantomline uses this to shape the hook, twist, captions, and loop.</span>
+        <!-- ═══ STEP 2: Style ═══ -->
+        <div class="wiz-panel" data-wiz-panel="2">
+          <div class="make-stage" id="makeStageVisuals">
+            <div class="make-stage-title">
+              <strong>Visual layer</strong>
+              <span>AI-generated art or retention footage.</span>
+            </div>
+            <div class="choice-grid" id="makeVisualSourceCards">
+              <button class="choice-card active" type="button" data-mode="generated"><strong>AI scene images</strong><span>Generate matching local scene stills with Forge.</span></button>
+              <button class="choice-card" type="button" data-mode="source"><strong>Retention footage</strong><span>Use gameplay, parkour, screen recordings, or any background clip.</span></button>
+            </div>
           </div>
-          <div class="choice-grid" id="makeTensionCards">
-            <button class="choice-card active" type="button" data-tension="betrayal_drama"><strong>Betrayal / Drama</strong><span>Wrong screenshots, hidden phones, secrets.</span></button>
-            <button class="choice-card" type="button" data-tension="confession_secret"><strong>Confession / Secret</strong><span>A private lie or secret finally leaks.</span></button>
-            <button class="choice-card" type="button" data-tension="rule_horror"><strong>Rule Horror</strong><span>A clear rule gets broken.</span></button>
-            <button class="choice-card" type="button" data-tension="impossible_situation"><strong>Impossible Situation</strong><span>A text, person, or event that should not exist.</span></button>
-          </div>
-          <div class="row">
+
+          <div class="make-top-grid">
             <div>
-              <label for="makeTensionFormat">Tension format</label>
-              <select id="makeTensionFormat">
-                <option value="betrayal_drama" selected>Betrayal / Drama</option>
-                <option value="confession_secret">Confession / Secret</option>
-                <option value="rule_horror">Rule-Based Horror</option>
-                <option value="impossible_situation">Impossible Situation</option>
+              <label for="makeVideoMode">Visual source</label>
+              <select id="makeVideoMode">
+                <option value="generated">Generate scene images</option>
+                <option value="library" selected>Use Phantomline footage</option>
+                <option value="source">Use retention/source footage</option>
               </select>
             </div>
             <div>
-              <label for="makeLoopType">Loop ending</label>
-              <select id="makeLoopType">
-                <option value="circular" selected>Circular callback</option>
-                <option value="missing-info">Missing information</option>
-                <option value="hard-cut">Fast hard cut</option>
-                <option value="question">Question ending</option>
-              </select>
+              <label for="makeVoice">Voice</label>
+              <select id="makeVoice"></select>
             </div>
           </div>
+
+          <div id="makeSourceVideoPanel" class="make-section" style="display:none;">
+            <div class="make-section-title">
+              <strong>Source video</strong>
+              <span>Gameplay, parkour, clips, screen recordings.</span>
+            </div>
+            <div id="makeSourceUploadRow">
+              <label for="makeSourceVideoFile">Source video</label>
+              <input type="file" id="makeSourceVideoFile" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-msvideo,video/x-matroska" />
+            </div>
+            <div id="makeSourceLibraryRow" class="source-library-row" hidden>
+              <label>Phantomline footage</label>
+              <button type="button" id="browseFootageLibraryBtn" class="btn secondary">Browse videos</button>
+              <div id="makeSourceLibraryPick" class="source-library-pick" hidden>
+                <span class="source-library-pick-label">Library:</span>
+                <span class="source-library-pick-id" data-clip-id=""></span>
+                <button type="button" class="source-library-pick-clear" aria-label="Clear library pick">×</button>
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="makeSourceFit">Video fit</label>
+                <select id="makeSourceFit">
+                  <option value="cover" selected>Fill frame / crop</option>
+                  <option value="contain">Fit full video / black bars</option>
+                </select>
+              </div>
+              <div>
+                <label for="makeCaptions">Captions</label>
+                <select id="makeCaptions">
+                  <option value="1" selected>Burn in captions</option>
+                  <option value="0">No captions</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="makeCaptionStyle">Caption style</label>
+                <select id="makeCaptionStyle">
+                  <option value="tiktok" selected>TikTok bold</option>
+                  <option value="clean">Clean lower-third</option>
+                  <option value="horror">Mystery / horror</option>
+                  <option value="kids">Kids cartoon</option>
+                  <option value="documentary">Documentary</option>
+                </select>
+              </div>
+              <div>
+                <label for="makeTitleStyle">Title style</label>
+                <select id="makeTitleStyle">
+                  <option value="top" selected>Top badge</option>
+                  <option value="none">No title overlay</option>
+                </select>
+              </div>
+            </div>
+            <select id="makePatternInterrupts" style="display:none;"><option value="0" selected>Off</option></select>
+            <select id="makeSourceEnhance" style="display:none;"><option value="none" selected>None</option></select>
+            <div class="hint" id="makeSourceVideoStatus" style="margin-top:6px;">Upload gameplay, parkour, drone footage, screen recordings, or any clip you want narrated.</div>
+          </div>
+
+          <details class="advanced-box">
+            <summary>Advanced style controls</summary>
+            <div class="advanced-inner">
+              <div class="row">
+                <div>
+                  <label for="makeVisualPreset">Visual style</label>
+                  <select id="makeVisualPreset">
+                    <option value="cinematic-photoreal" selected>Cinematic photoreal</option>
+                    <option value="animated-film">Animated film</option>
+                    <option value="storybook">Storybook illustration</option>
+                    <option value="cartoon">Clean cartoon</option>
+                    <option value="survival-channel">Survival tips channel</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="makeAmbience">Ambience</label>
+                  <input type="text" id="makeAmbience" value="night mist, soft blue moonlight, calm suspense" />
+                </div>
+              </div>
+              <div class="row">
+                <div>
+                  <label for="makeSceneSeconds">Seconds per scene</label>
+                  <input type="number" id="makeSceneSeconds" min="4" max="12" step="1" value="8" />
+                </div>
+              </div>
+              <label for="makeVisualStyle">Style details</label>
+              <input type="text" id="makeVisualStyle" value="dark cinematic sci-fi, atmospheric fog, soft contrast, film grain" />
+              <label for="makeVisualCharacter">Recurring character / host</label>
+              <input type="text" id="makeVisualCharacter" placeholder="Example: a small friendly backpacker host demonstrating each survival tip, orange jacket, simple readable silhouette" />
+              <label for="makeMusicPrompt">Music bed</label>
+              <textarea id="makeMusicPrompt" rows="2">calm cinematic ambient pad, distant piano, low strings, soft reverb, no drums, sleep-friendly, slow tempo</textarea>
+            </div>
+          </details>
+
+          <div class="wiz-nav">
+            <button class="btn secondary wiz-back" type="button" data-wiz-to="1">← Script</button>
+            <button class="btn wiz-next" type="button" data-wiz-to="3">Next: Review →</button>
+          </div>
         </div>
 
-        <div class="make-stage" id="makeStageIdea">
-          <div class="make-stage-title">
-            <strong>2. Generate or choose the idea</strong>
-            <span>Typing is optional.</span>
+        <!-- ═══ STEP 3: Review & Render ═══ -->
+        <div class="wiz-panel" data-wiz-panel="3">
+          <div class="make-stage" id="makeStageRender">
+            <div class="make-stage-title">
+              <strong>Review &amp; render</strong>
+              <span>Confirm your choices and hit render.</span>
+            </div>
+            <div class="wiz-review" id="wizReview"></div>
           </div>
-          <div class="script-actions" style="margin-top:0;">
-            <button id="makeShuffleIdeaBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;">Generate Ideas</button>
-            <button id="makeTitleIdeasBtn" class="btn secondary" type="button" style="width:auto; margin-top:0;" disabled data-blocked-reason="Generate and pick an idea first">Generate Titles</button>
-            <span class="hint" id="makeIdeaStatus" style="align-self:center;"></span>
-          </div>
-          <div id="makeIdeaDeck" class="idea-deck"></div>
-          <div id="makeTitleDeck" class="idea-deck"></div>
-          <div class="title-package" id="makeTitlePackage">
-            <label for="makePreferredTitle">Chosen YouTube title</label>
-            <input type="text" id="makePreferredTitle" placeholder="Click a generated title or write your own." />
-          </div>
-          <label for="makeTopic">Selected video idea</label>
-          <!-- Empty value with the demo topic moved to placeholder so a
-               first-time user doesn't think the example is their idea
-               and type over it nervously. Generate Ideas / pick-an-idea
-               from the deck above will populate the value when the user
-               actually picks one. -->
-          <textarea id="makeTopic" rows="3" placeholder="e.g. {{ defaults.topic }}"></textarea>
-        </div>
 
-        <div class="make-stage" id="makeStageVisuals">
-          <div class="make-stage-title">
-            <strong>3. Pick the visual layer</strong>
-            <span>Generated art or attention footage.</span>
-          </div>
-          <div class="choice-grid" id="makeVisualSourceCards">
-            <button class="choice-card active" type="button" data-mode="generated"><strong>AI scene images</strong><span>Generate matching local scene stills with Forge.</span></button>
-            <button class="choice-card" type="button" data-mode="source"><strong>Retention footage</strong><span>Use gameplay, parkour, screen recordings, or any background clip.</span></button>
-          </div>
-        </div>
+          <!-- Channel Insights (optional, collapsed) -->
+          <details id="insightsPanel" class="insights-panel compact">
+            <summary class="ip-head" style="cursor:pointer; list-style:none;">
+              <span class="ip-title">Optional: channel intelligence</span>
+              <span class="ip-status" id="insightsStatus">not configured</span>
+            </summary>
+            <div id="insightsBody" class="ip-empty">
+              Upload analytics once to make ideas, titles, scripts, SEO, and publish packages follow what already works for your channel.
+            </div>
+            <div class="ip-actions" id="insightsActions">
+              <button type="button" id="insightsImportAnalyticsBtn">Import Overview CSV</button>
+              <button type="button" id="insightsImportTrafficBtn">Import Traffic Sources CSV</button>
+              <button type="button" id="insightsImportSearchBtn">Import Search Terms CSV</button>
+              <button type="button" id="insightsClearBtn" style="margin-left:auto; opacity:0.65;">Clear</button>
+            </div>
+            <input type="file" id="insightsAnalyticsFile" accept=".csv,.tsv" style="display:none;" />
+            <input type="file" id="insightsTrafficFile" accept=".csv,.tsv" style="display:none;" />
+            <input type="file" id="insightsSearchFile" accept=".csv,.tsv" style="display:none;" />
+          </details>
 
-        <div class="make-stage" id="makeStageRender">
-          <div class="make-stage-title">
-            <strong>4. Final render choices</strong>
-            <span>Only the essentials before render.</span>
-          </div>
-        <div class="make-top-grid">
-          <div>
-            <label for="makeVideoMode">Visual source</label>
-            <select id="makeVideoMode">
-              <option value="generated">Generate scene images</option>
-              <option value="library" selected>Use Phantomline footage</option>
-              <option value="source">Use retention/source footage</option>
-            </select>
-          </div>
-          <div>
-            <label for="makeDuration">Length</label>
-            <select id="makeDuration">
-              <option value="70">30 seconds</option>
-              <option value="95">40 seconds</option>
-              <option value="140">1 minute</option>
-              <option value="280" selected>2 minutes</option>
-              <option value="700">5 minutes</option>
-              <option value="1400">10 minutes</option>
-              <option value="2800">20 minutes</option>
-              <option value="4200">30 minutes</option>
-              <option value="8400">60 minutes</option>
-            </select>
-            <div id="makeDurationHint" class="hint" style="margin-top:6px;">Short-form mode.</div>
-          </div>
-          <div>
-            <label for="makeAspect">Video ratio</label>
-            <select id="makeAspect">
-              <option value="16:9" selected>16:9 YouTube</option>
-              <option value="9:16">9:16 Shorts / TikTok</option>
-              <option value="1:1">1:1 square</option>
-            </select>
-          </div>
-        </div>
-        </div>
-
-        <div id="makeSourceVideoPanel" class="make-section" style="display:none;">
-          <div class="make-section-title">
-            <strong>3b. Source video</strong>
-            <span>Gameplay, parkour, clips, screen recordings.</span>
-          </div>
-          <div id="makeSourceUploadRow">
-            <label for="makeSourceVideoFile">Source video</label>
-            <input type="file" id="makeSourceVideoFile" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-msvideo,video/x-matroska" />
-          </div>
-          <div id="makeSourceLibraryRow" class="source-library-row" hidden>
-            <label>Phantomline footage</label>
-            <button type="button" id="browseFootageLibraryBtn" class="btn secondary">Browse videos</button>
-            <div id="makeSourceLibraryPick" class="source-library-pick" hidden>
-              <span class="source-library-pick-label">Library:</span>
-              <span class="source-library-pick-id" data-clip-id=""></span>
-              <button type="button" class="source-library-pick-clear" aria-label="Clear library pick">×</button>
+          <div class="wiz-nav">
+            <button class="btn secondary wiz-back" type="button" data-wiz-to="2">← Style</button>
+            <div class="wiz-render-group">
+              <button id="makeVideoBtn" class="btn">Render Video</button>
+              <button id="makeCancelBtn" class="btn secondary" type="button" style="display:none;" data-blocked-reason="No render in progress">Stop</button>
             </div>
           </div>
-          <div class="row">
-            <div>
-              <label for="makeSourceFit">Video fit</label>
-              <select id="makeSourceFit">
-                <option value="cover" selected>Fill frame / crop</option>
-                <option value="contain">Fit full video / black bars</option>
-              </select>
+
+          <!-- Hidden utility buttons preserved for existing JS -->
+          <button id="makeLoadDemoBtn" type="button" style="display:none;">Load Demo</button>
+          <button id="makeSaveBrandBtn" type="button" style="display:none;">Save Brand</button>
+          <button id="makeLoadBrandBtn" type="button" style="display:none;">Load Brand</button>
+        </div>
+
+        <!-- Production line (shown during/after render, outside wizard steps) -->
+        <h2 id="makeProductionLineHeader" style="margin-top:18px; display:none;">Production line</h2>
+        <div class="workflow-steps" id="makeProductionLine" style="display:none;">
+          <div class="workflow-step" id="makeStepScript">
+            <div class="num">1</div><div><strong>Script</strong><span>Write the voiceover.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepNarration">
+            <div class="num">2</div><div><strong>Narration</strong><span>Generate voice audio locally.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepScenes">
+            <div class="num">3</div><div><strong>Visuals</strong><span>Generate scene art or prepare source video.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepMusic">
+            <div class="num">4</div><div><strong>Music</strong><span>Create a background bed.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepMix">
+            <div class="num">5</div><div><strong>Mix</strong><span>Ducks music under narration.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepTimeline">
+            <div class="num">6</div><div><strong>Timeline</strong><span>Match scenes to audio length.</span></div><div class="state">waiting</div>
+          </div>
+          <div class="workflow-step" id="makeStepVideo">
+            <div class="num">7</div><div><strong>Video</strong><span>Render MP4.</span></div><div class="state">waiting</div>
+          </div>
+        </div>
+
+        <div id="makeResult" class="make-result">
+          <h2 style="margin-top:0;">Video ready</h2>
+          <div class="handoff-card" id="makeHandoffCard">
+            <strong>Finish the launch package</strong>
+            <div class="hint">Preview the MP4, check the publish draft, then schedule or upload from Publish Studio.</div>
+            <div class="row" style="margin-top:12px;">
+              <div>
+                <label for="makePinnedComment">Pinned comment</label>
+                <input type="text" id="makePinnedComment" placeholder="Would you have checked?" />
+              </div>
+              <div>
+                <label for="makeHashtags">Hashtags</label>
+                <input type="text" id="makeHashtags" placeholder="#shorts #storytime #plotwist" />
+              </div>
             </div>
-            <div>
-              <label for="makeCaptions">Captions</label>
-              <select id="makeCaptions">
-                <option value="1" selected>Burn in captions</option>
-                <option value="0">No captions</option>
-              </select>
+            <div class="readiness-checklist" id="makeHandoffChecklist"></div>
+            <div class="handoff-actions">
+              <button class="btn secondary" id="makePreviewFinalBtn" type="button">Preview final video</button>
+              <button class="btn secondary" id="makePublishDraftBtn" type="button">Review publish draft</button>
             </div>
           </div>
-          <div class="row">
-            <div>
-              <label for="makeCaptionStyle">Caption style</label>
-              <select id="makeCaptionStyle">
-                <option value="tiktok" selected>TikTok bold</option>
-                <option value="clean">Clean lower-third</option>
-                <option value="horror">Mystery / horror</option>
-                <option value="kids">Kids cartoon</option>
-                <option value="documentary">Documentary</option>
-              </select>
-            </div>
-            <div>
-              <label for="makeTitleStyle">Title style</label>
-              <select id="makeTitleStyle">
-                <option value="top" selected>Top badge</option>
-                <option value="none">No title overlay</option>
-              </select>
-            </div>
+          <div class="script-actions">
+            <button class="btn secondary" id="makeDownloadVideoBtn">Download MP4</button>
+            <button class="btn secondary" id="makeOpenPublishBtn">Review publish draft</button>
+            <button class="btn secondary" id="makeOpenLibraryBtn">Open Library</button>
+            <button class="btn secondary" id="makeOpenAdvancedBtn">Edit scenes</button>
           </div>
-          <select id="makePatternInterrupts" style="display:none;"><option value="0" selected>Off</option></select>
-          <select id="makeSourceEnhance" style="display:none;"><option value="none" selected>None</option></select>
-          <div class="hint" id="makeSourceVideoStatus" style="margin-top:6px;">Upload gameplay, parkour, drone footage, screen recordings, or any clip you want narrated.</div>
-        </div>
-
-        <details class="advanced-box">
-          <summary>Advanced creative controls</summary>
-          <div class="advanced-inner">
-        <div class="make-section">
-          <div class="make-section-title">
-            <strong>Advanced audience and script</strong>
-            <span>Defines the hook, voice, and pacing.</span>
-          </div>
-
-        <div class="row">
-          <div>
-            <label for="makeNiche">Niche</label>
-            <input type="text" id="makeNiche" value="{{ defaults.genre }}" />
-          </div>
-          <div>
-            <label for="makeAudience">Audience</label>
-            <input type="text" id="makeAudience" value="curious general viewers" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="makeFormat">Video format</label>
-            <select id="makeFormat">
-              <option value="story">Narrated story</option>
-              <option value="listicle">Listicle</option>
-              <option value="tutorial">Step-by-step tutorial</option>
-              <option value="documentary">Mini documentary</option>
-              <option value="explainer">Explainer</option>
-              <option value="short-hook">Short-form hook</option>
-              <option value="viral-short">Viral story short</option>
-            </select>
-          </div>
-          <div>
-            <label for="makeModel">Ollama model</label>
-            <select id="makeModel"><option value="{{ defaults.model }}">{{ defaults.model }}</option></select>
-          </div>
-        </div>
-
-        <label for="makeDesc">Script direction</label>
-        <textarea id="makeDesc" rows="3">Open with a strong hook, keep each section visual, avoid filler, and write for a single narrator.</textarea>
-
-        <div class="row">
-          <div>
-            <label for="makeHookStyle">Hook style</label>
-            <select id="makeHookStyle">
-              <option value="mistake" selected>Mistake warning</option>
-              <option value="question">Shocking question</option>
-              <option value="secret">Most people don't know</option>
-              <option value="cold-open">Visual cold open</option>
-              <option value="countdown">Countdown / list</option>
-              <option value="conflict">Story conflict</option>
-            </select>
-          </div>
-          <div>
-            <label for="makeKeywordMode">Keyword emphasis</label>
-            <select id="makeKeywordMode">
-              <option value="auto" selected>Auto highlight</option>
-              <option value="minimal">Minimal</option>
-              <option value="off">Off</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="makeVoice">Voice</label>
-            <select id="makeVoice"></select>
-          </div>
-          <div>
-            <label for="makeTone">Narration tone</label>
-            <input type="text" id="makeTone" value="{{ defaults.tone }}" />
-          </div>
-        </div>
-        </div>
-
-        <div class="make-section">
-          <div class="make-section-title">
-            <strong>Advanced visual identity</strong>
-            <span>Controls platform format and brand look.</span>
-          </div>
-
-        <div class="row">
-          <div>
-            <label for="makeSceneSeconds">Seconds per scene</label>
-            <input type="number" id="makeSceneSeconds" min="4" max="12" step="1" value="8" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label for="makeVisualPreset">Visual style</label>
-            <select id="makeVisualPreset">
-              <option value="cinematic-photoreal" selected>Cinematic photoreal</option>
-              <option value="animated-film">Animated film</option>
-              <option value="storybook">Storybook illustration</option>
-              <option value="cartoon">Clean cartoon</option>
-              <option value="survival-channel">Survival tips channel</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-          <div>
-            <label for="makeAmbience">Ambience</label>
-            <input type="text" id="makeAmbience" value="night mist, soft blue moonlight, calm suspense" />
-          </div>
-        </div>
-
-        <label for="makeVisualStyle">Style details</label>
-        <input type="text" id="makeVisualStyle" value="dark cinematic sci-fi, atmospheric fog, soft contrast, film grain" />
-
-        <label for="makeVisualCharacter">Recurring character / host</label>
-        <input type="text" id="makeVisualCharacter" placeholder="Example: a small friendly backpacker host demonstrating each survival tip, orange jacket, simple readable silhouette" />
-        </div>
-
-        <div class="make-section">
-          <div class="make-section-title">
-            <strong>Advanced sound and retention</strong>
-            <span>Music and the quality checks that stop the scroll.</span>
-          </div>
-        <label for="makeMusicPrompt">Music bed</label>
-        <textarea id="makeMusicPrompt" rows="2">calm cinematic ambient pad, distant piano, low strings, soft reverb, no drums, sleep-friendly, slow tempo</textarea>
-        <div class="quality-list">
-          <div class="quality-pill">Hook in first 3 seconds</div>
-          <div class="quality-pill">9:16 export for short-form</div>
-          <div class="quality-pill">Captions inside safe area</div>
-          <div class="quality-pill">Motion/pattern change every few seconds</div>
-        </div>
-        </div>
-          </div>
-        </details>
-
-        <button id="makeVideoBtn" class="btn">5. Render Video</button>
-        <button id="makeCancelBtn" class="btn secondary" type="button" style="display:none; margin-left:8px;" data-blocked-reason="No render in progress">Stop watching</button>
-        <div class="hint" style="margin-top:10px;">
-          For 20+ minute videos, Phantomline writes the script in sections, then narrates, scores, mixes, and timelines the full audio. Draft renders now use scene motion clips when present, then still images, and only fall back to cards for missing scenes.
+          <video id="makePreviewVideo" controls style="display:none;"></video>
+          <p class="hint" id="makeResultHint"></p>
         </div>
       </section>
 
@@ -1890,6 +2016,35 @@
           <div class="hint">Used for ideas, titles, scripts, descriptions, analytics, and SEO guidance.</div>
         </div>
         <div class="settings-card">
+          <div class="make-section-title"><strong>Channel format</strong><span>sets creative defaults</span></div>
+          <div class="hint" style="margin:0 0 10px;">Changing your format auto-fills script direction, visual style, music, hook style, and more across every new video.</div>
+          <label for="settingsRecipe">Active format</label>
+          <select id="settingsRecipe">
+            <option value="custom" selected>Custom faceless channel</option>
+            <option value="viral-story">Viral Story Short</option>
+            <option value="reddit-story">Reddit-style story</option>
+            <option value="survival">Survival tips</option>
+            <option value="scary-story">Scary story narration</option>
+            <option value="mystery">Mystery documentary</option>
+            <option value="finance">Finance explainer</option>
+            <option value="history">History explainer</option>
+            <option value="kids-edu">Kids educational</option>
+            <option value="motivational">Motivational shorts</option>
+            <option value="true-crime">True crime</option>
+            <option value="asmr-sleep">ASMR / Sleep</option>
+            <option value="science">Science explainer</option>
+            <option value="conspiracy">Conspiracy / What if</option>
+            <option value="top-list">Top 10 / Ranked</option>
+            <option value="travel">Travel / Geography</option>
+            <option value="philosophy">Philosophy</option>
+            <option value="urban-legend">Urban legends</option>
+            <option value="news-recap">News recap</option>
+            <option value="product-review">Product review</option>
+            <option value="tech">Tech explainer</option>
+          </select>
+          <div class="hint" id="settingsRecipeStatus" style="margin-top:6px;"></div>
+        </div>
+        <div class="settings-card">
           <div class="make-section-title"><strong>Video defaults</strong><span>short-form safe</span></div>
           <div class="row">
             <div>
@@ -1987,6 +2142,7 @@
         <button id="settingsApplyBtn" class="btn" type="button">Apply defaults</button>
         <button id="settingsOpenConnectionsBtn" class="btn secondary" type="button">YouTube connections</button>
         <button id="settingsReplayWalkBtn" class="btn secondary" type="button">Replay walkthrough</button>
+        <button id="settingsReplayOnboardingBtn" class="btn secondary" type="button">Replay onboarding</button>
         <button id="settingsInstallAppBtn" class="btn secondary" type="button" style="display:none;" data-blocked-reason="Install prompt only appears in supported browsers (Chrome, Edge, Safari on iOS 16+).">Install as app</button>
         <button id="settingsOpenCreateBtn" class="btn secondary" type="button">Back to Create Video</button>
       </div>

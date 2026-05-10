@@ -76,6 +76,383 @@ window.addEventListener('DOMContentLoaded', () => forceReadableButtons());
     document.body.classList.add('is-returning');
   }
 })();
+
+// =============================================================================
+// Onboarding flow. Three paths: existing channel, new creator, explorer.
+// Gated by localStorage key. Shows once, replayable from Settings.
+// =============================================================================
+const OB_COMPLETE_KEY = 'phantomline-onboarding-complete';
+const OB_PATH_KEY = 'phantomline-onboarding-path';
+const OB_NICHE_KEY = 'phantomline-onboarding-niche';
+
+(function initOnboarding() {
+  const overlay = document.getElementById('onboardingOverlay');
+  if (!overlay) return;
+
+  // Already completed — don't show.
+  try {
+    if (localStorage.getItem(OB_COMPLETE_KEY) === '1') return;
+  } catch (_) { return; }
+
+  // Show onboarding, hide studio.
+  overlay.hidden = false;
+  const wrap = document.querySelector('.wrap');
+  if (wrap) wrap.style.display = 'none';
+
+  const progressFill = document.getElementById('obProgressFill');
+  let currentPath = null;
+  let connectedChannel = null;
+  let selectedNiche = null;
+
+  const SCREENS = {
+    intent:               { progress: 20 },
+    connect:              { progress: 45 },
+    niche:                { progress: 65 },
+    generating:           { progress: 95 },
+  };
+
+  function showScreen(name) {
+    overlay.querySelectorAll('.ob-screen').forEach(s => s.classList.remove('active'));
+    const target = overlay.querySelector(`[data-ob-screen="${name}"]`);
+    if (target) target.classList.add('active');
+    if (progressFill && SCREENS[name]) {
+      progressFill.style.width = SCREENS[name].progress + '%';
+    }
+  }
+
+  function completeOnboarding() {
+    try {
+      localStorage.setItem(OB_COMPLETE_KEY, '1');
+      if (currentPath) localStorage.setItem(OB_PATH_KEY, currentPath);
+      if (selectedNiche) localStorage.setItem(OB_NICHE_KEY, selectedNiche);
+    } catch (_) {}
+    overlay.hidden = true;
+    overlay.remove();
+    if (wrap) wrap.style.display = '';
+  }
+
+  function preloadStudioFromNiche(niche, topic) {
+    const recipe = window.CHANNEL_RECIPES?.[niche] || window.CHANNEL_RECIPES?.custom;
+    if (!recipe) return;
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    const recipeKey = niche in (window.CHANNEL_RECIPES || {}) ? niche : 'custom';
+    setVal('makeRecipe', recipeKey);
+    setVal('makeNiche', recipe.niche || niche);
+    setVal('makeAudience', recipe.audience);
+    setVal('makeTone', recipe.tone);
+    setVal('makeDesc', recipe.direction);
+    setVal('makeMusicPrompt', recipe.music);
+    setVal('makeDuration', recipe.duration || '140');
+    setVal('makeAspect', recipe.aspect || '9:16');
+    if (topic) setVal('makeTopic', topic);
+    if (recipe.visualPreset) setVal('makeVisualPreset', recipe.visualPreset);
+    if (recipe.ambience) setVal('makeAmbience', recipe.ambience);
+    if (recipe.captionStyle) setVal('makeCaptionStyle', recipe.captionStyle);
+    if (recipe.hookStyle) setVal('makeHookStyle', recipe.hookStyle);
+    // Persist format choice so settings + wizard stay in sync.
+    try { localStorage.setItem('phantomline-channel-format', recipeKey); } catch (_) {}
+    const settingsRecipe = document.getElementById('settingsRecipe');
+    if (settingsRecipe) settingsRecipe.value = recipeKey;
+    if (typeof applyChannelRecipe === 'function') {
+      try { applyChannelRecipe(true); } catch (_) {}
+    }
+  }
+
+  function enterStudio(topic) {
+    completeOnboarding();
+    // Activate the Make tab.
+    const makeBtn = document.querySelector('.tab-btn[data-tab="make"]');
+    if (makeBtn) makeBtn.click();
+    if (typeof updateMakeReadiness === 'function') {
+      try { updateMakeReadiness(); } catch (_) {}
+    }
+  }
+
+  // Per-niche example videos. Uses the single demo video as placeholder
+  // for all niches until dedicated examples are rendered and uploaded to
+  // the Supabase public-videos bucket. To add a new niche video, just
+  // add the key + URL here.
+  const SUPABASE_VIDEOS = 'https://vdzydhrgazqeyaalguuy.supabase.co/storage/v1/object/public/public-videos';
+  const OB_NICHE_EXAMPLES = {
+    'scary-story':  { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'The statue started crying — #shorts #horror', creator: '@phantom_horror' },
+    'tech':         { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'This AI tool replaces your entire editing workflow — #shorts #tech', creator: '@tech_explained' },
+    'finance':      { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'The savings rule nobody follows — #shorts #finance', creator: '@money_minutes' },
+    'science':      { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'Black holes might be doorways — #shorts #science', creator: '@curious_cosmos' },
+    'history':      { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'The empire that vanished overnight — #shorts #history', creator: '@lost_chapters' },
+    'true-crime':   { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'The case that made detectives quit — #shorts #truecrime', creator: '@cold_files' },
+    'motivational': { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'You already know what to do — #shorts #motivation', creator: '@daily_drive' },
+    'travel':       { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'The town tourists never find — #shorts #travel', creator: '@hidden_routes' },
+    'kids-edu':     { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'Why do cats always land on their feet? — #shorts #learn', creator: '@tiny_genius' },
+    'philosophy':   { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'What if free will is an illusion? — #shorts #philosophy', creator: '@deep_think' },
+    'reddit-story': { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'My neighbor built a tunnel under my yard — #shorts #reddit', creator: '@story_scroll' },
+    'custom':       { video: `${SUPABASE_VIDEOS}/demo_the_statue_started_crying.mp4`, desc: 'Made with Phantomline — #shorts', creator: '@your_channel' },
+  };
+
+  function showShowcase(topic, niche) {
+    preloadStudioFromNiche(niche, topic);
+    showScreen('generating');
+
+    const example = OB_NICHE_EXAMPLES[niche] || OB_NICHE_EXAMPLES['custom'];
+    const video = document.getElementById('obShowcaseVideo');
+    const descEl = document.getElementById('obShowcaseDesc');
+    const creatorEl = document.getElementById('obShowcaseCreator');
+    const headingEl = document.getElementById('obShowcaseHeading');
+    const subtextEl = document.getElementById('obShowcaseSubtext');
+
+    if (video) {
+      video.src = example.video;
+      video.play().catch(() => {});
+    }
+    if (descEl) descEl.textContent = example.desc;
+    if (creatorEl) creatorEl.textContent = example.creator;
+
+    const recipes = window.CHANNEL_RECIPES || {};
+    const recipe = recipes[niche];
+    const nicheName = recipe?.niche || niche;
+    if (headingEl) headingEl.textContent = `This is a ${nicheName} video`;
+    if (subtextEl) subtextEl.textContent = 'Every part — script, voice, music, captions, visuals — was generated by AI on a local machine.';
+  }
+
+  // --- Screen 1: Intent cards ---
+  overlay.querySelectorAll('.ob-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const path = card.dataset.obPath;
+      currentPath = path;
+      if (path === 'existing') showScreen('connect');
+      else if (path === 'new') showScreen('niche');
+      else if (path === 'explorer') {
+        // Load demo and enter studio immediately.
+        completeOnboarding();
+        if (typeof applyLaunchDemo === 'function') {
+          try { applyLaunchDemo('reddit', { openCreate: true }); } catch (_) {}
+        }
+        const makeBtn = document.querySelector('.tab-btn[data-tab="make"]');
+        if (makeBtn) makeBtn.click();
+      }
+    });
+  });
+
+  // --- Screen A2: Connect YouTube ---
+  const connectBtn = document.getElementById('obConnectYouTubeBtn');
+  const connectSkip = document.getElementById('obConnectSkip');
+  const connectNext = document.getElementById('obConnectNext');
+  const connectStatus = document.getElementById('obConnectStatus');
+
+  if (connectBtn) {
+    connectBtn.addEventListener('click', async () => {
+      // Use Supabase OAuth with YouTube scopes if available.
+      // For now, this opens the OAuth flow in the same window;
+      // the callback will land back on /app with tokens in the session.
+      // Until Kyle's store-token endpoint lands, we simulate a skip.
+      try {
+        const supabase = window.__supabase;
+        if (supabase) {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              scopes: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload',
+              redirectTo: window.location.origin + '/app',
+              queryParams: { prompt: 'consent', access_type: 'offline' },
+            },
+          });
+          if (error) throw error;
+          // OAuth redirect will happen — onboarding state will be incomplete.
+          // On return, the onboarding resumes because OB_COMPLETE_KEY isn't set.
+          return;
+        }
+      } catch (e) {
+        console.warn('Onboarding: OAuth unavailable, falling back to skip', e);
+      }
+      // Fallback: skip connection, let them enter a niche manually.
+      connectSkip.click();
+    });
+  }
+
+  function goNicheFromConnect() {
+    showScreen('niche');
+    const nicheBack = overlay.querySelector('[data-ob-screen="niche"] .ob-back');
+    if (nicheBack) nicheBack.dataset.obGoto = 'connect';
+  }
+
+  if (connectSkip) {
+    connectSkip.addEventListener('click', goNicheFromConnect);
+  }
+
+  if (connectNext) {
+    connectNext.addEventListener('click', goNicheFromConnect);
+  }
+
+  // --- Screen B2: Niche selection ---
+  overlay.querySelectorAll('.ob-niche-card').forEach(card => {
+    card.addEventListener('click', () => {
+      // If "Something else", show text input.
+      if (card.dataset.obCustom !== undefined) {
+        overlay.querySelectorAll('.ob-niche-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const wrap = document.getElementById('obCustomNicheWrap');
+        if (wrap) { wrap.hidden = false; document.getElementById('obCustomNicheInput')?.focus(); }
+        return;
+      }
+      selectedNiche = card.dataset.obNiche;
+      showShowcase('', selectedNiche);
+    });
+  });
+
+  // Custom niche confirm.
+  const customConfirm = document.getElementById('obCustomNicheConfirm');
+  if (customConfirm) {
+    customConfirm.addEventListener('click', () => {
+      const input = document.getElementById('obCustomNicheInput');
+      const val = input?.value.trim();
+      if (!val) { input?.focus(); return; }
+      selectedNiche = val;
+      const nicheKey = findClosestRecipe(val);
+      showShowcase('', nicheKey);
+    });
+  }
+
+  // --- Showcase screen buttons ---
+  const showcaseGo = document.getElementById('obShowcaseGo');
+  if (showcaseGo) {
+    showcaseGo.addEventListener('click', () => enterStudio(''));
+  }
+
+  // --- Back buttons ---
+  overlay.querySelectorAll('.ob-back').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.obGoto;
+      if (target) showScreen(target);
+    });
+  });
+
+  // --- Helpers ---
+  function findClosestRecipe(niche) {
+    if (!niche) return 'custom';
+    const lower = niche.toLowerCase();
+    const recipes = window.CHANNEL_RECIPES || {};
+    if (recipes[lower]) return lower;
+    // Fuzzy match: check if the niche text contains a recipe key or vice versa.
+    for (const key of Object.keys(recipes)) {
+      if (lower.includes(key) || key.includes(lower)) return key;
+    }
+    // Check recipe niche descriptions.
+    for (const [key, val] of Object.entries(recipes)) {
+      if (val.niche && lower.includes(val.niche.split(' ')[0].toLowerCase())) return key;
+    }
+    return 'custom';
+  }
+})();
+
+// Expose CHANNEL_RECIPES on window for the onboarding to reference.
+// (It's defined later in this file but the onboarding IIFE runs at
+// DOMContentLoaded via the deferred script attribute, so it's available.)
+window.addEventListener('DOMContentLoaded', () => {
+  if (typeof CHANNEL_RECIPES !== 'undefined') window.CHANNEL_RECIPES = CHANNEL_RECIPES;
+});
+
+// Settings: replay onboarding.
+document.getElementById('settingsReplayOnboardingBtn')?.addEventListener('click', () => {
+  try {
+    localStorage.removeItem(OB_COMPLETE_KEY);
+    localStorage.removeItem(OB_PATH_KEY);
+    localStorage.removeItem(OB_NICHE_KEY);
+  } catch (_) {}
+  window.location.reload();
+});
+
+// ── Wizard step navigation (3-step: Script → Style → Review) ──
+(function initWizard() {
+  const bar = document.getElementById('wizBar');
+  if (!bar) return;
+  const panels = document.querySelectorAll('.wiz-panel[data-wiz-panel]');
+  const steps = bar.querySelectorAll('.wiz-step[data-wiz]');
+  let current = 1;
+  const visited = new Set([1]);
+
+  function goTo(n) {
+    n = Math.max(1, Math.min(3, n));
+    visited.add(n);
+    current = n;
+    panels.forEach(p => p.classList.toggle('active', p.dataset.wizPanel === String(n)));
+    steps.forEach(s => {
+      const sn = Number(s.dataset.wiz);
+      s.classList.remove('active', 'done');
+      if (sn === n) s.classList.add('active');
+      else if (visited.has(sn)) s.classList.add('done');
+    });
+    if (n === 3) buildReview();
+    bar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  steps.forEach(s => s.addEventListener('click', () => goTo(Number(s.dataset.wiz))));
+
+  document.querySelectorAll('.wiz-next, .wiz-back').forEach(btn => {
+    btn.addEventListener('click', () => goTo(Number(btn.dataset.wizTo)));
+  });
+
+  function label(id) {
+    const el = document.getElementById(id);
+    if (!el) return '—';
+    if (el.tagName === 'SELECT') return el.options[el.selectedIndex]?.text || el.value;
+    return el.value || el.placeholder || '—';
+  }
+
+  function buildReview() {
+    const review = document.getElementById('wizReview');
+    if (!review) return;
+    const recipe = label('makeRecipe');
+    const topic = document.getElementById('makeTopic')?.value.trim() || '(not set)';
+    const title = document.getElementById('makePreferredTitle')?.value.trim() || '(auto)';
+    const duration = label('makeDuration');
+    const aspect = label('makeAspect');
+    const visual = label('makeVideoMode');
+    const voice = label('makeVoice');
+    const preset = label('makeVisualPreset');
+    const items = [
+      ['Format', recipe],
+      ['Topic', topic],
+      ['Title', title],
+      ['Length', duration],
+      ['Ratio', aspect],
+      ['Visuals', visual],
+      ['Voice', voice],
+      ['Style', preset],
+    ];
+    review.innerHTML = items.map(([l, v]) =>
+      `<div class="wiz-review-item"><div class="wiz-rv-label">${l}</div><div class="wiz-rv-value">${v.replace(/</g,'&lt;')}</div></div>`
+    ).join('');
+  }
+
+  window.wizGoTo = goTo;
+})();
+
+// ── Settings: channel format selector syncs to makeRecipe ──
+(function initSettingsRecipe() {
+  const settingsRecipe = document.getElementById('settingsRecipe');
+  const makeRecipe = document.getElementById('makeRecipe');
+  if (!settingsRecipe || !makeRecipe) return;
+
+  // Load saved format from localStorage.
+  const saved = localStorage.getItem('phantomline-channel-format');
+  if (saved && settingsRecipe.querySelector(`option[value="${saved}"]`)) {
+    settingsRecipe.value = saved;
+    makeRecipe.value = saved;
+    makeRecipe.dispatchEvent(new Event('change'));
+  }
+
+  settingsRecipe.addEventListener('change', () => {
+    const val = settingsRecipe.value;
+    makeRecipe.value = val;
+    makeRecipe.dispatchEvent(new Event('change'));
+    try { localStorage.setItem('phantomline-channel-format', val); } catch (_) {}
+    const status = document.getElementById('settingsRecipeStatus');
+    if (status) {
+      status.textContent = `Switched to ${settingsRecipe.options[settingsRecipe.selectedIndex]?.text}. Creative defaults updated.`;
+      setTimeout(() => { status.textContent = ''; }, 3000);
+    }
+  });
+})();
+
 let currentJob = null;
 let pollTimer = null;
 
