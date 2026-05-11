@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Local AI Video Studio for Faceless YouTube | Phantomline</title>
-<meta name="description" content="Phantomline turns one-line ideas into finished faceless YouTube videos: script, voice, scenes, music, captions, MP4. Runs locally on your machine." />
+<title>AI Video Studio for Faceless YouTube | Phantomline</title>
+<meta name="description" content="Faceless YouTube videos from one idea. Bring your own Claude or GPT key for instant scripts, or run the full pipeline locally. Free to start." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -13,16 +13,16 @@
 
 <!-- Open Graph -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
-<meta property="og:description" content="Faceless YouTube studio that runs the whole pipeline on your machine: idea, script, voice, scenes, music, MP4, scheduler. Free tier, paid Pro and Studio plans, one-time Lifetime option." />
+<meta property="og:title" content="AI Video Studio for Faceless YouTube | Phantomline" />
+<meta property="og:description" content="Bring your own Claude or GPT key for instant scripts, or run the full pipeline locally. Script, voice, music, visuals, captions, MP4, scheduler." />
 <meta property="og:url" content="{{ canonical_url }}" />
 <meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta property="og:site_name" content="Phantomline" />
 
 <!-- Twitter card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Local AI Video Studio for Faceless YouTube | Phantomline" />
-<meta name="twitter:description" content="Faceless YouTube studio that runs the whole pipeline on your machine: idea, script, voice, scenes, music, MP4, scheduler. Free tier plus paid plans." />
+<meta name="twitter:title" content="AI Video Studio for Faceless YouTube | Phantomline" />
+<meta name="twitter:description" content="Bring your own Claude or GPT key for instant scripts, or run the full pipeline locally. Script, voice, music, visuals, captions, MP4, scheduler." />
 <meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
@@ -76,7 +76,7 @@
   "inLanguage": "en-US",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Windows, macOS, Linux",
-  "description": "Local-first AI video studio for faceless YouTube creators. Generate scripts, narration, captions, music, visuals, MP4 exports, and YouTube publishing drafts on your own machine.",
+  "description": "AI video studio for faceless YouTube creators. Bring your own Claude or GPT API key for instant scripts, or run the full pipeline locally. Script, narration, captions, music, visuals, MP4, scheduler.",
   "url": "{{ site_url }}",
   "offers": {
     "@type": "Offer",
@@ -104,12 +104,14 @@
      "acceptedAnswer": {"@type": "Answer", "text": "16 GB RAM and any GPU made in the last 5 years runs Llama 3.1 8B + Kokoro fine. CPU-only works too. Slower TTS, but everything else is fine. Phantomline runs on Windows, macOS, and Linux."}},
     {"@type": "Question", "name": "Can I use this on my phone?",
      "acceptedAnswer": {"@type": "Answer", "text": "Right now Phantomline runs on desktop. From your phone you can sign in to your account, view your project library, and manage your license. The mobile creator app is on the roadmap; the desktop studio is where you render and publish today."}},
+    {"@type": "Question", "name": "How does the cloud API key work?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Paste your Anthropic or OpenAI API key in Settings. Your browser calls the provider directly over HTTPS. Phantomline never sees, stores, or proxies your key. You pay the provider for tokens (~$0.005 per script on Claude Haiku). Free users get 2 cloud renders to try it. Pro and Studio get unlimited."}},
     {"@type": "Question", "name": "What's free vs Pro?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Free tier: 5 video renders per month, all local AI features, project library. Pro: unlimited renders, no watermark, publish scheduler, SEO Finder, Optimize Library (vidIQ-aware repackaging), channel analytics ingest, brand presets, multi-channel."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "Free tier: 5 video renders per month, 2 cloud trial renders, local AI and WebGPU engines, project library. Pro: unlimited renders, unlimited cloud engine, no watermark, publish scheduler, SEO Finder, Optimize Library, channel analytics, brand presets."}},
     {"@type": "Question", "name": "What does Founding Lifetime get me?",
      "acceptedAnswer": {"@type": "Answer", "text": "Everything in Creator Pro, forever. Pay once, no subscription. Limited to the first 500 buyers. Locked-in price even if monthly tiers go up later. After the 500 are sold, the founding deal is gone."}},
     {"@type": "Question", "name": "Is my data sent anywhere?",
-     "acceptedAnswer": {"@type": "Answer", "text": "No. Scripts, audio, video, channel analytics, all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "Local mode: nothing leaves your device. Cloud mode: your script prompt goes to Anthropic or OpenAI (your key, your account, their privacy policy). In both cases, rendered videos, audio, and analytics stay on your machine. API keys are stored only in your browser's localStorage. Anonymous error telemetry is optional and opt-in."}},
     {"@type": "Question", "name": "Can I use this commercially?",
      "acceptedAnswer": {"@type": "Answer", "text": "Yes. Any video you make is yours. The bundled music pack is procedurally generated and public-domain. Generated narration belongs to you. Generated visuals belong to you. Phantomline charges for the tool, not for what you make with it."}},
     {"@type": "Question", "name": "Does it run on Mac and Linux?",
@@ -159,14 +161,14 @@
     <section class="hero">
       <div class="hero-grid">
         <div class="hero-copy">
-          <div class="eyebrow">Local AI · Faceless YouTube</div>
-          <h1>Faceless videos, <span>built on your own machine.</span></h1>
+          <div class="eyebrow">Bring Your Own AI · Faceless YouTube</div>
+          <h1>Your AI key. <span>Your faceless channel.</span></h1>
           <p class="lede">
-            Phantomline turns one-line ideas into finished YouTube videos: script, narration, captions, music, visuals, MP4 export, and a publishing draft. The whole pipeline runs locally. No paid APIs, no per-render fees, no cloud watching your work.
+            Paste your Claude or GPT API key, type one idea, get a finished YouTube video: script, voice, captions, music, visuals, MP4, publishing draft. Two free cloud renders to try it. Or download and run the full pipeline locally, no API needed.
           </p>
           <div class="hero-actions">
-            <a class="cta" href="/download">Download for desktop</a>
-            <a class="cta secondary" href="#workflow">See the workflow</a>
+            <a class="cta" href="/app">Try with your API key</a>
+            <a class="cta secondary" href="/download">Download for desktop</a>
           </div>
         </div>
         <div class="hero-video-placeholder">
@@ -232,10 +234,10 @@
            can stretch only over the eyebrow→buttons height per Bible
            §03 vertical rhythm (proof is a separate signal block). -->
       <div class="proof">
-        <div><strong>Local pipeline</strong><span>Llama · Kokoro · MusicGen · ffmpeg</span></div>
-        <div><strong>No paid APIs</strong><span>Runs on your hardware</span></div>
+        <div><strong>Cloud or local</strong><span>Your Claude/GPT key or Ollama</span></div>
+        <div><strong>~$0.005 / script</strong><span>Billed by your AI provider</span></div>
         <div><strong>Publish-ready</strong><span>Queue, calendar, YouTube</span></div>
-        <div><strong>Pay once option</strong><span>$79 founding · 500 seats</span></div>
+        <div><strong>2 free cloud renders</strong><span>No credit card needed</span></div>
       </div>
     </section>
 
@@ -249,6 +251,27 @@
         <div class="step"><b>2</b><strong>Generate the package</strong><p>Ollama creates ideas, hooks, titles, pinned comments, hashtags, and a script direction.</p></div>
         <div class="step"><b>3</b><strong>Render the video</strong><p>Use local scene images or retention footage with narration, music, captions, title overlay, and ratio controls.</p></div>
         <div class="step"><b>4</b><strong>Schedule the post</strong><p>Phantomline auto-fills your publishing draft so you can set the date, review details, and queue it.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="engines">
+      <div class="section-head">
+        <h2>Three ways to generate</h2>
+        <p>Pick the path that fits your setup. Switch anytime.</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <strong>Cloud (bring your own key)</strong>
+          <p>Paste an Anthropic or OpenAI API key. Scripts generate in 30 seconds with Claude or GPT quality. Your browser calls the provider directly. The key never touches our server. ~$0.005 per script, billed by the provider.</p>
+        </div>
+        <div class="feature">
+          <strong>Local server (Ollama)</strong>
+          <p>Download Phantomline and run Llama 3.1 8B on your own hardware. Fully offline, zero token cost, complete privacy. Needs 16 GB RAM and a recent GPU. The original desktop path.</p>
+        </div>
+        <div class="feature">
+          <strong>In-browser (WebGPU)</strong>
+          <p>Llama 3.2 1B runs directly in your browser tab via WebGPU. Downloads once (~1 GB), then works offline forever. Good for mobile or machines without Python. Lower quality than the other two paths.</p>
+        </div>
       </div>
     </section>
 
@@ -387,8 +410,8 @@
           <p>Windows, macOS, Linux. Llama 3.1 8B for scripts, Kokoro for narration, MusicGen for soundtracks, FLUX for images, ffmpeg for assembly. Free and Pro tiers. License-key driven; works offline after activation.</p>
         </div>
         <div class="feature">
-          <strong>Web account (anywhere)</strong>
-          <p>Sign in at phantomline.xyz on any device (desktop or phone) to see your project library, manage your license, copy keys, and check render quota. No render runs in the browser yet; that's still desktop-only.</p>
+          <strong>Web studio (any device)</strong>
+          <p>Open phantomline.xyz, paste your API key, and generate scripts from any browser. Manage your project library, license, and render quota. Cloud engine works on desktop and mobile, no install needed.</p>
         </div>
         <div class="feature">
           <strong>Mobile creator app: on the roadmap</strong>
@@ -401,8 +424,8 @@
           <p>Eight mood-tagged tracks (cinematic, mystery, horror, uplifting, chill, dark, hopeful, tense) ship with the app. Public domain. No licensing footnote on your YouTube channel.</p>
         </div>
         <div class="feature">
-          <strong>No paid APIs anywhere</strong>
-          <p>Optional: free Pexels key for stock B-roll. Optional: free Pixabay key for extra music. Everything else runs on your hardware.</p>
+          <strong>Your key, your bill</strong>
+          <p>Cloud users bring their own API key and pay the provider directly. We never see, store, or proxy your key. Local users pay nothing beyond electricity. Optional free Pexels key for stock B-roll.</p>
         </div>
         <div class="feature">
           <strong>Your data, your machine</strong>
@@ -413,7 +436,7 @@
 
     <section class="section" id="pricing">
       <div class="section-head">
-        <h2>One-time license. Local AI forever.</h2>
+        <h2>Start free. Upgrade when you're ready.</h2>
       </div>
       {% if pricing and pricing.tiers %}
       <div class="pricing-grid">
@@ -450,7 +473,7 @@
         {% endfor %}
       </div>
       {% endif %}
-      <p class="pricing-fineprint">All paid tiers include unlimited renders, no watermark, scheduler, SEO Finder, Optimize Library, and analytics ingest. Lifetime is locked-in pricing forever, even when monthly tiers go up. License keys work offline; no recurring DRM check.</p>
+      <p class="pricing-fineprint">Free tier includes 2 cloud renders so you can try the product before buying. All paid tiers include unlimited cloud renders, no watermark, scheduler, SEO Finder, Optimize Library, and analytics ingest. Cloud users bring their own API key and pay the provider directly (~$0.005/script). Lifetime is locked-in pricing forever. License keys work offline.</p>
     </section>
 
     <section class="section" id="faq" style="border-bottom:0;">
@@ -467,8 +490,12 @@
           <p>Right now Phantomline runs on desktop. From your phone you can sign in to your account, view your project library, and manage your license. The mobile creator app is on the roadmap; the desktop studio is where you render and publish today.</p>
         </details>
         <details>
+          <summary>How does the cloud API key work?</summary>
+          <p>Paste your Anthropic or OpenAI API key in Settings. Your browser calls the provider directly over HTTPS. Phantomline never sees, stores, or proxies your key. You pay the provider for tokens (~$0.005 per script on Claude Haiku). Free users get 2 cloud renders to try it. Pro and Studio get unlimited.</p>
+        </details>
+        <details>
           <summary>What's free vs Pro?</summary>
-          <p>Free tier: 5 video renders per month, all local AI features, project library. Pro: unlimited renders, no watermark, publish scheduler, SEO Finder, Optimize Library (vidIQ-aware repackaging), channel analytics ingest, brand presets, multi-channel.</p>
+          <p>Free tier: 5 video renders per month, 2 cloud trial renders, local AI and WebGPU engines, project library. Pro: unlimited renders, unlimited cloud engine, no watermark, publish scheduler, SEO Finder, Optimize Library, channel analytics, brand presets.</p>
         </details>
         <details>
           <summary>What does Founding Lifetime get me?</summary>
@@ -476,7 +503,7 @@
         </details>
         <details>
           <summary>Is my data sent anywhere?</summary>
-          <p>No. Scripts, audio, video, channel analytics, all stay on your device. License keys are HMAC-signed offline. The only external traffic is optional: YouTube publishing if you connect it, Pexels API if you add a key for stock B-roll, anonymous error telemetry if you opt in.</p>
+          <p>Local mode: nothing leaves your device. Cloud mode: your script prompt goes to Anthropic or OpenAI (your key, your account, their privacy policy). In both cases, rendered videos, audio, and analytics stay on your machine. API keys are stored only in your browser's localStorage. Anonymous error telemetry is optional and opt-in.</p>
         </details>
         <details>
           <summary>Can I use this commercially?</summary>
@@ -496,7 +523,7 @@
     <section class="final">
       <div>
         <h2>Ship a video today</h2>
-        <p>Open Phantomline. Generate, render, schedule.</p>
+        <p>Paste your API key and generate your first script in 30 seconds. Two free cloud renders, no credit card.</p>
       </div>
       <a class="cta" href="/app">Open Studio</a>
     </section>

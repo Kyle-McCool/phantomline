@@ -61,9 +61,9 @@ PRICING = {
             "price_lifetime": 0,
             "features": [
                 "5 video renders per month",
+                "2 cloud AI trial renders",
                 "Local AI + WebGPU engines",
                 "Project library + bundles",
-                "No cloud AI engine",
                 "No publish scheduler",
                 "Render watermark",
             ],

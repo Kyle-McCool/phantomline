@@ -3720,9 +3720,11 @@ async function makeVideoWorkflow() {
     // multi-section orchestrator only exists server-side for now.
     const activeEngine = window.GhostlineEngines?.activeId?.() || 'server';
     const cloudEng = window._GhostlineEngineRegistry?.cloud;
-    // Defense-in-depth: cloud engine requires Pro/Studio even if someone
-    // manually flipped localStorage. Free tier always falls through to server.
-    const cloudTierOk = typeof ghCurrentTier === 'function' && ghCurrentTier() !== 'free';
+    // Defense-in-depth: free tier gets 2 trial cloud renders. After that,
+    // cloud requires Pro/Studio even if someone flipped localStorage.
+    const _tier = typeof ghCurrentTier === 'function' ? ghCurrentTier() : 'free';
+    const _cloudTrialOk = _tier === 'free' && _ghCloudTrialUsed() < 2;
+    const cloudTierOk = _tier !== 'free' || _cloudTrialOk;
     const useCloudDirect = activeEngine === 'cloud'
                         && cloudEng?.available?.()
                         && cloudTierOk
@@ -3742,6 +3744,8 @@ async function makeVideoWorkflow() {
         },
       });
       script = { text: result.text, title: result.title };
+      // Increment free trial counter after a successful cloud render.
+      if (_tier === 'free') _ghIncrementCloudTrial();
     } else {
       const scriptStart = await apiJson(longForm ? '/api/start' : '/api/start_short', {
         method: 'POST',
@@ -6615,6 +6619,19 @@ const TIER_LABEL = { free: 'Free', pro: 'Pro', studio: 'Studio' };
 let _ghCurrentTier = 'free';
 function ghCurrentTier() { return _ghCurrentTier; }
 
+// Cloud trial counter for free-tier users. Stored in localStorage so it
+// survives refresh. Free users get 2 cloud renders to experience the
+// quality, then must upgrade to Pro for unlimited.
+function _ghCloudTrialUsed() {
+  try { return parseInt(localStorage.getItem('ghostline.cloud.trial') || '0', 10) || 0; }
+  catch { return 0; }
+}
+function _ghIncrementCloudTrial() {
+  try { localStorage.setItem('ghostline.cloud.trial', String(_ghCloudTrialUsed() + 1)); }
+  catch { /* quota */ }
+  refreshEngineStatus();
+}
+
 async function refreshLicenseStatus() {
   const tierEl = document.getElementById('settingsLicenseTier');
   const statusEl = document.getElementById('settingsLicenseStatus');
@@ -6790,9 +6807,13 @@ function refreshEngineStatus() {
       );
     }
   }
-  // Cloud engine requires Pro or Studio tier. Free users see a locked state
-  // with an upgrade nudge. The key panel stays hidden until they upgrade.
-  const cloudLocked = _ghCurrentTier === 'free';
+  // Cloud engine: Pro/Studio get unlimited access. Free-tier users get
+  // 2 trial renders so they can experience the quality before upgrading.
+  const FREE_CLOUD_TRIAL_LIMIT = 2;
+  const freeCloudUsed = _ghCloudTrialUsed();
+  const freeTrialLeft = Math.max(0, FREE_CLOUD_TRIAL_LIMIT - freeCloudUsed);
+  const cloudLocked = _ghCurrentTier === 'free' && freeTrialLeft <= 0;
+  const cloudIsTrial = _ghCurrentTier === 'free' && freeTrialLeft > 0;
   if (cloudInput) {
     cloudInput.checked = active === 'cloud' && !cloudLocked;
     cloudInput.disabled = cloudLocked;
@@ -6802,27 +6823,34 @@ function refreshEngineStatus() {
       cloudLabel.style.cursor = cloudLocked ? 'not-allowed' : '';
     }
   }
-  // Pro badge on the cloud option
+  // Badge: "PRO" when locked, "2 free" / "1 free" during trial
   let proBadge = document.getElementById('cloudProBadge');
-  if (cloudLocked && cloudInput) {
-    if (!proBadge) {
-      proBadge = document.createElement('span');
-      proBadge.id = 'cloudProBadge';
-      proBadge.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;color:#fff;background:var(--accent,#6366f1);padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;';
-      proBadge.textContent = 'PRO';
-      const strong = cloudInput.parentElement?.querySelector('strong');
-      if (strong) strong.appendChild(proBadge);
+  if (cloudInput) {
+    const needsBadge = cloudLocked || cloudIsTrial;
+    if (needsBadge) {
+      if (!proBadge) {
+        proBadge = document.createElement('span');
+        proBadge.id = 'cloudProBadge';
+        const strong = cloudInput.parentElement?.querySelector('strong');
+        if (strong) strong.appendChild(proBadge);
+      }
+      if (cloudLocked) {
+        proBadge.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;color:#fff;background:var(--accent,#6366f1);padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;';
+        proBadge.textContent = 'PRO';
+      } else {
+        proBadge.style.cssText = 'display:inline-block;font-size:10px;font-weight:600;color:var(--text-accent,#22E7F5);background:var(--accent-muted,rgba(34,231,245,0.15));padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;';
+        proBadge.textContent = freeTrialLeft + ' free left';
+      }
+    } else if (proBadge) {
+      proBadge.remove();
     }
-  } else if (proBadge) {
-    proBadge.remove();
   }
-  // If a free user somehow has cloud selected (e.g. they downgraded), bump
-  // them back to the best available free engine.
+  // If a free user has exhausted trials and cloud is active, bump to server.
   if (cloudLocked && active === 'cloud' && window.GhostlineEngines) {
     window.GhostlineEngines.set('server');
     if (serverInput) serverInput.checked = true;
   }
-  // Show the cloud key panel whenever the cloud engine is selected (and unlocked).
+  // Show the cloud key panel whenever the cloud engine is selected (and usable).
   const cloudPanel = document.getElementById('cloudKeyPanel');
   if (cloudPanel) cloudPanel.style.display = (active === 'cloud' && !cloudLocked) ? '' : 'none';
 }
@@ -6831,10 +6859,10 @@ document.querySelectorAll('input[name="ghEngine"]').forEach((input) => {
   input.addEventListener('change', async (e) => {
     if (!e.target.checked || !window.GhostlineEngines) return;
     const id = e.target.value;
-    // Block free-tier users from selecting the cloud engine.
-    if (id === 'cloud' && _ghCurrentTier === 'free') {
+    // Free-tier users who've used their 2 trial renders can't select cloud.
+    if (id === 'cloud' && _ghCurrentTier === 'free' && _ghCloudTrialUsed() >= 2) {
       e.target.checked = false;
-      if (typeof toast === 'function') toast('Cloud engine requires a Pro or Studio license. Upgrade in Settings → License.', true);
+      if (typeof toast === 'function') toast('Free cloud trial used. Upgrade to Pro for unlimited cloud renders.', true);
       refreshEngineStatus();
       return;
     }
@@ -6951,8 +6979,8 @@ document.getElementById('settingsCloudProvider')?.addEventListener('change', (e)
 });
 
 document.getElementById('settingsCloudSaveBtn')?.addEventListener('click', () => {
-  if (_ghCurrentTier === 'free') {
-    if (typeof toast === 'function') toast('Cloud engine requires Pro. Upgrade in Settings → License.', true);
+  if (_ghCurrentTier === 'free' && _ghCloudTrialUsed() >= 2) {
+    if (typeof toast === 'function') toast('Free cloud trial used. Upgrade to Pro for unlimited.', true);
     return;
   }
   const eng = window._GhostlineEngineRegistry?.cloud;
