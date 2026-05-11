@@ -61,8 +61,9 @@ PRICING = {
             "price_lifetime": 0,
             "features": [
                 "5 video renders per month",
-                "Local AI pipeline — no paid APIs",
+                "Local AI + WebGPU engines",
                 "Project library + bundles",
+                "No cloud AI engine",
                 "No publish scheduler",
                 "Render watermark",
             ],
@@ -78,6 +79,7 @@ PRICING = {
             "price_lifetime": None,  # use the founding tier instead
             "features": [
                 "Unlimited renders",
+                "Cloud AI engine (bring your own Claude/GPT key)",
                 "No watermark",
                 "Publish scheduler + queue",
                 "Optimize Library (vidIQ-aware)",

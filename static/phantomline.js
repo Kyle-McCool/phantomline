@@ -3712,22 +3712,54 @@ async function makeVideoWorkflow() {
       : null;
     const wordCount = sourceWords || parseInt($('makeDuration').value, 10) || 280;
     const longForm = wordCount > 1400;
-    const scriptStart = await apiJson(longForm ? '/api/start' : '/api/start_short', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
+
+    // Engine routing: if the user has selected the cloud (BYO-key) engine
+    // and has a key configured, generate the script directly from the
+    // browser to their provider. No /api/start_short, no Ollama. Falls
+    // back to the server flow on long-form (>1400 words) since the
+    // multi-section orchestrator only exists server-side for now.
+    const activeEngine = window.GhostlineEngines?.activeId?.() || 'server';
+    const cloudEng = window._GhostlineEngineRegistry?.cloud;
+    // Defense-in-depth: cloud engine requires Pro/Studio even if someone
+    // manually flipped localStorage. Free tier always falls through to server.
+    const cloudTierOk = typeof ghCurrentTier === 'function' && ghCurrentTier() !== 'free';
+    const useCloudDirect = activeEngine === 'cloud'
+                        && cloudEng?.available?.()
+                        && cloudTierOk
+                        && !longForm;
+
+    let script;
+    if (useCloudDirect) {
+      setMakeStep('makeStepScript', 'running', `via ${cloudEng.provider()} (${cloudEng.model()})`);
+      const result = await cloudEng.generateScript({
         topic: $('makeTopic').value.trim(),
-        description: makeCreativeBrief(),
-        genre: $('makeNiche').value.trim(),
+        niche: $('makeNiche').value.trim(),
         tone: $('makeTone').value.trim() || (window.GHOSTLINE_DEFAULTS && window.GHOSTLINE_DEFAULTS.tone) || '',
-        word_count: wordCount,
-        model: $('makeModel').value.trim(),
-      }),
-    });
-    const script = await waitForStoryJob(scriptStart.job_id, (status, job) => {
-      const section = longForm && job.section ? `section ${job.section} · ` : '';
-      setMakeStep('makeStepScript', 'running', `${section}${status} · ${(job.words || 0).toLocaleString()} words`);
-    });
+        words: wordCount,
+        description: makeCreativeBrief(),
+        onProgress: (p) => {
+          if (p.words) setMakeStep('makeStepScript', 'running', `${p.words.toLocaleString()} words`);
+        },
+      });
+      script = { text: result.text, title: result.title };
+    } else {
+      const scriptStart = await apiJson(longForm ? '/api/start' : '/api/start_short', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          topic: $('makeTopic').value.trim(),
+          description: makeCreativeBrief(),
+          genre: $('makeNiche').value.trim(),
+          tone: $('makeTone').value.trim() || (window.GHOSTLINE_DEFAULTS && window.GHOSTLINE_DEFAULTS.tone) || '',
+          word_count: wordCount,
+          model: $('makeModel').value.trim(),
+        }),
+      });
+      script = await waitForStoryJob(scriptStart.job_id, (status, job) => {
+        const section = longForm && job.section ? `section ${job.section} · ` : '';
+        setMakeStep('makeStepScript', 'running', `${section}${status} · ${(job.words || 0).toLocaleString()} words`);
+      });
+    }
     setMakeStep('makeStepScript', 'done', 'done');
 
     setMakeStep('makeStepNarration', 'running', 'starting');
@@ -3966,8 +3998,13 @@ async function makeVideoWorkflow() {
         if (s) s.textContent = e.message || 'error';
       }
       toast(e.message || 'Make Video failed', true);
+      // Strip cloud-API error bodies from telemetry — never risk leaking
+      // fragments of provider responses (which ride in e.message).
+      const _safeMsg = String(e.message || '');
+      const _tMsg = /^(Anthropic|OpenAI) API \d+:/.test(_safeMsg)
+        ? _safeMsg.replace(/:.*/, ': [redacted]') : _safeMsg;
       window.ghTelemetry && window.ghTelemetry('render-error', {
-        message: String(e.message || ''),
+        message: _tMsg,
         step: running?.dataset?.step || '',
       });
     }
@@ -6574,6 +6611,9 @@ if ('serviceWorker' in navigator) {
 // upgrade nudges in the Make Video flow.
 // =============================================================================
 const TIER_LABEL = { free: 'Free', pro: 'Pro', studio: 'Studio' };
+// Global tier so other subsystems (engine gating, etc.) can check it.
+let _ghCurrentTier = 'free';
+function ghCurrentTier() { return _ghCurrentTier; }
 
 async function refreshLicenseStatus() {
   const tierEl = document.getElementById('settingsLicenseTier');
@@ -6584,6 +6624,7 @@ async function refreshLicenseStatus() {
     const d = await r.json();
     const info = (d && d.license) || { tier: 'free' };
     const tier = info.tier || 'free';
+    _ghCurrentTier = tier;
     tierEl.textContent = TIER_LABEL[tier] || tier;
     if (statusEl) {
       const lines = [];
@@ -6600,6 +6641,8 @@ async function refreshLicenseStatus() {
       statusEl.textContent = lines.join(' ');
     }
     if (d && d.pricing) renderPricingGrid(d.pricing, tier);
+    // Tier may unlock/lock the cloud engine — refresh engine UI.
+    refreshEngineStatus();
     return info;
   } catch {
     if (statusEl) statusEl.textContent = 'Could not check license.';
@@ -6734,6 +6777,7 @@ function refreshEngineStatus() {
   }
   const serverInput = document.getElementById('engineServer');
   const deviceInput = document.getElementById('engineDevice');
+  const cloudInput = document.getElementById('engineCloud');
   if (serverInput) serverInput.checked = active === 'server';
   if (deviceInput) {
     deviceInput.checked = active === 'device';
@@ -6746,12 +6790,54 @@ function refreshEngineStatus() {
       );
     }
   }
+  // Cloud engine requires Pro or Studio tier. Free users see a locked state
+  // with an upgrade nudge. The key panel stays hidden until they upgrade.
+  const cloudLocked = _ghCurrentTier === 'free';
+  if (cloudInput) {
+    cloudInput.checked = active === 'cloud' && !cloudLocked;
+    cloudInput.disabled = cloudLocked;
+    const cloudLabel = cloudInput.parentElement;
+    if (cloudLabel) {
+      cloudLabel.style.opacity = cloudLocked ? '0.55' : '';
+      cloudLabel.style.cursor = cloudLocked ? 'not-allowed' : '';
+    }
+  }
+  // Pro badge on the cloud option
+  let proBadge = document.getElementById('cloudProBadge');
+  if (cloudLocked && cloudInput) {
+    if (!proBadge) {
+      proBadge = document.createElement('span');
+      proBadge.id = 'cloudProBadge';
+      proBadge.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;color:#fff;background:var(--accent,#6366f1);padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;';
+      proBadge.textContent = 'PRO';
+      const strong = cloudInput.parentElement?.querySelector('strong');
+      if (strong) strong.appendChild(proBadge);
+    }
+  } else if (proBadge) {
+    proBadge.remove();
+  }
+  // If a free user somehow has cloud selected (e.g. they downgraded), bump
+  // them back to the best available free engine.
+  if (cloudLocked && active === 'cloud' && window.GhostlineEngines) {
+    window.GhostlineEngines.set('server');
+    if (serverInput) serverInput.checked = true;
+  }
+  // Show the cloud key panel whenever the cloud engine is selected (and unlocked).
+  const cloudPanel = document.getElementById('cloudKeyPanel');
+  if (cloudPanel) cloudPanel.style.display = (active === 'cloud' && !cloudLocked) ? '' : 'none';
 }
 
 document.querySelectorAll('input[name="ghEngine"]').forEach((input) => {
   input.addEventListener('change', async (e) => {
     if (!e.target.checked || !window.GhostlineEngines) return;
     const id = e.target.value;
+    // Block free-tier users from selecting the cloud engine.
+    if (id === 'cloud' && _ghCurrentTier === 'free') {
+      e.target.checked = false;
+      if (typeof toast === 'function') toast('Cloud engine requires a Pro or Studio license. Upgrade in Settings → License.', true);
+      refreshEngineStatus();
+      return;
+    }
     window.GhostlineEngines.set(id);
     refreshEngineStatus();
     if (id === 'device') {
@@ -6777,11 +6863,14 @@ document.querySelectorAll('input[name="ghEngine"]').forEach((input) => {
 
 // Mobile-aware UI: when the engine is "device", hide MusicGen + FLUX panels
 // and any control that depends on the local Python pipeline. Body class
-// drives the visibility via CSS.
+// drives the visibility via CSS. The "cloud" engine only swaps the LLM
+// call — TTS, MusicGen, and Forge still work — so it's treated as
+// engine-server for visibility purposes.
 function applyEngineUIHints() {
   const engine = window.GhostlineEngines?.activeId() || 'server';
   document.body.classList.toggle('engine-device', engine === 'device');
-  document.body.classList.toggle('engine-server', engine === 'server');
+  document.body.classList.toggle('engine-server', engine === 'server' || engine === 'cloud');
+  document.body.classList.toggle('engine-cloud', engine === 'cloud');
 }
 window.addEventListener('load', applyEngineUIHints);
 document.addEventListener('change', (e) => {
@@ -6823,3 +6912,100 @@ document.getElementById('settingsPexelsTestBtn')?.addEventListener('click', asyn
 // Load key when Settings tab opens.
 document.querySelector('.tab-btn[data-tab="settings"]')?.addEventListener('click', loadPexelsKey);
 window.addEventListener('load', loadPexelsKey);
+
+// =============================================================================
+// Cloud (BYO-API-key) engine. Anthropic or OpenAI direct from the browser.
+// Provider/key/model live in localStorage via CloudKeyEngine. We never proxy
+// through the server — the user's compute bill stays with the user.
+// =============================================================================
+function _cloudEngine() {
+  return window.GhostlineEngines?._all?.cloud
+      || (window.GhostlineEngines && window.GhostlineEngines.list().find(e => e.id === 'cloud'))
+      || null;
+}
+
+function loadCloudSettings() {
+  // Look up the engine instance directly off the registry. The exposed
+  // GhostlineEngines.list() only returns lightweight metadata; we want the
+  // real CloudKeyEngine for its getters/setters.
+  const eng = window._GhostlineEngineRegistry?.cloud;
+  if (!eng) return;
+  const providerEl = document.getElementById('settingsCloudProvider');
+  const modelEl = document.getElementById('settingsCloudModel');
+  const keyEl = document.getElementById('settingsCloudKey');
+  if (providerEl) providerEl.value = eng.provider();
+  if (modelEl) modelEl.value = eng.model();
+  if (keyEl) keyEl.value = eng.key();
+}
+
+// When provider changes, default the model field to that provider's cheap option.
+document.getElementById('settingsCloudProvider')?.addEventListener('change', (e) => {
+  const modelEl = document.getElementById('settingsCloudModel');
+  if (!modelEl) return;
+  // Only auto-fill if the user hasn't typed a custom model (or it's a known default).
+  const known = ['claude-haiku-4-5', 'claude-sonnet-4-5', 'claude-opus-4-5',
+                 'gpt-4o-mini', 'gpt-4o', 'gpt-5', 'gpt-5-mini'];
+  if (!modelEl.value || known.includes(modelEl.value)) {
+    modelEl.value = e.target.value === 'openai' ? 'gpt-4o-mini' : 'claude-haiku-4-5';
+  }
+});
+
+document.getElementById('settingsCloudSaveBtn')?.addEventListener('click', () => {
+  if (_ghCurrentTier === 'free') {
+    if (typeof toast === 'function') toast('Cloud engine requires Pro. Upgrade in Settings → License.', true);
+    return;
+  }
+  const eng = window._GhostlineEngineRegistry?.cloud;
+  if (!eng) return;
+  const provider = (document.getElementById('settingsCloudProvider')?.value || 'anthropic').trim();
+  const model = (document.getElementById('settingsCloudModel')?.value || '').trim();
+  const key = (document.getElementById('settingsCloudKey')?.value || '').trim();
+  eng.setProvider(provider);
+  eng.setModel(model);
+  eng.setKey(key);
+  const status = document.getElementById('settingsCloudStatus');
+  if (status) status.textContent = key ? 'Key saved. Cloud engine is now usable.' : 'Key cleared.';
+  if (typeof toast === 'function') toast(key ? 'Cloud key saved' : 'Cloud key cleared');
+  // If user just pasted a key and is on the cloud radio, the engine flips on.
+  refreshEngineStatus();
+});
+
+document.getElementById('settingsCloudTestBtn')?.addEventListener('click', async () => {
+  const eng = window._GhostlineEngineRegistry?.cloud;
+  const status = document.getElementById('settingsCloudStatus');
+  if (!eng) return;
+  if (status) status.textContent = 'Testing key…';
+  // Save first so the test uses whatever's in the inputs now.
+  const provider = (document.getElementById('settingsCloudProvider')?.value || 'anthropic').trim();
+  const model = (document.getElementById('settingsCloudModel')?.value || '').trim();
+  const key = (document.getElementById('settingsCloudKey')?.value || '').trim();
+  if (!key) {
+    if (status) status.textContent = 'Paste an API key first.';
+    return;
+  }
+  eng.setProvider(provider);
+  eng.setModel(model);
+  eng.setKey(key);
+  try {
+    const ok = await eng.testKey();
+    if (status) status.textContent = ok
+      ? `${provider === 'openai' ? 'OpenAI' : 'Anthropic'} key works. Ready to generate.`
+      : `Key call succeeded but reply was unexpected. Try another model id.`;
+  } catch (err) {
+    if (status) status.textContent = err.message || 'Test failed.';
+  }
+});
+
+document.getElementById('settingsCloudClearBtn')?.addEventListener('click', () => {
+  const eng = window._GhostlineEngineRegistry?.cloud;
+  if (!eng) return;
+  eng.setKey('');
+  const keyEl = document.getElementById('settingsCloudKey');
+  if (keyEl) keyEl.value = '';
+  const status = document.getElementById('settingsCloudStatus');
+  if (status) status.textContent = 'Key cleared.';
+  refreshEngineStatus();
+});
+
+document.querySelector('.tab-btn[data-tab="settings"]')?.addEventListener('click', loadCloudSettings);
+window.addEventListener('load', loadCloudSettings);

@@ -338,10 +338,13 @@ def _security_headers(response):
         # *.supabase.co: account portal sign-in flow + license queries hit the
         # Supabase REST + auth endpoints. Browser-side API calls only — server
         # side traffic is unrestricted.
+        # api.anthropic.com + api.openai.com: BYOK cloud engine — browser
+        # calls the provider directly, key never touches our server.
         "connect-src 'self' https://huggingface.co https://*.huggingface.co "
         "https://raw.githubusercontent.com https://cdn.jsdelivr.net "
         "https://api.pexels.com https://*.pexels.com https://pixabay.com https://cdn.pixabay.com "
-        "https://*.supabase.co https://esm.sh; "
+        "https://*.supabase.co https://esm.sh "
+        "https://api.anthropic.com https://api.openai.com; "
         "frame-ancestors 'none'; "
         "base-uri 'self'; "
         "form-action 'self'"

@@ -24,6 +24,7 @@ Resume a previous run:
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -34,6 +35,36 @@ try:
 except ImportError:
     print("ERROR: the 'requests' package is required. Install it with:\n    pip install requests")
     sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# Backend selection
+# ---------------------------------------------------------------------------
+# Phantomline supports three text-generation backends in priority order:
+#   1. Cloud BYO-key (Anthropic Claude or OpenAI GPT) when env vars are set.
+#      Best quality, ~$0.005/script on Haiku/mini, no install friction.
+#   2. Ollama on localhost:11434 — the original desktop path.
+#   3. text.pollinations.ai — last-resort free public endpoint for hosted
+#      deploys that have neither a cloud key nor Ollama.
+#
+# Set ANTHROPIC_API_KEY (preferred) or OPENAI_API_KEY in your .env / shell
+# to enable the cloud path. Override model with PHANTOMLINE_CLOUD_MODEL.
+# Set PHANTOMLINE_LLM_BACKEND=ollama to force the old path even if a key
+# is present — useful when testing the local pipeline.
+
+def _cloud_backend():
+    """Return ('anthropic', key, model) or ('openai', key, model) or None."""
+    forced = (os.environ.get("PHANTOMLINE_LLM_BACKEND") or "").strip().lower()
+    if forced == "ollama" or forced == "pollinations":
+        return None
+    a_key = (os.environ.get("ANTHROPIC_API_KEY") or "").strip()
+    o_key = (os.environ.get("OPENAI_API_KEY") or "").strip()
+    model_override = (os.environ.get("PHANTOMLINE_CLOUD_MODEL") or "").strip()
+    if a_key:
+        return ("anthropic", a_key, model_override or "claude-haiku-4-5")
+    if o_key:
+        return ("openai", o_key, model_override or "gpt-4o-mini")
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -395,6 +426,85 @@ def check_ollama():
 
 
 _POLLINATIONS_TEXT_URL = "https://text.pollinations.ai/"
+_ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
+_OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+
+
+def _generate_via_cloud(prompt, system=SYSTEM_PROMPT, label="",
+                        show_progress=True, temperature=0.85,
+                        num_predict=None):
+    """BYO-API-key text generation. Hits Anthropic or OpenAI directly using
+    keys from environment variables. Same return contract as generate():
+    plain string. Raises RuntimeError on transport / HTTP errors so callers
+    can fall back to Ollama or Pollinations.
+
+    Picked over Ollama when a key is present because the user has explicitly
+    opted in (by setting the env var) and frontier-model quality + speed
+    crushes any local 8B for script-shaped work.
+    """
+    backend = _cloud_backend()
+    if not backend:
+        raise RuntimeError("No cloud LLM key configured (set ANTHROPIC_API_KEY or OPENAI_API_KEY).")
+    provider, api_key, model = backend
+    max_tokens = int(num_predict) if num_predict else 2000
+    if label and show_progress:
+        print(f"  [{label}/{provider}:{model}] ", end="", flush=True)
+    start = time.time()
+    try:
+        if provider == "openai":
+            body = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": float(temperature),
+                "max_tokens": max_tokens,
+            }
+            res = requests.post(
+                _OPENAI_URL,
+                json=body,
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                timeout=180,
+            )
+            if not res.ok:
+                raise RuntimeError(f"OpenAI HTTP {res.status_code}: {res.text[:300]}")
+            data = res.json()
+            text = ((data.get("choices") or [{}])[0]
+                    .get("message", {})
+                    .get("content", "") or "").strip()
+        else:  # anthropic
+            body = {
+                "model": model,
+                "max_tokens": max_tokens,
+                "temperature": float(temperature),
+                "system": system,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+            res = requests.post(
+                _ANTHROPIC_URL,
+                json=body,
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "Content-Type": "application/json",
+                },
+                timeout=180,
+            )
+            if not res.ok:
+                raise RuntimeError(f"Anthropic HTTP {res.status_code}: {res.text[:300]}")
+            data = res.json()
+            blocks = data.get("content") or []
+            text = "".join(b.get("text", "") for b in blocks).strip()
+    except requests.RequestException as exc:
+        raise RuntimeError(f"Cloud LLM unreachable ({provider}): {exc}")
+    elapsed = time.time() - start
+    if show_progress:
+        print(f" done ({len(text.split())} words, {elapsed:.0f}s)")
+    return text
 
 
 def _generate_via_pollinations(prompt, system=SYSTEM_PROMPT, label="",
@@ -446,18 +556,38 @@ def _generate_via_pollinations(prompt, system=SYSTEM_PROMPT, label="",
 def generate(model, prompt, system=SYSTEM_PROMPT, label="", show_progress=True,
              temperature=0.85, num_predict=None):
     """
-    Call Ollama's /api/generate with streaming. Prints a dot every ~25 chunks
-    so the user can see something is happening. Returns the full string.
+    Three-tier text-generation dispatcher:
 
-    Falls back to text.pollinations.ai (free public endpoint) when Ollama
-    is unreachable. This is the hosted-mode path: phantomline.xyz on Render
-    doesn't have Ollama, so without this fallback every script/title/idea
-    generation 503s and the studio is unusable.
+    1. Cloud BYO-key (Anthropic/OpenAI) when ANTHROPIC_API_KEY or
+       OPENAI_API_KEY is set in the environment. Best quality, ~$0.005
+       per script, no install friction.
+    2. Ollama on localhost:11434 — the desktop default. Streams chunks
+       so the user sees progress.
+    3. text.pollinations.ai — free public fallback for hosted deploys
+       (phantomline.xyz on Render) where neither key nor Ollama exist.
 
-    Local desktop installs always hit Ollama first and stay on that path
-    when it's reachable, so no quality regression for users who pay for
-    the local experience.
+    Returns the full string regardless of which backend served it. Each
+    tier's failure is logged and the dispatcher falls through to the
+    next; only the last tier's exception bubbles up.
+
+    The `model` arg is only honored by the Ollama path; cloud uses the
+    model from PHANTOMLINE_CLOUD_MODEL or a sensible default.
     """
+    # Tier 1: cloud BYO key when configured.
+    if _cloud_backend():
+        try:
+            return _generate_via_cloud(
+                prompt, system=system, label=label,
+                show_progress=show_progress,
+                temperature=temperature, num_predict=num_predict,
+            )
+        except RuntimeError as exc:
+            # Don't crash — fall through to Ollama. Operators who set the
+            # env var probably do still have Ollama installed.
+            if show_progress:
+                print(f"\n  (cloud LLM failed: {exc}; falling back to Ollama)")
+
+    # Tier 2: Ollama (desktop original path).
     payload = {
         "model": model,
         "prompt": prompt,
@@ -499,9 +629,13 @@ def generate(model, prompt, system=SYSTEM_PROMPT, label="", show_progress=True,
                 if obj.get("done"):
                     break
     except requests.ConnectionError:
-        raise RuntimeError(
-            "Cannot reach Ollama at http://localhost:11434.\n"
-            "Make sure Ollama is running ('ollama serve' in a terminal, or open the Ollama app)."
+        # Tier 3: Pollinations fallback (hosted mode has no Ollama).
+        if show_progress:
+            print(" (Ollama unreachable, trying pollinations)")
+        return _generate_via_pollinations(
+            prompt, system=system, label=label,
+            show_progress=show_progress,
+            temperature=temperature, num_predict=num_predict,
         )
 
     elapsed = time.time() - start

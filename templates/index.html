@@ -2228,7 +2228,31 @@
             <input type="radio" name="ghEngine" value="device" id="engineDevice" />
             <span><strong>This device (WebGPU + Llama 3.2 1B):</strong> mobile/PWA path. First use downloads ~1 GB, then runs offline forever. Lower quality than 8B but no backend needed.</span>
           </label>
+          <label class="toggle-row">
+            <input type="radio" name="ghEngine" value="cloud" id="engineCloud" />
+            <span><strong>Cloud (your API key):</strong> easiest path. Paste your own Anthropic or OpenAI key below, generate in 30s with frontier-model quality. Costs ~$0.005 per script — paid directly to the provider, not us. Nothing routes through our server.</span>
+          </label>
           <div id="engineLoadProgress" class="hint" style="margin-top:8px; display:none;"></div>
+          <div id="cloudKeyPanel" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border); display:none;">
+            <strong style="font-size:13px;">Cloud API key</strong>
+            <div class="hint" style="margin:4px 0 8px;">
+              Get a key at <a href="https://console.anthropic.com/" target="_blank" rel="noopener" style="color:var(--accent);">console.anthropic.com</a> (Claude) or <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" style="color:var(--accent);">platform.openai.com</a> (OpenAI). Stored only in your browser. Never sent to our server.
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+              <select id="settingsCloudProvider" style="flex:0 0 140px;">
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="openai">OpenAI (GPT)</option>
+              </select>
+              <input id="settingsCloudModel" type="text" placeholder="model id" style="flex:1; min-width:140px;" />
+            </div>
+            <input id="settingsCloudKey" type="password" placeholder="API key (sk-… or claude-…)" autocomplete="off" spellcheck="false" />
+            <div class="script-actions" style="margin-top:8px;">
+              <button id="settingsCloudSaveBtn" class="btn secondary" type="button" style="width:auto;">Save key</button>
+              <button id="settingsCloudTestBtn" class="btn secondary" type="button" style="width:auto;">Test key</button>
+              <button id="settingsCloudClearBtn" class="btn secondary" type="button" style="width:auto;">Clear</button>
+            </div>
+            <div class="hint" id="settingsCloudStatus" style="margin-top:6px;"></div>
+          </div>
           <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
             <strong style="font-size:13px;">Stock video API (optional)</strong>
             <div class="hint" style="margin:4px 0 8px;">For mobile rendering when the server's image gen isn't reachable. Free API, sign up at <a href="https://www.pexels.com/api/" target="_blank" rel="noopener" style="color:var(--accent);">pexels.com/api</a>. Stays in your browser, never sent to our server.</div>

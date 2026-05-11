@@ -22,21 +22,38 @@
   'use strict';
 
   const ENGINE_PREF_KEY = 'ghostline.engine.v1';
+  const CLOUD_PROVIDER_KEY = 'ghostline.cloud.provider';
+  const CLOUD_KEY_KEY = 'ghostline.cloud.key';
+  const CLOUD_MODEL_KEY = 'ghostline.cloud.model';
 
-  // Default engine: server on desktop, prompt user on PWA-like environments.
+  // Has the user pasted a BYO cloud API key? Used by defaultEngine() so a
+  // fresh user with a key gets the cheap+fast Claude/OpenAI path by default
+  // without having to dig in settings.
+  function hasCloudKey() {
+    try {
+      return !!(localStorage.getItem(CLOUD_KEY_KEY) || '').trim();
+    } catch { return false; }
+  }
+
+  // Default engine priority:
+  //   1. cloud (BYO key) if user has pasted one — best UX, no install, $/run is on them
+  //   2. device (WebLLM in browser) for standalone PWA on touch devices
+  //   3. server (Ollama) for desktop installs — the original path
   function defaultEngine() {
+    if (hasCloudKey()) return 'cloud';
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true;
     const isTouch = window.matchMedia('(pointer: coarse)').matches;
-    // Standalone PWA on a phone? Suggest device. Otherwise server.
     return isStandalone && isTouch ? 'device' : 'server';
   }
 
   function readPref() {
     try {
       const v = localStorage.getItem(ENGINE_PREF_KEY);
-      return v === 'device' || v === 'server' ? v : defaultEngine();
+      return v === 'device' || v === 'server' || v === 'cloud'
+        ? v
+        : defaultEngine();
     } catch {
       return defaultEngine();
     }
@@ -179,6 +196,190 @@
       }
       this._engine = null;
       this._initPromise = null;
+    }
+  }
+
+  /**
+   * CloudKeyEngine: BYO-API-key path. The user pastes a personal Anthropic
+   * or OpenAI key into Settings; we call the provider directly from the
+   * browser. Nothing routes through the Phantomline server. Their key,
+   * their tokens, their bill.
+   *
+   * Why this exists:
+   * - Ollama install is the biggest install-funnel drop-off. A BYO-key
+   *   path lets users skip it entirely and start generating in 30 seconds.
+   * - Quality of frontier models (Claude/GPT-4o) crushes any 7B local
+   *   model for script writing, while cost is trivial (~$0.005/script
+   *   on Haiku).
+   * - We don't pay for inference and don't proxy traffic, so it scales
+   *   for free.
+   *
+   * Provider/key/model are stored in localStorage:
+   *   ghostline.cloud.provider  → 'anthropic' | 'openai'
+   *   ghostline.cloud.key       → raw API key (never sent to our server)
+   *   ghostline.cloud.model     → e.g. 'claude-haiku-4-5' or 'gpt-4o-mini'
+   *
+   * SECURITY NOTE: API keys in localStorage are visible to any JS that
+   * runs on the page. We mitigate by (a) strict CSP in production, (b)
+   * never logging keys, (c) never sending them to our backend. Users
+   * who don't want browser-visible keys should use the server (Ollama)
+   * or device (WebLLM) engine.
+   */
+  class CloudKeyEngine {
+    constructor() {
+      this.id = 'cloud';
+      this.label = 'Cloud (your API key)';
+      this.requiresInit = false;
+    }
+    available() {
+      // Available iff a key is present. Otherwise the UI shows a hint to
+      // paste one in Settings → AI engine.
+      try {
+        return !!(localStorage.getItem(CLOUD_KEY_KEY) || '').trim();
+      } catch { return false; }
+    }
+    provider() {
+      try {
+        const p = (localStorage.getItem(CLOUD_PROVIDER_KEY) || 'anthropic').toLowerCase();
+        return p === 'openai' ? 'openai' : 'anthropic';
+      } catch { return 'anthropic'; }
+    }
+    key() {
+      try { return (localStorage.getItem(CLOUD_KEY_KEY) || '').trim(); }
+      catch { return ''; }
+    }
+    model() {
+      try {
+        const m = (localStorage.getItem(CLOUD_MODEL_KEY) || '').trim();
+        if (m) return m;
+      } catch {}
+      // Sensible defaults — cheap and fast for both providers.
+      return this.provider() === 'openai' ? 'gpt-4o-mini' : 'claude-haiku-4-5';
+    }
+    setProvider(p) {
+      try { localStorage.setItem(CLOUD_PROVIDER_KEY, (p || 'anthropic').toLowerCase()); } catch {}
+    }
+    setKey(k) {
+      try { localStorage.setItem(CLOUD_KEY_KEY, (k || '').trim()); } catch {}
+    }
+    setModel(m) {
+      try { localStorage.setItem(CLOUD_MODEL_KEY, (m || '').trim()); } catch {}
+    }
+    async init() { return true; }
+
+    /**
+     * Low-level chat call. Returns the assistant's plain-text reply.
+     * Throws RuntimeError-style strings on HTTP failure so callers can
+     * surface them to the user verbatim.
+     */
+    async _chat({ system, user, temperature = 0.85, maxTokens = 2000 }) {
+      const provider = this.provider();
+      const apiKey = this.key();
+      if (!apiKey) throw new Error('No cloud API key set. Paste one in Settings → AI engine.');
+      const model = this.model();
+      if (provider === 'openai') {
+        const r = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: system },
+              { role: 'user', content: user },
+            ],
+            temperature,
+            max_tokens: maxTokens,
+          }),
+        });
+        if (!r.ok) {
+          const errText = await r.text().catch(() => '');
+          throw new Error(`OpenAI API ${r.status}: ${errText.slice(0, 300)}`);
+        }
+        const d = await r.json();
+        return (d.choices?.[0]?.message?.content || '').trim();
+      }
+      // Anthropic. Requires the dangerous-direct-browser-access opt-in.
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: maxTokens,
+          temperature,
+          system,
+          messages: [{ role: 'user', content: user }],
+        }),
+      });
+      if (!r.ok) {
+        const errText = await r.text().catch(() => '');
+        throw new Error(`Anthropic API ${r.status}: ${errText.slice(0, 300)}`);
+      }
+      const d = await r.json();
+      // content is an array of {type, text} blocks; concatenate text blocks.
+      const blocks = Array.isArray(d.content) ? d.content : [];
+      return blocks.map(b => b.text || '').join('').trim();
+    }
+
+    /**
+     * Same return contract as WebLLMEngine.generateScript: `{ mode, text, title }`.
+     * The Make Video flow's existing post-script handler treats `mode:
+     * 'device-direct'` and `mode: 'cloud-direct'` the same — both bypass the
+     * server job-polling loop.
+     */
+    async generateScript({ topic, niche, audience, format, recipe, hookStyle,
+                           tone, words, description, onProgress }) {
+      const sys = (
+        "You are a YouTube voiceover writer for faceless channels. " +
+        "You output ONLY narration prose, no markdown, no scene labels, " +
+        "no 'Here is', no author notes. Plain text only."
+      );
+      const direction = description ? `\n\nCustom direction: ${description}` : '';
+      const user = (
+        `Write a complete YouTube voiceover narration script.\n\n` +
+        `Topic: ${topic || 'creator-defined'}\n` +
+        `Niche: ${niche || 'faceless YouTube'}\n` +
+        `Audience: ${audience || 'general curious viewers'}\n` +
+        `Format: ${format || 'short-form'}\n` +
+        `Recipe: ${recipe || 'general'}\n` +
+        `Hook style: ${hookStyle || 'curiosity'}\n` +
+        `Tone: ${tone || 'cinematic, calm'}\n` +
+        `Target length: ~${words || 280} words.${direction}\n\n` +
+        `Open with a strong hook. End with a memorable final line.\n` +
+        `Begin the narration now:`
+      );
+      if (onProgress) onProgress({ streaming: false, status: 'Calling ' + this.provider() + '…' });
+      const text = await this._chat({
+        system: sys,
+        user,
+        temperature: 0.85,
+        maxTokens: Math.min(4000, Math.max(400, Math.round((words || 280) * 1.8))),
+      });
+      const cleaned = text.replace(/^(Here['']s|Sure[!,].*?\n|Title:.*\n)/i, '').trim();
+      const firstLine = cleaned.split('\n')[0] || '';
+      const title = firstLine.length < 100 && firstLine.length > 0 && /^[A-Z]/.test(firstLine)
+        ? firstLine.replace(/[*#"']/g, '').trim()
+        : 'Untitled video';
+      if (onProgress) onProgress({ streaming: false, words: cleaned.split(/\s+/).length });
+      return { mode: 'cloud-direct', text: cleaned, title, provider: this.provider(), model: this.model() };
+    }
+
+    /** Quick "did my key work?" probe for the settings panel. */
+    async testKey() {
+      const reply = await this._chat({
+        system: 'You answer in exactly one short word.',
+        user: 'Reply with the single word: ready',
+        temperature: 0,
+        maxTokens: 12,
+      });
+      return /ready|ok|yes/i.test(reply);
     }
   }
 
@@ -612,6 +813,7 @@
   const engines = {
     server: new ServerEngine(),
     device: new WebLLMEngine(),
+    cloud: new CloudKeyEngine(),
   };
 
   // Mobile-first companion engines. Available regardless of which AI engine
@@ -656,4 +858,8 @@
     list: listEngines,
     activeId: () => activeId,
   };
+  // Direct access to engine instances for settings UIs that need to call
+  // getters/setters not exposed via the lightweight `list()` summary.
+  // Treat as semi-internal: not for routine use.
+  window._GhostlineEngineRegistry = engines;
 })();

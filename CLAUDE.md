@@ -6,6 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Phantomline is a local-first AI faceless video studio. One Flask codebase serves three surfaces: a hosted PWA on Render (`phantomline.xyz`), a full desktop install, and an Android APK (Capacitor wrapper). Heavy AI inference runs either server-side (Ollama + Kokoro + MusicGen + ffmpeg) on the desktop install, or entirely in-browser (WebLLM + Web Speech + Web Audio + ffmpeg.wasm) on the hosted/PWA path. The server is never an AI inference bottleneck — it's a thin web tier on hosted, a full pipeline on desktop.
 
+### LLM backend tiers
+
+Script generation runs through one of three backends, picked in priority order:
+
+1. **Cloud BYO-key** (Anthropic Claude or OpenAI GPT). Frontline quality, ~$0.005 per short script, no install friction. User pastes their own API key into Settings → AI engine → Cloud, or sets `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` in their `.env`. Browser calls the provider directly — nothing routes through our server.
+2. **Ollama** on `localhost:11434`. Desktop default. Best for privacy, fully offline, no token cost. Requires `ollama pull llama3.1`.
+3. **text.pollinations.ai**. Free public fallback for hosted deploys that have neither a cloud key nor Ollama.
+
+The browser engine adapter lives in `static/engines.js` (`CloudKeyEngine`, `WebLLMEngine`, `ServerEngine`). The server-side dispatcher lives in `story_generator.py::generate()`. Both pick the highest-priority available backend; failures fall through to the next tier.
+
 ## Running locally
 
 ```bash
