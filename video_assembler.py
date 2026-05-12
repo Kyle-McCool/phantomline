@@ -812,7 +812,7 @@ def _draw_title_frame(text, out_path, target_size):
     box_w = max(draw.textbbox((0, 0), line, font=font)[2] for line in lines) + pad_x * 2
     box_h = len(lines) * line_h + pad_y * 2
     x1 = int((target_w - box_w) / 2)
-    y1 = int(target_h * 0.055)
+    y1 = int(target_h * 0.20)
     x2 = x1 + box_w
     y2 = y1 + box_h
     draw.rounded_rectangle((x1, y1, x2, y2), radius=18, fill=(0, 0, 0, 135))
