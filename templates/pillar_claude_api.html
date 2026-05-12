@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Claude API Video Generator: Use Anthropic Models for Video Scripts | Phantomline</title>
+<meta name="description" content="Use Claude Haiku, Sonnet, or Opus via your own API key to generate video scripts in Phantomline. Browser-direct architecture, no server middleman, full model control." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Claude API Video Generator: Use Anthropic Models for Video Scripts | Phantomline" />
+<meta property="og:description" content="Generate video scripts with Claude Haiku, Sonnet, or Opus via BYOK. Browser-direct calls, no middleman, pay only Anthropic's per-token rate." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Claude API Video Generator", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Claude API Video Generator: Use Anthropic Models for Video Scripts",
+  "description": "Use Claude Haiku, Sonnet, or Opus via your own API key to generate video scripts in Phantomline. Browser-direct architecture, no server middleman, full model control.",
+  "datePublished": "2026-05-11",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
+  "mainEntity": [
+    {"@type": "Question", "name": "How does Phantomline use the Claude API?",
+     "acceptedAnswer": {"@type": "Answer", "text": "You paste your Anthropic API key into Phantomline's Settings. When you generate a script, the browser calls Anthropic's API directly with no server middleman. Your key, your usage, your billing. Phantomline never sees or stores your API key on its servers."}},
+    {"@type": "Question", "name": "Which Claude model should I use for video scripts?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Haiku is the fastest and cheapest, good for high-volume faceless content. Sonnet is the best balance of quality and cost for most creators. Opus produces the most nuanced scripts but costs significantly more per token. For daily Shorts, Haiku. For weekly premium long-form, Sonnet or Opus."}},
+    {"@type": "Question", "name": "How much does Claude API cost per video script?",
+     "acceptedAnswer": {"@type": "Answer", "text": "A typical 2,000-word script uses about 3,000 output tokens. At current Anthropic pricing: Haiku costs roughly $0.001 per script, Sonnet about $0.005, and Opus around $0.02. These costs are for the script only. Narration, music, and rendering happen locally at no additional cost."}},
+    {"@type": "Question", "name": "Is my API key safe in Phantomline?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Your API key is stored in your browser's localStorage and never transmitted to Phantomline's servers. API calls go directly from your browser to Anthropic's endpoint. The browser-direct architecture means Phantomline has no access to your key or your API usage."}},
+    {"@type": "Question", "name": "Can I switch between Claude and local models?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Phantomline's engine selector lets you switch between Claude (cloud BYOK), Ollama (local), and WebGPU (in-browser) at any time. You can use Claude for premium scripts and Ollama for daily volume content, switching in the settings menu between sessions."}}
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>&rsaquo;</span>
+        <span class="current">Claude API Video Generator</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Pillar</div>
+        <h1>Claude API Video Generator: Use Anthropic Models for Video Scripts</h1>
+        <p class="article-lede">Claude is one of the strongest language models available for structured creative writing. Phantomline lets you use it for video script generation through a bring-your-own-key (BYOK) integration: paste your Anthropic API key, pick a model, and generate scripts that go straight into the narration and rendering pipeline.</p>
+        <p class="article-meta">Published May 11, 2026 &middot; Updated May 11, 2026</p>
+      </header>
+
+      <h2>Why Claude for video scripts</h2>
+      <p>Not all language models write video scripts equally well. Script generation for faceless YouTube requires specific capabilities: maintaining narrative tension across thousands of words, following structural templates (hook, retention beats, payoff), and producing natural-sounding prose that works when read aloud by a TTS engine.</p>
+      <p>Claude excels at these tasks for a few concrete reasons:</p>
+      <ul>
+        <li><strong>Instruction following.</strong> Claude reliably follows complex system prompts that specify script structure, word count targets, tone, and formatting constraints. It rarely ignores structural requirements, which means the output consistently fits the narration pipeline without manual reformatting.</li>
+        <li><strong>Long-form coherence.</strong> For 5,000-10,000 word scripts (common in Reddit storytime, horror narration, and mystery channels), Claude maintains narrative coherence better than most open-weight alternatives. The story arc stays intact. Characters stay consistent. Details introduced early get resolved later.</li>
+        <li><strong>Natural spoken cadence.</strong> Claude's output reads naturally when synthesized by TTS. Sentence lengths vary. Paragraph breaks fall in natural places. This matters because stilted writing produces stilted narration, and audiences notice.</li>
+      </ul>
+
+      <h2>The BYOK architecture</h2>
+      <p>Phantomline does not resell Claude API access or add a markup. The integration is pure bring-your-own-key:</p>
+      <ol>
+        <li>You create an API key at <strong>console.anthropic.com</strong>.</li>
+        <li>You paste the key into Phantomline's Settings under AI Engine.</li>
+        <li>The key is stored in your browser's <code>localStorage</code>. It never touches Phantomline's servers.</li>
+        <li>When you generate a script, Phantomline's JavaScript calls Anthropic's API directly from your browser.</li>
+        <li>You are billed by Anthropic at their standard per-token rates. Phantomline adds nothing.</li>
+      </ol>
+      <p>This browser-direct architecture is a deliberate design choice. Most AI video tools proxy your requests through their own servers, which means they see your prompts, your content, and your usage patterns. Phantomline stays out of the loop entirely. The API call goes from your browser to Anthropic and back. Phantomline's server is never involved in the inference request.</p>
+
+      <h2>Claude model comparison for video scripts</h2>
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Speed</th><th>Script quality</th><th>Cost per 2K-word script</th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Claude Haiku</td><td>Very fast (~5s)</td><td>Good</td><td>~$0.001</td><td>High-volume Shorts, daily faceless content</td></tr>
+          <tr><td>Claude Sonnet</td><td>Fast (~10s)</td><td>Very good</td><td>~$0.005</td><td>Most creators. Best quality-to-cost ratio.</td></tr>
+          <tr><td>Claude Opus</td><td>Moderate (~20s)</td><td>Excellent</td><td>~$0.02</td><td>Premium long-form, complex narratives, research content</td></tr>
+        </tbody>
+      </table>
+      <p>For most faceless YouTube creators, <strong>Sonnet is the right default.</strong> It produces scripts that are structurally sound, tonally consistent, and detailed enough for narration. The cost (~$0.005 per script, roughly $0.15/month at 30 scripts) is negligible.</p>
+      <p>Haiku is the right choice when you are producing 3-5 <a href="/ai-youtube-shorts-generator">Shorts per day</a> and need fast iteration more than peak quality. Opus is worth the premium for channels where script quality directly affects audience retention: investigative content, long-form mystery narration, or any niche where the writing is the product.</p>
+
+      <h2>How to get a Claude API key</h2>
+      <ol>
+        <li>Go to <strong>console.anthropic.com</strong> and create an account (or sign in).</li>
+        <li>Navigate to API Keys in the dashboard.</li>
+        <li>Click Create Key. Give it a descriptive name (e.g., "Phantomline scripts").</li>
+        <li>Copy the key. It starts with <code>sk-ant-</code>.</li>
+        <li>In Phantomline, go to Settings, select Cloud under AI Engine, and paste the key.</li>
+      </ol>
+      <p>Anthropic offers a free tier with limited credits for new accounts. After that, you load credits or set up billing. At Sonnet rates, $5 in API credits covers roughly 1,000 scripts.</p>
+
+      <h2>Claude vs. Ollama vs. WebGPU</h2>
+      <p>Phantomline supports three script generation backends. Claude BYOK is one option alongside <a href="/ollama-video-generation">Ollama</a> (local) and <a href="/webgpu-video-generation">WebGPU</a> (in-browser). Here is how they compare:</p>
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>Claude BYOK</th><th>Ollama (local)</th><th>WebGPU (browser)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Script quality</td><td>Excellent (frontier model)</td><td>Very good (Llama 3.1 8B)</td><td>Good (Llama 3.2 1B)</td></tr>
+          <tr><td>Cost per script</td><td>$0.001-$0.02</td><td>$0 (local compute)</td><td>$0 (local compute)</td></tr>
+          <tr><td>Internet required</td><td>Yes (for each script)</td><td>No (after model download)</td><td>No (after first load)</td></tr>
+          <tr><td>Hardware needed</td><td>None (runs on Anthropic's servers)</td><td>8 GB+ VRAM recommended</td><td>WebGPU-capable browser</td></tr>
+          <tr><td>Setup time</td><td>2 minutes (get key, paste in settings)</td><td>5 minutes (install Ollama, pull model)</td><td>Zero (built into the app)</td></tr>
+          <tr><td>Privacy</td><td>Prompts sent to Anthropic</td><td>Everything stays local</td><td>Everything stays in browser</td></tr>
+        </tbody>
+      </table>
+      <p>You can switch between backends at any time. A common workflow: use Claude for important scripts where quality matters most, use Ollama for daily batch generation where volume matters, and use WebGPU when you are on a device without Ollama installed.</p>
+
+      <h2>What Claude generates in Phantomline</h2>
+      <p>When you hit Generate with Claude selected, the system prompt instructs the model to produce:</p>
+      <ul>
+        <li><strong>A hook</strong> (the opening 1-2 sentences designed to stop the scroll).</li>
+        <li><strong>Body paragraphs</strong> with embedded retention beats (pattern interrupts that re-engage attention).</li>
+        <li><strong>A call to action</strong> tailored to the channel type (subscribe CTA, comment prompt, or next-video teaser).</li>
+        <li><strong>A title and description</strong> optimized for YouTube search.</li>
+        <li><strong>Hashtag suggestions</strong> for <a href="/ai-youtube-shorts-generator">Shorts</a> content.</li>
+      </ul>
+      <p>The script goes directly into Phantomline's narration pipeline. Kokoro TTS (or Web Speech in the browser) reads the script aloud, MusicGen adds a backing track, and ffmpeg renders the final MP4. The entire flow from prompt to upload-ready video takes 5-15 minutes depending on video length.</p>
+
+      <h2>Cost breakdown for a typical month</h2>
+      <p>For a creator publishing 30 long-form videos and 60 Shorts per month:</p>
+      <ul>
+        <li><strong>30 long-form scripts via Sonnet:</strong> 30 &times; $0.005 = $0.15</li>
+        <li><strong>60 Shorts scripts via Haiku:</strong> 60 &times; $0.001 = $0.06</li>
+        <li><strong>Total Claude API cost:</strong> ~$0.21/month</li>
+        <li><strong>Narration, music, rendering:</strong> $0 (runs locally)</li>
+      </ul>
+      <p>Compare that to a cloud video tool charging $25-$50/month in subscription fees plus per-render costs. The BYOK model is cheaper by an order of magnitude because you pay only for the AI inference you actually use, and everything else runs on your own hardware.</p>
+
+      <h2>Limitations</h2>
+      <ul>
+        <li><strong>Internet required for each script.</strong> Unlike <a href="/ai-video-generator-offline">offline mode</a> with Ollama, Claude BYOK needs a network connection for every script generation call. If you need to work without internet, switch to Ollama.</li>
+        <li><strong>API key management is your responsibility.</strong> If your key leaks, someone else can run up charges on your Anthropic account. Use a dedicated key for Phantomline with spending limits configured in the Anthropic console.</li>
+        <li><strong>Anthropic's usage policies apply.</strong> Content generated via the Claude API is subject to Anthropic's acceptable use policy. Review their terms if your content involves sensitive topics.</li>
+        <li><strong>Prompts are sent to Anthropic.</strong> If absolute privacy is a hard requirement, use <a href="/ollama-video-generation">Ollama</a> instead. Claude BYOK trades some privacy for higher script quality.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>How does Phantomline use the Claude API?</summary>
+          <p>You paste your Anthropic API key into Settings. When you generate a script, the browser calls Anthropic's API directly with no server middleman. Your key, your usage, your billing. Phantomline never sees or stores your API key on its servers.</p>
+        </details>
+        <details>
+          <summary>Which Claude model should I use for video scripts?</summary>
+          <p>Haiku is fastest and cheapest, good for high-volume faceless content. Sonnet is the best balance of quality and cost for most creators. Opus produces the most nuanced scripts but costs more per token. For daily Shorts, Haiku. For weekly premium long-form, Sonnet or Opus.</p>
+        </details>
+        <details>
+          <summary>How much does Claude API cost per video script?</summary>
+          <p>A typical 2,000-word script uses about 3,000 output tokens. Haiku costs roughly $0.001 per script, Sonnet about $0.005, and Opus around $0.02. These costs are for the script only. Narration, music, and rendering happen locally at no additional cost.</p>
+        </details>
+        <details>
+          <summary>Is my API key safe in Phantomline?</summary>
+          <p>Your API key is stored in your browser's localStorage and never transmitted to Phantomline's servers. API calls go directly from your browser to Anthropic's endpoint. The browser-direct architecture means Phantomline has no access to your key or your usage.</p>
+        </details>
+        <details>
+          <summary>Can I switch between Claude and local models?</summary>
+          <p>Yes. Phantomline's engine selector lets you switch between Claude (cloud BYOK), Ollama (local), and WebGPU (in-browser) at any time. Use Claude for premium scripts and Ollama for daily volume, switching in the settings between sessions.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/local-ai-video-generator">Local AI video generator</a></li>
+        <li><a href="/ai-video-generator-offline">AI video generator offline</a></li>
+        <li><a href="/ollama-video-generation">Ollama video generation</a></li>
+        <li><a href="/webgpu-video-generation">WebGPU video generation</a></li>
+        <li><a href="/ai-youtube-shorts-generator">AI YouTube Shorts generator</a></li>
+        <li><a href="/alternatives">All AI video tool alternatives</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

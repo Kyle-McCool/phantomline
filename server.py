@@ -452,6 +452,13 @@ _SITEMAP_ROUTES = [
     ("/ai-script-writing",             "0.8", "monthly"),
     ("/short-form-video",              "0.8", "monthly"),
     ("/content-repurposing",           "0.8", "monthly"),
+    # BYOK + offline differentiation pillars (from keyword research 2026-05).
+    ("/bring-your-own-api-key",        "0.85", "monthly"),
+    ("/ai-video-generator-offline",    "0.8", "monthly"),
+    ("/ollama-video-generation",       "0.8", "monthly"),
+    ("/ai-youtube-shorts-generator",   "0.8", "monthly"),
+    ("/claude-api-video-generator",    "0.8", "monthly"),
+    ("/webgpu-video-generation",       "0.8", "monthly"),
     # Persona pages.
     ("/for-solopreneurs",              "0.75", "monthly"),
     ("/for-course-creators",           "0.75", "monthly"),
@@ -2953,6 +2960,59 @@ def pillar_content_repurposing():
     """Content repurposing pillar. Turning one video into multiple
     formats, cross-platform distribution, ratio controls."""
     return render_template("pillar_content_repurposing.html")
+
+
+# -----------------------------------------------------------------------
+# BYOK + offline differentiation pillars (keyword research 2026-05).
+# These target low-KD terms where Phantomline has near-zero competition.
+# -----------------------------------------------------------------------
+
+@app.route("/bring-your-own-api-key")
+def pillar_byok():
+    """BYOK pillar. Targets 'bring your own api key video generator' (KD 14,
+    1,600/mo). Explains the BYOK architecture, security model, supported
+    models, cost comparison, and why it matters for faceless creators."""
+    return render_template("pillar_byok.html")
+
+
+@app.route("/ai-video-generator-offline")
+def pillar_offline():
+    """Offline AI video generator pillar. Targets 'ai video generator offline'
+    (KD 11, 720/mo). Covers Ollama + local pipeline, what works without
+    internet, and privacy benefits."""
+    return render_template("pillar_offline.html")
+
+
+@app.route("/ollama-video-generation")
+def pillar_ollama():
+    """Ollama video generation pillar. Targets 'ollama video generation'
+    (KD 8, 880/mo). Technical tutorial angle showing how Phantomline uses
+    Ollama for script generation in the video pipeline."""
+    return render_template("pillar_ollama.html")
+
+
+@app.route("/ai-youtube-shorts-generator")
+def pillar_shorts():
+    """YouTube Shorts generator pillar. Targets 'ai youtube shorts generator'
+    (KD 26, 1,600/mo). Shows the short-form pipeline, vertical format
+    controls, and Shorts-specific SEO."""
+    return render_template("pillar_shorts.html")
+
+
+@app.route("/claude-api-video-generator")
+def pillar_claude_api():
+    """Claude API video generator pillar. Targets 'claude api video generator'
+    (KD 10, 590/mo). Explains using Claude Haiku/Sonnet/Opus via BYOK
+    for high-quality faceless YouTube scripts."""
+    return render_template("pillar_claude_api.html")
+
+
+@app.route("/webgpu-video-generation")
+def pillar_webgpu():
+    """WebGPU video generation pillar. Targets 'webgpu video generation'
+    (KD 6, 260/mo). Technical angle on browser-side AI via WebLLM +
+    Llama 3.2 1B, no install needed."""
+    return render_template("pillar_webgpu.html")
 
 
 # -----------------------------------------------------------------------

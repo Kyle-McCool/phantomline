@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Ollama Video Generation: Free Local LLM for Video Scripts | Phantomline</title>
+<meta name="description" content="Use Ollama to generate video scripts locally with Llama 3.1. No API costs, no cloud dependency. Phantomline integrates Ollama for private, offline script generation." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Ollama Video Generation: Free Local LLM for Video Scripts | Phantomline" />
+<meta property="og:description" content="Run Llama 3.1 locally via Ollama for free, private video script generation. No API keys, no per-token costs." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Ollama Video Generation", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Ollama Video Generation: Free Local LLM for Video Scripts",
+  "description": "Use Ollama to generate video scripts locally with Llama 3.1. No API costs, no cloud dependency. Phantomline integrates Ollama for private, offline script generation.",
+  "datePublished": "2026-05-11",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
+  "mainEntity": [
+    {"@type": "Question", "name": "What is Ollama?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Ollama is a free, open-source tool that runs large language models locally on your computer. It handles model downloading, memory management, and inference through a simple API on localhost:11434. No cloud account or API key is needed."}},
+    {"@type": "Question", "name": "How does Phantomline use Ollama?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Phantomline connects to Ollama on localhost:11434 to generate video scripts. When you type a topic and hit Generate, Phantomline sends a structured prompt to Ollama, which returns a complete script with hook, body, retention beats, and call to action. The entire exchange stays on your machine."}},
+    {"@type": "Question", "name": "Which Ollama models work with Phantomline?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Any model Ollama can run. The default is Llama 3.1 8B, which balances quality and speed on consumer hardware. You can switch to llama3.1:70b for higher quality if your GPU has enough VRAM, or llama3.2:3b for faster generation on lower-end machines."}},
+    {"@type": "Question", "name": "Is Ollama free?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Ollama is open-source and free to use. The models it runs (Llama, Mistral, Gemma, etc.) are open-weight and free to download. There are no per-token costs and no usage limits."}},
+    {"@type": "Question", "name": "How do I install Ollama for use with Phantomline?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Download Ollama from ollama.com, install it, then run 'ollama pull llama3.1' in your terminal. Phantomline detects Ollama automatically when it is running on localhost:11434. No configuration file or API key is needed."}}
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>&rsaquo;</span>
+        <span class="current">Ollama Video Generation</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Pillar</div>
+        <h1>Ollama Video Generation: Free Local LLM for Video Scripts</h1>
+        <p class="article-lede">Ollama runs large language models on your own hardware for free. Phantomline uses it as the default script engine for the desktop install: type a topic, get a structured video script, pay nothing in API fees. Here is how it works, how to set it up, and which models to use.</p>
+        <p class="article-meta">Published May 11, 2026 &middot; Updated May 11, 2026</p>
+      </header>
+
+      <h2>What is Ollama?</h2>
+      <p>Ollama is a free, open-source tool that downloads, manages, and serves large language models on your local machine. It exposes a REST API on <code>localhost:11434</code> that any application can call. No cloud account, no API key, no per-token billing. You install it, pull a model, and start generating text.</p>
+      <p>For video creators, Ollama matters because it turns script generation from a metered cloud expense into a free local operation. The model runs on your CPU or GPU, the prompts never leave your machine, and there are no rate limits or usage caps.</p>
+
+      <h2>How Phantomline uses Ollama</h2>
+      <p>When the desktop install detects Ollama running on <code>localhost:11434</code>, it becomes the default script engine. The integration works like this:</p>
+      <ol>
+        <li>You enter a topic prompt in the studio (e.g., "5 abandoned theme parks that nature reclaimed").</li>
+        <li>Phantomline sends a structured system prompt plus your topic to Ollama's <code>/api/generate</code> endpoint.</li>
+        <li>Ollama runs inference on the local model (Llama 3.1 8B by default) and streams back a complete script.</li>
+        <li>The script arrives with a hook, body paragraphs, retention beats, and a call to action, formatted for narration.</li>
+      </ol>
+      <p>The entire exchange happens over localhost. No external network traffic. Phantomline's script generator falls back to Ollama automatically when no cloud API key is configured, making it the zero-configuration default for the desktop install.</p>
+
+      <h2>Installing Ollama</h2>
+      <p>Setup takes about five minutes:</p>
+      <ol>
+        <li>Download Ollama from <strong>ollama.com</strong>. Installers are available for Windows, macOS, and Linux.</li>
+        <li>Run the installer. Ollama starts as a background service automatically.</li>
+        <li>Open a terminal and pull the default model: <code>ollama pull llama3.1</code>. This downloads about 4.7 GB.</li>
+        <li>Verify it works: <code>ollama run llama3.1 "Write a one-paragraph horror story."</code> If text comes back, Ollama is ready.</li>
+        <li>Start Phantomline. It detects Ollama on <code>localhost:11434</code> and enables local script generation automatically.</li>
+      </ol>
+
+      <h2>Choosing the right model</h2>
+      <p>Ollama supports dozens of open-weight models. For video script generation, three tiers cover most use cases:</p>
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Size</th><th>VRAM needed</th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>llama3.2:3b</td><td>~2 GB</td><td>4 GB+</td><td>Fast drafts on low-end hardware. Shorter scripts, lighter on detail.</td></tr>
+          <tr><td>llama3.1:8b (default)</td><td>~4.7 GB</td><td>8 GB+</td><td>The sweet spot. Detailed scripts, good narrative structure, runs on most modern laptops.</td></tr>
+          <tr><td>llama3.1:70b</td><td>~40 GB</td><td>48 GB+</td><td>Maximum quality. Needs a workstation GPU or multi-GPU setup.</td></tr>
+        </tbody>
+      </table>
+      <p>To switch models in Phantomline, go to Settings and change the Ollama model name. Phantomline sends the model identifier to Ollama, which handles the rest. You can also use non-Llama models like Mistral, Gemma, or Qwen. Any model that Ollama can serve works with Phantomline's script generator.</p>
+
+      <h2>Why Ollama matters for video creators</h2>
+
+      <h3>Zero per-token cost</h3>
+      <p>Cloud LLM APIs charge per token. A 2,000-word video script runs roughly 3,000 tokens. At typical API pricing, that is $0.003 to $0.02 per script depending on the model. Across 30 scripts a month, the cost is modest but nonzero. Across 300 scripts (a multi-channel operator), it adds up. Ollama makes every script free after the one-time model download.</p>
+
+      <h3>Complete privacy</h3>
+      <p>Every prompt you send to a cloud API lands on someone else's server. That server may log prompts, may use them for model training (depending on the provider's terms), and is subject to that company's data retention policy. Ollama runs on your machine. Prompts go to localhost. Nothing leaves your device. For creators working in competitive or sensitive niches, this is a hard advantage.</p>
+
+      <h3>No rate limits or downtime</h3>
+      <p>Cloud APIs have rate limits, burst caps, and occasional outages. Ollama has none of those. You can generate as many scripts as your hardware can handle, as fast as your GPU can produce tokens. Batch-generating 20 scripts in a session is a normal workflow when there are no external constraints.</p>
+
+      <h3>Model flexibility</h3>
+      <p>Locked into GPT-4 because your tool only supports OpenAI? With Ollama, you choose. Want to test whether Mistral produces better horror scripts than Llama? Pull both, switch in Phantomline's settings, compare. New open-weight model releases (which happen monthly) are a single <code>ollama pull</code> away.</p>
+
+      <h2>Ollama vs. cloud APIs for video scripts</h2>
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>Ollama (local)</th><th>Cloud API (OpenAI, Anthropic)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cost per script</td><td>$0</td><td>$0.003 to $0.02+</td></tr>
+          <tr><td>Privacy</td><td>Prompts stay on your device</td><td>Prompts processed on provider servers</td></tr>
+          <tr><td>Setup time</td><td>5 minutes (install + model pull)</td><td>Minutes (get API key, enter in settings)</td></tr>
+          <tr><td>Internet required</td><td>Once for model download</td><td>Always, for every request</td></tr>
+          <tr><td>Model quality ceiling</td><td>Open-weight models (very good, not bleeding-edge)</td><td>Proprietary frontier models</td></tr>
+          <tr><td>Rate limits</td><td>None</td><td>Per-minute and per-day caps</td></tr>
+          <tr><td>Hardware required</td><td>8 GB+ VRAM for the 8B model</td><td>None (runs on their hardware)</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Common Ollama workflows in Phantomline</h2>
+      <ul>
+        <li><strong>Daily script batch:</strong> Generate 5-10 scripts in a session with no API costs. Edit and queue them for rendering over the week.</li>
+        <li><strong>Model A/B testing:</strong> Pull two models, generate the same topic with each, compare script quality before committing to a model for your channel.</li>
+        <li><strong>Offline production:</strong> Pull your preferred model while connected, then <a href="/ai-video-generator-offline">generate entirely offline</a> during travel or in low-connectivity environments.</li>
+        <li><strong>Niche-specific fine-tuning:</strong> Use Ollama's Modelfile to create a custom model variant with a system prompt tuned to your channel's tone and format.</li>
+      </ul>
+
+      <h2>Limitations</h2>
+      <p>Ollama is not the right choice for every creator. The honest version:</p>
+      <ul>
+        <li><strong>Hardware dependency.</strong> The 8B model needs a GPU with 8 GB VRAM for comfortable speed. CPU-only inference works but is significantly slower (minutes per script instead of seconds).</li>
+        <li><strong>Model quality gap.</strong> Open-weight models are very good, but the absolute frontier (Claude Opus, GPT-4) still produces more nuanced scripts for complex topics. For most faceless YouTube content, the difference is marginal. For premium or research-heavy content, <a href="/claude-api-video-generator">cloud BYOK</a> may be worth the cost.</li>
+        <li><strong>No built-in memory or context window scaling.</strong> Ollama serves one request at a time in its default configuration. If you need very long scripts (10,000+ words), you may need to increase context length manually or use a model with a larger default window.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>What is Ollama?</summary>
+          <p>Ollama is a free, open-source tool that runs large language models locally on your computer. It handles model downloading, memory management, and inference through a simple API on localhost:11434. No cloud account or API key is needed.</p>
+        </details>
+        <details>
+          <summary>How does Phantomline use Ollama?</summary>
+          <p>Phantomline connects to Ollama on localhost:11434 to generate video scripts. When you type a topic and hit Generate, Phantomline sends a structured prompt to Ollama, which returns a complete script with hook, body, retention beats, and call to action. The entire exchange stays on your machine.</p>
+        </details>
+        <details>
+          <summary>Which Ollama models work with Phantomline?</summary>
+          <p>Any model Ollama can run. The default is Llama 3.1 8B, which balances quality and speed on consumer hardware. You can switch to llama3.1:70b for higher quality if your GPU has enough VRAM, or llama3.2:3b for faster generation on lower-end machines.</p>
+        </details>
+        <details>
+          <summary>Is Ollama free?</summary>
+          <p>Yes. Ollama is open-source and free to use. The models it runs (Llama, Mistral, Gemma, etc.) are open-weight and free to download. There are no per-token costs and no usage limits.</p>
+        </details>
+        <details>
+          <summary>How do I install Ollama for use with Phantomline?</summary>
+          <p>Download Ollama from ollama.com, install it, then run <code>ollama pull llama3.1</code> in your terminal. Phantomline detects Ollama automatically when it is running on localhost:11434. No configuration file or API key is needed.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/local-ai-video-generator">Local AI video generator</a></li>
+        <li><a href="/ai-video-generator-offline">AI video generator offline</a></li>
+        <li><a href="/claude-api-video-generator">Claude API video generator</a></li>
+        <li><a href="/webgpu-video-generation">WebGPU video generation</a></li>
+        <li><a href="/ai-youtube-shorts-generator">AI YouTube Shorts generator</a></li>
+        <li><a href="/alternatives">All AI video tool alternatives</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

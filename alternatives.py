@@ -1535,6 +1535,148 @@ COMPETITORS: list[dict] = [
              "Kokoro is sufficient; for cloned-voice workflows Overdub remains the standard."),
         ],
     },
+
+    # -------------------------------------------------------------------
+    # InVideo — cloud AI video maker. Dominant brand in "ai video maker
+    # for youtube" search cluster. ~$25-50/mo. 2,400/mo searches for
+    # "invideo ai alternative" at KD 20.
+    # -------------------------------------------------------------------
+    {
+        "slug": "invideo",
+        "name": "InVideo AI",
+        "tagline": "Cloud AI video creation platform",
+        "primary_keyword": "InVideo AI alternative",
+        "title_tag": "InVideo AI Alternative for Faceless YouTube Creators | Phantomline",
+        "meta_description": "Looking for an InVideo AI alternative? Phantomline is a local-first AI faceless video generator with bring-your-own API key, no per-render fees, and offline rendering.",
+        "h1": "InVideo AI Alternative for Faceless YouTube Creators",
+        "intro": (
+            "InVideo AI is the most-searched cloud video creation platform in the faceless YouTube "
+            "space. You describe a video topic and their cloud generates a script, selects stock "
+            "footage, adds voiceover, and exports a finished video. It works, but the trade-offs "
+            "stack up: every render costs tokens or hits a monthly cap, your scripts and channel "
+            "data live on their servers, and the subscription compounds month after month."
+            "\n\n"
+            "Phantomline takes the same starting point (one idea becomes a finished video) but "
+            "runs the AI pipeline on your own machine or through your own API key. Bring your "
+            "Claude or GPT key for frontier-model script quality at ~$0.005 per script, or run "
+            "Ollama locally for zero token cost. Either way, nothing routes through our servers. "
+            "Your scripts, your voiceover, your channel analytics all stay on your device."
+        ),
+        "competitor_strengths": [
+            "Polished cloud UX with no installation needed.",
+            "Large stock footage and music library built into the platform.",
+            "AI voice cloning and multi-language support.",
+            "Strong brand recognition and active community.",
+            "Template library covering many content verticals.",
+        ],
+        "phantomline_advantages": [
+            "Bring your own API key: use Claude Haiku, Sonnet, Opus, or GPT for ~$0.005/script. Browser calls the provider directly.",
+            "Local AI pipeline: Ollama + Llama 3.1 8B for scripts, Kokoro TTS for voiceover, MusicGen for music. All offline, zero token cost.",
+            "Private workflow: scripts, narration, channel analytics, and rendered videos never leave your machine.",
+            "No per-render caps or token budgets. Render 90 videos/month on the free tier if your hardware supports it.",
+            "One-time Founding Lifetime tier ($79): pay once instead of $25-50/month forever.",
+            "Built-in YouTube SEO: keyword research, vidIQ-aware Optimize Library, channel-insights ingest.",
+            "WebGPU mode: run AI in the browser on mobile with no install and no server needed.",
+        ],
+        "comparison_rows": [
+            ["Tool",                    "Phantomline",                          "InVideo AI"],
+            ["Best for",                "Faceless YouTube end-to-end",          "Cloud video creation"],
+            ["Script generation",       "Claude/GPT via BYOK or local Ollama",  "Cloud AI (their models)"],
+            ["AI voiceover",            "Kokoro TTS, 16 voices, local",         "Cloud TTS + voice cloning"],
+            ["Music generation",        "MusicGen local + bundled pack",        "Stock library"],
+            ["Visuals",                 "AI scene gen (FLUX) + Pexels B-roll",  "Stock footage library"],
+            ["Runs locally?",           "Yes (full offline pipeline)",          "Cloud-only"],
+            ["BYOK (your API key)?",    "Yes (Claude, GPT)",                    "No"],
+            ["Per-render cost?",        "None (local) or ~$0.005 (cloud BYOK)", "$0.50+ per video"],
+            ["Subscription required?",  "Free tier + optional Pro",             "Subscription required"],
+            ["One-time lifetime tier?", "Yes ($79 founding, first 500)",        "No"],
+            ["YouTube SEO tools",       "Research + Optimize Library + analytics", "Basic metadata"],
+            ["Data privacy",            "Everything stays on your device",      "Cloud processing"],
+        ],
+        "when_competitor_wins": (
+            "InVideo AI is the right choice if you want zero-install video creation with a "
+            "polished interface, built-in stock footage, and voice cloning. If you need "
+            "multi-language voiceover, if you want to clone your own voice, or if you value "
+            "an extensive template library over tool ownership, InVideo delivers. The "
+            "platform is mature and the output quality is consistent."
+            "\n\n"
+            "It also wins on initial onboarding friction. There is no Python to install, no "
+            "Ollama to configure, no model to download. You open the browser, type a prompt, "
+            "and get a video. For someone testing the faceless niche with a single video before "
+            "committing, that speed-to-first-output matters."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline is the better fit when you are running a faceless YouTube channel at "
+            "volume (30-90 videos/month) and the recurring per-render cost of a cloud platform "
+            "starts hurting. At InVideo's pricing, 30 videos/month can easily cost $50-100+. "
+            "With Phantomline's BYOK cloud engine, the same volume costs ~$0.15 in API tokens. "
+            "With Ollama locally, the cost is zero."
+            "\n\n"
+            "Phantomline also wins on privacy and control. If you are developing a channel "
+            "strategy with proprietary keyword research, competitive analytics, and custom "
+            "script formulas, keeping that data on your own machine instead of a third-party "
+            "cloud matters. Phantomline's SEO Finder and channel-insights ingest run locally "
+            "and never upload your data."
+            "\n\n"
+            "And for creators who want to stop renting: the $79 Founding Lifetime tier gives "
+            "you the full Pro feature set forever. No monthly bill, no annual renewal, no "
+            "tier downgrades when the budget gets tight."
+        ),
+        "feature_comparison": [
+            ("Script generation", "Claude/GPT via your own key, or local Llama 3.1", "Cloud AI models (proprietary)"),
+            ("Voiceover", "Kokoro TTS, 16 voices, fully local", "Cloud TTS with voice cloning"),
+            ("Music", "MusicGen + bundled royalty-free pack", "Stock music library"),
+            ("Visuals / B-roll", "FLUX AI scenes + Pexels stock", "Built-in stock footage library"),
+            ("Captioning", "Built-in, configurable templates", "Built-in captions"),
+            ("MP4 export", "ffmpeg local render, no cap", "Cloud render, capped per tier"),
+            ("YouTube metadata", "Title + description + tags + schedule + SEO", "Basic metadata"),
+            ("Local / private", "Everything stays on your device", "Cloud-only"),
+            ("BYOK API key", "Yes (Anthropic Claude or OpenAI GPT)", "No"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month with 2 cloud trial renders. Creator "
+            "Pro is $15/month or $99/year for unlimited renders and unlimited cloud engine. "
+            "Founding Lifetime is $79 one-time for the first 500 customers, locked in for life."
+        ),
+        "pricing_comparison_competitor": (
+            "InVideo AI uses subscription-based pricing starting at ~$25/month with per-video "
+            "caps that increase with tier. Check invideo.io for current pricing."
+        ),
+        "who_picks_competitor": (
+            "Pick InVideo AI if you want zero setup, voice cloning, an extensive stock library, "
+            "and you are producing fewer than 10 videos per month where the per-video cost is "
+            "acceptable. Also pick InVideo if multi-language voiceover is a core requirement."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if you are running a faceless YouTube channel at volume, you want "
+            "to bring your own Claude or GPT API key for frontier-model quality at a fraction of "
+            "the cost, you value keeping your scripts and analytics private on your own machine, "
+            "and you would rather pay $79 once than $25-50/month forever."
+        ),
+        "faq": [
+            ("Is Phantomline a good InVideo AI alternative?",
+             "Yes. Phantomline covers the same end-to-end video creation workflow but runs locally "
+             "or via your own API key. For faceless YouTube creators producing at volume, the cost "
+             "difference is significant: ~$0.005 per script with BYOK vs $0.50+ per video on InVideo."),
+            ("Can I bring my own Claude or GPT key?",
+             "Yes. Paste your Anthropic or OpenAI API key in Settings. Your browser calls the "
+             "provider directly over HTTPS. Phantomline never sees, stores, or proxies your key. "
+             "Free users get 2 cloud renders to try it. Pro and Studio get unlimited."),
+            ("Does Phantomline work offline?",
+             "Yes. The desktop install runs Ollama for scripts, Kokoro for TTS, MusicGen for music, "
+             "and ffmpeg for video assembly, all on your machine with no internet required after "
+             "initial model downloads."),
+            ("Does InVideo AI let you use your own API key?",
+             "No. InVideo uses their own cloud models and charges per video or per monthly cap. "
+             "You cannot bring your own Anthropic or OpenAI key. Phantomline's BYOK approach "
+             "lets you control both the model quality and the cost."),
+            ("Which is cheaper for faceless YouTube at volume?",
+             "Phantomline. At 30 videos/month, InVideo costs $50-100+ depending on tier. "
+             "Phantomline with BYOK costs about $0.15 total in API tokens. With Ollama locally, "
+             "the cost is $0. Plus the Founding Lifetime tier ($79 once) eliminates the platform "
+             "fee entirely."),
+        ],
+    },
 ]
 
 

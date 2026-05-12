@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AI YouTube Shorts Generator: Vertical Video from a Text Prompt | Phantomline</title>
+<meta name="description" content="Generate YouTube Shorts with AI. Phantomline creates short-form vertical video from a topic prompt, with script, narration, music, captions, and rendered MP4 ready to upload." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="AI YouTube Shorts Generator: Vertical Video from a Text Prompt | Phantomline" />
+<meta property="og:description" content="Generate YouTube Shorts with AI. Script, narration, music, captions, and rendered MP4 from a single topic prompt." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "AI YouTube Shorts Generator", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "AI YouTube Shorts Generator: Vertical Video from a Text Prompt",
+  "description": "Generate YouTube Shorts with AI. Phantomline creates short-form vertical video from a topic prompt, with script, narration, music, captions, and rendered MP4 ready to upload.",
+  "datePublished": "2026-05-11",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
+  "mainEntity": [
+    {"@type": "Question", "name": "Can Phantomline make YouTube Shorts?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Set the format to vertical (9:16) and target length to 30-60 seconds. Phantomline generates a short script, narrates it, adds music and captions, and renders a Shorts-ready MP4. You can also generate longer short-form videos up to 10 minutes for the expanded Shorts format."}},
+    {"@type": "Question", "name": "What length should AI YouTube Shorts be?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The sweet spot for Shorts is 30 to 60 seconds. YouTube's algorithm favors Shorts with high completion rates, and shorter videos get completed more often. For story-driven content, 45-60 seconds tends to perform best because it allows a proper hook, body, and payoff."}},
+    {"@type": "Question", "name": "Can I use AI Shorts for TikTok and Instagram Reels too?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. The 9:16 vertical MP4 that Phantomline renders works on YouTube Shorts, TikTok, and Instagram Reels. The format is identical across platforms. You may want to adjust titles and hashtags per platform, but the video file itself is universal."}},
+    {"@type": "Question", "name": "Do I need a cloud API key for Shorts?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Phantomline can generate Shorts entirely locally using Ollama for scripts and Kokoro for narration, with no API key needed. If you prefer cloud quality, you can bring your own Claude or OpenAI key. Both paths produce the same output format."}},
+    {"@type": "Question", "name": "How do I optimize AI Shorts for the YouTube algorithm?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Keep titles under 50 characters. Front-load the hook in the first 2-3 seconds of narration. Use 3-5 relevant hashtags including #Shorts. Aim for high completion rate by keeping total length between 30 and 60 seconds. Post consistently at the same times each day."}}
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>&rsaquo;</span>
+        <span class="current">AI YouTube Shorts Generator</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Pillar</div>
+        <h1>AI YouTube Shorts Generator: Vertical Video from a Text Prompt</h1>
+        <p class="article-lede">YouTube Shorts is the fastest-growing surface on the platform, and faceless creators are publishing 3-5 Shorts per day to build audience. Phantomline generates the entire short-form pipeline from a topic prompt: script, narration, music, captions, and a rendered 9:16 MP4 ready to upload.</p>
+        <p class="article-meta">Published May 11, 2026 &middot; Updated May 11, 2026</p>
+      </header>
+
+      <h2>What makes Shorts different from long-form</h2>
+      <p>YouTube Shorts are vertical (9:16), capped at 3 minutes for eligibility in the Shorts feed (though YouTube has expanded this to 10 minutes in some regions), and governed by a different algorithm than standard uploads. The key difference: Shorts are ranked primarily by completion rate, not watch time. A 45-second video that viewers finish is worth more than a 10-minute video where half the audience drops off at the two-minute mark.</p>
+      <p>This changes how scripts need to be written. A Shorts script needs a hook in the first two seconds, a tight narrative arc compressed into 100-200 words, and a payoff right at the end. There is no room for slow intros or gradual build-up.</p>
+
+      <h2>Phantomline's short-form pipeline</h2>
+      <p>Phantomline handles the full Shorts workflow:</p>
+
+      <h3>1. Script generation with word count control</h3>
+      <p>Set a target word count (80-200 words for a 30-60 second Short) and Phantomline generates a script calibrated to that length. The script engine (powered by <a href="/ollama-video-generation">Ollama locally</a> or <a href="/claude-api-video-generator">Claude/OpenAI via BYOK</a>) produces a structured output: opening hook, body, payoff. For Shorts, the system prompt enforces a tighter structure than long-form scripts, with no filler paragraphs or extended tangents.</p>
+
+      <h3>2. Format selection</h3>
+      <p>Choose between vertical (9:16 for Shorts, TikTok, Reels), horizontal (16:9 for standard YouTube), or square (1:1 for Instagram feed). Phantomline adjusts caption positioning, font scaling, and visual layer composition based on the selected format. For Shorts, captions are centered and sized for mobile viewing.</p>
+
+      <h3>3. Narration and music</h3>
+      <p>Kokoro TTS narrates the script in your chosen voice. MusicGen produces a backing track timed to match the narration length. For Shorts, the music is typically more prominent in the mix because short-form viewers expect audio-forward content. You can adjust the voice-to-music ratio in the render settings.</p>
+
+      <h3>4. Render to upload-ready MP4</h3>
+      <p>ffmpeg assembles the final vertical MP4 with embedded captions, background visuals, and audio. The output file is ready to upload directly to YouTube, TikTok, or Instagram. No post-processing required.</p>
+
+      <h2>Viral story hooks for Shorts</h2>
+      <p>The first two seconds determine whether a viewer swipes past or watches to the end. Phantomline's script engine generates hooks designed for short-form attention spans:</p>
+      <ul>
+        <li><strong>Mystery open:</strong> "In 1987, an entire town vanished overnight. Nobody knows why."</li>
+        <li><strong>Contrarian claim:</strong> "Everything you know about sleep is wrong."</li>
+        <li><strong>Direct challenge:</strong> "You've walked past this every day and never noticed."</li>
+        <li><strong>Numbers:</strong> "3 animals that can survive in space. Number 2 is terrifying."</li>
+      </ul>
+      <p>These patterns work because they create an information gap that the viewer needs to close by watching the rest. The script engine cycles through hook archetypes so your channel does not repeat the same opening pattern.</p>
+
+      <h2>YouTube Shorts SEO</h2>
+      <p>Shorts SEO is simpler than long-form but still matters:</p>
+      <ul>
+        <li><strong>Title length:</strong> Keep it under 50 characters. Shorts titles get truncated aggressively on mobile. Front-load the keyword.</li>
+        <li><strong>Hashtags:</strong> Use 3-5 hashtags including <code>#Shorts</code>. Place relevant niche hashtags (e.g., <code>#HorrorStories</code>, <code>#ScienceFacts</code>) in the description, not the title.</li>
+        <li><strong>Description:</strong> A short description (1-2 sentences) plus hashtags. Shorts descriptions are rarely read in full, but they help YouTube's classifier categorize your content.</li>
+        <li><strong>Posting cadence:</strong> Consistency matters more than individual video quality for the Shorts algorithm. 1-3 Shorts per day at consistent times outperforms sporadic posting of higher-production Shorts.</li>
+      </ul>
+      <p>Phantomline generates title suggestions, descriptions, and hashtag sets alongside the script. The YouTube publisher can schedule Shorts in advance so you can batch-produce a week's content in a single session.</p>
+
+      <h2>Cloud BYOK or local generation</h2>
+      <p>Phantomline supports three backend tiers for Shorts generation, just like long-form:</p>
+      <table>
+        <thead>
+          <tr><th>Backend</th><th>Quality</th><th>Cost per Short</th><th>Internet required</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><a href="/ollama-video-generation">Ollama</a> (local)</td><td>Very good</td><td>$0</td><td>No (after setup)</td></tr>
+          <tr><td><a href="/claude-api-video-generator">Claude BYOK</a></td><td>Excellent</td><td>~$0.002</td><td>Yes (script generation only)</td></tr>
+          <tr><td><a href="/webgpu-video-generation">WebGPU in-browser</a></td><td>Good</td><td>$0</td><td>No (after first load)</td></tr>
+        </tbody>
+      </table>
+      <p>For high-volume Shorts production (3-5 per day), local generation via Ollama is the most practical choice. The per-script API cost of cloud generation is small, but it compounds at daily volumes. Creators who prioritize script quality for a single premium channel may prefer <a href="/claude-api-video-generator">Claude BYOK</a> for the superior narrative structure.</p>
+
+      <h2>Short-form vs. long-form faceless content</h2>
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>Shorts (30s-3min)</th><th>Long-form (8-20min)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Algorithm signal</td><td>Completion rate</td><td>Watch time + session time</td></tr>
+          <tr><td>Script length</td><td>80-400 words</td><td>1,500-10,000 words</td></tr>
+          <tr><td>Production time per video</td><td>2-5 minutes (local render)</td><td>10-30 minutes (local render)</td></tr>
+          <tr><td>Monetization</td><td>Shorts Fund + channel growth</td><td>AdSense mid-rolls + affiliates</td></tr>
+          <tr><td>Volume strategy</td><td>1-5 per day</td><td>3-7 per week</td></tr>
+          <tr><td>Audience building</td><td>Discovery-focused (new viewers)</td><td>Retention-focused (subscribers)</td></tr>
+        </tbody>
+      </table>
+      <p>Many faceless channels use Shorts as a discovery engine that feeds subscribers to their long-form channel. Phantomline supports both workflows from the same studio. Generate a long-form script, then ask the script engine to create a 60-second companion Short that teases the main video.</p>
+
+      <h2>Limitations</h2>
+      <ul>
+        <li><strong>No AI-generated video footage.</strong> Phantomline generates the script, narration, music, and captions. Visual layers use stock footage (Pexels integration) or AI-generated images (Forge/AUTOMATIC1111). It does not produce Sora-style AI video clips.</li>
+        <li><strong>Shorts algorithm is volatile.</strong> YouTube frequently adjusts how Shorts are distributed. No tool can guarantee virality. What Phantomline does is remove production friction so you can publish consistently, which is the single most controllable factor.</li>
+        <li><strong>Repurposing to TikTok and Reels requires manual posting.</strong> Phantomline's built-in publisher supports YouTube only. For TikTok and Instagram, you export the MP4 and upload it through those platforms directly.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Can Phantomline make YouTube Shorts?</summary>
+          <p>Yes. Set the format to vertical (9:16) and target length to 30-60 seconds. Phantomline generates a short script, narrates it, adds music and captions, and renders a Shorts-ready MP4. You can also generate longer short-form videos up to 10 minutes.</p>
+        </details>
+        <details>
+          <summary>What length should AI YouTube Shorts be?</summary>
+          <p>The sweet spot is 30 to 60 seconds. YouTube's algorithm favors Shorts with high completion rates, and shorter videos get completed more often. For story-driven content, 45-60 seconds tends to perform best.</p>
+        </details>
+        <details>
+          <summary>Can I use AI Shorts for TikTok and Instagram Reels too?</summary>
+          <p>Yes. The 9:16 vertical MP4 that Phantomline renders works on YouTube Shorts, TikTok, and Instagram Reels. The format is identical across platforms. Adjust titles and hashtags per platform, but the video file itself is universal.</p>
+        </details>
+        <details>
+          <summary>Do I need a cloud API key for Shorts?</summary>
+          <p>No. Phantomline can generate Shorts entirely locally using Ollama for scripts and Kokoro for narration, with no API key needed. If you prefer cloud quality, you can bring your own Claude or OpenAI key.</p>
+        </details>
+        <details>
+          <summary>How do I optimize AI Shorts for the YouTube algorithm?</summary>
+          <p>Keep titles under 50 characters. Front-load the hook in the first 2-3 seconds. Use 3-5 relevant hashtags including #Shorts. Aim for high completion rate by keeping length between 30 and 60 seconds. Post consistently at the same times each day.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/local-ai-video-generator">Local AI video generator</a></li>
+        <li><a href="/ai-video-generator-offline">AI video generator offline</a></li>
+        <li><a href="/ollama-video-generation">Ollama video generation</a></li>
+        <li><a href="/claude-api-video-generator">Claude API video generator</a></li>
+        <li><a href="/webgpu-video-generation">WebGPU video generation</a></li>
+        <li><a href="/alternatives">All AI video tool alternatives</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

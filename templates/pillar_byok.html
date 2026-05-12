@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Bring Your Own API Key Video Generator | Phantomline</title>
+<meta name="description" content="Phantomline lets you paste your own Anthropic or OpenAI API key and generate video scripts for ~$0.005 each. Your key stays in localStorage, never touches our server." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Bring Your Own API Key Video Generator | Phantomline" />
+<meta property="og:description" content="Paste your Claude or GPT API key, generate video scripts for ~$0.005 each. Key never leaves your browser." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Bring Your Own API Key Video Generator", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "en-US",
+  "headline": "Bring Your Own API Key Video Generator",
+  "description": "Phantomline lets you paste your own Anthropic or OpenAI API key and generate video scripts for ~$0.005 each. Your key stays in localStorage, never touches our server.",
+  "datePublished": "2026-05-11",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Phantomline",
+    "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}
+  },
+  "image": "{{ site_url }}/static/phantomline-og.png",
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to use your own API key to generate video scripts in Phantomline",
+  "description": "Connect your Anthropic or OpenAI API key to Phantomline and generate video scripts at provider-direct pricing with no middleman markup.",
+  "totalTime": "PT3M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "An Anthropic API key (for Claude models) or an OpenAI API key (for GPT models)"},
+    {"@type": "HowToSupply", "name": "Phantomline (free tier or Creator Pro)"}
+  ],
+  "tool": [
+    {"@type": "HowToTool", "name": "Phantomline AI video studio"},
+    {"@type": "HowToTool", "name": "Claude Haiku, Sonnet, or Opus (via Anthropic API)"},
+    {"@type": "HowToTool", "name": "GPT-4o or GPT-4o mini (via OpenAI API)"}
+  ],
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "Open Settings and choose Cloud engine",
+     "text": "In Phantomline, go to Settings, then AI engine, then Cloud. This tells the app to use a cloud LLM instead of the local Ollama or WebGPU engine."},
+    {"@type": "HowToStep", "position": 2, "name": "Paste your API key",
+     "text": "Paste your Anthropic or OpenAI API key into the key field. The key is saved to localStorage in your browser. It is never sent to Phantomline's server."},
+    {"@type": "HowToStep", "position": 3, "name": "Pick a model",
+     "text": "Choose the model you want: Claude Haiku for speed and low cost, Sonnet for balanced quality, Opus for maximum depth, or GPT-4o for the OpenAI path. Each model has different pricing and latency."},
+    {"@type": "HowToStep", "position": 4, "name": "Generate your script and render",
+     "text": "Type a topic prompt and hit Generate. Your browser sends the request directly to the AI provider over HTTPS. The script comes back in seconds. Then render narration, music, and video the same way you would with any other engine."}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
+  "mainEntity": [
+    {"@type": "Question", "name": "What does BYOK mean in a video generator?",
+     "acceptedAnswer": {"@type": "Answer", "text": "BYOK stands for Bring Your Own Key. Instead of the video tool charging you a markup on AI usage, you paste your own API key from Anthropic or OpenAI. Your browser calls the provider directly at their published rates, so you pay exactly what the model costs with no middleman fee."}},
+    {"@type": "Question", "name": "Is my API key safe in Phantomline?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Your key is stored in your browser's localStorage and never sent to Phantomline's server. When you generate a script, your browser makes an HTTPS request directly to the AI provider (api.anthropic.com or api.openai.com). Phantomline has zero custody of your key."}},
+    {"@type": "Question", "name": "How much does BYOK script generation cost?",
+     "acceptedAnswer": {"@type": "Answer", "text": "About $0.003 to $0.01 per script depending on the model and script length. Claude Haiku is the cheapest at roughly $0.003 per short script. Sonnet runs about $0.005. GPT-4o is comparable to Sonnet. These are the raw provider prices with no Phantomline markup."}},
+    {"@type": "Question", "name": "Which AI models can I use with BYOK in Phantomline?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Phantomline supports Anthropic Claude models (Haiku, Sonnet, Opus) and OpenAI models (GPT-4o, GPT-4o mini). You choose the provider and model in Settings. You can switch models between scripts if you want cheaper drafts from Haiku and polished finals from Sonnet."}},
+    {"@type": "Question", "name": "When should I use BYOK instead of local Ollama?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Use BYOK when you want frontier-quality scripts (Claude Sonnet or GPT-4o write noticeably better hooks and retention beats than Llama 3.1 8B), when you want fast generation (2-5 seconds vs 30-60 seconds on local), or when your hardware can't run Ollama comfortably. Use Ollama when you want $0 per script, full offline capability, or maximum privacy."}}
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/#faq">FAQ</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>&#8250;</span>
+        <span class="current">Bring Your Own API Key Video Generator</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Pillar</div>
+        <h1>Bring Your Own API Key Video Generator</h1>
+        <p class="article-lede">Most AI video tools charge you a subscription, then charge you again per render on top of that. BYOK flips the model. You bring your own API key from Anthropic or OpenAI, your browser calls the provider directly, and you pay the raw model price with no middleman markup. Here's how it works in Phantomline, what it costs, and when it makes sense compared to running models locally.</p>
+        <p class="article-meta">Published May 11, 2026 &middot; Updated May 11, 2026</p>
+      </header>
+
+      <h2>What BYOK means for video creators</h2>
+      <p>BYOK stands for Bring Your Own Key. The idea is simple: instead of the video tool proxying your AI requests through its own servers (and marking up the cost), you paste your API key from a provider like Anthropic or OpenAI directly into the app. When you hit Generate, your browser sends the request straight to the AI provider over HTTPS. The response comes back to your browser. Phantomline's server is never in the loop for inference.</p>
+      <p>This matters because it removes the economic layer that most SaaS video tools depend on. Tools like <a href="/alternatives/invideo">InVideo</a>, Pictory, and Submagic bundle AI costs into their subscription or per-render fees. You pay their price, not the model's price. With BYOK, you pay exactly what the model provider charges. For Claude Haiku, that's roughly $0.003 per short script. For Claude Sonnet, about $0.005. For GPT-4o, a similar range. No subscription surcharge on top.</p>
+      <p>The second thing BYOK changes is the relationship. Your API key, your account, your usage dashboard, your rate limits. If you want to switch from Claude to GPT tomorrow, you change one setting. If Phantomline disappeared, your API key still works with any other tool that supports that provider. You own the relationship with the AI, not the video tool.</p>
+
+      <h2>Why BYOK matters: cost, control, and transparency</h2>
+
+      <h3>You pick the model</h3>
+      <p>Cloud video tools choose the model for you. Usually it's whatever's cheapest for them to run, not whatever's best for your content. With BYOK in Phantomline, you pick from the full model lineup:</p>
+      <ul>
+        <li><strong>Claude Haiku:</strong> fastest and cheapest. Good for bulk drafts, listicle scripts, and anything where speed matters more than nuance.</li>
+        <li><strong>Claude Sonnet:</strong> the balanced pick. Writes strong hooks, handles retention beats well, produces scripts that need minimal editing. This is where most BYOK users land.</li>
+        <li><strong>Claude Opus:</strong> maximum depth. Best for long-form research scripts, true-crime narratives, and content where the writing quality is the product.</li>
+        <li><strong>GPT-4o:</strong> OpenAI's flagship. Comparable to Sonnet in quality, different in style. Some creators prefer its tone for certain niches.</li>
+        <li><strong>GPT-4o mini:</strong> OpenAI's budget option. Fast, cheap, good enough for high-volume formats.</li>
+      </ul>
+      <p>You can switch models between scripts. Draft with Haiku, polish with Sonnet. Use Opus for your tentpole video and Haiku for the filler. No tool locks you into one tier.</p>
+
+      <h3>You control the cost</h3>
+      <p>A 1,500-word faceless YouTube script uses roughly 2,000 tokens of output and 500 tokens of input (the system prompt plus your topic). At Anthropic's published rates, that's about $0.005 with Sonnet. Generate 30 scripts a month and you're at $0.15/month in AI costs. Not $15. Not $29. Fifteen cents.</p>
+      <p>Compare that to a cloud video SaaS where the AI cost is bundled into a $25-$50/month subscription. You're paying the subscription whether you use 5 scripts or 50. With BYOK, you pay for exactly what you use.</p>
+
+      <h3>You own the provider relationship</h3>
+      <p>Your Anthropic or OpenAI account is yours. You see your usage in their dashboard. You set your own spend limits. You get their uptime SLA, not a reseller's. If you build other tools that use the same API key, the usage is consolidated in one place. BYOK treats AI like a utility: you pick the provider, you pay the meter, and the video tool is just the interface.</p>
+
+      <h2>The security model: zero custody</h2>
+      <p>The most common objection to pasting an API key into a web app is security. Here's exactly how Phantomline handles it:</p>
+      <ul>
+        <li><strong>localStorage only.</strong> Your API key is saved in your browser's localStorage under a namespaced key. It never leaves the browser's storage.</li>
+        <li><strong>Direct HTTPS calls.</strong> When you generate a script, your browser makes a fetch request directly to <code>api.anthropic.com</code> or <code>api.openai.com</code>. The request goes from your browser to the provider. Phantomline's server is not a proxy, not a relay, not a man-in-the-middle.</li>
+        <li><strong>Zero custody.</strong> Phantomline never receives, stores, logs, or transmits your API key. There is no server-side code that handles cloud API keys. The entire BYOK flow runs in the browser engine adapter (<code>CloudKeyEngine</code> in <code>engines.js</code>).</li>
+        <li><strong>You can verify this.</strong> Open your browser's Network tab while generating a script. You'll see one request to the AI provider's domain and zero requests carrying your key to Phantomline's server.</li>
+      </ul>
+      <p>This is a meaningfully different architecture from tools that ask for your key and then proxy requests through their backend. Proxied keys pass through the vendor's servers, which means the vendor can log them, store them, or leak them in a breach. Phantomline's browser-direct approach eliminates that entire attack surface.</p>
+
+      <h2>Supported providers</h2>
+      <h3>Anthropic (Claude)</h3>
+      <p>Phantomline supports the full Claude model family through the Anthropic Messages API. You create an API key at <code>console.anthropic.com</code>, paste it into Phantomline's Settings, and choose Haiku, Sonnet, or Opus. The browser calls the Anthropic API directly with CORS-safe headers. Claude excels at structured script output: it follows the hook/body/retention-beat/CTA format reliably and writes in a natural, non-robotic tone that works well for narration.</p>
+
+      <h3>OpenAI (GPT)</h3>
+      <p>Phantomline also supports OpenAI's Chat Completions API. You create an API key at <code>platform.openai.com</code>, paste it in, and choose GPT-4o or GPT-4o mini. The browser calls OpenAI's API directly. GPT-4o produces slightly different script styles than Claude. Some creators prefer its pacing for listicle and explainer formats. GPT-4o mini is a good budget alternative when you want fast turnaround and the script topic is straightforward.</p>
+
+      <h2>Cost comparison: BYOK vs cloud SaaS vs local</h2>
+      <p>The real question is how BYOK stacks up against the alternatives. Here's a concrete comparison for a creator publishing 30 videos a month:</p>
+      <table>
+        <thead>
+          <tr><th>Approach</th><th>Script cost per video</th><th>Monthly cost (30 videos)</th><th>Annual cost</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>BYOK (Claude Sonnet)</td><td>~$0.005</td><td>~$0.15</td><td>~$1.80</td></tr>
+          <tr><td>BYOK (Claude Haiku)</td><td>~$0.003</td><td>~$0.09</td><td>~$1.08</td></tr>
+          <tr><td>BYOK (GPT-4o)</td><td>~$0.006</td><td>~$0.18</td><td>~$2.16</td></tr>
+          <tr><td>InVideo AI (Pro plan)</td><td>~$0.50+ bundled</td><td>$25/mo subscription</td><td>$300</td></tr>
+          <tr><td>Pictory (Premium)</td><td>~$0.55 bundled</td><td>$33/mo subscription</td><td>$396</td></tr>
+          <tr><td>Local Ollama (Llama 3.1 8B)</td><td>$0</td><td>$0</td><td>$0</td></tr>
+          <tr><td>WebGPU (Llama 3.2 1B in browser)</td><td>$0</td><td>$0</td><td>$0</td></tr>
+        </tbody>
+      </table>
+      <p>BYOK sits in a useful middle ground. It's not free like local Ollama, but the cost is so low that it rounds to free at normal volumes. And the script quality from Claude Sonnet or GPT-4o is measurably better than what you get from Llama 3.1 8B running locally, especially for hooks, transitions, and retention-focused writing.</p>
+      <p>The cloud SaaS column is where things get expensive. You're paying for convenience, for not having to manage an API key, and for the vendor's GPU margin. At 30 videos a month, the gap between BYOK and a cloud subscription is $25-$33/month, or $300-$400/year. That's money that could go toward better thumbnails, stock footage, or just staying in your pocket.</p>
+
+      <h2>How it works: paste key, pick model, generate, render</h2>
+      <p>The setup takes about two minutes:</p>
+      <ol>
+        <li><strong>Open Phantomline</strong> and go to Settings. Under AI engine, select Cloud.</li>
+        <li><strong>Paste your API key.</strong> If you're using Anthropic, grab your key from <code>console.anthropic.com/settings/keys</code>. If OpenAI, from <code>platform.openai.com/api-keys</code>. Paste it into the key field. Phantomline saves it to localStorage.</li>
+        <li><strong>Pick a model.</strong> The dropdown shows the available models for your provider. Choose based on your quality/cost/speed preference.</li>
+        <li><strong>Generate.</strong> Type your topic, hit Generate, and watch the script come back in 2-5 seconds. Your browser sent the request directly to the provider and got the response back without any server round-trip through Phantomline.</li>
+        <li><strong>Render.</strong> Once the script is ready, render narration with Kokoro TTS (local) or Web Speech API, add music, and assemble the final MP4. The BYOK path only handles script generation. Everything else in the pipeline runs the same way it does with any other engine.</li>
+      </ol>
+
+      <h2>When to use BYOK vs local Ollama vs WebGPU</h2>
+      <p>Phantomline gives you three script-generation engines. Each has a clear use case:</p>
+
+      <h3>Use BYOK when:</h3>
+      <ul>
+        <li>You want the best possible script quality. Claude Sonnet and GPT-4o write noticeably better hooks, transitions, and retention beats than Llama 3.1 8B.</li>
+        <li>You want fast generation. BYOK returns scripts in 2-5 seconds. Local Ollama takes 30-60 seconds on typical hardware.</li>
+        <li>Your hardware can't run Ollama comfortably. If you have less than 16 GB of RAM or an older GPU, BYOK offloads the inference to the cloud while keeping everything else local.</li>
+        <li>You're producing content where the writing quality is the product, like <a href="/local-ai-video-generator">long-form narrative channels</a> or research-heavy scripts.</li>
+      </ul>
+
+      <h3>Use local Ollama when:</h3>
+      <ul>
+        <li>You want $0 per script, period. No API costs at all.</li>
+        <li>You need full offline capability. Ollama runs without any internet connection after the initial model download.</li>
+        <li>Privacy is a hard requirement. Nothing leaves your machine. No API calls, no provider logging, no network traffic.</li>
+        <li>You have a capable GPU and don't mind the slower generation time.</li>
+      </ul>
+
+      <h3>Use WebGPU (browser) when:</h3>
+      <ul>
+        <li>You're on a phone or Chromebook and can't install Ollama.</li>
+        <li>You want zero setup. WebGPU runs Llama 3.2 1B directly in your browser after a one-time model download.</li>
+        <li>Script quality is secondary to convenience. The 1B model is smaller and less capable than Ollama's 8B, but it works anywhere WebGPU is supported.</li>
+      </ul>
+      <p>Most serious creators land on BYOK with Claude Sonnet as their primary engine and keep Ollama as a fallback for offline work or bulk drafting. The cost difference between BYOK and local is pennies per month. The quality difference is noticeable.</p>
+
+      <h2>What BYOK does not cover</h2>
+      <p>BYOK in Phantomline handles script generation only. The rest of the video pipeline uses different engines that don't require an API key:</p>
+      <ul>
+        <li><strong>Narration:</strong> Kokoro TTS on desktop (fully local, 16 voices) or Web Speech API in the browser. No cloud API needed.</li>
+        <li><strong>Music:</strong> MusicGen on desktop or bundled royalty-free tracks in the browser. No cloud API needed.</li>
+        <li><strong>Video assembly:</strong> ffmpeg on desktop, ffmpeg.wasm in the browser. Fully local.</li>
+        <li><strong>YouTube publishing:</strong> Uses YouTube's Data API through Phantomline's OAuth flow. Separate from the BYOK key.</li>
+      </ul>
+      <p>This design is intentional. Script generation is the one step where cloud models provide a clear quality advantage over local models. The other steps (TTS, music, video assembly) are handled well by local tools, so there's no reason to add cloud dependency there.</p>
+
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>What does BYOK mean in a video generator?</summary>
+          <p>BYOK stands for Bring Your Own Key. You paste your own API key from Anthropic or OpenAI, and your browser calls the provider directly at their published rates. No middleman fee, no subscription markup on AI usage.</p>
+        </details>
+        <details>
+          <summary>Is my API key safe in Phantomline?</summary>
+          <p>Yes. Your key lives in your browser's localStorage and is never sent to Phantomline's server. Script generation requests go directly from your browser to the AI provider over HTTPS. You can verify this by watching the Network tab in your browser's developer tools.</p>
+        </details>
+        <details>
+          <summary>How much does BYOK script generation cost?</summary>
+          <p>About $0.003 to $0.01 per script depending on the model and length. Claude Haiku is the cheapest at roughly $0.003 per short script. Sonnet runs about $0.005. GPT-4o is comparable to Sonnet. These are raw provider prices with no Phantomline markup.</p>
+        </details>
+        <details>
+          <summary>Which AI models can I use with BYOK?</summary>
+          <p>Phantomline supports Anthropic Claude models (Haiku, Sonnet, Opus) and OpenAI models (GPT-4o, GPT-4o mini). You choose the provider and model in Settings and can switch between scripts.</p>
+        </details>
+        <details>
+          <summary>When should I use BYOK instead of local Ollama?</summary>
+          <p>Use BYOK when you want frontier-quality scripts, fast 2-5 second generation, or your hardware can't run Ollama comfortably. Use Ollama when you want $0 per script, full offline capability, or maximum privacy. Most creators use BYOK as their primary engine and keep Ollama as a fallback.</p>
+        </details>
+      </div>
+
+      <h2>Try it</h2>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related reading</h2>
+      <ul>
+        <li><a href="/local-ai-video-generator">Local AI video generator pillar</a></li>
+        <li><a href="/faceless-youtube">Faceless YouTube tool pillar</a></li>
+        <li><a href="/ai-voice-generator">AI voice generator pillar</a></li>
+        <li><a href="/youtube-scheduler">YouTube scheduler pillar</a></li>
+        <li><a href="/youtube-seo-tool">YouTube SEO tool pillar</a></li>
+        <li><a href="/alternatives">All AI video tool alternatives</a></li>
+        <li><a href="/alternatives/invideo">InVideo alternative</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
+        <li><a href="/blog">Phantomline blog</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
