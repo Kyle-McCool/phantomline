@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>WebGPU Video Generation: AI in Your Browser, No Install | Phantomline</title>
-<meta name="description" content="Phantomline runs AI video generation entirely in your browser using WebGPU and WebLLM. No downloads, no installs, no API keys. Llama 3.2 1B runs on your GPU through the browser." />
+<title>WebGPU Video Generation: AI Video Scripts in Your Browser | Phantomline</title>
+<meta name="description" content="Phantomline runs Llama 3.2 1B directly in your browser via WebGPU and WebLLM. No install, no server, no API key. First download is ~1 GB, then it works offline." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
 <link rel="canonical" href="{{ canonical_url }}" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="WebGPU Video Generation: AI in Your Browser, No Install | Phantomline" />
-<meta property="og:description" content="Run AI video generation in your browser with WebGPU. No installs, no API keys, no data leaving your device. Powered by WebLLM and Llama 3.2." />
+<meta property="og:title" content="WebGPU Video Generation: AI Video Scripts in Your Browser | Phantomline" />
+<meta property="og:description" content="Run Llama 3.2 1B in a browser tab via WebGPU. No install, no server, works on desktop and mobile after a ~1 GB first download." />
 <meta property="og:url" content="{{ canonical_url }}" />
 <meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -35,8 +35,8 @@
   "@context": "https://schema.org",
   "@type": "Article",
   "inLanguage": "en-US",
-  "headline": "WebGPU Video Generation: AI in Your Browser, No Install",
-  "description": "Run AI video generation entirely in your browser using WebGPU and WebLLM. No downloads, no installs, no API keys.",
+  "headline": "WebGPU Video Generation: AI Video Scripts in Your Browser",
+  "description": "Phantomline runs Llama 3.2 1B directly in your browser via WebGPU and WebLLM. No install, no server, no API key. First download is ~1 GB, then it works offline.",
   "datePublished": "2026-05-11",
   "dateModified": "{{ today_iso }}",
   "author": {"@type": "Organization", "name": "Phantomline"},
@@ -55,17 +55,21 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "inLanguage": "en-US",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".faq summary", ".faq details p"]
+  },
   "mainEntity": [
     {"@type": "Question", "name": "What is WebGPU video generation?",
-     "acceptedAnswer": {"@type": "Answer", "text": "WebGPU is a browser API that gives web pages direct access to your GPU. Phantomline uses WebGPU through WebLLM to run Llama 3.2 1B in your browser tab, generating video scripts without any server-side processing or software installation."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "WebGPU is a browser API that gives web applications access to your device's GPU. Phantomline uses WebGPU through the WebLLM library to run Llama 3.2 1B directly in a browser tab. This means script generation happens on your device with no server involved, no software to install, and no API key needed."}},
+    {"@type": "Question", "name": "Does WebGPU work on mobile?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Chrome on Android supports WebGPU on flagship phones from the last 2-3 years. Safari on iOS 17+ has partial WebGPU support. Mobile inference is slower than desktop, but it works for generating shorter scripts and YouTube Shorts content."}},
+    {"@type": "Question", "name": "How big is the WebGPU model download?",
+     "acceptedAnswer": {"@type": "Answer", "text": "About 1 GB for Llama 3.2 1B. The model downloads once and is cached in your browser's storage. After the first download, the model loads from cache and works offline. You can check if your browser has the model cached in Phantomline's settings."}},
+    {"@type": "Question", "name": "Is WebGPU as good as Ollama or Claude for scripts?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Llama 3.2 1B is a smaller model than what Ollama runs (8B) or what Claude provides (frontier-class). Scripts from the 1B model are shorter, less detailed, and less nuanced. WebGPU is best for quick drafts, YouTube Shorts, and situations where you cannot install Ollama or do not have a cloud API key."}},
     {"@type": "Question", "name": "Which browsers support WebGPU?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Chrome 113+ and Edge 113+ have full WebGPU support. Firefox has experimental support behind a flag. Safari has partial support. For the best experience, use the latest version of Chrome or Edge."}},
-    {"@type": "Question", "name": "Is WebGPU generation slower than cloud APIs?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Browser inference with a 1B parameter model is slower than calling Claude or GPT via API. Expect 15-60 seconds for script generation depending on your GPU. The tradeoff is zero cost, zero install, and full privacy."}},
-    {"@type": "Question", "name": "Does my data leave my device with WebGPU?",
-     "acceptedAnswer": {"@type": "Answer", "text": "No. The model weights are downloaded once and cached in your browser. All inference runs on your local GPU. Prompts and generated scripts never leave your device."}},
-    {"@type": "Question", "name": "Can I use WebGPU on mobile?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Android Chrome supports WebGPU on devices with compatible GPUs. iPhones have partial WebGPU support in Safari. Performance varies significantly by device. For mobile, the cloud BYOK engine typically provides a better experience."}}
+     "acceptedAnswer": {"@type": "Answer", "text": "Chrome 113+, Edge 113+, and Chrome on Android support WebGPU. Safari has partial support starting with iOS 17 and macOS Sonoma. Firefox is working on support but has not shipped it in stable releases yet. Chrome is the most reliable choice currently."}}
   ]
 }
 </script>
@@ -95,114 +99,146 @@
 
       <header class="article-head">
         <div class="eyebrow">Pillar</div>
-        <h1>WebGPU Video Generation: AI in Your Browser, No Install</h1>
-        <p class="article-lede">No downloads. No installs. No API keys. Phantomline's browser engine runs a language model directly on your GPU using WebGPU. Open a tab, pick a topic, generate a video. Everything happens in your browser.</p>
+        <h1>WebGPU Video Generation: AI Video Scripts in Your Browser</h1>
+        <p class="article-lede">WebGPU lets a browser tab access your device's GPU directly. Phantomline uses this to run Llama 3.2 1B for script generation, Web Speech API for narration, and ffmpeg.wasm for video rendering, all inside a browser with no install, no server, and no API key.</p>
         <p class="article-meta">Published May 11, 2026 &middot; Updated May 11, 2026</p>
       </header>
 
-      <h2>What WebGPU enables</h2>
-      <p>WebGPU is a browser API (the successor to WebGL) that gives web pages low-level access to your device's GPU. Until recently, running a language model required a native application or a cloud API. WebGPU changes that. Libraries like WebLLM compile quantized models to run directly in the browser, using your GPU for inference without any server involved.</p>
-      <p>Phantomline uses WebLLM to load Llama 3.2 1B in-browser. Combined with Web Speech API for narration, Web Audio for music, and ffmpeg.wasm for rendering, the entire video production pipeline runs inside a single browser tab.</p>
+      <h2>What is WebGPU?</h2>
+      <p>WebGPU is a browser API (successor to WebGL) that gives web applications low-level access to your device's GPU. Where WebGL was designed for 3D graphics, WebGPU adds compute shader support, which makes it possible to run machine learning inference directly in a browser tab.</p>
+      <p>For video creators, this means one thing: you can generate AI video scripts without installing any software and without sending your prompts to a cloud server. Open a browser tab, wait for the model to load, type a topic, and get a script. The entire computation happens on your device.</p>
 
-      <h2>How the browser pipeline works</h2>
+      <h2>How Phantomline uses WebGPU</h2>
+      <p>Phantomline's browser mode (the PWA) uses the <strong>WebLLM</strong> library to run Llama 3.2 1B over WebGPU. The architecture works like this:</p>
       <ol>
-        <li><strong>Model download (one time).</strong> On first use, WebLLM downloads the quantized Llama 3.2 1B model from HuggingFace (~700 MB). This is cached in your browser's storage and reused for subsequent sessions.</li>
-        <li><strong>Script generation.</strong> Your topic prompt goes to the local WebLLM model. Inference runs on your GPU. Output: a structured script with hook, beats, and CTA.</li>
-        <li><strong>Narration.</strong> Web Speech API (your browser's built-in TTS) reads the script aloud. Voice selection from the available system voices.</li>
-        <li><strong>Background music.</strong> Pre-bundled ambient loops (or generated via Web Audio synthesis) provide the backing track.</li>
-        <li><strong>Rendering.</strong> ffmpeg.wasm composites narration, music, captions, and visuals into a final MP4. All in-browser, no upload needed.</li>
+        <li>When you open the studio at <a href="/app">phantomline.xyz/app</a>, the app checks for WebGPU support in your browser.</li>
+        <li>On first use, the Llama 3.2 1B model weights download (~1 GB). This is cached in the browser's Cache API storage.</li>
+        <li>Subsequent visits load the model from cache in 5-15 seconds. No re-download needed.</li>
+        <li>When you generate a script, WebLLM runs inference on the model using your GPU via WebGPU compute shaders.</li>
+        <li>The script output feeds into Web Speech API (for narration), Web Audio API (for music), and ffmpeg.wasm (for rendering).</li>
       </ol>
+      <p>The result is a complete video generation pipeline that runs in a browser tab with zero server-side inference. Phantomline's web server delivers the application code and static assets, but never participates in AI inference.</p>
 
-      <h2>Who should use the WebGPU engine</h2>
+      <h2>The ~1 GB first download</h2>
+      <p>The Llama 3.2 1B model is about 1 GB in quantized form. This downloads once over your internet connection and gets stored in your browser's cache. After that initial download:</p>
       <ul>
-        <li><strong>First-time users</strong> who want to test Phantomline without installing anything or providing an API key.</li>
-        <li><strong>Chromebook and school/work device users</strong> who cannot install desktop software.</li>
-        <li><strong>Privacy-conscious creators</strong> who want zero data transmission. With WebGPU, not even API calls leave your device.</li>
-        <li><strong>Quick prototyping.</strong> Generate a rough draft to see if a topic works, then switch to Claude BYOK or Ollama for the production version.</li>
+        <li>The model loads from local cache in 5-15 seconds on subsequent visits.</li>
+        <li>No internet is needed for script generation. You can <a href="/ai-video-generator-offline">work offline</a> after the first load.</li>
+        <li>The cache persists across browser sessions. Clearing browser data will require a re-download.</li>
+        <li>Multiple devices each need their own download since browser caches are per-device.</li>
       </ul>
+      <p>One gigabyte is a significant download on slow connections. But it is a one-time cost that enables unlimited free script generation from that point forward. Compare that to paying per-token for every cloud API call.</p>
 
-      <h2>WebGPU vs. other Phantomline engines</h2>
+      <h2>Browser support</h2>
       <table>
         <thead>
-          <tr><th>Dimension</th><th>WebGPU (browser)</th><th>Ollama (local)</th><th>Cloud BYOK</th></tr>
+          <tr><th>Browser</th><th>WebGPU status</th><th>Notes</th></tr>
         </thead>
         <tbody>
-          <tr><td>Install required</td><td>None</td><td>Ollama + model</td><td>None (browser only)</td></tr>
-          <tr><td>Model size</td><td>1B parameters</td><td>8B+ parameters</td><td>Frontier models (Claude, GPT)</td></tr>
-          <tr><td>Script quality</td><td>Acceptable for drafts</td><td>Good</td><td>Best</td></tr>
-          <tr><td>Speed</td><td>15-60 seconds</td><td>5-30 seconds</td><td>3-10 seconds</td></tr>
-          <tr><td>Cost</td><td>$0</td><td>$0</td><td>~$0.005 per script</td></tr>
-          <tr><td>Internet needed</td><td>First load only</td><td>First model pull only</td><td>Every generation</td></tr>
-          <tr><td>Privacy</td><td>Full (nothing leaves browser)</td><td>Full (nothing leaves machine)</td><td>Key in browser, prompts to provider</td></tr>
+          <tr><td>Chrome 113+ (desktop)</td><td>Full support</td><td>Most reliable. Recommended for Phantomline.</td></tr>
+          <tr><td>Edge 113+ (desktop)</td><td>Full support</td><td>Same engine as Chrome. Works identically.</td></tr>
+          <tr><td>Chrome (Android)</td><td>Supported</td><td>Works on flagship phones from the last 2-3 years. Slower than desktop.</td></tr>
+          <tr><td>Safari (macOS Sonoma+)</td><td>Partial support</td><td>Some compute shader features are still landing. May have issues with larger models.</td></tr>
+          <tr><td>Safari (iOS 17+)</td><td>Partial support</td><td>Works for the 1B model. Performance varies by device.</td></tr>
+          <tr><td>Firefox</td><td>In development</td><td>Available behind a flag (dom.webgpu.enabled). Not recommended for production use yet.</td></tr>
         </tbody>
       </table>
+      <p>If your browser does not support WebGPU, Phantomline falls back to the free public LLM endpoint (text.pollinations.ai) for script generation. The rest of the pipeline (TTS, music, rendering) uses Web Speech API and ffmpeg.wasm, which work in all modern browsers.</p>
 
-      <h2>Browser compatibility</h2>
-      <p>WebGPU support as of 2026:</p>
+      <h2>Mobile support</h2>
+      <p>WebGPU on mobile is genuinely usable for short-form content. Chrome on Android supports WebGPU on devices with Adreno, Mali, or Apple GPUs made in the last 2-3 years. Performance expectations:</p>
       <ul>
-        <li><strong>Chrome 113+:</strong> Full support. Recommended.</li>
-        <li><strong>Edge 113+:</strong> Full support. Same Chromium engine as Chrome.</li>
-        <li><strong>Firefox:</strong> Behind <code>dom.webgpu.enabled</code> flag. Works but less tested.</li>
-        <li><strong>Safari:</strong> Partial support. Metal backend. Some features may not work.</li>
+        <li><strong>Script generation:</strong> 30-90 seconds for a 200-word Shorts script on a flagship phone. Slower than desktop but functional.</li>
+        <li><strong>Narration:</strong> Web Speech API uses your device's built-in TTS voices. Quality varies by phone manufacturer and OS version.</li>
+        <li><strong>Rendering:</strong> ffmpeg.wasm works on mobile but is slower. A 60-second Short renders in 1-3 minutes on a modern phone.</li>
       </ul>
-      <p>If your browser does not support WebGPU, Phantomline falls back to the Pollinations free API or prompts you to set up a cloud API key.</p>
+      <p>The mobile experience is best suited for <a href="/ai-youtube-shorts-generator">YouTube Shorts</a> and quick drafts rather than long-form video production. For 10-minute videos with complex scripts, the <a href="/local-ai-video-generator">desktop install</a> with <a href="/ollama-video-generation">Ollama</a> is a better choice.</p>
 
-      <h2>Performance tips</h2>
+      <h2>Quality tradeoffs: WebGPU vs. Ollama vs. Claude</h2>
+      <p>The 1B model is the smallest language model in Phantomline's lineup. It trades quality for accessibility. Here is how the three tiers compare for the same prompt:</p>
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>WebGPU (1B)</th><th><a href="/ollama-video-generation">Ollama</a> (8B)</th><th><a href="/claude-api-video-generator">Claude</a> (frontier)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Install required</td><td>None</td><td>Ollama + model pull</td><td>None (API key only)</td></tr>
+          <tr><td>Script detail</td><td>Basic, shorter paragraphs</td><td>Detailed, well-structured</td><td>Most nuanced, best narrative</td></tr>
+          <tr><td>Max practical script length</td><td>500-1,000 words</td><td>2,000-10,000 words</td><td>2,000-10,000+ words</td></tr>
+          <tr><td>Generation speed (2K words)</td><td>2-5 minutes</td><td>30-60 seconds</td><td>5-15 seconds</td></tr>
+          <tr><td>Works on mobile</td><td>Yes</td><td>No (needs desktop)</td><td>Yes (needs internet)</td></tr>
+          <tr><td>Works offline</td><td>Yes (after first load)</td><td>Yes (after model pull)</td><td>No</td></tr>
+          <tr><td>Cost</td><td>$0</td><td>$0</td><td>$0.001-$0.02 per script</td></tr>
+        </tbody>
+      </table>
+      <p>WebGPU is the right choice when you need zero-install, zero-cost generation and are willing to accept shorter, simpler scripts. It excels for quick drafts and Shorts scripts where brevity is the goal anyway. For premium long-form content, Ollama or Claude will produce better results.</p>
+
+      <h2>The full in-browser pipeline</h2>
+      <p>WebGPU handles script generation, but Phantomline's browser mode runs the entire video pipeline client-side:</p>
       <ul>
-        <li><strong>Close other GPU-heavy tabs.</strong> Video calls, 3D demos, and other WebGPU pages compete for VRAM.</li>
-        <li><strong>Use a discrete GPU.</strong> Integrated graphics work but are significantly slower. Laptops with an NVIDIA or AMD GPU perform much better.</li>
-        <li><strong>Let the model cache finish.</strong> The first load downloads ~700 MB. Subsequent sessions load from cache in seconds.</li>
-        <li><strong>Shorts are faster.</strong> Shorter scripts mean faster inference. If you are testing WebGPU for the first time, start with the Shorts format.</li>
+        <li><strong>Script:</strong> WebLLM + Llama 3.2 1B via WebGPU compute shaders.</li>
+        <li><strong>Narration:</strong> Web Speech API using your OS-provided TTS voices. Quality depends on your operating system (macOS and iOS have the best built-in voices).</li>
+        <li><strong>Music:</strong> 8 royalty-free ambient tracks bundled with the app, plus on-the-fly synthesis via Web Audio API.</li>
+        <li><strong>Captions:</strong> Generated from the script text. Styled and positioned for the selected format (vertical, horizontal, square).</li>
+        <li><strong>Rendering:</strong> ffmpeg.wasm assembles the final MP4 in the browser. Multi-threaded rendering is available when the browser supports SharedArrayBuffer.</li>
+      </ul>
+      <p>No server touches your content at any point. The MP4 file exists only on your device until you choose to upload it to YouTube or export it.</p>
+
+      <h2>When to use WebGPU mode</h2>
+      <ul>
+        <li><strong>You are on a shared or locked-down machine</strong> where you cannot install Ollama or desktop software.</li>
+        <li><strong>You want to try Phantomline without installing anything.</strong> Open the studio in Chrome, generate a test video, decide if the tool is right for you.</li>
+        <li><strong>You are on mobile</strong> and want to draft scripts or produce <a href="/ai-youtube-shorts-generator">Shorts</a> on the go.</li>
+        <li><strong>You do not have an API key</strong> and do not want to set up Ollama. WebGPU is the zero-configuration, zero-cost default.</li>
+        <li><strong>You are producing short-form content</strong> where the 1B model's quality ceiling is acceptable.</li>
       </ul>
 
       <h2>Limitations</h2>
-      <p>The browser engine makes tradeoffs for accessibility:</p>
       <ul>
-        <li><strong>Smaller model.</strong> Llama 3.2 1B is much smaller than the 8B model Ollama uses or the frontier models available via cloud BYOK. Script quality is lower.</li>
-        <li><strong>Browser TTS only.</strong> Web Speech API voices are functional but less natural than Kokoro TTS on desktop.</li>
-        <li><strong>No MusicGen.</strong> Browser music uses pre-bundled loops or Web Audio synthesis instead of AI-generated tracks.</li>
-        <li><strong>Memory constraints.</strong> Browser tabs have tighter memory limits than native apps. Very long scripts may hit limits on devices with less VRAM.</li>
+        <li><strong>Model quality.</strong> The 1B model is significantly less capable than the 8B model Ollama runs or the frontier models Claude provides. For long-form scripts with complex narratives, the output will be noticeably simpler.</li>
+        <li><strong>Browser compatibility.</strong> WebGPU is not universally supported yet. Firefox users and some Safari configurations will fall back to the cloud endpoint instead of local inference.</li>
+        <li><strong>TTS voice quality.</strong> Web Speech API voices vary wildly by operating system. macOS and iOS have good voices. Windows and Android voices tend to sound more robotic. The desktop install's Kokoro TTS produces consistently better narration.</li>
+        <li><strong>No MusicGen.</strong> The browser mode uses bundled music tracks instead of generating custom music via MusicGen. The desktop install provides AI-generated music; the browser mode provides a curated selection of royalty-free ambient tracks.</li>
+        <li><strong>Memory pressure.</strong> Running a 1 GB model in a browser tab alongside other tabs can cause memory pressure on devices with 8 GB RAM or less. Close other tabs during generation for best results.</li>
       </ul>
-      <p>For production publishing, we recommend upgrading to <a href="/bring-your-own-api-key-video-generator">cloud BYOK</a> (best scripts) or <a href="/ollama-video-generation">Ollama</a> (best local pipeline). WebGPU is ideal for testing, drafting, and situations where you cannot install software.</p>
 
       <h2>FAQ</h2>
       <div class="faq">
         <details>
           <summary>What is WebGPU video generation?</summary>
-          <p>WebGPU is a browser API that gives web pages direct access to your GPU. Phantomline uses WebGPU through WebLLM to run Llama 3.2 1B in your browser tab, generating video scripts without any server-side processing or software installation.</p>
+          <p>WebGPU is a browser API that gives web apps access to your device's GPU. Phantomline uses it to run Llama 3.2 1B directly in a browser tab for script generation, with no server involved, no install needed, and no API key required.</p>
+        </details>
+        <details>
+          <summary>Does WebGPU work on mobile?</summary>
+          <p>Yes. Chrome on Android supports WebGPU on flagship phones from the last 2-3 years. Safari on iOS 17+ has partial support. Mobile inference is slower than desktop, but it works for shorter scripts and Shorts content.</p>
+        </details>
+        <details>
+          <summary>How big is the WebGPU model download?</summary>
+          <p>About 1 GB for Llama 3.2 1B. The model downloads once and is cached in your browser's storage. After the first download, it loads from cache and works offline.</p>
+        </details>
+        <details>
+          <summary>Is WebGPU as good as Ollama or Claude for scripts?</summary>
+          <p>No. Llama 3.2 1B is a smaller model. Scripts are shorter, less detailed, and less nuanced. WebGPU is best for quick drafts, Shorts, and situations where you cannot install Ollama or do not have a cloud API key.</p>
         </details>
         <details>
           <summary>Which browsers support WebGPU?</summary>
-          <p>Chrome 113+ and Edge 113+ have full WebGPU support. Firefox has experimental support behind a flag. Safari has partial support. For the best experience, use the latest version of Chrome or Edge.</p>
-        </details>
-        <details>
-          <summary>Is WebGPU generation slower than cloud APIs?</summary>
-          <p>Yes. Browser inference with a 1B parameter model is slower than calling Claude or GPT via API. Expect 15-60 seconds for script generation depending on your GPU. The tradeoff is zero cost, zero install, and full privacy.</p>
-        </details>
-        <details>
-          <summary>Does my data leave my device with WebGPU?</summary>
-          <p>No. The model weights are downloaded once and cached in your browser. All inference runs on your local GPU. Prompts and generated scripts never leave your device.</p>
-        </details>
-        <details>
-          <summary>Can I use WebGPU on mobile?</summary>
-          <p>Android Chrome supports WebGPU on devices with compatible GPUs. iPhones have partial WebGPU support in Safari. Performance varies significantly by device. For mobile, the cloud BYOK engine typically provides a better experience.</p>
+          <p>Chrome 113+, Edge 113+, and Chrome on Android support WebGPU. Safari has partial support starting with iOS 17 and macOS Sonoma. Firefox is working on support but has not shipped it in stable releases yet.</p>
         </details>
       </div>
 
       <h2>Try it</h2>
-      <p>No install, no API key, no cost. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+      <p>Free tier needs no card. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
 
       <hr class="article-divider" />
 
       <h2>Related reading</h2>
       <ul>
-        <li><a href="/bring-your-own-api-key-video-generator">Bring your own API key</a></li>
-        <li><a href="/claude-api-video-generator">Claude API video generator</a></li>
-        <li><a href="/ollama-video-generation">Ollama video generation</a></li>
-        <li><a href="/ai-video-generator-offline">AI video generator offline</a></li>
-        <li><a href="/ai-youtube-shorts-generator">AI YouTube Shorts generator</a></li>
         <li><a href="/local-ai-video-generator">Local AI video generator</a></li>
+        <li><a href="/ai-video-generator-offline">AI video generator offline</a></li>
+        <li><a href="/ollama-video-generation">Ollama video generation</a></li>
+        <li><a href="/claude-api-video-generator">Claude API video generator</a></li>
+        <li><a href="/ai-youtube-shorts-generator">AI YouTube Shorts generator</a></li>
         <li><a href="/alternatives">All AI video tool alternatives</a></li>
+        <li><a href="/pricing">Phantomline pricing</a></li>
       </ul>
     </article>
   </main>
