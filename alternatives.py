@@ -1677,6 +1677,294 @@ COMPETITORS: list[dict] = [
              "fee entirely."),
         ],
     },
+
+    # -------------------------------------------------------------------
+    # Synthesia — AI avatar video platform. ~$22-67/mo.
+    # -------------------------------------------------------------------
+    {
+        "slug": "synthesia",
+        "name": "Synthesia",
+        "tagline": "AI avatar video platform for corporate and training content",
+        "primary_keyword": "Synthesia alternative",
+        "title_tag": "Synthesia Alternative for Faceless YouTube Creators | Phantomline",
+        "meta_description": "Looking for a Synthesia alternative? Phantomline is a local-first faceless YouTube tool with BYOK API key support, no avatar lock-in, and a full script-to-MP4 pipeline at ~$0.005/script.",
+        "h1": "Synthesia Alternative for Faceless YouTube Creators",
+        "intro": (
+            "Synthesia built its business on AI avatars: photorealistic talking-head videos "
+            "generated from a text script. The tool is strong in corporate L&D, internal "
+            "communications, and compliance training where a consistent on-screen presenter "
+            "matters more than creative flair. The avatar speaks your script in any of 130+ "
+            "languages, and the video renders in their cloud."
+            "\n\n"
+            "Faceless YouTube is a fundamentally different workflow. There is no on-screen "
+            "presenter. The audience watches atmospheric B-roll or AI-generated scenes while "
+            "listening to a narrator they never see. Reddit stories, horror narration, "
+            "mystery docs, mythology explainers: the voice carries the content, not a face. "
+            "Phantomline is shaped for that use case. Local script generation via your own "
+            "Claude or GPT key (or Ollama offline), local TTS narration, ambient music, "
+            "and rendering on your hardware. No avatar lock-in, no per-minute pricing."
+        ),
+        "competitor_strengths": [
+            "Industry-leading AI avatars with 230+ stock presenters and custom avatar creation.",
+            "130+ language support with lip-synced translations.",
+            "Strong enterprise features: brand kits, approval workflows, SCORM export.",
+            "Polished template library for corporate training and product walkthroughs.",
+            "SOC 2 certified with enterprise-grade security and SSO.",
+        ],
+        "phantomline_advantages": [
+            "Built for faceless YouTube, not corporate training. No avatars needed, no avatar cost.",
+            "BYOK cloud engine: use Claude Haiku or GPT-4o-mini for ~$0.005/script. Browser calls the provider directly.",
+            "Local AI pipeline: Ollama + Kokoro TTS + MusicGen. Fully offline, zero token cost.",
+            "No per-minute or per-video pricing. Founding Lifetime is $79 once.",
+            "Privacy: scripts, narration, and channel analytics never leave your machine.",
+            "Built-in YouTube SEO: keyword research, Optimize Library, channel-insights ingest.",
+            "WebGPU browser mode for mobile: same workflow without installing anything.",
+        ],
+        "comparison_rows": [
+            ["Tool",                    "Phantomline",                          "Synthesia"],
+            ["Best for",                "Faceless YouTube end-to-end",          "Corporate avatar videos"],
+            ["AI avatars",              "Not needed (faceless workflow)",        "Core feature (230+ presenters)"],
+            ["Script generation",       "Claude/GPT via BYOK or local Ollama",  "Text input (no AI generation)"],
+            ["Narration / voice",       "Kokoro TTS, 16 voices, local",         "Avatar lip-sync, 130+ languages"],
+            ["Music generation",        "MusicGen local + bundled pack",        "Background music library"],
+            ["Runs locally?",           "Yes (full offline pipeline)",          "Cloud-only"],
+            ["BYOK (your API key)?",    "Yes (Claude, GPT)",                    "No"],
+            ["Per-video cost?",         "None (local) or ~$0.005 (BYOK)",       "$11-22+ per video"],
+            ["Subscription required?",  "Free tier + optional Pro",             "Subscription required ($22-67/mo)"],
+            ["One-time lifetime tier?", "Yes ($79 founding, first 500)",        "No"],
+            ["YouTube SEO tools",       "Research + Optimize Library + analytics", "None"],
+        ],
+        "when_competitor_wins": (
+            "Synthesia is the right tool if you need an on-screen AI presenter. Corporate "
+            "training videos, product walkthrough demos, internal comms where a consistent "
+            "talking head reading a script is the deliverable: that is Synthesia's core use "
+            "case and they execute it better than anyone else in the market."
+            "\n\n"
+            "It also wins for multi-language content. If you need the same training video "
+            "dubbed into 40 languages with lip-synced avatars, Synthesia's translation "
+            "pipeline is a genuine competitive advantage. No faceless tool competes on that "
+            "axis because faceless channels usually serve one language market at a time."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline wins when there is no presenter on screen. Faceless YouTube channels "
+            "do not use avatars. Reddit stories, horror narration, mystery docs, mythology "
+            "explainers, listicle channels, survival guides: the viewer watches atmospheric "
+            "visuals while listening to a narrator. Synthesia's core value proposition (the "
+            "avatar) is irrelevant here, and its per-video pricing ($11-22+) is punishing at "
+            "faceless-channel volume (30-90 videos/month)."
+            "\n\n"
+            "Phantomline also wins on cost. At 30 videos/month, Synthesia would cost $330-660+ "
+            "just in per-video fees, plus the subscription. Phantomline with BYOK costs about "
+            "$0.15 in API tokens for the same volume. With Ollama locally, the cost is zero. "
+            "The $79 Founding Lifetime tier eliminates the platform fee entirely."
+            "\n\n"
+            "And Phantomline wins on privacy. Synthesia processes your scripts in their cloud "
+            "and stores them on their servers. Phantomline runs everything locally or through "
+            "your own API key, and your scripts never touch a third-party server."
+        ),
+        "feature_comparison": [
+            ("Script generation", "Claude/GPT via your own key, or local Llama 3.1", "Text input only (bring your own script)"),
+            ("AI presenter", "Not applicable (faceless workflow)", "230+ AI avatars with lip sync"),
+            ("Voiceover", "Kokoro TTS, 16 voices, fully local", "Avatar voice, 130+ languages"),
+            ("Music", "MusicGen + bundled royalty-free pack", "Background music library"),
+            ("Visuals / B-roll", "FLUX AI scenes + Pexels stock", "Avatar on branded slide deck"),
+            ("MP4 export", "ffmpeg local render, no cap", "Cloud render, per-video pricing"),
+            ("YouTube metadata", "Title + description + tags + schedule + SEO", "Not YouTube-focused"),
+            ("Local / private", "Everything stays on your device", "Cloud-only"),
+            ("BYOK API key", "Yes (Anthropic Claude or OpenAI GPT)", "No"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month with 2 cloud trial renders. Creator "
+            "Pro is $15/month or $99/year for unlimited renders and cloud engine. Founding "
+            "Lifetime is $79 one-time for the first 500 customers, locked in for life."
+        ),
+        "pricing_comparison_competitor": (
+            "Synthesia uses per-video and subscription-based pricing. The Starter plan is "
+            "~$22/month with limited video minutes. Enterprise plans run $67+/month with "
+            "custom avatar creation. Check synthesia.io for current pricing."
+        ),
+        "who_picks_competitor": (
+            "Pick Synthesia if you need AI avatar videos for corporate training, internal "
+            "communications, or product demos. If the deliverable requires a consistent "
+            "on-screen presenter speaking in multiple languages, Synthesia is purpose-built "
+            "for that and no faceless tool competes on avatar quality."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if you are running a faceless YouTube channel where there is no "
+            "on-screen presenter, you generate scripts from prompts, and you ship enough "
+            "volume that per-video pricing becomes painful. Phantomline's BYOK engine costs "
+            "~$0.005 per script vs Synthesia's $11-22+ per video. At scale, the math is "
+            "not close."
+        ),
+        "faq": [
+            ("Is Phantomline a Synthesia alternative?",
+             "For faceless YouTube, yes. Synthesia specializes in AI avatar videos for corporate "
+             "use. Phantomline specializes in faceless YouTube content: script generation, "
+             "voiceover narration, ambient music, and MP4 rendering without any on-screen avatar. "
+             "They serve different niches with different cost structures."),
+            ("Does Phantomline have AI avatars?",
+             "No. Faceless YouTube channels do not use on-screen presenters. Phantomline focuses "
+             "on narration-driven content where the voice carries the story over atmospheric "
+             "visuals. If you specifically need a talking-head avatar, Synthesia is the better tool."),
+            ("Which is cheaper for YouTube content at volume?",
+             "Phantomline, significantly. At 30 videos/month, Synthesia costs $330-660+ in "
+             "per-video fees. Phantomline with BYOK costs about $0.15 total in API tokens. "
+             "With Ollama locally, the cost is $0. The Founding Lifetime tier ($79 once) "
+             "eliminates the platform fee entirely."),
+            ("Can I use my own Claude or GPT key with Phantomline?",
+             "Yes. Paste your Anthropic or OpenAI API key in Settings. Your browser calls the "
+             "provider directly. Phantomline never sees or stores your key. Free users get 2 "
+             "trial renders. Pro and Studio tiers get unlimited cloud renders."),
+            ("Does Phantomline work offline?",
+             "Yes. The desktop install runs Ollama for scripts, Kokoro for TTS, MusicGen for "
+             "music, and ffmpeg for video assembly. No internet required after initial model "
+             "downloads. Synthesia requires an internet connection for every render."),
+        ],
+    },
+
+    # -------------------------------------------------------------------
+    # HeyGen — AI avatar + video translation platform. ~$24-72/mo.
+    # -------------------------------------------------------------------
+    {
+        "slug": "heygen",
+        "name": "HeyGen",
+        "tagline": "AI avatar video and translation platform",
+        "primary_keyword": "HeyGen alternative",
+        "title_tag": "HeyGen Alternative for Faceless YouTube Creators | Phantomline",
+        "meta_description": "Looking for a HeyGen alternative? Phantomline is a local-first AI faceless video tool with bring-your-own API key, no avatar fees, and offline rendering at ~$0.005/script.",
+        "h1": "HeyGen Alternative for Faceless YouTube Creators",
+        "intro": (
+            "HeyGen is an AI avatar platform that generates talking-head videos from text "
+            "scripts. Its standout feature is video translation: take an existing video of "
+            "someone speaking, and HeyGen re-renders it with lip-synced dubbing in a different "
+            "language. For creators who film themselves and want to reach international "
+            "audiences, that is a genuine unlock."
+            "\n\n"
+            "Faceless YouTube works differently. There is no face to translate. There is no "
+            "source video of a speaker. The workflow starts with a topic, generates a script, "
+            "narrates it over atmospheric visuals, and exports a finished MP4. Phantomline is "
+            "built for exactly that workflow: local script generation via your own Claude or "
+            "GPT key (or Ollama offline), Kokoro TTS narration, ambient music, and rendering "
+            "on your hardware. No avatar fees, no credit system, no per-minute charges."
+        ),
+        "competitor_strengths": [
+            "Best-in-class video translation with lip-synced dubbing in 40+ languages.",
+            "Custom avatar creation from a short video recording.",
+            "Strong instant avatar library with 200+ stock presenters.",
+            "Real-time streaming avatar for live events and customer support.",
+            "Robust API for enterprise integration and batch video generation.",
+        ],
+        "phantomline_advantages": [
+            "Built for faceless YouTube, not avatar videos. No presenter needed, no credit burn.",
+            "BYOK cloud engine: Claude Haiku or GPT-4o-mini for ~$0.005/script. Your key, your bill, no middleman.",
+            "Local AI pipeline: Ollama + Kokoro TTS + MusicGen. Zero token cost, fully offline.",
+            "No credit system or per-minute pricing. Founding Lifetime is $79 once for unlimited.",
+            "Privacy: scripts and channel analytics stay on your device. No cloud processing.",
+            "Built-in YouTube SEO: keyword research, vidIQ-aware Optimize Library, channel-insights ingest.",
+            "Browser-mode PWA on phones: same workflow without installing anything.",
+        ],
+        "comparison_rows": [
+            ["Tool",                    "Phantomline",                          "HeyGen"],
+            ["Best for",                "Faceless YouTube end-to-end",          "AI avatar videos + translation"],
+            ["AI avatars",              "Not needed (faceless workflow)",        "Core feature (200+ presenters)"],
+            ["Video translation",       "Not the use case",                     "Best-in-class (40+ languages)"],
+            ["Script generation",       "Claude/GPT via BYOK or local Ollama",  "Text input (no AI generation)"],
+            ["Narration / voice",       "Kokoro TTS, 16 voices, local",         "Avatar voice, lip-synced"],
+            ["Music generation",        "MusicGen local + bundled pack",        "Background audio library"],
+            ["Runs locally?",           "Yes (full offline pipeline)",          "Cloud-only"],
+            ["BYOK (your API key)?",    "Yes (Claude, GPT)",                    "No"],
+            ["Per-video cost?",         "None (local) or ~$0.005 (BYOK)",       "1+ credits per video (~$1-6+)"],
+            ["Subscription required?",  "Free tier + optional Pro",             "Subscription + credits ($24-72/mo)"],
+            ["One-time lifetime tier?", "Yes ($79 founding, first 500)",        "No"],
+            ["YouTube SEO tools",       "Research + Optimize Library + analytics", "None"],
+        ],
+        "when_competitor_wins": (
+            "HeyGen is the right tool when you need a talking-head avatar or when video "
+            "translation is the core job. If you record yourself speaking and want that video "
+            "re-dubbed into 20 languages with natural lip sync, HeyGen does that better than "
+            "any competitor. The translation quality is the reason enterprise clients pay."
+            "\n\n"
+            "It also wins for customer support and sales use cases where a custom avatar "
+            "delivers personalized video messages at scale. The real-time streaming avatar "
+            "is a feature no faceless tool competes with because it solves a fundamentally "
+            "different problem (live interaction vs pre-rendered content)."
+        ),
+        "when_phantomline_wins": (
+            "Phantomline wins when there is no face to animate. Faceless YouTube channels "
+            "do not need avatars. The viewer watches atmospheric visuals: B-roll footage, "
+            "AI-generated scenes, text overlays, ambient loops. The voice carries the story. "
+            "HeyGen's avatar and translation features are expensive tools for a job the "
+            "faceless workflow doesn't have."
+            "\n\n"
+            "Phantomline also wins on economics. HeyGen uses a credit system where each video "
+            "costs 1+ credits and credits cost $1-6+ each depending on tier. At 30 faceless "
+            "videos/month, that compounds to $30-180+ just in credit burns, on top of the "
+            "subscription. Phantomline with BYOK costs ~$0.15 total in API tokens for the "
+            "same volume. With Ollama locally, the cost is zero."
+            "\n\n"
+            "And Phantomline wins on workflow integration. HeyGen outputs an avatar video but "
+            "doesn't handle YouTube metadata, SEO research, or publishing. Phantomline "
+            "generates the script, the voice, the music, the visuals, the metadata, and "
+            "drafts the YouTube publish, all in one pipeline."
+        ),
+        "feature_comparison": [
+            ("Script generation", "Claude/GPT via your own key, or local Llama 3.1", "Text input only (bring your own script)"),
+            ("AI presenter", "Not applicable (faceless workflow)", "200+ AI avatars with lip sync"),
+            ("Video translation", "Not the use case", "40+ languages with lip-sync dubbing"),
+            ("Voiceover", "Kokoro TTS, 16 voices, fully local", "Avatar voice or uploaded audio"),
+            ("Music", "MusicGen + bundled royalty-free pack", "Background audio library"),
+            ("Visuals / B-roll", "FLUX AI scenes + Pexels stock", "Avatar on branded backgrounds"),
+            ("MP4 export", "ffmpeg local render, no cap", "Cloud render, credit-based"),
+            ("YouTube metadata", "Title + description + tags + schedule + SEO", "Not YouTube-focused"),
+            ("Local / private", "Everything stays on your device", "Cloud-only"),
+            ("BYOK API key", "Yes (Anthropic Claude or OpenAI GPT)", "No"),
+        ],
+        "pricing_comparison_phantomline": (
+            "Phantomline is free for up to 5 renders/month with 2 cloud trial renders. Creator "
+            "Pro is $15/month or $99/year for unlimited renders and cloud engine. Founding "
+            "Lifetime is $79 one-time for the first 500 customers, locked in for life."
+        ),
+        "pricing_comparison_competitor": (
+            "HeyGen uses a subscription + credit system. Plans start at ~$24/month with limited "
+            "credits. Business and enterprise tiers run $72+/month with more credits and custom "
+            "avatars. Check heygen.com for current pricing."
+        ),
+        "who_picks_competitor": (
+            "Pick HeyGen if you need AI avatar videos, custom digital presenters, or video "
+            "translation with lip-synced dubbing. If the deliverable requires a talking head "
+            "and multi-language reach, HeyGen is the strongest option in the market."
+        ),
+        "who_picks_phantomline": (
+            "Pick Phantomline if you are running a faceless YouTube channel with no on-screen "
+            "presenter, you want to bring your own Claude or GPT key for frontier-model scripts "
+            "at a fraction of the cost, and you ship enough volume that per-video credit fees "
+            "make avatar platforms uneconomical. Phantomline is $79 once. HeyGen is $24-72+ "
+            "per month, forever."
+        ),
+        "faq": [
+            ("Is Phantomline a HeyGen alternative?",
+             "For faceless YouTube, yes. HeyGen specializes in AI avatar videos and video "
+             "translation. Phantomline specializes in narration-driven faceless content: script "
+             "generation, TTS voiceover, ambient music, and MP4 rendering. They serve different "
+             "audiences with different economics."),
+            ("Does Phantomline have AI avatars or video translation?",
+             "No. Phantomline is built for faceless content where there is no on-screen presenter. "
+             "If you need a talking-head avatar or lip-synced dubbing, HeyGen is the right tool. "
+             "If you need a narrator over atmospheric visuals, Phantomline is the right tool."),
+            ("Which is cheaper for faceless YouTube?",
+             "Phantomline, by a wide margin. At 30 videos/month, HeyGen credit costs run "
+             "$30-180+, plus the subscription. Phantomline with BYOK costs ~$0.15 in API tokens. "
+             "With Ollama, $0. The Founding Lifetime tier ($79 once) covers you permanently."),
+            ("Can I bring my own API key to Phantomline?",
+             "Yes. Paste your Anthropic or OpenAI key in Settings. The browser calls the provider "
+             "directly over HTTPS. Phantomline never sees your key. Free users get 2 cloud trial "
+             "renders. Pro and Studio tiers get unlimited."),
+            ("Does Phantomline work offline?",
+             "Yes. The desktop install runs Ollama for scripts, Kokoro for TTS, MusicGen for "
+             "music, and ffmpeg for video assembly. No internet needed after initial model "
+             "downloads. HeyGen requires an internet connection for every render."),
+        ],
+    },
 ]
 
 
