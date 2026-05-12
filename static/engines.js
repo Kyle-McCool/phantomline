@@ -215,7 +215,7 @@
    *   for free.
    *
    * Provider/key/model are stored in localStorage:
-   *   ghostline.cloud.provider  → 'anthropic' | 'openai'
+   *   ghostline.cloud.provider  → 'anthropic' | 'openai' | 'gemini' | 'openrouter'
    *   ghostline.cloud.key       → raw API key (never sent to our server)
    *   ghostline.cloud.model     → e.g. 'claude-haiku-4-5' or 'gpt-4o-mini'
    *
@@ -241,7 +241,8 @@
     provider() {
       try {
         const p = (localStorage.getItem(CLOUD_PROVIDER_KEY) || 'anthropic').toLowerCase();
-        return p === 'openai' ? 'openai' : 'anthropic';
+        if (p === 'openai' || p === 'gemini' || p === 'openrouter') return p;
+        return 'anthropic';
       } catch { return 'anthropic'; }
     }
     key() {
@@ -253,8 +254,12 @@
         const m = (localStorage.getItem(CLOUD_MODEL_KEY) || '').trim();
         if (m) return m;
       } catch {}
-      // Sensible defaults — cheap and fast for both providers.
-      return this.provider() === 'openai' ? 'gpt-4o-mini' : 'claude-haiku-4-5';
+      // Sensible defaults — cheap and fast for each provider.
+      const prov = this.provider();
+      if (prov === 'openai') return 'gpt-4o-mini';
+      if (prov === 'gemini') return 'gemini-2.0-flash';
+      if (prov === 'openrouter') return 'google/gemini-2.0-flash-exp:free';
+      return 'claude-haiku-4-5';
     }
     setProvider(p) {
       try { localStorage.setItem(CLOUD_PROVIDER_KEY, (p || 'anthropic').toLowerCase()); } catch {}
@@ -277,6 +282,50 @@
       const apiKey = this.key();
       if (!apiKey) throw new Error('No cloud API key set. Paste one in Settings → AI engine.');
       const model = this.model();
+      if (provider === 'gemini') {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const r = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: user }] }],
+            systemInstruction: { parts: [{ text: system }] },
+            generationConfig: { temperature, maxOutputTokens: maxTokens },
+          }),
+        });
+        if (!r.ok) {
+          const errText = await r.text().catch(() => '');
+          throw new Error(`Gemini API ${r.status}: ${errText.slice(0, 300)}`);
+        }
+        const d = await r.json();
+        return (d.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+      }
+      if (provider === 'openrouter') {
+        const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': 'https://phantomline.xyz',
+            'X-Title': 'Phantomline',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: system },
+              { role: 'user', content: user },
+            ],
+            temperature,
+            max_tokens: maxTokens,
+          }),
+        });
+        if (!r.ok) {
+          const errText = await r.text().catch(() => '');
+          throw new Error(`OpenRouter API ${r.status}: ${errText.slice(0, 300)}`);
+        }
+        const d = await r.json();
+        return (d.choices?.[0]?.message?.content || '').trim();
+      }
       if (provider === 'openai') {
         const r = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',

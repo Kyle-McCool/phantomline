@@ -89,9 +89,9 @@
       <h2>How BYOK works in <a href="/bring-your-own-api-key">Phantomline</a></h2>
       <p>The implementation is intentionally simple:</p>
       <ol>
-        <li>Get an API key from <a href="https://console.anthropic.com/" rel="nofollow noopener">Anthropic</a> (for Claude) or <a href="https://platform.openai.com/" rel="nofollow noopener">OpenAI</a> (for GPT). Both offer free trial credits for new accounts.</li>
+        <li>Get an API key from any supported provider: <a href="https://console.anthropic.com/" rel="nofollow noopener">Anthropic</a> (Claude), <a href="https://platform.openai.com/" rel="nofollow noopener">OpenAI</a> (GPT), <a href="https://aistudio.google.com/apikey" rel="nofollow noopener">Google Gemini</a>, or <a href="https://openrouter.ai/keys" rel="nofollow noopener">OpenRouter</a>. Gemini and OpenRouter both offer free tiers with no credit card required.</li>
         <li>Open Phantomline &rarr; Settings &rarr; AI Engine &rarr; select Cloud.</li>
-        <li>Pick your provider (Anthropic or OpenAI), paste your key, click Save.</li>
+        <li>Pick your provider, paste your key, click Save.</li>
         <li>Generate scripts. Your browser calls the provider directly. Phantomline never sees, stores, or proxies the key.</li>
       </ol>
 
@@ -111,10 +111,12 @@
       <ul>
         <li><strong>Claude Haiku (Anthropic):</strong> the default in Phantomline. Fastest, cheapest Anthropic model. Produces clean narration prose with strong hooks. Best cost-to-quality ratio for daily Shorts and standard-format faceless videos.</li>
         <li><strong>GPT-4o-mini (OpenAI):</strong> comparable speed and cost. Slightly different voice characteristics. Some creators prefer its pacing for conversational niches.</li>
+        <li><strong>Gemini 2.0 Flash (Google):</strong> free tier with 15 requests per minute and no credit card required. Strong script quality, fast inference. The best zero-cost starting point for new creators.</li>
+        <li><strong>OpenRouter free models:</strong> aggregator that offers free tiers on several models including Gemini, Llama, and Mistral. One key gives access to dozens of models. Good for experimenting with different voices and styles.</li>
         <li><strong>Claude Sonnet (Anthropic):</strong> higher quality, higher cost (~5x Haiku). Worth it for flagship long-form videos in history, science, or true crime where script nuance directly affects retention.</li>
       </ul>
 
-      <p>Phantomline defaults to Haiku or GPT-4o-mini depending on provider. You can switch models per project without changing keys.</p>
+      <p>Phantomline defaults to the cheapest model for each provider. You can switch models per project without changing keys.</p>
 
       <h2>Common concerns</h2>
 
@@ -122,7 +124,7 @@
       <p>The key is stored in localStorage, which is accessible to any JavaScript running on the page. Phantomline mitigates this with strict Content Security Policy headers that limit which scripts can execute and which domains the browser can contact. The key is never sent to the Phantomline server. If this exposure level is uncomfortable, use the Ollama engine instead, which requires no API key at all.</p>
 
       <h3>What if I exceed my API budget?</h3>
-      <p>Both Anthropic and OpenAI let you set hard spending limits on your API account. A $5/month limit covers ~1,000 scripts. Set the limit on the provider's dashboard and you cannot accidentally overspend.</p>
+      <p>Anthropic and OpenAI let you set hard spending limits on your API account. A $5/month limit covers ~1,000 scripts. Set the limit on the provider's dashboard and you cannot accidentally overspend. Google Gemini and OpenRouter both offer free tiers, so you can generate scripts at zero cost within their rate limits.</p>
 
       <h3>Can free-tier users use BYOK?</h3>
       <p>Free-tier users get 2 cloud trial renders to experience the quality. After that, the cloud engine requires Creator Pro ($15/month) or the Founding Lifetime tier ($79 once). This gating ensures that the BYOK path is sustainable: users who rely on it for volume are contributing to the platform that makes the integration possible.</p>
