@@ -3660,7 +3660,7 @@ def api_video_source_start():
     return jsonify({"ok": True, "job_id": job_id})
 
 
-@app.route("/api/render/cloud", methods=["POST"])
+@app.route("/api/cloud/render", methods=["POST"])
 def api_render_cloud():
     """Server-side video render for the cloud/BYOK pipeline.
 

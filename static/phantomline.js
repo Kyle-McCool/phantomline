@@ -4093,7 +4093,7 @@ async function makeVideoWorkflow() {
         } else if (makeSourceLibraryPick) {
           _fd.append('clip_id', makeSourceLibraryPick);
         }
-        const _rr = await fetch('/api/render/cloud', { method: 'POST', body: _fd });
+        const _rr = await fetch('/api/cloud/render', { method: 'POST', body: _fd });
         const _rd = await _rr.json();
         if (!_rd.ok) throw new Error(_rd.error || 'Server render failed');
         setMakeStep('makeStepVideo', 'running', 'rendering on server');
