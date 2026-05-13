@@ -70,7 +70,7 @@ def _cloud_backend():
     if g_key:
         return ("gemini", g_key, model_override or "gemini-2.0-flash")
     if or_key:
-        return ("openrouter", or_key, model_override or "meta-llama/llama-3.3-70b-instruct:free")
+        return ("openrouter", or_key, model_override or "openai/gpt-oss-120b:free")
     return None
 
 

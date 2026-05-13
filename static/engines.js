@@ -258,7 +258,7 @@
       const prov = this.provider();
       if (prov === 'openai') return 'gpt-4o-mini';
       if (prov === 'gemini') return 'gemini-2.0-flash';
-      if (prov === 'openrouter') return 'meta-llama/llama-3.3-70b-instruct:free';
+      if (prov === 'openrouter') return 'openai/gpt-oss-120b:free';
       return 'claude-haiku-4-5';
     }
     setProvider(p) {
@@ -301,30 +301,50 @@
         return (d.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
       }
       if (provider === 'openrouter') {
-        const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': 'https://phantomline.xyz',
-            'X-Title': 'Phantomline',
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: system },
-              { role: 'user', content: user },
-            ],
-            temperature,
-            max_tokens: maxTokens,
-          }),
-        });
-        if (!r.ok) {
+        const _orFallbackChain = [
+          model,
+          'openai/gpt-oss-120b:free',
+          'nvidia/nemotron-3-super-120b-a12b:free',
+          'qwen/qwen3-next-80b-a3b-instruct:free',
+          'meta-llama/llama-3.3-70b-instruct:free',
+          'google/gemma-4-31b-it:free',
+          'nvidia/nemotron-3-nano-30b-a3b:free',
+        ];
+        const tried = new Set();
+        let lastErr = '';
+        for (const tryModel of _orFallbackChain) {
+          if (tried.has(tryModel)) continue;
+          tried.add(tryModel);
+          const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`,
+              'HTTP-Referer': 'https://phantomline.xyz',
+              'X-Title': 'Phantomline',
+            },
+            body: JSON.stringify({
+              model: tryModel,
+              messages: [
+                { role: 'system', content: system },
+                { role: 'user', content: user },
+              ],
+              temperature,
+              max_tokens: maxTokens,
+            }),
+          });
+          if (r.ok) {
+            const d = await r.json();
+            return (d.choices?.[0]?.message?.content || '').trim();
+          }
+          if (r.status === 429 || r.status === 503 || r.status === 502) {
+            lastErr = `${tryModel} → ${r.status}`;
+            continue;
+          }
           const errText = await r.text().catch(() => '');
           throw new Error(`OpenRouter API ${r.status}: ${errText.slice(0, 300)}`);
         }
-        const d = await r.json();
-        return (d.choices?.[0]?.message?.content || '').trim();
+        throw new Error(`All OpenRouter free models rate-limited. Last: ${lastErr}. Try again in a minute.`);
       }
       if (provider === 'openai') {
         const r = await fetch('https://api.openai.com/v1/chat/completions', {
