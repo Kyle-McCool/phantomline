@@ -4098,8 +4098,26 @@ async function makeVideoWorkflow() {
           try {
             const _clipMeta = await fetch('/api/library/footage/' + makeSourceLibraryPick).then(r => r.json());
             if (_clipMeta.ok && _clipMeta.clip?.url) {
-              const _clipResp = await fetch(_clipMeta.clip.url);
-              if (_clipResp.ok) _sourceBlob = await _clipResp.blob();
+              const _clipUrl = _clipMeta.clip.url;
+              // Single GET often fails on large files; use chunked range requests
+              const _headResp = await fetch(_clipUrl, {method: 'HEAD', credentials: 'omit'});
+              const _totalSize = parseInt(_headResp.headers.get('content-length') || '0', 10);
+              if (_headResp.ok && _totalSize > 0) {
+                const _chunkSize = 2 * 1024 * 1024;
+                const _chunks = [];
+                let _dl = 0;
+                while (_dl < _totalSize) {
+                  const _end = Math.min(_dl + _chunkSize - 1, _totalSize - 1);
+                  const _pct = Math.round((_dl / _totalSize) * 100);
+                  setMakeStep('makeStepVideo', 'running', `loading clip · ${_pct}%`);
+                  const _cr = await fetch(_clipUrl, {headers: {'Range': `bytes=${_dl}-${_end}`}, credentials: 'omit'});
+                  if (!_cr.ok && _cr.status !== 206) break;
+                  const _ab = await _cr.arrayBuffer();
+                  _chunks.push(_ab);
+                  _dl += _ab.byteLength;
+                }
+                if (_dl >= _totalSize) _sourceBlob = new Blob(_chunks, {type: 'video/mp4'});
+              }
             }
           } catch (_clipErr) {
             console.warn('Direct clip fetch failed, trying stream proxy:', _clipErr);
