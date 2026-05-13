@@ -4005,7 +4005,7 @@ async function makeVideoWorkflow() {
       // Strip cloud-API error bodies from telemetry — never risk leaking
       // fragments of provider responses (which ride in e.message).
       const _safeMsg = String(e.message || '');
-      const _tMsg = /^(Anthropic|OpenAI) API \d+:/.test(_safeMsg)
+      const _tMsg = /^(Anthropic|OpenAI|Gemini|OpenRouter) API \d+:/.test(_safeMsg)
         ? _safeMsg.replace(/:.*/, ': [redacted]') : _safeMsg;
       window.ghTelemetry && window.ghTelemetry('render-error', {
         message: _tMsg,
@@ -6964,6 +6964,8 @@ function loadCloudSettings() {
   if (providerEl) providerEl.value = eng.provider();
   if (modelEl) modelEl.value = eng.model();
   if (keyEl) keyEl.value = eng.key();
+  // Sync the console-URL hint to the loaded provider.
+  if (typeof _updateCloudConsoleLink === 'function') _updateCloudConsoleLink(eng.provider());
 }
 
 // When provider changes, default the model field to that provider's cheap option.
@@ -6972,11 +6974,37 @@ document.getElementById('settingsCloudProvider')?.addEventListener('change', (e)
   if (!modelEl) return;
   // Only auto-fill if the user hasn't typed a custom model (or it's a known default).
   const known = ['claude-haiku-4-5', 'claude-sonnet-4-5', 'claude-opus-4-5',
-                 'gpt-4o-mini', 'gpt-4o', 'gpt-5', 'gpt-5-mini'];
+                 'gpt-4o-mini', 'gpt-4o', 'gpt-5', 'gpt-5-mini',
+                 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro',
+                 'google/gemini-2.0-flash-exp:free', 'meta-llama/llama-3.1-8b-instruct:free',
+                 'mistralai/mistral-7b-instruct:free'];
+  const defaults = {
+    openai: 'gpt-4o-mini',
+    gemini: 'gemini-2.0-flash',
+    openrouter: 'google/gemini-2.0-flash-exp:free',
+    anthropic: 'claude-haiku-4-5',
+  };
   if (!modelEl.value || known.includes(modelEl.value)) {
-    modelEl.value = e.target.value === 'openai' ? 'gpt-4o-mini' : 'claude-haiku-4-5';
+    modelEl.value = defaults[e.target.value] || 'claude-haiku-4-5';
   }
+  // Update the console-URL hint below the key input.
+  _updateCloudConsoleLink(e.target.value);
 });
+
+// Helper: update the "Get a key at …" hint link to match the selected provider.
+function _updateCloudConsoleLink(provider) {
+  const hint = document.querySelector('#cloudKeyPanel .hint');
+  if (!hint) return;
+  const urls = {
+    anthropic: ['https://console.anthropic.com/', 'console.anthropic.com', 'Claude'],
+    openai: ['https://platform.openai.com/api-keys', 'platform.openai.com', 'OpenAI'],
+    gemini: ['https://aistudio.google.com/apikey', 'aistudio.google.com', 'Gemini'],
+    openrouter: ['https://openrouter.ai/keys', 'openrouter.ai', 'OpenRouter'],
+  };
+  const [url, label, name] = urls[provider] || urls.anthropic;
+  hint.innerHTML =
+    `Get a key at <a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);">${label}</a> (${name}). Stored only in your browser. Never sent to our server.`;
+}
 
 document.getElementById('settingsCloudSaveBtn')?.addEventListener('click', () => {
   if (_ghCurrentTier === 'free' && _ghCloudTrialUsed() >= 2) {
@@ -7016,8 +7044,9 @@ document.getElementById('settingsCloudTestBtn')?.addEventListener('click', async
   eng.setKey(key);
   try {
     const ok = await eng.testKey();
+    const provNames = { openai: 'OpenAI', anthropic: 'Anthropic', gemini: 'Gemini', openrouter: 'OpenRouter' };
     if (status) status.textContent = ok
-      ? `${provider === 'openai' ? 'OpenAI' : 'Anthropic'} key works. Ready to generate.`
+      ? `${provNames[provider] || provider} key works. Ready to generate.`
       : `Key call succeeded but reply was unexpected. Try another model id.`;
   } catch (err) {
     if (status) status.textContent = err.message || 'Test failed.';
@@ -7034,6 +7063,25 @@ document.getElementById('settingsCloudClearBtn')?.addEventListener('click', () =
   if (status) status.textContent = 'Key cleared.';
   refreshEngineStatus();
 });
+
+// Inject Gemini and OpenRouter options into the provider dropdown (avoids
+// editing index.html, which is off-limits per CLAUDE.md).
+(function _injectCloudProviderOptions() {
+  const sel = document.getElementById('settingsCloudProvider');
+  if (!sel) return;
+  if (!sel.querySelector('option[value="gemini"]')) {
+    const gemini = document.createElement('option');
+    gemini.value = 'gemini';
+    gemini.textContent = 'Google Gemini';
+    sel.appendChild(gemini);
+  }
+  if (!sel.querySelector('option[value="openrouter"]')) {
+    const or = document.createElement('option');
+    or.value = 'openrouter';
+    or.textContent = 'OpenRouter';
+    sel.appendChild(or);
+  }
+})();
 
 document.querySelector('.tab-btn[data-tab="settings"]')?.addEventListener('click', loadCloudSettings);
 window.addEventListener('load', loadCloudSettings);

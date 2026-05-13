@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BYOK Explained: Why Bring Your Own API Key Matters for Creators | Phantomline</title>
+<meta name="description" content="BYOK (bring your own API key) explained for video creators: why using your own Claude or GPT key costs 10-100x less than platform tokens, and why your scripts should stay on your machine." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="BYOK Explained: Why Bring Your Own API Key Matters" />
+<meta property="og:description" content="The economics and privacy case for using your own Claude or GPT key instead of platform tokens." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Blog", "item": "{{ site_url }}/blog"},
+    {"@type": "ListItem", "position": 3, "name": "BYOK explained", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "BYOK Explained: Why Bring Your Own API Key Matters for Creators",
+  "datePublished": "2026-05-12",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {"@type": "Organization", "name": "Phantomline", "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}},
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>&rsaquo;</span>
+        <a href="/blog">Blog</a> <span>&rsaquo;</span>
+        <span class="current">BYOK explained</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Economics</div>
+        <h1>BYOK Explained: Why Bring Your Own API Key Matters for Creators</h1>
+        <p class="article-meta">Published May 12, 2026 &middot; 8 min read</p>
+      </header>
+
+      <p>Most AI video platforms charge you per video. You pay a subscription, and on top of that, each render burns through credits or tokens at rates the platform sets. The platform buys AI inference wholesale from providers like Anthropic or OpenAI, marks it up 10-100x, and sells it to you as a bundled feature. You never see the underlying cost.</p>
+
+      <p>BYOK (bring your own API key) is the alternative. Instead of paying a middleman for AI inference, you get your own API key directly from the provider, paste it into your tool, and pay the provider directly at their published rates. The tool never touches your key or your tokens. Your scripts, your bill, no markup.</p>
+
+      <h2>The economics of BYOK vs platform tokens</h2>
+      <p>A typical faceless YouTube script is 250-350 words. At Anthropic's published rates for Claude Haiku, that script costs approximately $0.003-0.007 in API tokens. Call it $0.005 as a round number.</p>
+
+      <p>Now compare that to what platforms charge for the same work:</p>
+      <ul>
+        <li><strong>Platform A</strong> charges 1 credit per video, credits cost $1-2 each. That is 200-400x the raw API cost.</li>
+        <li><strong>Platform B</strong> bundles AI into a $25/month subscription with a 30-video cap. That is $0.83 per video, or 166x the raw cost.</li>
+        <li><strong>Platform C</strong> charges $0.50 per video on top of the subscription. That is 100x the raw cost.</li>
+      </ul>
+
+      <p>The markup exists because the platform is packaging convenience: they handle the API integration, the UI, the prompt engineering. That packaging has value. But once you have a tool that handles the integration for you and lets you plug in your own key, the convenience argument evaporates. You get the same frontier model quality, the same speed, and the same output, at the raw provider rate.</p>
+
+      <h2>How BYOK works in <a href="/bring-your-own-api-key">Phantomline</a></h2>
+      <p>The implementation is intentionally simple:</p>
+      <ol>
+        <li>Get an API key from any supported provider: <a href="https://console.anthropic.com/" rel="nofollow noopener">Anthropic</a> (Claude), <a href="https://platform.openai.com/" rel="nofollow noopener">OpenAI</a> (GPT), <a href="https://aistudio.google.com/apikey" rel="nofollow noopener">Google Gemini</a>, or <a href="https://openrouter.ai/keys" rel="nofollow noopener">OpenRouter</a>. Gemini and OpenRouter both offer free tiers with no credit card required.</li>
+        <li>Open Phantomline &rarr; Settings &rarr; AI Engine &rarr; select Cloud.</li>
+        <li>Pick your provider, paste your key, click Save.</li>
+        <li>Generate scripts. Your browser calls the provider directly. Phantomline never sees, stores, or proxies the key.</li>
+      </ol>
+
+      <p>The key lives in your browser's localStorage. It is never sent to the Phantomline server. The CSP headers in production restrict which domains the browser can contact, limiting the key's exposure surface.</p>
+
+      <h2>The privacy argument</h2>
+      <p>BYOK is not just about cost. It is about who processes your scripts.</p>
+
+      <p>When a platform bundles AI, your script content is sent to their server, which forwards it to the AI provider (or processes it on their own models). The platform sees your script. Their logs capture it. Their data pipeline processes it. If you are developing proprietary script formulas, competitive niche strategies, or channel-specific hook patterns, that data is sitting on someone else's infrastructure.</p>
+
+      <p>With BYOK, the browser sends your script prompt directly to Anthropic or OpenAI. The platform never sees the content. Both Anthropic and OpenAI have published data-use policies for API traffic (API inputs are not used for model training by default). The data exposure surface is smaller: one provider instead of one provider plus one platform.</p>
+
+      <p>For creators who want even stronger privacy, Phantomline's <a href="/ollama-video-generation">Ollama engine</a> runs inference entirely on your own hardware. Scripts never leave your machine at all. See our <a href="/blog/ollama-vs-cloud-apis-video-scripts">Ollama vs cloud APIs comparison</a> for the tradeoffs.</p>
+
+      <h2>Which models to use</h2>
+      <p>For faceless YouTube scripts, the best value models in 2026 are:</p>
+      <ul>
+        <li><strong>Claude Haiku (Anthropic):</strong> the default in Phantomline. Fastest, cheapest Anthropic model. Produces clean narration prose with strong hooks. Best cost-to-quality ratio for daily Shorts and standard-format faceless videos.</li>
+        <li><strong>GPT-4o-mini (OpenAI):</strong> comparable speed and cost. Slightly different voice characteristics. Some creators prefer its pacing for conversational niches.</li>
+        <li><strong>Gemini 2.0 Flash (Google):</strong> free tier with 15 requests per minute and no credit card required. Strong script quality, fast inference. The best zero-cost starting point for new creators.</li>
+        <li><strong>OpenRouter free models:</strong> aggregator that offers free tiers on several models including Gemini, Llama, and Mistral. One key gives access to dozens of models. Good for experimenting with different voices and styles.</li>
+        <li><strong>Claude Sonnet (Anthropic):</strong> higher quality, higher cost (~5x Haiku). Worth it for flagship long-form videos in history, science, or true crime where script nuance directly affects retention.</li>
+      </ul>
+
+      <p>Phantomline defaults to the cheapest model for each provider. You can switch models per project without changing keys.</p>
+
+      <h2>Common concerns</h2>
+
+      <h3>Is my API key safe in the browser?</h3>
+      <p>The key is stored in localStorage, which is accessible to any JavaScript running on the page. Phantomline mitigates this with strict Content Security Policy headers that limit which scripts can execute and which domains the browser can contact. The key is never sent to the Phantomline server. If this exposure level is uncomfortable, use the Ollama engine instead, which requires no API key at all.</p>
+
+      <h3>What if I exceed my API budget?</h3>
+      <p>Anthropic and OpenAI let you set hard spending limits on your API account. A $5/month limit covers ~1,000 scripts. Set the limit on the provider's dashboard and you cannot accidentally overspend. Google Gemini and OpenRouter both offer free tiers, so you can generate scripts at zero cost within their rate limits.</p>
+
+      <h3>Can free-tier users use BYOK?</h3>
+      <p>Free-tier users get 2 cloud trial renders to experience the quality. After that, the cloud engine requires Creator Pro ($15/month) or the Founding Lifetime tier ($79 once). This gating ensures that the BYOK path is sustainable: users who rely on it for volume are contributing to the platform that makes the integration possible.</p>
+
+      <h2>Try Phantomline</h2>
+      <p>Free tier includes 2 cloud trial renders. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related</h2>
+      <ul>
+        <li><a href="/bring-your-own-api-key">BYOK pillar page</a></li>
+        <li><a href="/claude-api-video-generator">Claude API video generator</a></li>
+        <li><a href="/blog/ollama-vs-cloud-apis-video-scripts">Ollama vs cloud APIs</a></li>
+        <li><a href="/alternatives/invideo">InVideo AI alternative</a></li>
+        <li><a href="/alternatives/synthesia">Synthesia alternative</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>

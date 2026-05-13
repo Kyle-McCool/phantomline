@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Ollama vs Cloud APIs for Video Scripts: Which Should You Use? | Phantomline</title>
+<meta name="description" content="Ollama vs cloud APIs (Claude, GPT) for YouTube video scripts. Comparing cost per script, output quality, privacy, offline capability, and the hybrid approach most serious creators land on." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090b0c" />
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Ollama vs Cloud APIs for Video Scripts" />
+<meta property="og:description" content="Local LLMs vs frontier cloud models for faceless YouTube script generation." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Blog", "item": "{{ site_url }}/blog"},
+    {"@type": "ListItem", "position": 3, "name": "Ollama vs cloud APIs", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Ollama vs Cloud APIs for Video Scripts: Which Should You Use?",
+  "datePublished": "2026-05-12",
+  "dateModified": "{{ today_iso }}",
+  "author": {"@type": "Organization", "name": "Phantomline"},
+  "publisher": {"@type": "Organization", "name": "Phantomline", "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}},
+  "mainEntityOfPage": "{{ canonical_url }}"
+}
+</script>
+</head>
+<body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/alternatives">Alternatives</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a class="cta" href="/app">Open Studio</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <article class="article article--wide">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>&rsaquo;</span>
+        <a href="/blog">Blog</a> <span>&rsaquo;</span>
+        <span class="current">Ollama vs cloud APIs</span>
+      </nav>
+
+      <header class="article-head">
+        <div class="eyebrow">Technical</div>
+        <h1>Ollama vs Cloud APIs for Video Scripts: Which Should You Use?</h1>
+        <p class="article-meta">Published May 12, 2026 &middot; 10 min read</p>
+      </header>
+
+      <p>Every faceless YouTube creator eventually faces the same question: should scripts come from a local model running on your own hardware, or from a frontier cloud model via an API call? The answer depends on your volume, your quality bar, your privacy requirements, and whether you have a GPU sitting under your desk.</p>
+
+      <p>Phantomline supports both paths and lets you switch between them per-project. This article breaks down the real tradeoffs so you can pick the right one for your workflow.</p>
+
+      <h2>The local path: Ollama</h2>
+      <p><a href="/ollama-video-generation">Ollama</a> runs open-weight models (Llama 3.1, Mistral, Gemma) on your own machine. After the initial model download (~4-8 GB depending on the model), inference is free and fully offline. No API key, no token budget, no internet connection required.</p>
+
+      <h3>Strengths of local inference</h3>
+      <ul>
+        <li><strong>Zero marginal cost.</strong> Once the model is downloaded, every script is free. At 30 videos per month, cloud APIs cost ~$0.15 in tokens. Ollama costs $0. At 90 videos per month, the gap widens but the real savings are in not worrying about cost at all.</li>
+        <li><strong>Complete privacy.</strong> Your scripts, your topic research, your proprietary niche formulas: none of it leaves your machine. For creators developing competitive advantages in script structure or hook patterns, this matters.</li>
+        <li><strong>Offline capability.</strong> No internet means no API outages, no rate limits, no latency spikes. Useful for creators who batch-render scripts on flights or in areas with unreliable connectivity.</li>
+        <li><strong>No vendor dependency.</strong> If Anthropic raises prices or OpenAI changes their terms of service, your local pipeline keeps running unchanged.</li>
+      </ul>
+
+      <h3>Limitations of local inference</h3>
+      <ul>
+        <li><strong>Quality ceiling.</strong> An 8B parameter model running on consumer hardware produces noticeably less polished scripts than Claude Haiku or GPT-4o-mini. The gap shows most in hook construction, tonal consistency across longer scripts, and handling of nuanced factual content. For simple storytime or listicle niches, the gap is small. For history docs or science explainers, it is visible.</li>
+        <li><strong>Hardware requirement.</strong> Llama 3.1 8B runs adequately on 16 GB RAM with a 6 GB+ VRAM GPU. Without a GPU, inference is slow (30-60 seconds per script vs 3-5 seconds on a decent card). M-series Macs handle it well; older Windows machines struggle.</li>
+        <li><strong>Setup friction.</strong> Installing Ollama, pulling the model, configuring the context window: these are straightforward for technical users but are the single biggest drop-off point in the install funnel for non-technical creators.</li>
+      </ul>
+
+      <h2>The cloud path: BYOK (bring your own key)</h2>
+      <p>The <a href="/bring-your-own-api-key">BYOK engine</a> lets you paste your own Anthropic or OpenAI API key into Phantomline. Your browser calls the provider directly over HTTPS. The key never touches the Phantomline server. Your tokens, your bill.</p>
+
+      <h3>Strengths of cloud BYOK</h3>
+      <ul>
+        <li><strong>Frontier quality.</strong> Claude Haiku and GPT-4o-mini produce scripts that need minimal editing. Hooks land harder, transitions are smoother, and factual claims are more reliably grounded. For niches where script quality directly affects watch time (history, science, true crime), this gap is worth the $0.005.</li>
+        <li><strong>Zero setup.</strong> Paste a key, pick a model, generate. No Ollama install, no GPU, no model download. A creator on a Chromebook can produce the same quality scripts as someone on a $3,000 workstation.</li>
+        <li><strong>Speed.</strong> Cloud inference returns a 300-word script in 2-4 seconds regardless of the user's hardware. Local inference on CPU-only machines can take 30-60 seconds for the same output.</li>
+        <li><strong>Model variety.</strong> Want to try Claude Sonnet for a prestige series and Haiku for daily Shorts? Switch models per project without downloading anything.</li>
+      </ul>
+
+      <h3>Limitations of cloud BYOK</h3>
+      <ul>
+        <li><strong>Cost, even if small.</strong> ~$0.005 per script on Haiku. At 30 scripts/month that is $0.15. At 90 scripts/month, $0.45. The cost is trivial in absolute terms but nonzero. Creators who are philosophically opposed to per-unit costs will prefer local.</li>
+        <li><strong>Privacy tradeoff.</strong> Your scripts are sent to Anthropic or OpenAI for inference. Both companies have data-use policies, but the scripts are technically processed on their servers. For most creators this is fine. For creators building proprietary script formulas they consider trade secrets, it is worth considering.</li>
+        <li><strong>API key in the browser.</strong> The key is stored in localStorage. Phantomline's CSP and security headers mitigate the risk, but any JS running on the page could theoretically read it. Creators who are uncomfortable with that should use the server (Ollama) engine instead.</li>
+      </ul>
+
+      <h2>The hybrid approach</h2>
+      <p>Most serious faceless creators land on a hybrid: Ollama for bulk daily Shorts (where marginal quality differences are less visible in a 60-second format), and BYOK cloud for flagship long-form videos where script quality directly affects 8-minute retention curves. Phantomline lets you switch engines per session without reconfiguring anything.</p>
+
+      <h2>Decision matrix</h2>
+      <table>
+        <thead><tr><th>Factor</th><th>Choose Ollama</th><th>Choose BYOK Cloud</th></tr></thead>
+        <tbody>
+          <tr><td>Budget</td><td>Strict zero-cost requirement</td><td>$0.005/script is acceptable</td></tr>
+          <tr><td>Quality bar</td><td>Storytime, listicles, simple formats</td><td>History, science, true crime, prestige</td></tr>
+          <tr><td>Privacy</td><td>Scripts must never leave the machine</td><td>Standard provider data policies are fine</td></tr>
+          <tr><td>Hardware</td><td>Have a GPU with 6 GB+ VRAM</td><td>Chromebook, phone, or no GPU</td></tr>
+          <tr><td>Volume</td><td>90+ videos/month (cost savings compound)</td><td>Any volume (cost is trivial)</td></tr>
+          <tr><td>Setup tolerance</td><td>Comfortable with CLI tools</td><td>Want zero-install generation</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Try Phantomline</h2>
+      <p>Both engines are available on the free tier. <a class="cta" href="/app">Open the studio</a> <a href="/pricing">See pricing</a></p>
+
+      <hr class="article-divider" />
+
+      <h2>Related</h2>
+      <ul>
+        <li><a href="/ollama-video-generation">Ollama video generation pillar</a></li>
+        <li><a href="/bring-your-own-api-key">BYOK API key pillar</a></li>
+        <li><a href="/blog/byok-explained-bring-your-own-api-key">BYOK explained</a></li>
+        <li><a href="/alternatives/invideo">InVideo AI alternative</a></li>
+        <li><a href="/local-ai-video-generator">Local AI video generator pillar</a></li>
+      </ul>
+    </article>
+  </main>
+
+  {% include "_footer.html" %}
+</div>
+</body>
+</html>
