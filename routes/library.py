@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, Response, jsonify, request
 
 from core import BASE_DIR
 
@@ -137,6 +137,28 @@ def cache_clip(clip_id: str) -> tuple[Path | None, bool, str | None]:
         return None, False, f"Download failed: {exc}"
 
     return cached, False, None
+
+
+@library_bp.route("/api/library/footage/<clip_id>/stream", methods=["GET"])
+def api_library_footage_stream(clip_id: str):
+    """Proxy-stream a library clip from Supabase so the browser can fetch it
+    without CORS issues. Used by the cloud/browser render pipeline."""
+    clip = find_clip(clip_id)
+    if not clip:
+        return jsonify({"ok": False, "error": "Clip not found"}), 404
+    url = clip.get("url")
+    if not url:
+        return jsonify({"ok": False, "error": "Clip has no URL"}), 422
+    try:
+        r = requests.get(url, stream=True, timeout=120)
+        r.raise_for_status()
+        return Response(
+            r.iter_content(chunk_size=256 * 1024),
+            content_type=r.headers.get("Content-Type", "video/mp4"),
+            headers={"Content-Length": r.headers.get("Content-Length", "")},
+        )
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 502
 
 
 @library_bp.route("/api/library/footage/<clip_id>/download", methods=["POST"])

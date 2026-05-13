@@ -13,7 +13,7 @@
 // rebuilt account portal (tabs: overview/licenses/billing/settings,
 // robust error handling, /api/account/me + /invoices wiring) reaches
 // existing visitors immediately on next page load.
-const CACHE_VERSION = "phantomline-v19";
+const CACHE_VERSION = "phantomline-v20";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 
