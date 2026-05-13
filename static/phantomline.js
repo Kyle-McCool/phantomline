@@ -2232,6 +2232,48 @@ function _extractJsonArray(raw) {
   return [];
 }
 
+async function _cloudTts(text, voice) {
+  const cloudEng = window._GhostlineEngineRegistry?.cloud;
+  if (!cloudEng) throw new Error('Cloud engine not available');
+  const provider = cloudEng.provider();
+  const apiKey = cloudEng.key();
+  if (!apiKey) throw new Error('No API key configured');
+  if (provider === 'openai') {
+    const voiceMap = {
+      af_nicole: 'nova', af_bella: 'nova', af_sarah: 'shimmer', af_sky: 'shimmer',
+      am_adam: 'onyx', am_michael: 'echo', bf_emma: 'alloy', bm_george: 'echo',
+    };
+    const openaiVoice = voiceMap[voice] || 'nova';
+    const resp = await fetch('https://api.openai.com/v1/audio/speech', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'tts-1', input: text, voice: openaiVoice, response_format: 'mp3' }),
+    });
+    if (!resp.ok) {
+      const errBody = await resp.text().catch(() => '');
+      throw new Error('OpenAI TTS API ' + resp.status + ': ' + errBody.slice(0, 200));
+    }
+    const blob = await resp.blob();
+    return { blob, voice: openaiVoice };
+  }
+  if (provider === 'openrouter') {
+    const orKey = apiKey;
+    const resp = await fetch('https://openrouter.ai/api/v1/audio/speech', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + orKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'openai/tts-1', input: text, voice: 'nova', response_format: 'mp3' }),
+    });
+    if (resp.ok) {
+      const blob = await resp.blob();
+      return { blob, voice: 'nova' };
+    }
+  }
+  throw new Error(
+    'Narration requires a TTS-capable provider. Your ' + provider +
+    ' key does not support text-to-speech. Switch to OpenAI in Settings, or use the desktop app for Kokoro TTS.'
+  );
+}
+
 async function _cloudGenerateIdeas({ recipe, niche, audience, format, hookStyle, tensionFormat, loopType, currentTopic }) {
   const cloudEng = window._GhostlineEngineRegistry.cloud;
   const system = (
@@ -4016,6 +4058,97 @@ async function makeVideoWorkflow() {
     }
     setMakeStep('makeStepScript', 'done', 'done');
 
+    if (useCloudDirect) {
+      // ── Browser-side pipeline (cloud TTS + browser music/mix/video) ──
+
+      setMakeStep('makeStepNarration', 'running', 'cloud TTS');
+      const ttsResult = await _cloudTts(script.text, $('makeVoice').value || 'af_nicole');
+      setMakeStep('makeStepNarration', 'done', ttsResult.voice || 'done');
+
+      if (!useSourceVideo) setMakeStep('makeStepScenes', 'done', 'browser mode');
+
+      setMakeStep('makeStepMusic', 'running', 'selecting track');
+      let _musicBlob;
+      const _bundled = window.GhostlineMobileLibs?.bundledMusic;
+      const _ambient = window.GhostlineMobileLibs?.ambient;
+      try {
+        const _recipe = $('makeRecipe')?.value || $('makeNiche')?.value || '';
+        const _track = await _bundled?.pickForRecipe(_recipe);
+        if (_track?.url) {
+          setMakeStep('makeStepMusic', 'running', 'loading track');
+          const _mr = await fetch(_track.url);
+          if (_mr.ok) _musicBlob = await _mr.blob();
+        }
+      } catch {}
+      if (!_musicBlob && _ambient?.available()) {
+        setMakeStep('makeStepMusic', 'running', 'generating ambient bed');
+        const _dur = Math.max(30, 60);
+        const _amb = await _ambient.generate({ seconds: _dur, mood: 'cinematic' });
+        _musicBlob = _amb.blob;
+      }
+      setMakeStep('makeStepMusic', 'done', _musicBlob ? 'done' : 'skipped');
+
+      setMakeStep('makeStepMix', 'running', 'mixing audio');
+      let _mixedBlob;
+      if (_musicBlob && window.GhostlineMobileLibs?.mixAudio) {
+        _mixedBlob = await window.GhostlineMobileLibs.mixAudio(ttsResult.blob, _musicBlob, -18);
+      } else {
+        _mixedBlob = ttsResult.blob;
+      }
+      setMakeStep('makeStepMix', 'done', 'done');
+
+      let _finishedUrl;
+      if (useSourceVideo) {
+        setMakeStep('makeStepTimeline', 'done', 'source video');
+        setMakeStep('makeStepVideo', 'running', 'rendering in browser');
+        const _render = window.GhostlineMobileLibs?.render;
+        if (!_render?.available()) throw new Error('Browser video rendering unavailable (WebAssembly required).');
+        const _srcFile = $('makeSourceVideoFile')?.files?.[0];
+        let _srcBlob;
+        if (_srcFile) {
+          _srcBlob = _srcFile;
+        } else {
+          const _sr = await fetch('/api/projects/' + sourceVideoProjectId + '/file/video');
+          if (!_sr.ok) throw new Error('Could not load source video.');
+          _srcBlob = await _sr.blob();
+        }
+        const _vr = await _render.assemble({
+          narrationBlob: _mixedBlob,
+          sourceVideoBlob: _srcBlob,
+          aspect: $('makeAspect').value,
+          onProgress: function(p) {
+            if (p.progress != null) setMakeStep('makeStepVideo', 'running', Math.round(p.progress * 100) + '%');
+          },
+        });
+        _finishedUrl = _vr.url;
+        setMakeStep('makeStepVideo', 'done', 'done');
+      } else {
+        setMakeStep('makeStepTimeline', 'done', 'audio only');
+        setMakeStep('makeStepVideo', 'done', 'audio only');
+        _finishedUrl = URL.createObjectURL(_mixedBlob);
+      }
+
+      $('makePreviewVideo').src = _finishedUrl;
+      const _pv = $('makePhonePreviewVideo');
+      if (_pv) { _pv.src = _finishedUrl; _pv.style.display = 'block'; _pv.load(); $('makePhonePreviewInner')?.classList.add('has-video'); }
+      $('makeResultHint').textContent = useSourceVideo
+        ? 'Rendered in-browser with AI narration and background music.'
+        : 'Audio-only render (narration + music). For full video with scenes, use Source Video mode or the desktop app.';
+      $('makeResult').classList.add('shown');
+      makeVideoJob = null;
+      latestMakeVideoProjectId = null;
+      preparePublishDraft({
+        videoProjectId: null,
+        title: $('makePreferredTitle').value.trim() || script.title,
+        caption: makeCreativeBrief(),
+        scriptText: script.text,
+        tags: $('makeHashtags').value.trim(),
+        pinnedComment: $('makePinnedComment').value.trim(),
+      });
+      renderMakeHandoffChecklist();
+
+    } else {
+
     setMakeStep('makeStepNarration', 'running', 'starting');
     const ttsStart = await apiJson('/api/tts/start', {
       method: 'POST',
@@ -4216,6 +4349,7 @@ async function makeVideoWorkflow() {
     } catch (bundleErr) {
       window.ghTelemetry && window.ghTelemetry('bundle-create-failed', { message: String(bundleErr?.message || '') });
     }
+    } // end server-side pipeline
     loadRecentWork();
     loadLibrary();
     toast('Video ready');

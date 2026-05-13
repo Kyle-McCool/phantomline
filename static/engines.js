@@ -893,6 +893,37 @@
     render: new FfmpegRenderEngine(),
     pexels: new PexelsLibrary(),
     bundledMusic: new BundledMusicLibrary(),
+    async mixAudio(narrationBlob, musicBlob, musicDbReduction = -18) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const narAb = await narrationBlob.arrayBuffer();
+      const narBuf = await ctx.decodeAudioData(narAb);
+      let musBuf = null;
+      if (musicBlob && musicBlob.size > 100) {
+        const musAb = await musicBlob.arrayBuffer();
+        musBuf = await ctx.decodeAudioData(musAb);
+      }
+      const duration = narBuf.duration + 1;
+      const sampleRate = narBuf.sampleRate;
+      const offline = new OfflineAudioContext(2, Math.ceil(duration * sampleRate), sampleRate);
+      const narSrc = offline.createBufferSource();
+      narSrc.buffer = narBuf;
+      narSrc.connect(offline.destination);
+      narSrc.start(0);
+      if (musBuf) {
+        const musSrc = offline.createBufferSource();
+        musSrc.buffer = musBuf;
+        musSrc.loop = true;
+        const musGain = offline.createGain();
+        musGain.gain.value = Math.pow(10, musicDbReduction / 20);
+        musSrc.connect(musGain);
+        musGain.connect(offline.destination);
+        musSrc.start(0);
+      }
+      const rendered = await offline.startRendering();
+      const wav = audioBufferToWav(rendered);
+      ctx.close();
+      return new Blob([wav], { type: 'audio/wav' });
+    },
   };
 
   let activeId = readPref();
