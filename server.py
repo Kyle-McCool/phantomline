@@ -3662,20 +3662,28 @@ def api_video_source_start():
 
 @app.route("/api/cloud/render", methods=["POST"])
 def api_render_cloud():
-    """Server-side video render for the cloud/BYOK pipeline.
+    """Lightweight server-side video render for the cloud/BYOK pipeline.
+
+    Uses ffmpeg CLI directly (~50 MB RAM) instead of moviepy (~500 MB+)
+    so it fits within Render's free-tier 512 MB limit.
 
     Accepts multipart form:
       audio       – narration audio blob (mp3)
       video       – (optional) uploaded source video file
       clip_id     – (optional) library clip id (used if no video file)
-      caption_text– script text for burned-in captions
+      caption_text– script text for burned-in subtitles
       title       – video title
       aspect      – 9:16 / 16:9 / 1:1
-      captions    – "1" to burn captions
-      caption_style – tiktok / karaoke / etc
+      captions    – "1" to burn subtitles
     """
-    if not video_assembler:
-        return jsonify({"ok": False, "error": "Video assembler unavailable on this server"}), 503
+    import subprocess as _sp
+    import tempfile as _tmp
+
+    try:
+        import imageio_ffmpeg
+        _ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    except ImportError:
+        _ffmpeg = "ffmpeg"
 
     audio_file = request.files.get("audio")
     if not audio_file:
@@ -3687,23 +3695,17 @@ def api_render_cloud():
     title = (request.form.get("title") or "cloud render").strip()
     aspect = (request.form.get("aspect") or "9:16").strip()
     captions = request.form.get("captions") in ("1", "true", "yes")
-    caption_style = (request.form.get("caption_style") or "tiktok").strip()
-    keyword_mode = (request.form.get("keyword_mode") or "auto").strip()
-    pattern_interrupts = request.form.get("pattern_interrupts") in ("1", "true", "yes")
-    source_enhance = (request.form.get("source_enhance") or "none").strip()
-    title_style = (request.form.get("title_style") or "top").strip()
-    fit = (request.form.get("fit") or "cover").strip()
-
-    import tempfile as _tmp
 
     audio_tmp = Path(_tmp.mktemp(suffix=".mp3", prefix="cloud_audio_"))
     audio_file.save(str(audio_tmp))
 
     source_path = None
+    uploaded_video = False
     if video_file:
         source_tmp = Path(_tmp.mktemp(suffix=".mp4", prefix="cloud_video_"))
         video_file.save(str(source_tmp))
         source_path = source_tmp
+        uploaded_video = True
     elif clip_id:
         cached, _was_cached, err = _cache_library_clip(clip_id)
         if err or not cached:
@@ -3733,44 +3735,92 @@ def api_render_cloud():
             "started_at": time.time(),
         }
 
+    def _ffmpeg_duration(path):
+        """Get media duration in seconds by parsing ffmpeg stderr."""
+        r = _sp.run([_ffmpeg, "-i", str(path)], capture_output=True, text=True, timeout=15)
+        for line in (r.stderr or "").splitlines():
+            m = re.search(r"Duration:\s*(\d+):(\d+):(\d+)\.(\d+)", line)
+            if m:
+                return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + int(m.group(3)) + int(m.group(4)) / 100
+        return 0
+
+    def _make_srt(text, duration):
+        """Generate SRT subtitles from script text with proportional timing."""
+        words = text.split()
+        if not words or duration <= 0:
+            return None
+        chunk_size = 5
+        chunks = [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
+        per = duration / len(chunks)
+        def ts(s):
+            h, rem = divmod(s, 3600)
+            m, sec = divmod(rem, 60)
+            ms = int((sec % 1) * 1000)
+            return f"{int(h):02d}:{int(m):02d}:{int(sec):02d},{ms:03d}"
+        lines = []
+        for i, c in enumerate(chunks):
+            lines.append(str(i + 1))
+            lines.append(f"{ts(i * per)} --> {ts(min((i + 1) * per, duration))}")
+            lines.append(c)
+            lines.append("")
+        srt = Path(_tmp.mktemp(suffix=".srt", prefix="cloud_subs_"))
+        srt.write_text("\n".join(lines), encoding="utf-8")
+        return srt
+
     def worker():
+        srt_path = None
         try:
             safe = sg.sanitize_filename(title)
             out_path = OUTPUT_DIR / f"{safe}_cloud_render.mp4"
-            _video_log(job_id, "Preparing cloud video render")
-            video_assembler.render_source_video(
-                source_path,
-                audio_tmp,
-                out_path,
-                caption_text=caption_text,
-                title_text=title,
-                captions=captions,
-                aspect=aspect,
-                fit=fit,
-                caption_style=caption_style,
-                keyword_mode=keyword_mode,
-                pattern_interrupts=pattern_interrupts,
-                source_enhance=source_enhance,
-                title_style=title_style,
-                progress_cb=lambda msg: _video_log(job_id, msg),
-            )
-            proj = _register_project(
-                kind=project_store.KIND_VIDEO,
-                title=f"{title} final",
-                file_path=str(out_path),
-                role="video",
-                params={
-                    "cloud_render": True,
-                    "aspect": aspect,
-                    "fit": fit,
-                    "captions": captions,
-                    "caption_style": caption_style,
-                },
-            )
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+
+            sizes = {"9:16": (1080, 1920), "1:1": (1080, 1080), "16:9": (1920, 1080)}
+            w, h = sizes.get(aspect, (1080, 1920))
+
+            _video_log(job_id, "Preparing cloud render")
+            dur = _ffmpeg_duration(audio_tmp)
+
+            if captions and caption_text.strip() and dur > 0:
+                _video_log(job_id, "Generating subtitles")
+                srt_path = _make_srt(caption_text, dur)
+
+            vf = f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}"
+            if srt_path:
+                escaped = str(srt_path).replace("\\", "/").replace(":", "\\\\:")
+                vf += f",subtitles='{escaped}':force_style='FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,Outline=2,Shadow=1,MarginV=60'"
+
+            cmd = [
+                _ffmpeg, "-y",
+                "-i", str(source_path),
+                "-i", str(audio_tmp),
+                "-vf", vf,
+                "-map", "0:v:0", "-map", "1:a:0",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                "-c:a", "aac", "-b:a", "128k",
+                "-shortest",
+                "-movflags", "+faststart",
+                str(out_path),
+            ]
+
+            _video_log(job_id, "Rendering video")
+            result = _sp.run(cmd, capture_output=True, text=True, timeout=600)
+
+            if result.returncode != 0:
+                if srt_path and "subtitles" in (result.stderr or "").lower():
+                    _video_log(job_id, "Retrying without subtitle filter")
+                    vf_plain = f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}"
+                    cmd[cmd.index(vf)] = vf_plain
+                    result = _sp.run(cmd, capture_output=True, text=True, timeout=600)
+                if result.returncode != 0:
+                    raise RuntimeError(f"ffmpeg error: {(result.stderr or '')[-400:]}")
+
+            if not out_path.exists():
+                raise FileNotFoundError("ffmpeg produced no output")
+
             with VIDEO_LOCK:
                 job = VIDEO_JOBS[job_id]
-                job["video_path"] = str(PROJECTS.file_path(proj["id"], "video")) if proj else str(out_path)
-                job["project_id"] = proj["id"] if proj else None
+                job["video_path"] = str(out_path)
+                job["project_id"] = None
                 job["status"] = "done"
                 job["done"] = True
         except Exception as exc:
@@ -3782,7 +3832,9 @@ def api_render_cloud():
                     job["done"] = True
         finally:
             audio_tmp.unlink(missing_ok=True)
-            if video_file and source_path and source_path != audio_tmp:
+            if srt_path:
+                srt_path.unlink(missing_ok=True)
+            if uploaded_video and source_path:
                 source_path.unlink(missing_ok=True)
 
     quota_block = _enforce_render_quota()
