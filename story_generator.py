@@ -53,17 +53,24 @@ except ImportError:
 # is present — useful when testing the local pipeline.
 
 def _cloud_backend():
-    """Return ('anthropic', key, model) or ('openai', key, model) or None."""
+    """Return (provider, key, model) or None.
+    Supports Anthropic, OpenAI, Gemini, and OpenRouter."""
     forced = (os.environ.get("PHANTOMLINE_LLM_BACKEND") or "").strip().lower()
     if forced == "ollama" or forced == "pollinations":
         return None
     a_key = (os.environ.get("ANTHROPIC_API_KEY") or "").strip()
     o_key = (os.environ.get("OPENAI_API_KEY") or "").strip()
+    g_key = (os.environ.get("GEMINI_API_KEY") or "").strip()
+    or_key = (os.environ.get("OPENROUTER_API_KEY") or "").strip()
     model_override = (os.environ.get("PHANTOMLINE_CLOUD_MODEL") or "").strip()
     if a_key:
         return ("anthropic", a_key, model_override or "claude-haiku-4-5")
     if o_key:
         return ("openai", o_key, model_override or "gpt-4o-mini")
+    if g_key:
+        return ("gemini", g_key, model_override or "gemini-2.0-flash")
+    if or_key:
+        return ("openrouter", or_key, model_override or "google/gemini-2.0-flash-exp:free")
     return None
 
 
@@ -428,6 +435,7 @@ def check_ollama():
 _POLLINATIONS_TEXT_URL = "https://text.pollinations.ai/"
 _ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 _OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+_OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
 def _generate_via_cloud(prompt, system=SYSTEM_PROMPT, label="",
@@ -451,7 +459,49 @@ def _generate_via_cloud(prompt, system=SYSTEM_PROMPT, label="",
         print(f"  [{label}/{provider}:{model}] ", end="", flush=True)
     start = time.time()
     try:
-        if provider == "openai":
+        if provider == "gemini":
+            endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            body = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "systemInstruction": {"parts": [{"text": system}]},
+                "generationConfig": {"temperature": float(temperature), "maxOutputTokens": max_tokens},
+            }
+            res = requests.post(endpoint, json=body, timeout=180)
+            if not res.ok:
+                raise RuntimeError(f"Gemini HTTP {res.status_code}: {res.text[:300]}")
+            data = res.json()
+            text = ((data.get("candidates") or [{}])[0]
+                    .get("content", {})
+                    .get("parts", [{}])[0]
+                    .get("text", "") or "").strip()
+        elif provider == "openrouter":
+            body = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": float(temperature),
+                "max_tokens": max_tokens,
+            }
+            res = requests.post(
+                _OPENROUTER_URL,
+                json=body,
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://phantomline.xyz",
+                    "X-Title": "Phantomline",
+                },
+                timeout=180,
+            )
+            if not res.ok:
+                raise RuntimeError(f"OpenRouter HTTP {res.status_code}: {res.text[:300]}")
+            data = res.json()
+            text = ((data.get("choices") or [{}])[0]
+                    .get("message", {})
+                    .get("content", "") or "").strip()
+        elif provider == "openai":
             body = {
                 "model": model,
                 "messages": [

@@ -113,3 +113,26 @@ if (heroUnmuteBtn && heroDemoVideo) {
     if (willUnmute) heroDemoVideo.play().catch(() => {});
   });
 }
+
+/* ─── "Try with your API key" CTA: route by auth state ───────────────── */
+const heroApiCta = document.getElementById('heroApiCta');
+if (heroApiCta) {
+  heroApiCta.addEventListener('click', (e) => {
+    let hasSession = false;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') > 0) {
+          const raw = localStorage.getItem(k);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            const sess = (parsed && parsed.currentSession) || parsed;
+            if (sess && sess.access_token) { hasSession = true; break; }
+          }
+        }
+      }
+    } catch (_) {}
+    e.preventDefault();
+    window.location.href = hasSession ? '/app?tab=settings' : '/account';
+  });
+}

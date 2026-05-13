@@ -106,8 +106,11 @@
   --text: var(--text-primary);
   --text-2: var(--text-secondary);
   --text-3: var(--text-muted);
+  --muted: var(--text-muted);
+  --cyan: var(--accent-default);
   --rule: var(--border-subtle);
   --rule-strong: var(--border-default);
+  --border-faint: rgba(255, 255, 255, 0.08);
   --brand: var(--accent-default);
   --brand-deep: var(--cyan-700);
   --brand-faint: var(--accent-muted);
