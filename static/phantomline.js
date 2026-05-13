@@ -1492,23 +1492,25 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // Returning users get continuity; new users get the creator surface.
 (function smartDefaultTab() {
   try {
+    const urlTab = new URLSearchParams(location.search).get('tab');
+    if (urlTab && ['launch','make','publish','library','settings'].includes(urlTab)) {
+      const btn = document.querySelector(`.tab-btn[data-tab="${urlTab}"]`);
+      if (btn) { btn.click(); return; }
+    }
     const saved = localStorage.getItem('phantomline-last-tab');
     fetch('/api/launch/readiness', { credentials: 'same-origin' })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         const blockers = (d?.blockers || []).filter(b => b.required);
         if (blockers.length > 0) {
-          // System not ready. force Launch so blockers are visible.
           const btn = document.querySelector('.tab-btn[data-tab="launch"]');
           if (btn) btn.click();
           return;
         }
-        // Ready: honor saved tab if it exists and is non-default.
         if (saved && saved !== 'make') {
           const btn = document.querySelector(`.tab-btn[data-tab="${saved}"]`);
           if (btn) btn.click();
         }
-        // Otherwise stay on Create Video (the HTML default).
       })
       .catch(() => { /* no readiness. stay on Create Video default */ });
   } catch (_) {}
@@ -2202,13 +2204,236 @@ function renderPublishReadinessChecklist() {
   if (btn) btn.disabled = missing.length > 0;
 }
 
+// ---------------------------------------------------------------------------
+// Cloud-direct idea / title / description generation.
+// When the user has a BYOK cloud key active, these bypass the server (which
+// requires Ollama) and call the provider directly from the browser — same
+// pattern as CloudKeyEngine.generateScript().
+// ---------------------------------------------------------------------------
+
+function _useCloudForMake() {
+  const activeEngine = window.GhostlineEngines?.activeId?.() || 'server';
+  const cloudEng = window._GhostlineEngineRegistry?.cloud;
+  return activeEngine === 'cloud' && cloudEng?.available?.();
+}
+
+function _extractJsonArray(raw) {
+  let text = (raw || '').trim();
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) text = fenceMatch[1].trim();
+  try {
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : [parsed];
+  } catch {}
+  const bracketMatch = text.match(/\[[\s\S]*\]/);
+  if (bracketMatch) {
+    try { return JSON.parse(bracketMatch[0]); } catch {}
+  }
+  return [];
+}
+
+async function _cloudGenerateIdeas({ recipe, niche, audience, format, hookStyle, tensionFormat, loopType, currentTopic }) {
+  const cloudEng = window._GhostlineEngineRegistry.cloud;
+  const system = (
+    "You are a faceless-video idea strategist. " +
+    "Every idea must be a viewer retention bet: a concrete hook that stops scrolling, " +
+    "a structure that sustains watch time, and an ending that drives replay or comment. " +
+    "Output strict JSON only. No markdown. No preamble."
+  );
+  const user = `Generate 6 fresh faceless-video ideas for a local AI video studio.
+
+Channel recipe: ${recipe || 'custom'}
+Niche: ${niche || 'faceless YouTube channel'}
+Audience: ${audience || 'curious general viewers'}
+Video format: ${format || 'explainer'}
+Hook style: ${hookStyle || 'curiosity'}
+Current stale idea to avoid copying: ${currentTopic || '(none)'}
+
+Return ONLY valid JSON. No markdown. No explanation.
+Schema:
+[
+  {
+    "title": "short clickable idea name",
+    "topic": "one specific video idea the script writer can use",
+    "hook": "first sentence angle",
+    "structure": {
+      "setup": "what happens from 1.5-10s",
+      "escalation": "what makes it worse from 10-20s",
+      "twist": "the reveal from 20-35s",
+      "loop_ending": "last line that points back to the hook"
+    },
+    "caption_beats": [{"text": "2 to 5 words", "highlight": "one word"}],
+    "pinned_comment": "short comment prompt that invites debate",
+    "hashtags": ["#shorts", "#storytime"],
+    "visual": "suggested visual style",
+    "music": "short music bed direction"
+  }
+]
+
+DIVERSITY IS CRITICAL — each idea must feel like a completely different video.
+All 6 must use DIFFERENT subjects, settings, time periods, and emotional tones.
+Each topic must name a specific person, place, event, object, or scenario.`;
+
+  const raw = await cloudEng._chat({ system, user, temperature: 1.0, maxTokens: 1800 });
+  const items = _extractJsonArray(raw);
+  const ideas = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object') continue;
+    const topic = (item.topic || '').trim();
+    if (!topic) continue;
+    const structure = (typeof item.structure === 'object' && item.structure) || {};
+    const beats = Array.isArray(item.caption_beats) ? item.caption_beats : [];
+    ideas.push({
+      title: (item.title || topic.slice(0, 70)).trim().slice(0, 120),
+      topic: topic.slice(0, 600),
+      hook: (item.hook || '').trim().slice(0, 300),
+      structure: {
+        setup: (structure.setup || '').trim().slice(0, 260),
+        escalation: (structure.escalation || '').trim().slice(0, 260),
+        twist: (structure.twist || '').trim().slice(0, 260),
+        loop_ending: (structure.loop_ending || '').trim().slice(0, 260),
+      },
+      caption_beats: beats.slice(0, 8).filter(b => b && b.text).map(b => ({
+        text: (b.text || '').trim().slice(0, 60),
+        highlight: (b.highlight || '').trim().slice(0, 24),
+      })),
+      pinned_comment: (item.pinned_comment || '').trim().slice(0, 160),
+      hashtags: (Array.isArray(item.hashtags) ? item.hashtags : []).filter(Boolean).slice(0, 10),
+      visual: (item.visual || '').trim().slice(0, 300),
+      music: (item.music || '').trim().slice(0, 220),
+    });
+    if (ideas.length >= 6) break;
+  }
+  return { ok: ideas.length > 0, ideas };
+}
+
+async function _cloudGenerateTitles({ topic, niche, audience, recipe, format, hookStyle, selectedIdea }) {
+  const cloudEng = window._GhostlineEngineRegistry.cloud;
+  const system = (
+    "You are a YouTube title packaging strategist. " +
+    "You optimize for two things simultaneously: the focus keyword must appear in every title, " +
+    "and the title must earn the click on its own emotional merit. " +
+    "Output strict JSON only. No markdown. No preamble."
+  );
+  const idea = selectedIdea || {};
+  const structure = (typeof idea.structure === 'object' && idea.structure) || {};
+  const selectedBits = [
+    idea.title ? `Selected idea: ${idea.title}` : '',
+    idea.hook ? `Hook: ${idea.hook}` : '',
+    structure.twist ? `Twist: ${structure.twist}` : '',
+    structure.loop_ending ? `Loop ending: ${structure.loop_ending}` : '',
+  ].filter(Boolean).join('\n');
+  const focusKeyword = topic || niche || 'video';
+
+  const user = `Generate 12 clickable YouTube title options for a faceless video.
+
+FOCUS KEYWORD: ${focusKeyword}
+Topic: ${topic || '(infer from niche)'}
+${selectedBits ? `Selected idea package:\n${selectedBits}` : ''}
+Niche: ${niche || 'faceless YouTube'}
+Audience: ${audience || 'general curious viewers'}
+Format: ${format || 'short-form'}
+Hook style: ${hookStyle || 'curiosity'}
+
+Return ONLY valid JSON. No markdown. No explanation.
+Schema:
+[
+  {
+    "title": "clickable title",
+    "angle": "why this title works",
+    "platform": "shorts or youtube",
+    "pinned_comment": "short comment prompt"
+  }
+]
+
+Rules:
+- Titles should be specific, curiosity-driven, and not clickbait lies.
+- Under 50 characters each (mobile-safe).
+- Mix styles: warning, question, mystery, list, transformation, proof, conflict.
+- Avoid all caps, emojis, hashtags, and vague titles.`;
+
+  const raw = await cloudEng._chat({ system, user, temperature: 0.85, maxTokens: 1300 });
+  const items = _extractJsonArray(raw);
+  const titles = [];
+  for (const item of items) {
+    let title, angle, platform, pinnedComment;
+    if (typeof item === 'string') {
+      title = item.trim(); angle = ''; platform = ''; pinnedComment = '';
+    } else if (item && typeof item === 'object') {
+      title = (item.title || '').trim();
+      angle = (item.angle || '').trim();
+      platform = (item.platform || '').trim();
+      pinnedComment = (item.pinned_comment || '').trim();
+    } else continue;
+    if (!title) continue;
+    titles.push({
+      title: title.slice(0, 120),
+      angle: angle.slice(0, 200),
+      platform: platform.slice(0, 20),
+      pinned_comment: pinnedComment.slice(0, 160),
+      fit: { verdict: 'neutral', score: 0, reasons: [] },
+    });
+    if (titles.length >= 12) break;
+  }
+  return { ok: titles.length > 0, titles, insights_configured: false };
+}
+
+async function _cloudGenerateDescription({ title, topic, script, niche, recipe, format, hashtags, pinnedComment }) {
+  const cloudEng = window._GhostlineEngineRegistry.cloud;
+  const system = (
+    "You are a YouTube SEO strategist. " +
+    "Write a viewer-facing YouTube description that earns the 'show more' click " +
+    "and locks in the focus keyword naturally. " +
+    "Output strict JSON only. No markdown. No preamble."
+  );
+  const scriptExcerpt = (script || '').replace(/\s+/g, ' ').slice(0, 1800);
+  const user = `Write a YouTube description, optimized tags, and a pinned comment for this video.
+
+Title: ${title || 'Untitled'}
+Topic: ${topic || ''}
+Script excerpt: ${scriptExcerpt || '(no script)'}
+Niche: ${niche || 'faceless YouTube'}
+Format: ${format || 'short-form'}
+Existing hashtags: ${hashtags || '#shorts'}
+Existing pinned comment: ${pinnedComment || ''}
+
+Return ONLY valid JSON:
+{
+  "description": "viewer-facing YouTube description (2-4 sentences, include focus keyword)",
+  "tags": ["tag1", "tag2", "...at least 15 tags"],
+  "pinned_comment": "short engaging pinned comment"
+}`;
+
+  const raw = await cloudEng._chat({ system, user, temperature: 0.7, maxTokens: 800 });
+  let parsed;
+  try {
+    let text = raw.trim();
+    const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fence) text = fence[1].trim();
+    parsed = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  if (!parsed || !parsed.description) return null;
+  return {
+    ok: true,
+    description: parsed.description,
+    tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+    pinned_comment: parsed.pinned_comment || '',
+  };
+}
+
 async function shuffleMakeIdeas() {
   const btn = $('makeShuffleIdeaBtn');
   const deck = $('makeIdeaDeck');
   const status = $('makeIdeaStatus');
   btn.disabled = true;
   btn.classList.add('generating');
-  status.textContent = 'Asking Ollama for fresh angles...';
+  const _cloud = _useCloudForMake();
+  const cloudEng = window._GhostlineEngineRegistry?.cloud;
+  status.textContent = _cloud
+    ? `Generating ideas via ${cloudEng.provider()} (${cloudEng.model()})...`
+    : 'Asking Ollama for fresh angles...';
   status.classList.add('loading-status');
   deck.style.display = 'none';
   deck.innerHTML = '';
@@ -2218,21 +2443,32 @@ async function shuffleMakeIdeas() {
   makeSelectedIdea = null;
   updateTitleIdeaGate();
   try {
-    const d = await apiJson('/api/ideas/video', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: $('makeModel').value.trim(),
-        recipe: $('makeRecipe').value,
-        niche: $('makeNiche').value.trim(),
-        audience: $('makeAudience').value.trim(),
-        format: $('makeFormat').value,
-        hook_style: $('makeHookStyle').value,
-        tension_format: $('makeTensionFormat').value,
-        loop_type: $('makeLoopType').value,
-        current_topic: $('makeTopic').value.trim(),
-      }),
-    });
+    const d = _cloud
+      ? await _cloudGenerateIdeas({
+          recipe: $('makeRecipe').value,
+          niche: $('makeNiche').value.trim(),
+          audience: $('makeAudience').value.trim(),
+          format: $('makeFormat').value,
+          hookStyle: $('makeHookStyle').value,
+          tensionFormat: $('makeTensionFormat').value,
+          loopType: $('makeLoopType').value,
+          currentTopic: $('makeTopic').value.trim(),
+        })
+      : await apiJson('/api/ideas/video', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            model: $('makeModel').value.trim(),
+            recipe: $('makeRecipe').value,
+            niche: $('makeNiche').value.trim(),
+            audience: $('makeAudience').value.trim(),
+            format: $('makeFormat').value,
+            hook_style: $('makeHookStyle').value,
+            tension_format: $('makeTensionFormat').value,
+            loop_type: $('makeLoopType').value,
+            current_topic: $('makeTopic').value.trim(),
+          }),
+        });
     for (const idea of d.ideas || []) {
       const card = document.createElement('button');
       card.type = 'button';
@@ -2290,7 +2526,7 @@ async function shuffleMakeIdeas() {
     status.textContent = deck.children.length ? 'Pick one to load it.' : 'No ideas returned.';
     status.classList.remove('loading-status');
   } catch (e) {
-    status.textContent = e.message || 'Could not generate ideas. Check Ollama is running.';
+    status.textContent = e.message || 'Could not generate ideas.';
     status.classList.remove('loading-status');
     toast(e.message || 'Could not generate ideas', true);
   } finally {
@@ -2311,27 +2547,41 @@ async function generateMakeTitles() {
   btn.disabled = true;
   btn.classList.add('generating');
   btn.removeAttribute('data-blocked-reason');
-  status.textContent = 'Generating title options...';
+  const _cloud = _useCloudForMake();
+  const _cloudEng = window._GhostlineEngineRegistry?.cloud;
+  status.textContent = _cloud
+    ? `Generating titles via ${_cloudEng.provider()} (${_cloudEng.model()})...`
+    : 'Generating title options...';
   status.classList.add('loading-status');
   deck.style.display = 'none';
   deck.innerHTML = '';
   try {
-    const d = await apiJson('/api/ideas/titles', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: $('makeModel').value.trim(),
-        topic: $('makeTopic').value.trim(),
-        niche: $('makeNiche').value.trim(),
-        audience: $('makeAudience').value.trim(),
-        recipe: $('makeRecipe').value,
-        format: $('makeFormat').value,
-        hook_style: $('makeHookStyle').value,
-        tension_format: $('makeTensionFormat').value,
-        loop_type: $('makeLoopType').value,
-        selected_idea: makeSelectedIdea,
-      }),
-    });
+    const d = _cloud
+      ? await _cloudGenerateTitles({
+          topic: $('makeTopic').value.trim(),
+          niche: $('makeNiche').value.trim(),
+          audience: $('makeAudience').value.trim(),
+          recipe: $('makeRecipe').value,
+          format: $('makeFormat').value,
+          hookStyle: $('makeHookStyle').value,
+          selectedIdea: makeSelectedIdea,
+        })
+      : await apiJson('/api/ideas/titles', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            model: $('makeModel').value.trim(),
+            topic: $('makeTopic').value.trim(),
+            niche: $('makeNiche').value.trim(),
+            audience: $('makeAudience').value.trim(),
+            recipe: $('makeRecipe').value,
+            format: $('makeFormat').value,
+            hook_style: $('makeHookStyle').value,
+            tension_format: $('makeTensionFormat').value,
+            loop_type: $('makeLoopType').value,
+            selected_idea: makeSelectedIdea,
+          }),
+        });
     for (const title of d.titles || []) {
       const card = document.createElement('button');
       card.type = 'button';
@@ -2378,7 +2628,7 @@ async function generateMakeTitles() {
     status.textContent = deck.children.length ? 'Pick a title to package the video.' : 'No titles returned.';
     status.classList.remove('loading-status');
   } catch (e) {
-    status.textContent = e.message || 'Could not generate titles. Check Ollama is running.';
+    status.textContent = e.message || 'Could not generate titles.';
     status.classList.remove('loading-status');
     toast(e.message || 'Could not generate titles', true);
   } finally {
@@ -4680,6 +4930,18 @@ function fallbackYoutubeDescription({title, topic, tags, pinnedComment}) {
 
 async function generatePublishDescription({title, caption, scriptText, tags, pinnedComment}) {
   try {
+    if (_useCloudForMake()) {
+      return await _cloudGenerateDescription({
+        title,
+        topic: $('makeTopic')?.value.trim() || '',
+        script: scriptText || '',
+        niche: $('makeNiche')?.value.trim() || '',
+        recipe: $('makeRecipe')?.value || '',
+        format: $('makeFormat')?.value || '',
+        hashtags: tags || '',
+        pinnedComment: pinnedComment || '',
+      });
+    }
     return await apiJson('/api/publish/description', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -4709,14 +4971,15 @@ async function preparePublishDraft({videoProjectId, title, caption, scriptText, 
   const cleanTags = tags || $('makeHashtags')?.value || '#shorts #viralshorts';
   $('publishTags').value = cleanTags.replace(/#/g, '').trim();
   $('publishPinnedComment').value = pinnedComment || $('publishPinnedComment').value || 'What would you do?';
-  $('publishCaption').value = 'Writing a viewer-facing YouTube Shorts description with Ollama...';
+  const _descEngine = _useCloudForMake() ? window._GhostlineEngineRegistry?.cloud?.provider() : 'Ollama';
+  $('publishCaption').value = `Writing a viewer-facing YouTube Shorts description with ${_descEngine}...`;
   updatePublishPreview();
   setPublishDefaultTime();
   loadPublishVideos().then(() => {
     if (videoProjectId) $('publishVideoProject').value = videoProjectId;
     updatePublishPreview();
   });
-  $('publishStatusLine').textContent = 'Writing YouTube description, tags, and comment with Ollama...';
+  $('publishStatusLine').textContent = `Writing YouTube description, tags, and comment with ${_descEngine}...`;
   const generated = await generatePublishDescription({
     title: $('publishTitle').value,
     caption,
@@ -4736,7 +4999,7 @@ async function preparePublishDraft({videoProjectId, title, caption, scriptText, 
       tags: cleanTags,
       pinnedComment: $('publishPinnedComment').value,
     });
-    $('publishStatusLine').textContent = 'Ollama description failed, so Phantomline used a clean viewer-facing fallback.';
+    $('publishStatusLine').textContent = 'AI description failed, so Phantomline used a clean viewer-facing fallback.';
   }
   updatePublishPreview();
 }
@@ -7002,8 +7265,9 @@ function _updateCloudConsoleLink(provider) {
     openrouter: ['https://openrouter.ai/keys', 'openrouter.ai', 'OpenRouter'],
   };
   const [url, label, name] = urls[provider] || urls.anthropic;
+  const free = (provider === 'gemini' || provider === 'openrouter') ? ' Free tier, no credit card.' : '';
   hint.innerHTML =
-    `Get a key at <a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);">${label}</a> (${name}). Stored only in your browser. Never sent to our server.`;
+    `Get a key at <a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);">${label}</a> (${name}).${free} Stored only in your browser. Never sent to our server.`;
 }
 
 document.getElementById('settingsCloudSaveBtn')?.addEventListener('click', () => {

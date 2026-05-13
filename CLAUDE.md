@@ -65,6 +65,14 @@ routes/*.py      ← core, flask, individual project modules
 - `research.py` — YouTube keyword research (Pro tier)
 - `optimize.py` — per-video repackaging (Pro tier)
 - `bundles.py` — project import/export
+- `account.py` — Google OAuth sign-in, account management
+- `profile.py` — user profile endpoints
+- `library.py` — clip library management
+- `pillars.py` — pillar, persona, and listicle SEO pages
+- `blog_routes.py` — blog index and per-article routes
+- `alternatives_routes.py` — alternatives hub and per-competitor pages
+- `seo.py` — robots.txt, sitemap.xml, feed.xml, llms.txt, IndexNow, verification files
+- `pages.py` — static pages (/, /pricing, /about, etc.), install guides, source download
 
 New blueprints must be registered in `server.py`:
 ```python
