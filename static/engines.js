@@ -670,6 +670,10 @@
             'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
             'application/wasm'
           ),
+          workerURL: await UtilMod.toBlobURL(
+            'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js',
+            'text/javascript'
+          ),
         });
         this._instance = { ffmpeg, util: UtilMod };
         return this._instance;
