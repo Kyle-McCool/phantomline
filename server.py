@@ -3655,6 +3655,140 @@ def api_video_source_start():
     return jsonify({"ok": True, "job_id": job_id})
 
 
+@app.route("/api/render/cloud", methods=["POST"])
+def api_render_cloud():
+    """Server-side video render for the cloud/BYOK pipeline.
+
+    Accepts multipart form:
+      audio       – narration audio blob (mp3)
+      video       – (optional) uploaded source video file
+      clip_id     – (optional) library clip id (used if no video file)
+      caption_text– script text for burned-in captions
+      title       – video title
+      aspect      – 9:16 / 16:9 / 1:1
+      captions    – "1" to burn captions
+      caption_style – tiktok / karaoke / etc
+    """
+    if not video_assembler:
+        return jsonify({"ok": False, "error": "Video assembler unavailable on this server"}), 503
+
+    audio_file = request.files.get("audio")
+    if not audio_file:
+        return jsonify({"ok": False, "error": "No audio file provided"}), 400
+
+    clip_id = (request.form.get("clip_id") or "").strip()
+    video_file = request.files.get("video")
+    caption_text = (request.form.get("caption_text") or "").strip()
+    title = (request.form.get("title") or "cloud render").strip()
+    aspect = (request.form.get("aspect") or "9:16").strip()
+    captions = request.form.get("captions") in ("1", "true", "yes")
+    caption_style = (request.form.get("caption_style") or "tiktok").strip()
+    keyword_mode = (request.form.get("keyword_mode") or "auto").strip()
+    pattern_interrupts = request.form.get("pattern_interrupts") in ("1", "true", "yes")
+    source_enhance = (request.form.get("source_enhance") or "none").strip()
+    title_style = (request.form.get("title_style") or "top").strip()
+    fit = (request.form.get("fit") or "cover").strip()
+
+    import tempfile as _tmp
+
+    audio_tmp = Path(_tmp.mktemp(suffix=".mp3", prefix="cloud_audio_"))
+    audio_file.save(str(audio_tmp))
+
+    source_path = None
+    if video_file:
+        source_tmp = Path(_tmp.mktemp(suffix=".mp4", prefix="cloud_video_"))
+        video_file.save(str(source_tmp))
+        source_path = source_tmp
+    elif clip_id:
+        cached, _was_cached, err = _cache_library_clip(clip_id)
+        if err or not cached:
+            audio_tmp.unlink(missing_ok=True)
+            return jsonify({"ok": False, "error": f"Library clip error: {err}"}), 404
+        source_path = cached
+    else:
+        audio_tmp.unlink(missing_ok=True)
+        return jsonify({"ok": False, "error": "No video source (upload a file or pick a library clip)"}), 400
+
+    caption_title, caption_body = _strip_title_prefix(caption_text)
+    if title == "cloud render" and caption_title:
+        title = caption_title
+    caption_text = caption_body or caption_text
+
+    job_id = uuid.uuid4().hex[:12]
+    with VIDEO_LOCK:
+        VIDEO_JOBS[job_id] = {
+            "id": job_id,
+            "status": "queued",
+            "title": title,
+            "done": False,
+            "error": None,
+            "video_path": None,
+            "project_id": None,
+            "log": [],
+            "started_at": time.time(),
+        }
+
+    def worker():
+        try:
+            safe = sg.sanitize_filename(title)
+            out_path = OUTPUT_DIR / f"{safe}_cloud_render.mp4"
+            _video_log(job_id, "Preparing cloud video render")
+            video_assembler.render_source_video(
+                source_path,
+                audio_tmp,
+                out_path,
+                caption_text=caption_text,
+                title_text=title,
+                captions=captions,
+                aspect=aspect,
+                fit=fit,
+                caption_style=caption_style,
+                keyword_mode=keyword_mode,
+                pattern_interrupts=pattern_interrupts,
+                source_enhance=source_enhance,
+                title_style=title_style,
+                progress_cb=lambda msg: _video_log(job_id, msg),
+            )
+            proj = _register_project(
+                kind=project_store.KIND_VIDEO,
+                title=f"{title} final",
+                file_path=str(out_path),
+                role="video",
+                params={
+                    "cloud_render": True,
+                    "aspect": aspect,
+                    "fit": fit,
+                    "captions": captions,
+                    "caption_style": caption_style,
+                },
+            )
+            with VIDEO_LOCK:
+                job = VIDEO_JOBS[job_id]
+                job["video_path"] = str(PROJECTS.file_path(proj["id"], "video")) if proj else str(out_path)
+                job["project_id"] = proj["id"] if proj else None
+                job["status"] = "done"
+                job["done"] = True
+        except Exception as exc:
+            with VIDEO_LOCK:
+                job = VIDEO_JOBS.get(job_id)
+                if job:
+                    job["error"] = str(exc)
+                    job["status"] = "error"
+                    job["done"] = True
+        finally:
+            audio_tmp.unlink(missing_ok=True)
+            if video_file and source_path and source_path != audio_tmp:
+                source_path.unlink(missing_ok=True)
+
+    quota_block = _enforce_render_quota()
+    if quota_block:
+        audio_tmp.unlink(missing_ok=True)
+        return quota_block
+    spawn_user_thread(worker).start()
+    _record_render_used()
+    return jsonify({"ok": True, "job_id": job_id})
+
+
 # ---------------------------------------------------------------------------
 # Publishing workspace (Cadence port)
 # ---------------------------------------------------------------------------

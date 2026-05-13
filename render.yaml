@@ -13,7 +13,7 @@ services:
                          # Upgrade to "starter" ($7/mo) for always-on once billing is set up.
                          # Free tier has no persistent disk — output/ is ephemeral, but the
                          # user downloads renders immediately so loss-on-restart is acceptable.
-    buildCommand: pip install -r requirements.txt
+    buildCommand: apt-get update && apt-get install -y ffmpeg && pip install -r requirements.txt
     startCommand: python server.py
     healthCheckPath: /
     autoDeploy: true     # auto-deploy on every push to main branch

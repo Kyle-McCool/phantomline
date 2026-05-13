@@ -4078,32 +4078,31 @@ async function makeVideoWorkflow() {
       let _finishedUrl;
       if (useSourceVideo) {
         setMakeStep('makeStepTimeline', 'done', 'source video');
-        setMakeStep('makeStepVideo', 'running', 'rendering in browser');
-        const _render = window.GhostlineMobileLibs?.render;
-        if (!_render?.available()) throw new Error('Browser video rendering unavailable (WebAssembly required).');
+        setMakeStep('makeStepVideo', 'running', 'uploading to server');
+        const _fd = new FormData();
+        _fd.append('audio', _mixedBlob, 'narration.mp3');
+        _fd.append('caption_text', script.text || '');
+        _fd.append('title', $('makePreferredTitle')?.value?.trim() || script.title || 'cloud render');
+        _fd.append('aspect', $('makeAspect')?.value || '9:16');
+        _fd.append('captions', '1');
+        _fd.append('caption_style', $('makeCaptionStyle')?.value || 'tiktok');
+        _fd.append('fit', 'cover');
         const _srcFile = $('makeSourceVideoFile')?.files?.[0];
-        let _srcBlob;
         if (_srcFile) {
-          _srcBlob = _srcFile;
+          _fd.append('video', _srcFile, _srcFile.name);
         } else if (makeSourceLibraryPick) {
-          setMakeStep('makeStepVideo', 'running', 'downloading clip');
-          const _sr = await fetch('/api/library/footage/' + encodeURIComponent(makeSourceLibraryPick) + '/stream');
-          if (!_sr.ok) throw new Error('Could not download library clip.');
-          _srcBlob = await _sr.blob();
-        } else {
-          const _sr = await fetch('/api/projects/' + sourceVideoProjectId + '/file/video');
-          if (!_sr.ok) throw new Error('Could not load source video.');
-          _srcBlob = await _sr.blob();
+          _fd.append('clip_id', makeSourceLibraryPick);
         }
-        const _vr = await _render.assemble({
-          narrationBlob: _mixedBlob,
-          sourceVideoBlob: _srcBlob,
-          aspect: $('makeAspect').value,
-          onProgress: function(p) {
-            if (p.progress != null) setMakeStep('makeStepVideo', 'running', Math.round(p.progress * 100) + '%');
-          },
+        const _rr = await fetch('/api/render/cloud', { method: 'POST', body: _fd });
+        const _rd = await _rr.json();
+        if (!_rd.ok) throw new Error(_rd.error || 'Server render failed');
+        setMakeStep('makeStepVideo', 'running', 'rendering on server');
+        const _videoProjectId = await waitForDraftVideo(_rd.job_id, function(msg) {
+          setMakeStep('makeStepVideo', 'running', msg || 'rendering');
         });
-        _finishedUrl = _vr.url;
+        const _dlUrl = '/api/video/draft/download/' + _rd.job_id + '?inline=1';
+        _finishedUrl = _dlUrl;
+        latestMakeVideoProjectId = _videoProjectId;
         setMakeStep('makeStepVideo', 'done', 'done');
       } else {
         setMakeStep('makeStepTimeline', 'done', 'audio only');
@@ -4115,13 +4114,12 @@ async function makeVideoWorkflow() {
       const _pv = $('makePhonePreviewVideo');
       if (_pv) { _pv.src = _finishedUrl; _pv.style.display = 'block'; _pv.load(); $('makePhonePreviewInner')?.classList.add('has-video'); }
       $('makeResultHint').textContent = useSourceVideo
-        ? 'Rendered in-browser with AI narration and background music.'
+        ? 'Rendered on server with AI narration, captions, and background music.'
         : 'Audio-only render (narration + music). For full video with scenes, use Source Video mode or the desktop app.';
       $('makeResult').classList.add('shown');
       makeVideoJob = null;
-      latestMakeVideoProjectId = null;
       preparePublishDraft({
-        videoProjectId: null,
+        videoProjectId: latestMakeVideoProjectId || null,
         title: $('makePreferredTitle').value.trim() || script.title,
         caption: makeCreativeBrief(),
         scriptText: script.text,
