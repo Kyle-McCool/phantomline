@@ -662,7 +662,7 @@
           ffmpeg.on('progress', ({ progress }) => progressCb({ progress }));
         }
         await ffmpeg.load({
-          classWorkerURL: '/static/vendor/ffmpeg-worker.js',
+          classWorkerURL: new URL('/static/vendor/ffmpeg-worker.js', location.origin).href,
           coreURL: await UtilMod.toBlobURL(
             'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
             'text/javascript'
