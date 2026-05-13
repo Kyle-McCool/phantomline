@@ -4102,7 +4102,16 @@ async function makeVideoWorkflow() {
               if (_clipResp.ok) _sourceBlob = await _clipResp.blob();
             }
           } catch (_clipErr) {
-            console.warn('Direct clip fetch failed, will try server fallback:', _clipErr);
+            console.warn('Direct clip fetch failed, trying stream proxy:', _clipErr);
+          }
+          if (!_sourceBlob) {
+            try {
+              setMakeStep('makeStepVideo', 'running', 'loading clip (proxy)');
+              const _proxyResp = await fetch('/api/library/footage/' + makeSourceLibraryPick + '/stream');
+              if (_proxyResp.ok) _sourceBlob = await _proxyResp.blob();
+            } catch (_proxyErr) {
+              console.warn('Stream proxy also failed:', _proxyErr);
+            }
           }
         }
 
