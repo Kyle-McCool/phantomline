@@ -2676,15 +2676,66 @@ def api_download(job_id):
 # TTS routes (Kokoro)
 # ---------------------------------------------------------------------------
 
+CLOUD_TTS_VOICES = [
+    {"id": "en-US-AvaNeural",    "label": "Ava — warm, American female",    "gender": "F"},
+    {"id": "en-US-EmmaNeural",   "label": "Emma — clear, American female",  "gender": "F"},
+    {"id": "en-US-AndrewNeural", "label": "Andrew — calm, American male",   "gender": "M"},
+    {"id": "en-US-BrianNeural",  "label": "Brian — deep, American male",    "gender": "M"},
+    {"id": "en-GB-SoniaNeural",  "label": "Sonia — warm, British female",   "gender": "F"},
+    {"id": "en-GB-RyanNeural",   "label": "Ryan — smooth, British male",    "gender": "M"},
+    {"id": "en-AU-NatashaNeural","label": "Natasha — bright, Australian",   "gender": "F"},
+    {"id": "en-CA-ClaraNeural",  "label": "Clara — gentle, Canadian",       "gender": "F"},
+    {"id": "en-CA-LiamNeural",   "label": "Liam — steady, Canadian male",   "gender": "M"},
+]
+_CLOUD_TTS_VALID = {v["id"] for v in CLOUD_TTS_VOICES}
+
+
 @app.route("/api/voices")
 def api_voices():
-    """List Kokoro voices for the dropdown. Available even before kokoro is installed."""
+    """List available voices. Returns cloud TTS voices when ?cloud=1."""
+    if request.args.get("cloud") == "1":
+        return jsonify({"voices": CLOUD_TTS_VOICES})
     return jsonify({
         "voices": [
             {"id": v[0], "label": v[1], "lang": v[2], "gender": v[3]}
             for v in tts_mod.VOICES
         ],
     })
+
+
+@app.route("/api/tts/cloud", methods=["POST"])
+def api_tts_cloud():
+    """Free server-side TTS via edge-tts (Microsoft neural voices)."""
+    import asyncio
+
+    data = request.get_json(force=True) or {}
+    text = (data.get("text") or "").strip()
+    if not text:
+        return jsonify({"ok": False, "error": "Empty text"}), 400
+
+    voice = (data.get("voice") or "en-US-AvaNeural").strip()
+    if voice not in _CLOUD_TTS_VALID:
+        voice = "en-US-AvaNeural"
+
+    try:
+        import edge_tts
+    except ImportError as exc:
+        return jsonify({"ok": False, "error": f"edge-tts not installed: {exc}"}), 503
+
+    async def _synthesize():
+        comm = edge_tts.Communicate(text[:8000], voice)
+        buf = BytesIO()
+        async for chunk in comm.stream():
+            if chunk["type"] == "audio":
+                buf.write(chunk["data"])
+        buf.seek(0)
+        return buf
+
+    try:
+        buf = asyncio.run(_synthesize())
+        return send_file(buf, mimetype="audio/mpeg")
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 502
 
 
 @app.route("/api/tts/start", methods=["POST"])

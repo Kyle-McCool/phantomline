@@ -1436,13 +1436,16 @@ $('scriptVideoBtn').addEventListener('click', () => {
 let ttsJob = null;
 let ttsTimer = null;
 
-async function loadVoices() {
+async function loadVoices(cloud) {
   try {
-    const r = await fetch('/api/voices');
+    const url = cloud ? '/api/voices?cloud=1' : '/api/voices';
+    const r = await fetch(url);
     const d = await r.json();
+    const defaultVoice = cloud ? 'en-US-AvaNeural' : 'af_nicole';
     for (const id of ['voice', 'pasteVoice', 'makeVoice', 'settingsVoice']) {
       const sel = $(id);
       if (!sel) continue;
+      const prev = sel.value;
       sel.innerHTML = '';
       for (const v of d.voices || []) {
         const opt = document.createElement('option');
@@ -1450,8 +1453,11 @@ async function loadVoices() {
         opt.textContent = v.label;
         sel.appendChild(opt);
       }
-      // Default to a calm female voice that's good for bedtime.
-      sel.value = 'af_nicole';
+      if ([...sel.options].some(o => o.value === prev)) {
+        sel.value = prev;
+      } else {
+        sel.value = defaultVoice;
+      }
     }
   } catch (e) { /* leave dropdowns empty */ }
 }
@@ -2233,45 +2239,17 @@ function _extractJsonArray(raw) {
 }
 
 async function _cloudTts(text, voice) {
-  const cloudEng = window._GhostlineEngineRegistry?.cloud;
-  if (!cloudEng) throw new Error('Cloud engine not available');
-  const provider = cloudEng.provider();
-  const apiKey = cloudEng.key();
-  if (!apiKey) throw new Error('No API key configured');
-  if (provider === 'openai') {
-    const voiceMap = {
-      af_nicole: 'nova', af_bella: 'nova', af_sarah: 'shimmer', af_sky: 'shimmer',
-      am_adam: 'onyx', am_michael: 'echo', bf_emma: 'alloy', bm_george: 'echo',
-    };
-    const openaiVoice = voiceMap[voice] || 'nova';
-    const resp = await fetch('https://api.openai.com/v1/audio/speech', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'tts-1', input: text, voice: openaiVoice, response_format: 'mp3' }),
-    });
-    if (!resp.ok) {
-      const errBody = await resp.text().catch(() => '');
-      throw new Error('OpenAI TTS API ' + resp.status + ': ' + errBody.slice(0, 200));
-    }
-    const blob = await resp.blob();
-    return { blob, voice: openaiVoice };
+  const resp = await fetch('/api/tts/cloud', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: text, voice: voice || 'en-US-AvaNeural' }),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'TTS failed' }));
+    throw new Error(err.error || 'Cloud TTS failed (' + resp.status + ')');
   }
-  if (provider === 'openrouter') {
-    const orKey = apiKey;
-    const resp = await fetch('https://openrouter.ai/api/v1/audio/speech', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + orKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'openai/tts-1', input: text, voice: 'nova', response_format: 'mp3' }),
-    });
-    if (resp.ok) {
-      const blob = await resp.blob();
-      return { blob, voice: 'nova' };
-    }
-  }
-  throw new Error(
-    'Narration requires a TTS-capable provider. Your ' + provider +
-    ' key does not support text-to-speech. Switch to OpenAI in Settings, or use the desktop app for Kokoro TTS.'
-  );
+  const blob = await resp.blob();
+  return { blob, voice: voice || 'en-US-AvaNeural' };
 }
 
 async function _cloudGenerateIdeas({ recipe, niche, audience, format, hookStyle, tensionFormat, loopType, currentTopic }) {
@@ -6286,7 +6264,7 @@ document.querySelector('.tab-btn[data-tab="library"]').addEventListener('click',
 loadLibrary();
 
 updatePasteCount();
-loadVoices();
+loadVoices(window.GhostlineEngines?.active?.() === 'cloud');
 refreshOllama();
 setInterval(refreshOllama, 15000);
 
@@ -7305,6 +7283,7 @@ document.querySelectorAll('input[name="ghEngine"]').forEach((input) => {
     }
     window.GhostlineEngines.set(id);
     refreshEngineStatus();
+    loadVoices(id === 'cloud');
     if (id === 'device') {
       // Eagerly init so the model download starts; show progress in card.
       const progressEl = document.getElementById('engineLoadProgress');
