@@ -41,6 +41,11 @@ except Exception as _music_import_err:
     music_mod = None
 import projects as project_store
 try:
+    import imageio_ffmpeg
+    os.environ.setdefault("FFMPEG_BINARY", imageio_ffmpeg.get_ffmpeg_exe())
+except ImportError:
+    pass
+try:
     import video_assembler
 except Exception:
     video_assembler = None
