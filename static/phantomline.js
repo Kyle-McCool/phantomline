@@ -4085,6 +4085,15 @@ async function makeVideoWorkflow() {
         let _srcBlob;
         if (_srcFile) {
           _srcBlob = _srcFile;
+        } else if (makeSourceLibraryPick) {
+          setMakeStep('makeStepVideo', 'running', 'downloading clip');
+          const _clipR = await fetch('/api/library/footage/' + encodeURIComponent(makeSourceLibraryPick));
+          const _clipD = await _clipR.json();
+          const _clipUrl = _clipD?.clip?.url;
+          if (!_clipUrl) throw new Error('Library clip URL not found.');
+          const _sr = await fetch(_clipUrl);
+          if (!_sr.ok) throw new Error('Could not download library clip.');
+          _srcBlob = await _sr.blob();
         } else {
           const _sr = await fetch('/api/projects/' + sourceVideoProjectId + '/file/video');
           if (!_sr.ok) throw new Error('Could not load source video.');
