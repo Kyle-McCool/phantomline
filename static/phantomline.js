@@ -4092,8 +4092,18 @@ async function makeVideoWorkflow() {
           _sourceBlob = _srcFile;
         } else if (makeSourceLibraryPick) {
           setMakeStep('makeStepVideo', 'running', 'loading clip');
-          const _clipResp = await fetch('/api/library/footage/' + makeSourceLibraryPick + '/stream');
-          if (_clipResp.ok) _sourceBlob = await _clipResp.blob();
+          // Fetch clip metadata (small JSON) then download directly from
+          // Supabase — avoids proxying the video through the Render server
+          // which OOMs on free tier.
+          try {
+            const _clipMeta = await fetch('/api/library/footage/' + makeSourceLibraryPick).then(r => r.json());
+            if (_clipMeta.ok && _clipMeta.clip?.url) {
+              const _clipResp = await fetch(_clipMeta.clip.url);
+              if (_clipResp.ok) _sourceBlob = await _clipResp.blob();
+            }
+          } catch (_clipErr) {
+            console.warn('Direct clip fetch failed, will try server fallback:', _clipErr);
+          }
         }
 
         // Try in-browser ffmpeg.wasm first — no server dependency
