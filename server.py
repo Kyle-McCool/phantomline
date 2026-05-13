@@ -3795,7 +3795,7 @@ def api_render_cloud():
                 "-i", str(audio_tmp),
                 "-vf", vf,
                 "-map", "0:v:0", "-map", "1:a:0",
-                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
                 "-c:a", "aac", "-b:a", "128k",
                 "-shortest",
                 "-movflags", "+faststart",

@@ -4047,15 +4047,19 @@ async function makeVideoWorkflow() {
 
       setMakeStep('makeStepMusic', 'running', 'selecting track');
       let _musicBlob;
+      let _musicLabel = 'skipped';
       const _bundled = window.GhostlineMobileLibs?.bundledMusic;
       const _ambient = window.GhostlineMobileLibs?.ambient;
       try {
         const _recipe = $('makeRecipe')?.value || $('makeNiche')?.value || '';
         const _track = await _bundled?.pickForRecipe(_recipe);
         if (_track?.url) {
-          setMakeStep('makeStepMusic', 'running', 'loading track');
+          setMakeStep('makeStepMusic', 'running', _track.title ? `loading “${_track.title}”` : 'loading track');
           const _mr = await fetch(_track.url);
-          if (_mr.ok) _musicBlob = await _mr.blob();
+          if (_mr.ok) {
+            _musicBlob = await _mr.blob();
+            _musicLabel = _track.title || 'bundled track';
+          }
         }
       } catch {}
       if (!_musicBlob && _ambient?.available()) {
@@ -4063,8 +4067,9 @@ async function makeVideoWorkflow() {
         const _dur = Math.max(30, 60);
         const _amb = await _ambient.generate({ seconds: _dur, mood: 'cinematic' });
         _musicBlob = _amb.blob;
+        _musicLabel = 'ambient bed';
       }
-      setMakeStep('makeStepMusic', 'done', _musicBlob ? 'done' : 'skipped');
+      setMakeStep('makeStepMusic', 'done', _musicLabel);
 
       setMakeStep('makeStepMix', 'running', 'mixing audio');
       let _mixedBlob;
@@ -4073,37 +4078,79 @@ async function makeVideoWorkflow() {
       } else {
         _mixedBlob = ttsResult.blob;
       }
-      setMakeStep('makeStepMix', 'done', 'done');
+      setMakeStep('makeStepMix', 'done', _musicBlob ? 'web audio' : 'narration only');
 
       let _finishedUrl;
+      let _usedBrowserRender = false;
       if (useSourceVideo) {
         setMakeStep('makeStepTimeline', 'done', 'source video');
-        setMakeStep('makeStepVideo', 'running', 'uploading to server');
-        const _fd = new FormData();
-        _fd.append('audio', _mixedBlob, 'narration.mp3');
-        _fd.append('caption_text', script.text || '');
-        _fd.append('title', $('makePreferredTitle')?.value?.trim() || script.title || 'cloud render');
-        _fd.append('aspect', $('makeAspect')?.value || '9:16');
-        _fd.append('captions', '1');
-        _fd.append('caption_style', $('makeCaptionStyle')?.value || 'tiktok');
-        _fd.append('fit', 'cover');
+
+        // Get source video blob for in-browser render
+        let _sourceBlob;
         const _srcFile = $('makeSourceVideoFile')?.files?.[0];
         if (_srcFile) {
-          _fd.append('video', _srcFile, _srcFile.name);
+          _sourceBlob = _srcFile;
         } else if (makeSourceLibraryPick) {
-          _fd.append('clip_id', makeSourceLibraryPick);
+          setMakeStep('makeStepVideo', 'running', 'loading clip');
+          const _clipResp = await fetch('/api/library/footage/' + makeSourceLibraryPick + '/stream');
+          if (_clipResp.ok) _sourceBlob = await _clipResp.blob();
         }
-        const _rr = await fetch('/api/cloud/render', { method: 'POST', body: _fd });
-        const _rd = await _rr.json();
-        if (!_rd.ok) throw new Error(_rd.error || 'Server render failed');
-        setMakeStep('makeStepVideo', 'running', 'rendering on server');
-        const _videoProjectId = await waitForDraftVideo(_rd.job_id, function(msg) {
-          setMakeStep('makeStepVideo', 'running', msg || 'rendering');
-        });
-        const _dlUrl = '/api/video/draft/download/' + _rd.job_id + '?inline=1';
-        _finishedUrl = _dlUrl;
-        latestMakeVideoProjectId = _videoProjectId;
-        setMakeStep('makeStepVideo', 'done', 'done');
+
+        // Try in-browser ffmpeg.wasm first — no server dependency
+        const _renderEngine = window.GhostlineMobileLibs?.render;
+        if (_sourceBlob && _renderEngine?.available()) {
+          try {
+            let _renderPhase = 'loading ffmpeg.wasm';
+            setMakeStep('makeStepVideo', 'running', _renderPhase);
+            await _renderEngine.init((p) => {
+              if (p.progress != null) {
+                const pct = Math.round(p.progress * 100);
+                setMakeStep('makeStepVideo', 'running', `${_renderPhase} · ${pct}%`);
+              }
+            });
+            _renderPhase = 'rendering';
+            setMakeStep('makeStepVideo', 'running', 'rendering in browser');
+            const _rendered = await _renderEngine.assemble({
+              narrationBlob: _mixedBlob,
+              sourceVideoBlob: _sourceBlob,
+              aspect: $('makeAspect')?.value || '9:16',
+            });
+            _finishedUrl = _rendered.url;
+            _usedBrowserRender = true;
+            latestMakeVideoProjectId = null;
+            setMakeStep('makeStepVideo', 'done', 'done');
+          } catch (_wasmErr) {
+            console.warn('ffmpeg.wasm failed, falling back to server:', _wasmErr);
+          }
+        }
+
+        // Fallback: server-side render via /api/cloud/render
+        if (!_usedBrowserRender) {
+          setMakeStep('makeStepVideo', 'running', 'uploading to server');
+          const _fd = new FormData();
+          _fd.append('audio', _mixedBlob, 'narration.mp3');
+          _fd.append('caption_text', script.text || '');
+          _fd.append('title', $('makePreferredTitle')?.value?.trim() || script.title || 'cloud render');
+          _fd.append('aspect', $('makeAspect')?.value || '9:16');
+          _fd.append('captions', '1');
+          _fd.append('caption_style', $('makeCaptionStyle')?.value || 'tiktok');
+          _fd.append('fit', 'cover');
+          if (_srcFile) {
+            _fd.append('video', _srcFile, _srcFile.name);
+          } else if (makeSourceLibraryPick) {
+            _fd.append('clip_id', makeSourceLibraryPick);
+          }
+          const _rr = await fetch('/api/cloud/render', { method: 'POST', body: _fd });
+          const _rd = await _rr.json();
+          if (!_rd.ok) throw new Error(_rd.error || 'Server render failed');
+          setMakeStep('makeStepVideo', 'running', 'rendering on server');
+          const _videoProjectId = await waitForDraftVideo(_rd.job_id, function(msg) {
+            setMakeStep('makeStepVideo', 'running', msg || 'rendering');
+          });
+          _finishedUrl = '/api/video/draft/download/' + _rd.job_id + '?inline=1';
+          latestMakeVideoProjectId = _videoProjectId;
+          setMakeStep('makeStepVideo', 'done', 'done');
+        }
       } else {
         setMakeStep('makeStepTimeline', 'done', 'audio only');
         setMakeStep('makeStepVideo', 'done', 'audio only');
@@ -4114,7 +4161,9 @@ async function makeVideoWorkflow() {
       const _pv = $('makePhonePreviewVideo');
       if (_pv) { _pv.src = _finishedUrl; _pv.style.display = 'block'; _pv.load(); $('makePhonePreviewInner')?.classList.add('has-video'); }
       $('makeResultHint').textContent = useSourceVideo
-        ? 'Rendered on server with AI narration, captions, and background music.'
+        ? (_usedBrowserRender
+          ? 'Rendered entirely in your browser with AI narration and background music.'
+          : 'Rendered on server with AI narration, captions, and background music.')
         : 'Audio-only render (narration + music). For full video with scenes, use Source Video mode or the desktop app.';
       $('makeResult').classList.add('shown');
       makeVideoJob = null;
