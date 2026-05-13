@@ -258,7 +258,7 @@
       const prov = this.provider();
       if (prov === 'openai') return 'gpt-4o-mini';
       if (prov === 'gemini') return 'gemini-2.0-flash';
-      if (prov === 'openrouter') return 'google/gemma-4-27b-it:free';
+      if (prov === 'openrouter') return 'google/gemma-4-31b-it:free';
       return 'claude-haiku-4-5';
     }
     setProvider(p) {
