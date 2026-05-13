@@ -7029,6 +7029,29 @@ function _ghIncrementCloudTrial() {
   refreshEngineStatus();
 }
 
+function _showUpgradeCta() {
+  if (document.getElementById('ghUpgradeOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'ghUpgradeOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;';
+  const proUrl = document.querySelector('.pricing-tier-card:not(.is-current) a.btn[href*="stripe"]')?.href || 'https://buy.stripe.com/aFadR8gT9amQa4v4mm2Nq00';
+  const foundingCard = document.querySelector('.pricing-tier-card.is-founding a.btn[href*="stripe"]');
+  const foundingUrl = foundingCard?.href || 'https://buy.stripe.com/9B63cuauL9iM90rf102Nq04';
+  overlay.innerHTML = '<div style="background:var(--surface,#1a1a2e);border:1px solid var(--border,#333);border-radius:12px;padding:32px;max-width:420px;width:90%;text-align:center;color:var(--text,#e0e0e0);">'
+    + '<h3 style="margin:0 0 8px;font-size:20px;">Free cloud trials used</h3>'
+    + '<p style="margin:0 0 20px;font-size:14px;opacity:0.8;">You\'ve used your 2 free cloud AI renders. Upgrade to keep using your own API key with unlimited renders.</p>'
+    + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+    + '<a href="' + foundingUrl + '" target="_blank" rel="noopener" class="btn" style="background:var(--accent);color:#000;font-weight:700;padding:10px 20px;border-radius:8px;text-decoration:none;">Founding pass · $79 once</a>'
+    + '<a href="' + proUrl + '" target="_blank" rel="noopener" class="btn secondary" style="padding:10px 20px;border-radius:8px;text-decoration:none;">Pro · $15/mo</a>'
+    + '</div>'
+    + '<button id="ghUpgradeDismiss" type="button" style="margin-top:16px;background:none;border:none;color:var(--text-muted,#888);cursor:pointer;font-size:13px;">Not now</button>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay || e.target.id === 'ghUpgradeDismiss') overlay.remove();
+  });
+}
+
 async function refreshLicenseStatus() {
   const tierEl = document.getElementById('settingsLicenseTier');
   const statusEl = document.getElementById('settingsLicenseStatus');
@@ -7037,7 +7060,24 @@ async function refreshLicenseStatus() {
     const r = await fetch('/api/license');
     const d = await r.json();
     const info = (d && d.license) || { tier: 'free' };
-    const tier = info.tier || 'free';
+    let tier = info.tier || 'free';
+    if (tier === 'free') {
+      try {
+        const ar = await fetch('/api/account/me');
+        if (ar.ok) {
+          const ad = await ar.json();
+          const acctTier = ad?.summary?.active_tier;
+          if (acctTier && acctTier !== 'free') {
+            tier = acctTier;
+            info.tier = acctTier;
+            info.source = 'account';
+            info.is_founding = !!ad?.summary?.is_founding;
+            info.founding_seat = ad?.summary?.founding_seat;
+            if (info.is_founding) info.lifetime = true;
+          }
+        }
+      } catch {}
+    }
     _ghCurrentTier = tier;
     tierEl.textContent = TIER_LABEL[tier] || tier;
     if (statusEl) {
@@ -7259,7 +7299,7 @@ document.querySelectorAll('input[name="ghEngine"]').forEach((input) => {
     // Free-tier users who've used their 2 trial renders can't select cloud.
     if (id === 'cloud' && _ghCurrentTier === 'free' && _ghCloudTrialUsed() >= 2) {
       e.target.checked = false;
-      if (typeof toast === 'function') toast('Free cloud trial used. Upgrade to Pro for unlimited cloud renders.', true);
+      _showUpgradeCta();
       refreshEngineStatus();
       return;
     }

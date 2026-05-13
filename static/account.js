@@ -657,18 +657,16 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
         renderHeaderAndOverview(me.user || { email: session.user.email }, cachedSummary);
         renderLicenses(cachedLicenses);
         setStatus("");
-        // Phase 1 of the first-run UX fix: when /account is loaded on a
-        // localhost desktop install, auto-activate the buyer's license
-        // by hitting /api/license/sync. The endpoint validates the JWT
-        // server-side and writes the best license to output/license.json.
-        // Hosted (phantomline.xyz) skips this — there's no local app to
-        // activate; the deep-link button shown to local users handles it.
-        if (_isLocal) {
+        // Auto-activate the buyer's license by hitting /api/license/sync.
+        // The endpoint validates the JWT server-side and writes the best
+        // license to output/license.json. Runs on both local and hosted
+        // so the tier is always up to date after sign-in.
+        {
           try {
             const sync = await authedFetch("/api/license/sync", { method: "POST" });
             if (sync.synced) {
               setStatus(
-                `Desktop license activated: ${tierLabel(sync.license?.tier)}.`,
+                `License activated: ${tierLabel(sync.license?.tier)}.`,
                 "success"
               );
             }
