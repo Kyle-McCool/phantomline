@@ -2725,13 +2725,24 @@ def api_tts_cloud():
     if voice not in _CLOUD_TTS_VALID:
         voice = "en-US-AvaNeural"
 
+    # Slower default pacing reads more naturally for narration and gives
+    # captions enough on-screen time to feel readable. Accepts edge-tts
+    # rate strings like "-10%", "+0%", "+25%"; clamp to a sane range.
+    raw_rate = (data.get("rate") or "-10%").strip()
+    try:
+        pct = int(raw_rate.replace("%", "").replace("+", ""))
+        pct = max(-50, min(50, pct))
+        rate = f"{pct:+d}%"
+    except ValueError:
+        rate = "-10%"
+
     try:
         import edge_tts
     except ImportError as exc:
         return jsonify({"ok": False, "error": f"edge-tts not installed: {exc}"}), 503
 
     async def _synthesize():
-        comm = edge_tts.Communicate(text[:8000], voice)
+        comm = edge_tts.Communicate(text[:8000], voice, rate=rate)
         buf = BytesIO()
         # edge-tts emits WordBoundary events alongside audio chunks. Capturing
         # them gives the browser real per-word timestamps so caption chunks

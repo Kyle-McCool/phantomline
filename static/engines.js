@@ -794,7 +794,32 @@
       if (rc !== 0) throw new Error(`ffmpeg exited with code ${rc}`);
       const data = await ffmpeg.readFile('out.mp4');
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
-      return { url: URL.createObjectURL(blob), blob };
+
+      // Sidecar SRT built from the same chunks burned into the video.
+      // Lets the user upload it to YouTube as a real caption track for
+      // accessibility/SEO without the auto-CC roulette.
+      let srtBlob = null, srtUrl = null;
+      if (captionChunks.length > 0) {
+        const srt = this._buildSrt(captionChunks);
+        srtBlob = new Blob([srt], { type: 'application/x-subrip' });
+        srtUrl = URL.createObjectURL(srtBlob);
+      }
+      return { url: URL.createObjectURL(blob), blob, srtBlob, srtUrl };
+    }
+
+    _buildSrt(chunks) {
+      const fmt = (sec) => {
+        const ms = Math.max(0, Math.round(sec * 1000));
+        const h = Math.floor(ms / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        const milli = ms % 1000;
+        const pad = (n, w = 2) => String(n).padStart(w, '0');
+        return `${pad(h)}:${pad(m)}:${pad(s)},${pad(milli, 3)}`;
+      };
+      return chunks.map((c, i) =>
+        `${i + 1}\n${fmt(c.start)} --> ${fmt(c.end)}\n${c.text}\n`
+      ).join('\n');
     }
 
     _renderTextPng(text, vw, vh, { fontSize, y, boxColor, type }) {

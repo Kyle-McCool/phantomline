@@ -2258,6 +2258,26 @@ function _extractJsonArray(raw) {
   return [];
 }
 
+// Inject (or refresh) a "Download captions (SRT)" button next to every
+// "Download MP4" button across the Make Video result layouts. Idempotent —
+// clears previous links on each new render so stale Blob URLs don't pile up.
+function _attachSrtDownload(srtUrl, suggestedTitle) {
+  document.querySelectorAll('.srt-download-link').forEach(el => {
+    try { URL.revokeObjectURL(el.href); } catch (_) {}
+    el.remove();
+  });
+  if (!srtUrl) return;
+  const safe = (suggestedTitle || 'captions').replace(/[^\w\-]+/g, '_').slice(0, 60) || 'captions';
+  document.querySelectorAll('#makeDownloadVideoBtn').forEach((btn) => {
+    const a = document.createElement('a');
+    a.className = 'btn secondary srt-download-link';
+    a.href = srtUrl;
+    a.download = `${safe}.srt`;
+    a.textContent = 'Download captions (SRT)';
+    btn.insertAdjacentElement('afterend', a);
+  });
+}
+
 async function _cloudTts(text, voice) {
   const resp = await fetch('/api/tts/cloud', {
     method: 'POST',
@@ -4202,6 +4222,9 @@ async function makeVideoWorkflow() {
             _finishedUrl = _rendered.url;
             _usedBrowserRender = true;
             latestMakeVideoProjectId = null;
+            // Surface the SRT sidecar so the user can upload it to YouTube
+            // (real caption track > YT auto-CC for accessibility & search).
+            _attachSrtDownload(_rendered.srtUrl, script.title);
             setMakeStep('makeStepVideo', 'done', 'done');
           } catch (_wasmErr) {
             console.warn('ffmpeg.wasm failed, falling back to server:', _wasmErr);
