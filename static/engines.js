@@ -625,6 +625,110 @@
   }
 
   /**
+   * WhisperAlignEngine: word-level forced alignment of the final rendered
+   * audio. This is how CapCut/Submagic/Captions.ai get sub-100ms caption
+   * sync — they don't trust TTS metadata, they transcribe the actual
+   * waveform. Same model class (Whisper) running entirely in the browser
+   * via @huggingface/transformers.
+   *
+   * Lazy-loaded on first use (~75 MB, cached in IndexedDB after that —
+   * same pattern as WebLLM). WebGPU when available makes a 60s narration
+   * align in ~5s; CPU fallback runs ~25s on a midrange laptop.
+   *
+   * Output format matches edge-tts boundaries downstream: [[startSec,
+   * durationSec, "word"], …]. Callers swap one source for the other.
+   */
+  class WhisperAlignEngine {
+    constructor() {
+      this.id = 'whisper-align';
+      this.label = 'In-browser word-level alignment (Whisper)';
+      this._pipeline = null;
+      this._initPromise = null;
+      this._modelId = 'Xenova/whisper-base.en';
+    }
+    available() {
+      // Same WASM requirement as ffmpeg.wasm; transformers.js degrades to
+      // CPU on devices without WebGPU.
+      return typeof WebAssembly !== 'undefined';
+    }
+    async init(progressCb) {
+      if (this._pipeline) return this._pipeline;
+      if (this._initPromise) return this._initPromise;
+      this._initPromise = (async () => {
+        const mod = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2');
+        const device = ('gpu' in navigator) ? 'webgpu' : 'wasm';
+        const transcriber = await mod.pipeline(
+          'automatic-speech-recognition',
+          this._modelId,
+          {
+            device,
+            progress_callback: (p) => {
+              if (progressCb) progressCb({
+                progress: p.progress != null ? p.progress / 100 : null,
+                text: p.status ? `${p.status} ${p.file || ''}`.trim() : null,
+                device,
+              });
+            },
+          }
+        );
+        this._pipeline = transcriber;
+        return transcriber;
+      })();
+      return this._initPromise;
+    }
+    /**
+     * Align `audioBlob` and return word-level timestamps in the same shape
+     * as edge-tts boundaries: [[startSec, durSec, word], …].
+     * Throws on failure — caller should catch and fall back.
+     */
+    async align(audioBlob, onProgress) {
+      const transcriber = await this.init(onProgress);
+      // Whisper expects 16kHz mono Float32 PCM. Use a 16k AudioContext so
+      // decodeAudioData does the resample for us in one pass.
+      const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+      let pcm;
+      try {
+        const buf = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
+        if (buf.numberOfChannels === 1) {
+          pcm = buf.getChannelData(0).slice(0);
+        } else {
+          const l = buf.getChannelData(0);
+          const r = buf.getChannelData(1);
+          pcm = new Float32Array(buf.length);
+          for (let i = 0; i < buf.length; i++) pcm[i] = (l[i] + r[i]) / 2;
+        }
+      } finally {
+        ctx.close();
+      }
+      if (onProgress) onProgress({ progress: null, text: 'transcribing audio' });
+      const result = await transcriber(pcm, {
+        return_timestamps: 'word',
+        chunk_length_s: 30,
+        stride_length_s: 5,
+      });
+      const chunks = result?.chunks || [];
+      // Skip null timestamps (Whisper occasionally emits them at chunk
+      // edges) and clamp tiny/missing durations so overlay enable= ranges
+      // are always non-empty.
+      const out = [];
+      for (const c of chunks) {
+        const t = c?.timestamp;
+        if (!t || t[0] == null) continue;
+        const start = t[0];
+        const end = (t[1] != null) ? t[1] : start + 0.18;
+        const text = (c.text || '').trim();
+        if (!text) continue;
+        out.push([
+          Math.max(0, start),
+          Math.max(0.05, end - start),
+          text,
+        ]);
+      }
+      return out;
+    }
+  }
+
+  /**
    * FfmpegRenderEngine: assembles narration + visuals + captions into a
    * single MP4, all in the browser via ffmpeg.wasm. Lazy-loads the WASM
    * core (~25 MB) on first use; cached forever via the service worker.
@@ -937,6 +1041,13 @@
         if (group.length >= wordsPerChunk || endsSentence) flush();
       }
       flush();
+      // CapCut-feel: nudge each chunk ~120ms earlier so viewers see the
+      // text just before the word lands, giving the eye time to read.
+      // Captions appearing *exactly* on the word always feel a beat late.
+      const LEAD_SEC = 0.12;
+      for (const c of chunks) {
+        c.start = Math.max(0, c.start - LEAD_SEC);
+      }
       // Hold each chunk on screen until the next one starts so there's no
       // dead frames between captions.
       for (let i = 0; i < chunks.length - 1; i++) {
@@ -1126,6 +1237,7 @@
     speech: new SpeechEngine(),
     ambient: new AmbientMusicEngine(),
     render: new FfmpegRenderEngine(),
+    whisperAlign: new WhisperAlignEngine(),
     pexels: new PexelsLibrary(),
     bundledMusic: new BundledMusicLibrary(),
     async mixAudio(narrationBlob, musicBlob, musicDbReduction = -18) {

@@ -4194,7 +4194,6 @@ async function makeVideoWorkflow() {
               }
             });
             _renderPhase = 'rendering';
-            setMakeStep('makeStepVideo', 'running', 'rendering in browser');
             const _wantCaptions = $('makeCaptions')?.value !== 'none';
             let _audioDur = 0;
             if (_wantCaptions && script.text) {
@@ -4205,6 +4204,34 @@ async function makeVideoWorkflow() {
                 _actx.close();
               } catch (_) { /* fall back to estimation in assemble() */ }
             }
+
+            // Force-align captions to the actual rendered audio via in-browser
+            // Whisper. Same approach CapCut/Submagic/Captions.ai use — sub-100ms
+            // sync because timestamps come from the real waveform, not from TTS
+            // metadata that can drift through MP3/AAC encoding. Falls back to
+            // edge-tts WordBoundary timestamps if the model can't load (older
+            // device, no WebGPU + slow CPU, network fail on first download).
+            let _alignedBoundaries = ttsResult.boundaries || null;
+            const _whisper = window.GhostlineMobileLibs?.whisperAlign;
+            if (_wantCaptions && _whisper?.available()) {
+              try {
+                setMakeStep('makeStepVideo', 'running', 'aligning captions · loading whisper');
+                _alignedBoundaries = await _whisper.align(_mixedBlob, (p) => {
+                  if (p.progress != null) {
+                    setMakeStep('makeStepVideo', 'running',
+                      `loading whisper · ${Math.round(p.progress * 100)}%`);
+                  } else if (p.text) {
+                    setMakeStep('makeStepVideo', 'running', `whisper · ${p.text}`);
+                  }
+                });
+                setMakeStep('makeStepVideo', 'running',
+                  `aligned ${_alignedBoundaries.length} words`);
+              } catch (_walignErr) {
+                console.warn('Whisper alignment failed, using edge-tts boundaries:', _walignErr);
+                _alignedBoundaries = ttsResult.boundaries || null;
+              }
+            }
+            setMakeStep('makeStepVideo', 'running', 'rendering in browser');
             const _titleStyle = $('makeTitleStyle')?.value || '';
             const _titleText = (_titleStyle !== 'none')
               ? ($('makePreferredTitle')?.value?.trim() || script.title || '')
@@ -4217,7 +4244,7 @@ async function makeVideoWorkflow() {
               captionStyle: $('makeCaptionStyle')?.value || 'tiktok',
               audioDuration: _audioDur || 0,
               titleText: _titleText || null,
-              wordBoundaries: ttsResult.boundaries || null,
+              wordBoundaries: _alignedBoundaries,
             });
             _finishedUrl = _rendered.url;
             _usedBrowserRender = true;
