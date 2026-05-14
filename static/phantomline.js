@@ -2268,8 +2268,16 @@ async function _cloudTts(text, voice) {
     const err = await resp.json().catch(() => ({ error: 'TTS failed' }));
     throw new Error(err.error || 'Cloud TTS failed (' + resp.status + ')');
   }
+  // Word-level timestamps from edge-tts. Format: [[startSec, durSec, "word"], …].
+  // Used downstream to anchor caption chunks to real speech and avoid drift.
+  let boundaries = null;
+  const raw = resp.headers.get('X-Word-Boundaries');
+  if (raw) {
+    try { boundaries = JSON.parse(decodeURIComponent(raw)); }
+    catch (_) { boundaries = null; }
+  }
   const blob = await resp.blob();
-  return { blob, voice: voice || 'en-US-AvaNeural' };
+  return { blob, voice: voice || 'en-US-AvaNeural', boundaries };
 }
 
 async function _cloudGenerateIdeas({ recipe, niche, audience, format, hookStyle, tensionFormat, loopType, currentTopic }) {
@@ -4189,6 +4197,7 @@ async function makeVideoWorkflow() {
               captionStyle: $('makeCaptionStyle')?.value || 'tiktok',
               audioDuration: _audioDur || 0,
               titleText: _titleText || null,
+              wordBoundaries: ttsResult.boundaries || null,
             });
             _finishedUrl = _rendered.url;
             _usedBrowserRender = true;
@@ -6391,7 +6400,7 @@ document.querySelector('.tab-btn[data-tab="library"]').addEventListener('click',
 loadLibrary();
 
 updatePasteCount();
-loadVoices(window.GhostlineEngines?.active?.() === 'cloud');
+loadVoices(window.GhostlineEngines?.activeId?.() !== 'server');
 refreshOllama();
 setInterval(refreshOllama, 15000);
 
@@ -7413,7 +7422,7 @@ document.querySelectorAll('input[name="ghEngine"]').forEach((input) => {
     }
     window.GhostlineEngines.set(id);
     refreshEngineStatus();
-    loadVoices(id === 'cloud');
+    loadVoices(id !== 'server');
     if (id === 'device') {
       // Eagerly init so the model download starts; show progress in card.
       const progressEl = document.getElementById('engineLoadProgress');

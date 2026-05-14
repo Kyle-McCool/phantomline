@@ -2733,15 +2733,33 @@ def api_tts_cloud():
     async def _synthesize():
         comm = edge_tts.Communicate(text[:8000], voice)
         buf = BytesIO()
+        # edge-tts emits WordBoundary events alongside audio chunks. Capturing
+        # them gives the browser real per-word timestamps so caption chunks
+        # can be anchored to actual speech instead of estimated from chars,
+        # which drifts over the course of a long narration.
+        boundaries = []
         async for chunk in comm.stream():
             if chunk["type"] == "audio":
                 buf.write(chunk["data"])
+            elif chunk["type"] == "WordBoundary":
+                # offset & duration are in 100-nanosecond units (HNS).
+                boundaries.append([
+                    round(chunk["offset"] / 10_000_000, 3),
+                    round(chunk["duration"] / 10_000_000, 3),
+                    chunk["text"],
+                ])
         buf.seek(0)
-        return buf
+        return buf, boundaries
 
     try:
-        buf = asyncio.run(_synthesize())
-        return send_file(buf, mimetype="audio/mpeg")
+        buf, boundaries = asyncio.run(_synthesize())
+        resp = send_file(buf, mimetype="audio/mpeg")
+        # Stash boundaries in a header. URL-encoded so any non-ASCII narration
+        # text survives the wire safely. ~280-word scripts fit in <8 KB.
+        from urllib.parse import quote
+        resp.headers["X-Word-Boundaries"] = quote(json.dumps(boundaries, separators=(",", ":")))
+        resp.headers["Access-Control-Expose-Headers"] = "X-Word-Boundaries"
+        return resp
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 502
 

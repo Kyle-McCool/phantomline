@@ -679,7 +679,8 @@
     }
     async assemble({ narrationBlob, sourceVideoBlob, aspect = '9:16',
                      captionText = null, captionStyle = 'tiktok',
-                     audioDuration = 0, titleText = null, onProgress }) {
+                     audioDuration = 0, titleText = null,
+                     wordBoundaries = null, onProgress }) {
       const { ffmpeg, util } = await this.init(onProgress);
       await ffmpeg.writeFile('input.mp4', await util.fetchFile(sourceVideoBlob));
       await ffmpeg.writeFile('voice.webm', await util.fetchFile(narrationBlob));
@@ -698,13 +699,30 @@
       let captionChunks = [];
       if (wantCaptions) {
         const isTiktok = captionStyle === 'tiktok' || captionStyle === 'kids';
-        const raw = this._chunkText(captionText, 4);
-        const perChunk = dur / raw.length;
-        captionChunks = raw.map((text, i) => ({
-          text: isTiktok ? text.toUpperCase() : text,
-          start: i * perChunk,
-          end: (i + 1) * perChunk,
-        }));
+        if (wordBoundaries && wordBoundaries.length > 0) {
+          // CapCut-style: anchor each chunk to real per-word timestamps
+          // from edge-tts. No drift over long narrations, since every
+          // chunk's start/end matches the actual speech.
+          captionChunks = this._chunksFromBoundaries(wordBoundaries, 4, isTiktok);
+        } else {
+          // Fallback (no boundary metadata available): weight each chunk's
+          // screen time by character count. Drifts on long videos but
+          // better than equal splits.
+          const raw = this._chunkText(captionText, 4);
+          const weights = raw.map(t => Math.max(1, t.length));
+          const totalWeight = weights.reduce((a, b) => a + b, 0);
+          let cursor = 0;
+          captionChunks = raw.map((text, i) => {
+            const span = (weights[i] / totalWeight) * dur;
+            const start = cursor;
+            cursor += span;
+            return {
+              text: isTiktok ? text.toUpperCase() : text,
+              start,
+              end: cursor,
+            };
+          });
+        }
       }
 
       // Render text overlays as transparent PNGs using Canvas, then
@@ -791,13 +809,20 @@
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
 
-      const maxWidth = type === 'title' ? vw * 0.82 : vw * 0.85;
+      // On vertical (YouTube Shorts) the right edge is occupied by like/
+      // comment/share chrome (~60px). Pull the caption box in on both sides
+      // so it stays clear of that overlay while keeping the text centered.
+      const isVertical = vh > vw;
+      const maxWidth = type === 'title'
+        ? vw * 0.82
+        : isVertical ? vw * 0.78 : vw * 0.85;
       const lines = this._wrapText(ctx, text, maxWidth);
       const lineH = Math.round(fontSize * 1.22);
       const padX = Math.round(vw * 0.035);
       const padY = Math.round(vh * 0.018);
       const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
-      const boxW = Math.min(textW + padX * 2, vw * 0.95);
+      const boxClamp = type === 'caption' && isVertical ? vw * 0.86 : vw * 0.95;
+      const boxW = Math.min(textW + padX * 2, boxClamp);
       const boxH = lines.length * lineH + padY * 2;
       const boxX = (vw - boxW) / 2;
       const boxY = vh * y;
@@ -856,6 +881,43 @@
         chunks.push(words.slice(i, i + wordsPerChunk).join(' '));
       }
       return chunks.length ? chunks : [''];
+    }
+
+    /**
+     * Build caption chunks from real word-level timestamps. `boundaries` is
+     * an array of [startSec, durationSec, word] triples from edge-tts. The
+     * chunk's start = first word's offset, end = last word's offset + its
+     * duration. End-of-sentence markers (. ! ?) force a chunk break so
+     * captions don't run across sentence boundaries — that's the CapCut feel.
+     */
+    _chunksFromBoundaries(boundaries, wordsPerChunk, isTiktok) {
+      const chunks = [];
+      let group = [];
+      const flush = () => {
+        if (!group.length) return;
+        const start = group[0][0];
+        const last = group[group.length - 1];
+        const end = last[0] + last[1];
+        const txt = group.map(g => g[2]).join(' ');
+        chunks.push({
+          text: isTiktok ? txt.toUpperCase() : txt,
+          start,
+          end,
+        });
+        group = [];
+      };
+      for (const b of boundaries) {
+        group.push(b);
+        const endsSentence = /[.!?…]$/.test(b[2]);
+        if (group.length >= wordsPerChunk || endsSentence) flush();
+      }
+      flush();
+      // Hold each chunk on screen until the next one starts so there's no
+      // dead frames between captions.
+      for (let i = 0; i < chunks.length - 1; i++) {
+        chunks[i].end = chunks[i + 1].start;
+      }
+      return chunks;
     }
   }
 
