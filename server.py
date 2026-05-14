@@ -2728,13 +2728,13 @@ def api_tts_cloud():
     # Slower default pacing reads more naturally for narration and gives
     # captions enough on-screen time to feel readable. Accepts edge-tts
     # rate strings like "-10%", "+0%", "+25%"; clamp to a sane range.
-    raw_rate = (data.get("rate") or "-10%").strip()
+    raw_rate = (data.get("rate") or "-20%").strip()
     try:
         pct = int(raw_rate.replace("%", "").replace("+", ""))
         pct = max(-50, min(50, pct))
         rate = f"{pct:+d}%"
     except ValueError:
-        rate = "-10%"
+        rate = "-20%"
 
     try:
         import edge_tts
@@ -2839,8 +2839,8 @@ def api_tts_start():
         try:
             with TTS_LOCK:
                 TTS_JOBS[job_id]["status"] = "loading model"
-            audio, sr = tts_mod.synthesize(text, voice=voice, speed=speed,
-                                           progress_cb=progress)
+            audio, sr, segments = tts_mod.synthesize_with_timing(
+                text, voice=voice, speed=speed, progress_cb=progress)
             with TTS_LOCK:
                 TTS_JOBS[job_id]["status"] = "encoding"
             data_bytes, ext = tts_mod.encode(audio, sr, fmt=fmt)
@@ -2857,10 +2857,10 @@ def api_tts_start():
             )
             with TTS_LOCK:
                 j = TTS_JOBS[job_id]
-                # The artifact has been moved into the project folder.
                 j["audio_path"] = str(PROJECTS.file_path(proj["id"], "audio")) if proj else str(out_path)
                 j["audio_ext"] = ext
                 j["duration_seconds"] = duration
+                j["caption_segments"] = segments
                 j["status"] = "done"
                 j["done"] = True
                 j["project_id"] = proj["id"] if proj else None
@@ -3590,6 +3590,7 @@ def api_video_source_start():
     pattern_interrupts = bool(data.get("pattern_interrupts"))
     source_enhance = (data.get("source_enhance") or "none").strip()
     title_style = (data.get("title_style") or "top").strip()
+    _caption_segments = data.get("caption_segments") or None
     caption_title, caption_body = _strip_title_prefix(caption_text)
     if title == "source video" and caption_title:
         title = caption_title
@@ -3648,6 +3649,7 @@ def api_video_source_start():
                 source_enhance=source_enhance,
                 title_style=title_style,
                 progress_cb=lambda msg: _video_log(job_id, msg),
+                caption_segments=_caption_segments,
             )
             proj = _register_project(
                 kind=project_store.KIND_VIDEO,

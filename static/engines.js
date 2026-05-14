@@ -807,7 +807,7 @@
           // CapCut-style: anchor each chunk to real per-word timestamps
           // from edge-tts. No drift over long narrations, since every
           // chunk's start/end matches the actual speech.
-          captionChunks = this._chunksFromBoundaries(wordBoundaries, 4, isTiktok);
+          captionChunks = this._chunksFromBoundaries(wordBoundaries, 5, isTiktok);
         } else {
           // Fallback (no boundary metadata available): weight each chunk's
           // screen time by character count. Drifts on long videos but
@@ -1037,8 +1037,12 @@
       };
       for (const b of boundaries) {
         group.push(b);
-        const endsSentence = /[.!?…]$/.test(b[2]);
-        if (group.length >= wordsPerChunk || endsSentence) flush();
+        const word = b[2];
+        const endsSentence = /[.!?…]["')\]]?$/.test(word);
+        const softPause = /[,;:]["')\]]?$/.test(word);
+        if (group.length >= wordsPerChunk
+            || (endsSentence && group.length >= 2)
+            || (softPause && group.length >= 4)) flush();
       }
       flush();
       // CapCut-feel: nudge each chunk ~120ms earlier so viewers see the

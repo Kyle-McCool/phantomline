@@ -4216,7 +4216,10 @@ async function makeVideoWorkflow() {
             if (_wantCaptions && _whisper?.available()) {
               try {
                 setMakeStep('makeStepVideo', 'running', 'aligning captions · loading whisper');
-                _alignedBoundaries = await _whisper.align(_mixedBlob, (p) => {
+                // Align against the pure narration blob, not the mixed audio.
+                // Music confuses Whisper's word boundary detection — the local
+                // Kokoro pipeline also measures timing from pure speech audio.
+                _alignedBoundaries = await _whisper.align(ttsResult.blob, (p) => {
                   if (p.progress != null) {
                     setMakeStep('makeStepVideo', 'running',
                       `loading whisper · ${Math.round(p.progress * 100)}%`);
@@ -4325,9 +4328,11 @@ async function makeVideoWorkflow() {
         format: 'mp3',
       }),
     });
-    const narrationProjectId = await waitForTtsProject(ttsStart.job_id, msg => {
+    const _ttsResult = await waitForTtsProject(ttsStart.job_id, msg => {
       setMakeStep('makeStepNarration', 'running', msg);
     });
+    const narrationProjectId = _ttsResult.projectId;
+    const _kokoroCaptionSegments = _ttsResult.captionSegments;
     setMakeStep('makeStepNarration', 'done', 'done');
 
     let planData = null;
@@ -4405,6 +4410,7 @@ async function makeVideoWorkflow() {
           pattern_interrupts: $('makePatternInterrupts').value === '1',
           source_enhance: $('makeSourceEnhance').value,
           title_style: $('makeTitleStyle').value,
+          caption_segments: _kokoroCaptionSegments,
         }),
       });
     } else {
@@ -5797,9 +5803,10 @@ async function buildProductionKitFromShort() {
     });
     const ttsData = await ttsRes.json();
     if (!ttsData.ok) throw new Error(ttsData.error || 'narration failed');
-    const narrationProjectId = await waitForTtsProject(ttsData.job_id, msg => {
+    const _prodTts = await waitForTtsProject(ttsData.job_id, msg => {
       $('shortProductionHint').textContent = '2/4 Narrating locally with Kokoro.. ' + msg;
     });
+    const narrationProjectId = _prodTts.projectId;
 
     $('shortProductionHint').textContent = '3/4 Aligning scene timing to narration...';
     const tlRes = await fetch('/api/video/timeline', {
@@ -5838,7 +5845,9 @@ async function waitForTtsProject(jobId, onStatus) {
     const pct = Math.min(100, Math.round(((j.chars_done || 0) / total) * 100));
     if (onStatus) onStatus((j.status || 'working') + ' ' + pct + '%');
     if (j.error) throw new Error(j.error);
-    if (j.done && j.project_id) return j.project_id;
+    if (j.done && j.project_id) {
+      return { projectId: j.project_id, captionSegments: j.caption_segments || null };
+    }
     await new Promise(resolve => setTimeout(resolve, 1500));
   }
 }
