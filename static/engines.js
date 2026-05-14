@@ -716,7 +716,7 @@
       let inputIdx = 2; // 0=video, 1=audio
 
       if (wantTitle) {
-        const png = this._renderTextPng(titleText.trim(), vw, vh, {
+        const png = await this._renderTextPng(titleText.trim(), vw, vh, {
           fontSize: Math.max(38, Math.round(vh * 0.038)),
           y: 0.20, boxColor: 'rgba(0,0,0,0.53)', type: 'title',
         });
@@ -731,7 +731,7 @@
       for (let i = 0; i < captionChunks.length; i++) {
         const c = captionChunks[i];
         const fname = `cap${i}.png`;
-        const png = this._renderTextPng(c.text, vw, vh, {
+        const png = await this._renderTextPng(c.text, vw, vh, {
           fontSize: Math.max(42, Math.round(vh * (isVertical ? 0.047 : 0.052))),
           y: isVertical ? 0.66 : 0.78, boxColor: 'rgba(0,0,0,0.45)', type: 'caption',
         });
