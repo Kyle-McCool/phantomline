@@ -677,102 +677,185 @@
       })();
       return this._initPromise;
     }
-    async assemble({ narrationBlob, sourceVideoBlob, aspect = '9:16',
-                     captionText = null, captionStyle = 'tiktok',
+    async assemble({ narrationBlob, sourceVideoBlob, aspect = ‘9:16’,
+                     captionText = null, captionStyle = ‘tiktok’,
                      audioDuration = 0, titleText = null, onProgress }) {
       const { ffmpeg, util } = await this.init(onProgress);
-      await ffmpeg.writeFile('input.mp4', await util.fetchFile(sourceVideoBlob));
-      await ffmpeg.writeFile('voice.webm', await util.fetchFile(narrationBlob));
+      await ffmpeg.writeFile(‘input.mp4’, await util.fetchFile(sourceVideoBlob));
+      await ffmpeg.writeFile(‘voice.webm’, await util.fetchFile(narrationBlob));
 
-      try {
-        const fontResp = await fetch('/static/fonts/Montserrat-Black.ttf');
-        if (fontResp.ok) await ffmpeg.writeFile('font.ttf', await util.fetchFile(await fontResp.blob()));
-      } catch (_) { /* drawtext falls back to default font */ }
-
-      const dim = aspect === '9:16' ? '1080:1920' : aspect === '1:1' ? '1080:1080' : '1920:1080';
-      const [wStr, hStr] = dim.split(':');
+      const dim = aspect === ‘9:16’ ? ‘1080:1920’ : aspect === ‘1:1’ ? ‘1080:1080’ : ‘1920:1080’;
+      const [wStr, hStr] = dim.split(‘:’);
       const vw = parseInt(wStr, 10);
       const vh = parseInt(hStr, 10);
       const isVertical = vh > vw;
       const filterPad = `scale=${dim}:force_original_aspect_ratio=decrease,pad=${dim}:(ow-iw)/2:(oh-ih)/2:black,setsar=1`;
 
-      let overlayFilters = '';
+      const wantTitle = titleText && titleText.trim();
+      const wantCaptions = captionText && captionText.trim();
+      const dur = audioDuration > 0 ? audioDuration : Math.max(narrationBlob.size / 2000, 5);
 
-      // Title overlay — matches local render: y = 20% from top, centered
-      if (titleText && titleText.trim()) {
-        const titleFs = Math.max(38, Math.round(vh * 0.038));
-        const titleY = Math.round(vh * 0.20);
-        const escaped = this._escDrawtext(titleText.trim());
-        overlayFilters += `,drawtext=fontfile=font.ttf:text='${escaped}'` +
-          `:fontsize=${titleFs}:fontcolor=white@0.96` +
-          `:borderw=3:bordercolor=black@0.82` +
-          `:shadowx=2:shadowy=2:shadowcolor=black@0.5` +
-          `:x=(w-text_w)/2:y=${titleY}` +
-          `:box=1:boxcolor=black@0.53:boxborderw=12`;
+      let captionChunks = [];
+      if (wantCaptions) {
+        const isTiktok = captionStyle === ‘tiktok’ || captionStyle === ‘kids’;
+        const raw = this._chunkText(captionText, 4);
+        const perChunk = dur / raw.length;
+        captionChunks = raw.map((text, i) => ({
+          text: isTiktok ? text.toUpperCase() : text,
+          start: i * perChunk,
+          end: (i + 1) * perChunk,
+        }));
       }
 
-      // Captions — matches local render: y = 66% from top (vertical), 78% (horizontal)
-      if (captionText && captionText.trim()) {
-        const dur = audioDuration > 0 ? audioDuration : Math.max(narrationBlob.size / 2000, 5);
-        const capFs = Math.max(42, Math.round(vh * (isVertical ? 0.047 : 0.052)));
-        const capY = Math.round(vh * (isVertical ? 0.66 : 0.78));
-        const isTiktok = captionStyle === 'tiktok' || captionStyle === 'kids';
-        const chunks = this._chunkText(captionText, 4);
-        const perChunk = dur / chunks.length;
+      // Render text overlays as transparent PNGs using Canvas, then
+      // composite via ffmpeg overlay filter (works in all wasm builds,
+      // unlike drawtext which requires libfreetype).
+      const extraInputs = [];
+      let filterGraph = `[0:v]${filterPad}[base]`;
+      let lastLabel = ‘base’;
+      let inputIdx = 2; // 0=video, 1=audio
 
-        for (let i = 0; i < chunks.length; i++) {
-          const start = (i * perChunk).toFixed(3);
-          const end = ((i + 1) * perChunk).toFixed(3);
-          const raw = isTiktok ? chunks[i].toUpperCase() : chunks[i];
-          const escaped = this._escDrawtext(raw);
-          overlayFilters += `,drawtext=fontfile=font.ttf:text='${escaped}'` +
-            `:fontsize=${capFs}:fontcolor=white` +
-            `:borderw=4:bordercolor=black` +
-            `:shadowx=2:shadowy=2:shadowcolor=black@0.6` +
-            `:x=(w-text_w)/2:y=${capY}` +
-            `:box=1:boxcolor=black@0.45:boxborderw=10` +
-            `:enable='between(t\\,${start}\\,${end})'`;
-        }
+      if (wantTitle) {
+        const png = this._renderTextPng(titleText.trim(), vw, vh, {
+          fontSize: Math.max(38, Math.round(vh * 0.038)),
+          y: 0.20, boxColor: ‘rgba(0,0,0,0.53)’, type: ‘title’,
+        });
+        await ffmpeg.writeFile(‘title.png’, new Uint8Array(await png.arrayBuffer()));
+        extraInputs.push(‘-i’, ‘title.png’);
+        const next = `t${inputIdx}`;
+        filterGraph += `;[${lastLabel}][${inputIdx}:v]overlay=0:0[${next}]`;
+        lastLabel = next;
+        inputIdx++;
+      }
+
+      for (let i = 0; i < captionChunks.length; i++) {
+        const c = captionChunks[i];
+        const fname = `cap${i}.png`;
+        const png = this._renderTextPng(c.text, vw, vh, {
+          fontSize: Math.max(42, Math.round(vh * (isVertical ? 0.047 : 0.052))),
+          y: isVertical ? 0.66 : 0.78, boxColor: ‘rgba(0,0,0,0.45)’, type: ‘caption’,
+        });
+        await ffmpeg.writeFile(fname, new Uint8Array(await png.arrayBuffer()));
+        extraInputs.push(‘-i’, fname);
+        const next = `c${i}`;
+        const enable = `enable=’between(t,${c.start.toFixed(3)},${c.end.toFixed(3)})’`;
+        filterGraph += `;[${lastLabel}][${inputIdx}:v]overlay=0:0:${enable}[${next}]`;
+        lastLabel = next;
+        inputIdx++;
+      }
+
+      filterGraph = filterGraph.replace(`[${lastLabel}]`, `[v]`)
+        .replace(new RegExp(`\\[${lastLabel}\\]$`), ‘[v]’);
+      if (lastLabel === ‘base’) filterGraph = `[0:v]${filterPad}[v]`;
+      else filterGraph += ‘’;
+
+      // Fix: ensure last output is labeled [v]
+      const lastBracket = filterGraph.lastIndexOf(‘[‘);
+      const afterLast = filterGraph.substring(lastBracket);
+      if (!afterLast.includes(‘[v]’)) {
+        filterGraph = filterGraph.substring(0, lastBracket) + ‘[v]’;
       }
 
       const args = [
-        '-i', 'input.mp4',
-        '-i', 'voice.webm',
-        '-filter_complex', `[0:v]${filterPad}${overlayFilters}[v]`,
-        '-map', '[v]',
-        '-map', '1:a',
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-crf', '24',
-        '-c:a', 'aac',
-        '-b:a', '128k',
-        '-shortest',
-        'out.mp4',
+        ‘-i’, ‘input.mp4’,
+        ‘-i’, ‘voice.webm’,
+        ...extraInputs,
+        ‘-filter_complex’, filterGraph,
+        ‘-map’, ‘[v]’,
+        ‘-map’, ‘1:a’,
+        ‘-c:v’, ‘libx264’,
+        ‘-preset’, ‘ultrafast’,
+        ‘-crf’, ‘24’,
+        ‘-c:a’, ‘aac’,
+        ‘-b:a’, ‘128k’,
+        ‘-shortest’,
+        ‘out.mp4’,
       ];
-      await ffmpeg.exec(args);
-      const data = await ffmpeg.readFile('out.mp4');
-      const blob = new Blob([data.buffer], { type: 'video/mp4' });
+      console.log(‘[phantomline] ffmpeg args:’, args.join(‘ ‘));
+      const rc = await ffmpeg.exec(args);
+      if (rc !== 0) throw new Error(`ffmpeg exited with code ${rc}`);
+      const data = await ffmpeg.readFile(‘out.mp4’);
+      const blob = new Blob([data.buffer], { type: ‘video/mp4’ });
       return { url: URL.createObjectURL(blob), blob };
+    }
+
+    _renderTextPng(text, vw, vh, { fontSize, y, boxColor, type }) {
+      const canvas = document.createElement(‘canvas’);
+      canvas.width = vw;
+      canvas.height = vh;
+      const ctx = canvas.getContext(‘2d’);
+      ctx.clearRect(0, 0, vw, vh);
+
+      const font = `bold ${fontSize}px "Montserrat", "Arial Black", "Impact", sans-serif`;
+      ctx.font = font;
+      ctx.textAlign = ‘center’;
+      ctx.textBaseline = ‘top’;
+
+      const maxWidth = type === ‘title’ ? vw * 0.82 : vw * 0.85;
+      const lines = this._wrapText(ctx, text, maxWidth);
+      const lineH = Math.round(fontSize * 1.22);
+      const padX = Math.round(vw * 0.035);
+      const padY = Math.round(vh * 0.018);
+      const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+      const boxW = Math.min(textW + padX * 2, vw * 0.95);
+      const boxH = lines.length * lineH + padY * 2;
+      const boxX = (vw - boxW) / 2;
+      const boxY = vh * y;
+
+      ctx.fillStyle = boxColor;
+      const r = 18;
+      ctx.beginPath();
+      ctx.moveTo(boxX + r, boxY);
+      ctx.lineTo(boxX + boxW - r, boxY);
+      ctx.quadraticCurveTo(boxX + boxW, boxY, boxX + boxW, boxY + r);
+      ctx.lineTo(boxX + boxW, boxY + boxH - r);
+      ctx.quadraticCurveTo(boxX + boxW, boxY + boxH, boxX + boxW - r, boxY + boxH);
+      ctx.lineTo(boxX + r, boxY + boxH);
+      ctx.quadraticCurveTo(boxX, boxY + boxH, boxX, boxY + boxH - r);
+      ctx.lineTo(boxX, boxY + r);
+      ctx.quadraticCurveTo(boxX, boxY, boxX + r, boxY);
+      ctx.closePath();
+      ctx.fill();
+
+      let ty = boxY + padY;
+      for (const line of lines) {
+        ctx.font = font;
+        ctx.strokeStyle = ‘rgba(0,0,0,0.85)’;
+        ctx.lineWidth = type === ‘title’ ? 6 : 8;
+        ctx.lineJoin = ‘round’;
+        ctx.strokeText(line, vw / 2, ty);
+        ctx.fillStyle = ‘rgba(255,255,255,0.96)’;
+        ctx.fillText(line, vw / 2, ty);
+        ty += lineH;
+      }
+
+      return new Promise(resolve => canvas.toBlob(resolve, ‘image/png’));
+    }
+
+    _wrapText(ctx, text, maxWidth) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = ‘’;
+      for (const word of words) {
+        const test = line ? line + ‘ ‘ + word : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.slice(0, 2);
     }
 
     _chunkText(text, wordsPerChunk) {
       const words = text.split(/\s+/).filter(Boolean);
       const chunks = [];
       for (let i = 0; i < words.length; i += wordsPerChunk) {
-        chunks.push(words.slice(i, i + wordsPerChunk).join(' '));
+        chunks.push(words.slice(i, i + wordsPerChunk).join(‘ ‘));
       }
-      return chunks.length ? chunks : [''];
-    }
-
-    _escDrawtext(s) {
-      return s
-        .replace(/\\/g, '\\\\\\\\')
-        .replace(/'/g, "’")
-        .replace(/:/g, '\\:')
-        .replace(/%/g, '%%')
-        .replace(/\[/g, '\\[')
-        .replace(/\]/g, '\\]')
-        .replace(/;/g, '\\;');
+      return chunks.length ? chunks : [‘’];
     }
   }
 
