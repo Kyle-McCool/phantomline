@@ -1008,6 +1008,26 @@ function fillModelSelect(sel, models) {
   }
 }
 
+// Hydrate Supabase auth session on the studio page so the JWT stays
+// fresh without requiring a detour through /account. The Supabase
+// client's autoRefreshToken keeps the session alive in localStorage.
+(async function _hydrateSupabaseSession() {
+  const sbUrl = document.querySelector('meta[name="supabase-url"]')?.content;
+  const sbKey = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+  if (!sbUrl || !sbKey) return;
+  try {
+    const mod = await import('https://esm.sh/@supabase/supabase-js@2.45.4');
+    const sb = mod.createClient(sbUrl, sbKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+    });
+    window.__supabase = sb;
+    const { data } = await sb.auth.getSession();
+    if (data?.session) {
+      document.dispatchEvent(new CustomEvent('phantomline:auth-ready'));
+    }
+  } catch {}
+})();
+
 // Read the Supabase access token out of localStorage (same key the
 // auth-gate inspects). Returns null when the user isn't signed in or
 // when localStorage is unavailable. Used to attach an Authorization
@@ -7099,6 +7119,7 @@ if ('serviceWorker' in navigator) {
 const TIER_LABEL = { free: 'Free', pro: 'Pro', studio: 'Studio' };
 // Global tier so other subsystems (engine gating, etc.) can check it.
 let _ghCurrentTier = 'free';
+let _tierResolved = false;
 function ghCurrentTier() { return _ghCurrentTier; }
 
 // Cloud trial counter for free-tier users. Stored in localStorage so it
@@ -7164,6 +7185,7 @@ async function refreshLicenseStatus() {
       } catch {}
     }
     _ghCurrentTier = tier;
+    _tierResolved = true;
     tierEl.textContent = TIER_LABEL[tier] || tier;
     if (statusEl) {
       const lines = [];
@@ -7184,6 +7206,7 @@ async function refreshLicenseStatus() {
     refreshEngineStatus();
     return info;
   } catch {
+    _tierResolved = true;
     if (statusEl) statusEl.textContent = 'Could not check license.';
     return null;
   }
@@ -7334,8 +7357,8 @@ function refreshEngineStatus() {
   const FREE_CLOUD_TRIAL_LIMIT = 2;
   const freeCloudUsed = _ghCloudTrialUsed();
   const freeTrialLeft = Math.max(0, FREE_CLOUD_TRIAL_LIMIT - freeCloudUsed);
-  const cloudLocked = _ghCurrentTier === 'free' && freeTrialLeft <= 0;
-  const cloudIsTrial = _ghCurrentTier === 'free' && freeTrialLeft > 0;
+  const cloudLocked = _tierResolved && _ghCurrentTier === 'free' && freeTrialLeft <= 0;
+  const cloudIsTrial = _tierResolved && _ghCurrentTier === 'free' && freeTrialLeft > 0;
   if (cloudInput) {
     cloudInput.checked = active === 'cloud' && !cloudLocked;
     cloudInput.disabled = cloudLocked;

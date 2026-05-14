@@ -1876,6 +1876,7 @@ def studio():
     """The real application UI. Moved off `/` so the root URL can show
     marketing content. Both /app and /studio are accepted; the canonical
     is /app (referenced by the landing page CTAs)."""
+    from auth_helpers import supabase_url, supabase_anon_key
     return render_template(
         "index.html",
         defaults={
@@ -1886,6 +1887,8 @@ def studio():
             "model": sg.DEFAULT_MODEL,
             "genres": sg.GENRE_HINTS,
         },
+        supabase_url=supabase_url() or "",
+        supabase_anon_key=supabase_anon_key() or "",
     )
 
 
