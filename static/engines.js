@@ -807,25 +807,33 @@
           // CapCut-style: anchor each chunk to real per-word timestamps
           // from edge-tts. No drift over long narrations, since every
           // chunk's start/end matches the actual speech.
-          captionChunks = this._chunksFromBoundaries(wordBoundaries, 5, isTiktok);
+          captionChunks = this._chunksFromBoundaries(wordBoundaries, 4, isTiktok);
         } else {
-          // Fallback (no boundary metadata available): weight each chunk's
-          // screen time by character count. Drifts on long videos but
-          // better than equal splits.
-          const raw = this._chunkText(captionText, 4);
-          const weights = raw.map(t => Math.max(1, t.length));
-          const totalWeight = weights.reduce((a, b) => a + b, 0);
+          // Fallback: split by sentences first, then chunk within each
+          // sentence. Keeps drift local to each sentence instead of
+          // compounding across the full narration.
+          const sentences = captionText.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g) || [captionText];
+          const sentWeights = sentences.map(s => Math.max(1, s.trim().length));
+          const totalSentWeight = sentWeights.reduce((a, b) => a + b, 0);
           let cursor = 0;
-          captionChunks = raw.map((text, i) => {
-            const span = (weights[i] / totalWeight) * dur;
-            const start = cursor;
-            cursor += span;
-            return {
-              text: isTiktok ? text.toUpperCase() : text,
-              start,
-              end: cursor,
-            };
-          });
+          for (let si = 0; si < sentences.length; si++) {
+            const sentDur = (sentWeights[si] / totalSentWeight) * dur;
+            const words = this._chunkText(sentences[si].trim(), 3);
+            const wWeights = words.map(t => Math.max(1, t.length));
+            const totalW = wWeights.reduce((a, b) => a + b, 0);
+            let inner = 0;
+            for (let wi = 0; wi < words.length; wi++) {
+              const span = (wWeights[wi] / totalW) * sentDur;
+              const start = cursor + inner;
+              inner += span;
+              captionChunks.push({
+                text: isTiktok ? words[wi].toUpperCase() : words[wi],
+                start,
+                end: start + span,
+              });
+            }
+            cursor += sentDur;
+          }
         }
       }
 
@@ -1012,13 +1020,6 @@
       return chunks.length ? chunks : [''];
     }
 
-    /**
-     * Build caption chunks from real word-level timestamps. `boundaries` is
-     * an array of [startSec, durationSec, word] triples from edge-tts. The
-     * chunk's start = first word's offset, end = last word's offset + its
-     * duration. End-of-sentence markers (. ! ?) force a chunk break so
-     * captions don't run across sentence boundaries — that's the CapCut feel.
-     */
     _chunksFromBoundaries(boundaries, wordsPerChunk, isTiktok) {
       const chunks = [];
       let group = [];
@@ -1035,25 +1036,33 @@
         });
         group = [];
       };
-      for (const b of boundaries) {
-        group.push(b);
+      const CLAUSE_STARTERS = new Set([
+        'and','but','so','because','when','while','if','then',
+        'however','although','yet','or','nor','since','until',
+        'before','after','where','which','that','who',
+      ]);
+      const maxWords = Math.min(wordsPerChunk, 4);
+      for (let bi = 0; bi < boundaries.length; bi++) {
+        const b = boundaries[bi];
         const word = b[2];
+        const lower = word.toLowerCase().replace(/[^a-z']/g, '');
+        if (group.length >= 2 && CLAUSE_STARTERS.has(lower)) flush();
+        group.push(b);
         const endsSentence = /[.!?…]["')\]]?$/.test(word);
-        const softPause = /[,;:]["')\]]?$/.test(word);
-        if (group.length >= wordsPerChunk
-            || (endsSentence && group.length >= 2)
-            || (softPause && group.length >= 4)) flush();
+        const softPause = /[,;:—–\-]["')\]]?$/.test(word);
+        const nextB = boundaries[bi + 1];
+        const gapToNext = nextB ? nextB[0] - (b[0] + b[1]) : 0;
+        const naturalPause = gapToNext > 0.25;
+        if (group.length >= maxWords
+            || (endsSentence && group.length >= 1)
+            || (softPause && group.length >= 2)
+            || (naturalPause && group.length >= 2)) flush();
       }
       flush();
-      // CapCut-feel: nudge each chunk ~120ms earlier so viewers see the
-      // text just before the word lands, giving the eye time to read.
-      // Captions appearing *exactly* on the word always feel a beat late.
-      const LEAD_SEC = 0.12;
+      const LEAD_SEC = 0.08;
       for (const c of chunks) {
         c.start = Math.max(0, c.start - LEAD_SEC);
       }
-      // Hold each chunk on screen until the next one starts so there's no
-      // dead frames between captions.
       for (let i = 0; i < chunks.length - 1; i++) {
         chunks[i].end = chunks[i + 1].start;
       }

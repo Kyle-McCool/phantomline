@@ -2288,16 +2288,59 @@ async function _cloudTts(text, voice) {
     const err = await resp.json().catch(() => ({ error: 'TTS failed' }));
     throw new Error(err.error || 'Cloud TTS failed (' + resp.status + ')');
   }
-  // Word-level timestamps from edge-tts. Format: [[startSec, durSec, "word"], …].
-  // Used downstream to anchor caption chunks to real speech and avoid drift.
-  let boundaries = null;
-  const raw = resp.headers.get('X-Word-Boundaries');
-  if (raw) {
-    try { boundaries = JSON.parse(decodeURIComponent(raw)); }
-    catch (_) { boundaries = null; }
-  }
-  const blob = await resp.blob();
+  const data = await resp.json();
+  if (!data.ok) throw new Error(data.error || 'Cloud TTS failed');
+  const raw = atob(data.audio_b64);
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+  const blob = new Blob([bytes], { type: data.content_type || 'audio/mpeg' });
+  const boundaries = Array.isArray(data.boundaries) && data.boundaries.length > 0
+    ? data.boundaries : null;
   return { blob, voice: voice || 'en-US-AvaNeural', boundaries };
+}
+
+// Map Whisper's word-level timing to original script words. Whisper's
+// transcription may differ from the script (dropped articles, merged
+// words, misrecognitions). We walk both sequences and match greedily
+// by normalized text, interpolating timing for unmatched script words.
+function _mapWhisperToScript(whisperBounds, scriptText) {
+  const scriptWords = (scriptText || '').split(/\s+/).filter(Boolean);
+  if (!scriptWords.length || !whisperBounds?.length) return whisperBounds || [];
+  const norm = (s) => s.toLowerCase().replace(/[^a-z0-9']/g, '');
+  let wi = 0;
+  const mapped = [];
+  for (let si = 0; si < scriptWords.length; si++) {
+    const sw = norm(scriptWords[si]);
+    // Find the closest matching Whisper word at or after wi
+    let bestJ = -1;
+    for (let j = wi; j < Math.min(wi + 6, whisperBounds.length); j++) {
+      const ww = norm(whisperBounds[j][2]);
+      if (ww === sw || sw.startsWith(ww) || ww.startsWith(sw)) {
+        bestJ = j;
+        break;
+      }
+    }
+    if (bestJ >= 0) {
+      mapped.push([whisperBounds[bestJ][0], whisperBounds[bestJ][1], scriptWords[si]]);
+      wi = bestJ + 1;
+    } else {
+      // No Whisper match — interpolate from neighbors
+      const prev = mapped.length > 0 ? mapped[mapped.length - 1] : null;
+      const nextW = wi < whisperBounds.length ? whisperBounds[wi] : null;
+      if (prev && nextW) {
+        const gap = nextW[0] - (prev[0] + prev[1]);
+        const t = prev[0] + prev[1] + gap * 0.5;
+        mapped.push([t, Math.max(0.08, gap * 0.4), scriptWords[si]]);
+      } else if (prev) {
+        mapped.push([prev[0] + prev[1], 0.15, scriptWords[si]]);
+      } else if (nextW) {
+        mapped.push([Math.max(0, nextW[0] - 0.15), 0.15, scriptWords[si]]);
+      } else {
+        mapped.push([si * 0.3, 0.15, scriptWords[si]]);
+      }
+    }
+  }
+  return mapped;
 }
 
 async function _cloudGenerateIdeas({ recipe, niche, audience, format, hookStyle, tensionFormat, loopType, currentTopic }) {
@@ -4205,33 +4248,33 @@ async function makeVideoWorkflow() {
               } catch (_) { /* fall back to estimation in assemble() */ }
             }
 
-            // Force-align captions to the actual rendered audio via in-browser
-            // Whisper. Same approach CapCut/Submagic/Captions.ai use — sub-100ms
-            // sync because timestamps come from the real waveform, not from TTS
-            // metadata that can drift through MP3/AAC encoding. Falls back to
-            // edge-tts WordBoundary timestamps if the model can't load (older
-            // device, no WebGPU + slow CPU, network fail on first download).
+            // Edge-tts word boundaries are ground truth for synthesized speech
+            // — the synthesizer knows exactly when it produced each word.
+            // Whisper is only used as a fallback when edge-tts boundaries
+            // aren't available (e.g., user-uploaded narration or header
+            // truncation on very long scripts).
             let _alignedBoundaries = ttsResult.boundaries || null;
-            const _whisper = window.GhostlineMobileLibs?.whisperAlign;
-            if (_wantCaptions && _whisper?.available()) {
-              try {
-                setMakeStep('makeStepVideo', 'running', 'aligning captions · loading whisper');
-                // Align against the pure narration blob, not the mixed audio.
-                // Music confuses Whisper's word boundary detection — the local
-                // Kokoro pipeline also measures timing from pure speech audio.
-                _alignedBoundaries = await _whisper.align(ttsResult.blob, (p) => {
-                  if (p.progress != null) {
-                    setMakeStep('makeStepVideo', 'running',
-                      `loading whisper · ${Math.round(p.progress * 100)}%`);
-                  } else if (p.text) {
-                    setMakeStep('makeStepVideo', 'running', `whisper · ${p.text}`);
-                  }
-                });
-                setMakeStep('makeStepVideo', 'running',
-                  `aligned ${_alignedBoundaries.length} words`);
-              } catch (_walignErr) {
-                console.warn('Whisper alignment failed, using edge-tts boundaries:', _walignErr);
-                _alignedBoundaries = ttsResult.boundaries || null;
+            if (_wantCaptions && !_alignedBoundaries) {
+              const _whisper = window.GhostlineMobileLibs?.whisperAlign;
+              if (_whisper?.available()) {
+                try {
+                  setMakeStep('makeStepVideo', 'running', 'aligning captions · loading whisper');
+                  const _rawWhisper = await _whisper.align(ttsResult.blob, (p) => {
+                    if (p.progress != null) {
+                      setMakeStep('makeStepVideo', 'running',
+                        `loading whisper · ${Math.round(p.progress * 100)}%`);
+                    } else if (p.text) {
+                      setMakeStep('makeStepVideo', 'running', `whisper · ${p.text}`);
+                    }
+                  });
+                  // Map Whisper timing back to original script words so caption
+                  // text is the authored script, not Whisper's transcription.
+                  _alignedBoundaries = _mapWhisperToScript(_rawWhisper, script.text);
+                  setMakeStep('makeStepVideo', 'running',
+                    `aligned ${_alignedBoundaries.length} words`);
+                } catch (_walignErr) {
+                  console.warn('Whisper alignment failed, using proportional fallback:', _walignErr);
+                }
               }
             }
             setMakeStep('makeStepVideo', 'running', 'rendering in browser');
