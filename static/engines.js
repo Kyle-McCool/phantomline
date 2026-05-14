@@ -677,24 +677,68 @@
       })();
       return this._initPromise;
     }
-    /**
-     * Mux narration audio + a single source video into an MP4 sized to
-     * `aspect`. Used as the simplest mobile path: user uploads source
-     * footage, we narrate over it, this writes the MP4.
-     */
     async assemble({ narrationBlob, sourceVideoBlob, aspect = '9:16',
-                     captions = null, onProgress }) {
+                     captionText = null, captionStyle = 'tiktok',
+                     audioDuration = 0, titleText = null, onProgress }) {
       const { ffmpeg, util } = await this.init(onProgress);
       await ffmpeg.writeFile('input.mp4', await util.fetchFile(sourceVideoBlob));
       await ffmpeg.writeFile('voice.webm', await util.fetchFile(narrationBlob));
 
+      try {
+        const fontResp = await fetch('/static/fonts/Montserrat-Black.ttf');
+        if (fontResp.ok) await ffmpeg.writeFile('font.ttf', await util.fetchFile(await fontResp.blob()));
+      } catch (_) { /* drawtext falls back to default font */ }
+
       const dim = aspect === '9:16' ? '1080:1920' : aspect === '1:1' ? '1080:1080' : '1920:1080';
+      const [wStr, hStr] = dim.split(':');
+      const vw = parseInt(wStr, 10);
+      const vh = parseInt(hStr, 10);
+      const isVertical = vh > vw;
       const filterPad = `scale=${dim}:force_original_aspect_ratio=decrease,pad=${dim}:(ow-iw)/2:(oh-ih)/2:black,setsar=1`;
+
+      let overlayFilters = '';
+
+      // Title overlay — matches local render: y = 20% from top, centered
+      if (titleText && titleText.trim()) {
+        const titleFs = Math.max(38, Math.round(vh * 0.038));
+        const titleY = Math.round(vh * 0.20);
+        const escaped = this._escDrawtext(titleText.trim());
+        overlayFilters += `,drawtext=fontfile=font.ttf:text='${escaped}'` +
+          `:fontsize=${titleFs}:fontcolor=white@0.96` +
+          `:borderw=3:bordercolor=black@0.82` +
+          `:shadowx=2:shadowy=2:shadowcolor=black@0.5` +
+          `:x=(w-text_w)/2:y=${titleY}` +
+          `:box=1:boxcolor=black@0.53:boxborderw=12`;
+      }
+
+      // Captions — matches local render: y = 66% from top (vertical), 78% (horizontal)
+      if (captionText && captionText.trim()) {
+        const dur = audioDuration > 0 ? audioDuration : Math.max(narrationBlob.size / 2000, 5);
+        const capFs = Math.max(42, Math.round(vh * (isVertical ? 0.047 : 0.052)));
+        const capY = Math.round(vh * (isVertical ? 0.66 : 0.78));
+        const isTiktok = captionStyle === 'tiktok' || captionStyle === 'kids';
+        const chunks = this._chunkText(captionText, 4);
+        const perChunk = dur / chunks.length;
+
+        for (let i = 0; i < chunks.length; i++) {
+          const start = (i * perChunk).toFixed(3);
+          const end = ((i + 1) * perChunk).toFixed(3);
+          const raw = isTiktok ? chunks[i].toUpperCase() : chunks[i];
+          const escaped = this._escDrawtext(raw);
+          overlayFilters += `,drawtext=fontfile=font.ttf:text='${escaped}'` +
+            `:fontsize=${capFs}:fontcolor=white` +
+            `:borderw=4:bordercolor=black` +
+            `:shadowx=2:shadowy=2:shadowcolor=black@0.6` +
+            `:x=(w-text_w)/2:y=${capY}` +
+            `:box=1:boxcolor=black@0.45:boxborderw=10` +
+            `:enable='between(t\\,${start}\\,${end})'`;
+        }
+      }
 
       const args = [
         '-i', 'input.mp4',
         '-i', 'voice.webm',
-        '-filter_complex', `[0:v]${filterPad}[v]`,
+        '-filter_complex', `[0:v]${filterPad}${overlayFilters}[v]`,
         '-map', '[v]',
         '-map', '1:a',
         '-c:v', 'libx264',
@@ -709,6 +753,26 @@
       const data = await ffmpeg.readFile('out.mp4');
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
       return { url: URL.createObjectURL(blob), blob };
+    }
+
+    _chunkText(text, wordsPerChunk) {
+      const words = text.split(/\s+/).filter(Boolean);
+      const chunks = [];
+      for (let i = 0; i < words.length; i += wordsPerChunk) {
+        chunks.push(words.slice(i, i + wordsPerChunk).join(' '));
+      }
+      return chunks.length ? chunks : [''];
+    }
+
+    _escDrawtext(s) {
+      return s
+        .replace(/\\/g, '\\\\\\\\')
+        .replace(/'/g, "’")
+        .replace(/:/g, '\\:')
+        .replace(/%/g, '%%')
+        .replace(/\[/g, '\\[')
+        .replace(/\]/g, '\\]')
+        .replace(/;/g, '\\;');
     }
   }
 

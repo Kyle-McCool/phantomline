@@ -4147,10 +4147,28 @@ async function makeVideoWorkflow() {
             });
             _renderPhase = 'rendering';
             setMakeStep('makeStepVideo', 'running', 'rendering in browser');
+            const _wantCaptions = $('makeCaptions')?.value !== 'none';
+            let _audioDur = 0;
+            if (_wantCaptions && script.text) {
+              try {
+                const _actx = new (window.AudioContext || window.webkitAudioContext)();
+                const _abuf = await _actx.decodeAudioData(await _mixedBlob.arrayBuffer());
+                _audioDur = _abuf.duration;
+                _actx.close();
+              } catch (_) { /* fall back to estimation in assemble() */ }
+            }
+            const _titleStyle = $('makeTitleStyle')?.value || '';
+            const _titleText = (_titleStyle !== 'none')
+              ? ($('makePreferredTitle')?.value?.trim() || script.title || '')
+              : null;
             const _rendered = await _renderEngine.assemble({
               narrationBlob: _mixedBlob,
               sourceVideoBlob: _sourceBlob,
               aspect: $('makeAspect')?.value || '9:16',
+              captionText: _wantCaptions ? (script.text || '') : null,
+              captionStyle: $('makeCaptionStyle')?.value || 'tiktok',
+              audioDuration: _audioDur || 0,
+              titleText: _titleText || null,
             });
             _finishedUrl = _rendered.url;
             _usedBrowserRender = true;
