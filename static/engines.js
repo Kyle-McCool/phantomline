@@ -559,65 +559,113 @@
     available() {
       return typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
     }
-    /**
-     * Generate `seconds` of ambient bed at a given mood. Returns a Blob URL.
-     */
     async generate({ seconds = 30, mood = 'cinematic' } = {}) {
       if (!this.available()) throw new Error('Web Audio API unsupported.');
       const sampleRate = 44100;
       const length = Math.floor(seconds * sampleRate);
       const ctx = new OfflineAudioContext(2, length, sampleRate);
+      const rand = (lo, hi) => lo + Math.random() * (hi - lo);
+      const jitter = (v, pct) => v * (1 + (Math.random() - 0.5) * 2 * pct);
 
-      // Mood presets: pick base frequencies, detune, lowpass cutoff.
       const presets = {
-        cinematic:   { roots: [55, 82.4, 110], detune: 7, cutoff: 1200, lfoRate: 0.18 },
-        mystery:     { roots: [49, 73.4, 98],  detune: 12, cutoff: 800,  lfoRate: 0.12 },
-        uplifting:   { roots: [65, 98, 130],   detune: 4, cutoff: 1800, lfoRate: 0.25 },
-        horror:      { roots: [41, 55, 65],    detune: 18, cutoff: 600,  lfoRate: 0.08 },
-        chill:       { roots: [110, 165, 220], detune: 3, cutoff: 1500, lfoRate: 0.20 },
+        cinematic:   { roots: [55, 82.4, 110], detune: 7, cutoff: 1200, lfoRate: 0.18, vol: 0.32 },
+        mystery:     { roots: [49, 73.4, 98],  detune: 12, cutoff: 800,  lfoRate: 0.12, vol: 0.30 },
+        uplifting:   { roots: [65, 98, 130],   detune: 4, cutoff: 1800, lfoRate: 0.25, vol: 0.30 },
+        horror:      { roots: [41, 55, 65],    detune: 18, cutoff: 600,  lfoRate: 0.08, vol: 0.28 },
+        chill:       { roots: [110, 165, 220], detune: 3, cutoff: 1500, lfoRate: 0.20, vol: 0.28 },
+        tense:       { roots: [46.2, 69.3, 92.5], detune: 15, cutoff: 900, lfoRate: 0.10, vol: 0.30 },
+        dark:        { roots: [36.7, 49, 58.3],   detune: 20, cutoff: 500, lfoRate: 0.06, vol: 0.26 },
+        hopeful:     { roots: [73.4, 110, 146.8], detune: 5, cutoff: 1600, lfoRate: 0.22, vol: 0.30 },
       };
       const p = presets[mood] || presets.cinematic;
+
+      // Randomize root pitch: transpose up or down by 0–4 semitones
+      const semitoneShift = Math.floor(rand(-4, 5));
+      const pitchMul = Math.pow(2, semitoneShift / 12);
+      const roots = p.roots.map(r => jitter(r * pitchMul, 0.03));
+
+      const cutoff = jitter(p.cutoff, 0.20);
+      const lfoBase = jitter(p.lfoRate, 0.30);
+      const vol = p.vol;
+
       const master = ctx.createGain();
       master.gain.value = 0.0;
       master.connect(ctx.destination);
-      // Slow fade in/out so it doesn't pop.
+      const fadeIn = rand(1.0, 2.5);
       master.gain.setValueAtTime(0.0001, 0);
-      master.gain.exponentialRampToValueAtTime(0.32, 1.5);
-      master.gain.setValueAtTime(0.32, Math.max(2, seconds - 1.5));
+      master.gain.exponentialRampToValueAtTime(vol, fadeIn);
+      master.gain.setValueAtTime(vol, Math.max(fadeIn + 1, seconds - 2));
       master.gain.exponentialRampToValueAtTime(0.0001, seconds);
 
       const filter = ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.value = p.cutoff;
-      filter.Q.value = 0.8;
+      filter.frequency.value = cutoff;
+      filter.Q.value = rand(0.5, 1.2);
       filter.connect(master);
 
-      // Layered detuned oscillators per root note.
-      for (const root of p.roots) {
-        for (let i = 0; i < 3; i++) {
+      // Slow filter sweep for movement
+      const sweepLfo = ctx.createOscillator();
+      sweepLfo.frequency.value = rand(0.02, 0.08);
+      const sweepGain = ctx.createGain();
+      sweepGain.gain.value = cutoff * rand(0.15, 0.4);
+      sweepLfo.connect(sweepGain);
+      sweepGain.connect(filter.frequency);
+      sweepLfo.start(0);
+      sweepLfo.stop(seconds);
+
+      const waveTypes = ['sine', 'triangle', 'sawtooth'];
+      for (const root of roots) {
+        const layerCount = Math.random() > 0.3 ? 3 : 2;
+        for (let i = 0; i < layerCount; i++) {
           const osc = ctx.createOscillator();
-          osc.type = i === 0 ? 'sine' : i === 1 ? 'triangle' : 'sawtooth';
+          osc.type = waveTypes[i % waveTypes.length];
           osc.frequency.value = root;
-          osc.detune.value = (i - 1) * p.detune;
-          // LFO for slow shimmer.
+          osc.detune.value = (i - 1) * jitter(p.detune, 0.25);
           const lfo = ctx.createOscillator();
-          lfo.frequency.value = p.lfoRate + (i * 0.02);
+          lfo.frequency.value = lfoBase + rand(-0.04, 0.04) + (i * rand(0.01, 0.03));
           const lfoGain = ctx.createGain();
-          lfoGain.gain.value = 4;
+          lfoGain.gain.value = rand(2, 8);
           lfo.connect(lfoGain);
           lfoGain.connect(osc.detune);
           const oscGain = ctx.createGain();
-          oscGain.gain.value = 0.06;
+          oscGain.gain.value = rand(0.03, 0.08);
           osc.connect(oscGain);
           oscGain.connect(filter);
-          osc.start(0);
+          osc.start(rand(0, 0.3));
           osc.stop(seconds);
           lfo.start(0);
           lfo.stop(seconds);
         }
       }
+
+      // Occasional sub-bass pulse (adds subtle rhythm)
+      if (mood !== 'chill' && mood !== 'uplifting' && Math.random() > 0.3) {
+        const subFreq = roots[0] * 0.5;
+        const pulseRate = rand(0.3, 0.8);
+        const sub = ctx.createOscillator();
+        sub.type = 'sine';
+        sub.frequency.value = subFreq;
+        const subLfo = ctx.createOscillator();
+        subLfo.frequency.value = pulseRate;
+        const subLfoGain = ctx.createGain();
+        subLfoGain.gain.value = rand(0.02, 0.05);
+        subLfo.connect(subLfoGain);
+        const subGain = ctx.createGain();
+        subGain.gain.value = 0.0001;
+        subGain.gain.setValueAtTime(0.0001, 0);
+        subGain.gain.exponentialRampToValueAtTime(rand(0.04, 0.09), fadeIn + 1);
+        subGain.gain.setValueAtTime(rand(0.04, 0.09), Math.max(fadeIn + 2, seconds - 2));
+        subGain.gain.exponentialRampToValueAtTime(0.0001, seconds);
+        sub.connect(subGain);
+        subLfoGain.connect(subGain.gain);
+        subGain.connect(ctx.destination);
+        sub.start(0);
+        sub.stop(seconds);
+        subLfo.start(0);
+        subLfo.stop(seconds);
+      }
+
       const buffer = await ctx.startRendering();
-      // Encode as WAV (small, lossless, decoded by every browser).
       const wav = audioBufferToWav(buffer);
       const blob = new Blob([wav], { type: 'audio/wav' });
       return { url: URL.createObjectURL(blob), blob, duration: seconds, mood };
@@ -1171,8 +1219,6 @@
       return [];
     }
     async pickForRecipe(recipe) {
-      // Map recipe IDs to moods. Mirrors the desktop recipe presets so the
-      // chosen track matches the script's emotional shape.
       const recipeMoods = {
         'viral-story': 'tense',
         'rule-horror': 'horror',
@@ -1190,9 +1236,12 @@
       };
       const mood = recipeMoods[recipe] || 'cinematic';
       const matches = await this.byMood(mood);
-      if (matches.length) return matches[0];
       const all = await this.list();
-      return all[0] || null;
+      // Pick randomly: 70% mood-matched, 30% any track for variety
+      if (matches.length && Math.random() < 0.7) {
+        return matches[Math.floor(Math.random() * matches.length)];
+      }
+      return all[Math.floor(Math.random() * all.length)] || null;
     }
   }
 

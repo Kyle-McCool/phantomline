@@ -4141,24 +4141,46 @@ async function makeVideoWorkflow() {
       let _musicLabel = 'skipped';
       const _bundled = window.GhostlineMobileLibs?.bundledMusic;
       const _ambient = window.GhostlineMobileLibs?.ambient;
-      try {
-        const _recipe = $('makeRecipe')?.value || $('makeNiche')?.value || '';
-        const _track = await _bundled?.pickForRecipe(_recipe);
-        if (_track?.url) {
-          setMakeStep('makeStepMusic', 'running', _track.title ? `loading “${_track.title}”` : 'loading track');
-          const _mr = await fetch(_track.url);
-          if (_mr.ok) {
-            _musicBlob = await _mr.blob();
-            _musicLabel = _track.title || 'bundled track';
+      const _recipe = $('makeRecipe')?.value || $('makeNiche')?.value || '';
+      const _moodMap = {
+        'viral-story': 'tense', 'rule-horror': 'horror', 'survival-tips': 'chill',
+        'mystery-doc': 'mystery', 'education': 'cinematic', 'finance': 'uplifting',
+        'history': 'cinematic', 'motivation': 'hopeful', 'scary-story': 'horror',
+        'listicle': 'uplifting', 'reddit-story': 'tense', 'confession': 'dark',
+        'betrayal': 'tense',
+      };
+      const _mood = _moodMap[_recipe] || 'cinematic';
+      // Alternate between procedural (unique every time) and bundled tracks
+      const _preferProcedural = _ambient?.available() && Math.random() > 0.35;
+      if (_preferProcedural) {
+        try {
+          setMakeStep('makeStepMusic', 'running', `generating ${_mood} bed`);
+          const _dur = Math.max(30, 60);
+          const _amb = await _ambient.generate({ seconds: _dur, mood: _mood });
+          _musicBlob = _amb.blob;
+          _musicLabel = `procedural ${_mood}`;
+        } catch {}
+      }
+      if (!_musicBlob) {
+        try {
+          const _track = await _bundled?.pickForRecipe(_recipe);
+          if (_track?.url) {
+            setMakeStep('makeStepMusic', 'running', _track.title ? `loading “${_track.title}”` : 'loading track');
+            const _mr = await fetch(_track.url);
+            if (_mr.ok) {
+              _musicBlob = await _mr.blob();
+              _musicLabel = _track.title || 'bundled track';
+            }
           }
-        }
-      } catch {}
+        } catch {}
+      }
       if (!_musicBlob && _ambient?.available()) {
-        setMakeStep('makeStepMusic', 'running', 'generating ambient bed');
-        const _dur = Math.max(30, 60);
-        const _amb = await _ambient.generate({ seconds: _dur, mood: 'cinematic' });
-        _musicBlob = _amb.blob;
-        _musicLabel = 'ambient bed';
+        try {
+          setMakeStep('makeStepMusic', 'running', `generating ${_mood} bed`);
+          const _amb = await _ambient.generate({ seconds: 60, mood: _mood });
+          _musicBlob = _amb.blob;
+          _musicLabel = `procedural ${_mood}`;
+        } catch {}
       }
       setMakeStep('makeStepMusic', 'done', _musicLabel);
 
