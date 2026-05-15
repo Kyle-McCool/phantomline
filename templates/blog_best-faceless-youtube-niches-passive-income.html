@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -12,6 +12,8 @@
 <meta property="og:description" content="Niches where faceless channels build durable revenue, ranked by CPM, competition, and automation potential." />
 <meta property="og:url" content="{{ canonical_url }}" />
 <meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ site_url }}/static/phantomline-og.png" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
@@ -37,6 +39,7 @@
   "dateModified": "{{ today_iso }}",
   "author": {"@type": "Organization", "name": "Phantomline"},
   "publisher": {"@type": "Organization", "name": "Phantomline", "logo": {"@type": "ImageObject", "url": "{{ site_url }}/static/phantomline-logo-primary.png"}},
+  "image": "{{ site_url }}/static/phantomline-og.png",
   "mainEntityOfPage": "{{ canonical_url }}"
 }
 </script>

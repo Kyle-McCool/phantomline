@@ -113,31 +113,36 @@ def robots_txt():
     return response
 
 
+def _rfc822(iso_date: str) -> str:
+    """Convert 'YYYY-MM-DD' to RFC-822 date for RSS pubDate."""
+    try:
+        t = time.strptime(iso_date, "%Y-%m-%d")
+        return time.strftime("%a, %d %b %Y 00:00:00 +0000", t)
+    except (ValueError, TypeError):
+        return time.strftime("%a, %d %b %Y 00:00:00 +0000", time.gmtime())
+
+
 @seo_bp.route("/feed.xml")
 def rss_feed():
     from alternatives import COMPETITORS
     from blog import published_articles
-    today = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
     items = []
-    for path, _, _ in _SITEMAP_ROUTES:
+    for a in published_articles():
         items.append(
             f"    <item>\n"
-            f"      <link>{SITE_URL}{path}</link>\n"
-            f"      <pubDate>{today}</pubDate>\n"
+            f"      <title>{a['title']}</title>\n"
+            f"      <link>{SITE_URL}/blog/{a['slug']}</link>\n"
+            f"      <description>{a.get('meta_description', '')}</description>\n"
+            f"      <pubDate>{_rfc822(a.get('published_date', ''))}</pubDate>\n"
             f"    </item>"
         )
     for c in COMPETITORS:
         items.append(
             f"    <item>\n"
+            f"      <title>{c['name']} Alternative | Phantomline</title>\n"
             f"      <link>{SITE_URL}/alternatives/{c['slug']}</link>\n"
-            f"      <pubDate>{today}</pubDate>\n"
-            f"    </item>"
-        )
-    for a in published_articles():
-        items.append(
-            f"    <item>\n"
-            f"      <link>{SITE_URL}/blog/{a['slug']}</link>\n"
-            f"      <pubDate>{today}</pubDate>\n"
+            f"      <description>{c.get('meta_description', '')}</description>\n"
+            f"      <pubDate>{_rfc822('2026-05-02')}</pubDate>\n"
             f"    </item>"
         )
     body = (
@@ -147,6 +152,7 @@ def rss_feed():
         "    <title>Phantomline</title>\n"
         f"    <link>{SITE_URL}/</link>\n"
         "    <description>Local-first AI video studio for faceless YouTube creators</description>\n"
+        f"    <language>en-us</language>\n"
         f"{''.join(chr(10) + i for i in items)}\n"
         "  </channel>\n"
         "</rss>\n"
@@ -303,25 +309,37 @@ _indexnow_deploy_ping_once()
 def sitemap_xml():
     from alternatives import COMPETITORS
     from blog import published_articles
-    today = time.strftime("%Y-%m-%d")
-    routes = list(_SITEMAP_ROUTES)
+    entries: list[str] = []
+    for path, priority, changefreq in _SITEMAP_ROUTES:
+        entries.append(
+            f"  <url>\n"
+            f"    <loc>{SITE_URL}{path}</loc>\n"
+            f"    <changefreq>{changefreq}</changefreq>\n"
+            f"    <priority>{priority}</priority>\n"
+            f"  </url>"
+        )
     for c in COMPETITORS:
-        routes.append((f"/alternatives/{c['slug']}", "0.7", "monthly"))
+        entries.append(
+            f"  <url>\n"
+            f"    <loc>{SITE_URL}/alternatives/{c['slug']}</loc>\n"
+            f"    <changefreq>monthly</changefreq>\n"
+            f"    <priority>0.7</priority>\n"
+            f"  </url>"
+        )
     for a in published_articles():
-        routes.append((f"/blog/{a['slug']}", "0.65", "monthly"))
-    urls = "\n".join(
-        f"  <url>\n"
-        f"    <loc>{SITE_URL}{path}</loc>\n"
-        f"    <lastmod>{today}</lastmod>\n"
-        f"    <changefreq>{changefreq}</changefreq>\n"
-        f"    <priority>{priority}</priority>\n"
-        f"  </url>"
-        for (path, priority, changefreq) in routes
-    )
+        date = a.get("published_date", "")
+        lastmod = f"\n    <lastmod>{date}</lastmod>" if date else ""
+        entries.append(
+            f"  <url>\n"
+            f"    <loc>{SITE_URL}/blog/{a['slug']}</loc>{lastmod}\n"
+            f"    <changefreq>monthly</changefreq>\n"
+            f"    <priority>0.65</priority>\n"
+            f"  </url>"
+        )
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        f"{urls}\n"
+        + "\n".join(entries) + "\n"
         "</urlset>\n"
     )
     from flask import current_app

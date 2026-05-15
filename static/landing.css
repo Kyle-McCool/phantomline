@@ -1163,6 +1163,14 @@ h4 {
   color: var(--text-2);
   margin-top: 4px;
 }
+.pricing-price-alt a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.pricing-price-alt a:hover {
+  color: #fff;
+}
 .pricing-features {
   list-style: none;
   padding: 0;

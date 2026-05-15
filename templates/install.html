@@ -13,8 +13,19 @@
 <link rel="stylesheet" href="{{ '/static/install.css' | versioned }}" />
 </head>
 <body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/" aria-label="Phantomline home">
+      <img class="brand-img" src="{{ '/static/phantomline-logo-primary.png' | versioned }}" alt="Phantomline" />
+    </a>
+    <div class="navlinks">
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a class="cta secondary" href="/app">Open Studio</a>
+    </div>
+  </nav>
+</div>
 <div class="install-hero">
-  <a class="back-link" href="/app">&larr; Back to studio</a>
   <div id="mobileHint" style="display:none; margin-top:14px; padding:14px; background:#3a2f0c; border:1px solid #c9a93a; border-radius:8px; color:#fff8d4;">
     <strong>You're on mobile.</strong> {{ tool.label }} can't be installed on a phone. It runs on your desktop or laptop. Open this page on your computer (<a href="/app" style="color:#ffe48a; text-decoration:underline;">phantomline.xyz/install/{{ tool.label.split()[0]|lower }}</a>) to continue.
   </div>

@@ -4159,7 +4159,9 @@ async function makeVideoWorkflow() {
           const _amb = await _ambient.generate({ seconds: _dur, mood: _mood });
           _musicBlob = _amb.blob;
           _musicLabel = `procedural ${_mood}`;
-        } catch {}
+        } catch (_mErr) {
+          console.warn('Procedural music generation failed:', _mErr);
+        }
       }
       if (!_musicBlob) {
         try {
@@ -4172,7 +4174,9 @@ async function makeVideoWorkflow() {
               _musicLabel = _track.title || 'bundled track';
             }
           }
-        } catch {}
+        } catch (_bErr) {
+          console.warn('Bundled music loading failed:', _bErr);
+        }
       }
       if (!_musicBlob && _ambient?.available()) {
         try {
@@ -4180,7 +4184,9 @@ async function makeVideoWorkflow() {
           const _amb = await _ambient.generate({ seconds: 60, mood: _mood });
           _musicBlob = _amb.blob;
           _musicLabel = `procedural ${_mood}`;
-        } catch {}
+        } catch (_fErr) {
+          console.warn('Fallback music generation failed:', _fErr);
+        }
       }
       setMakeStep('makeStepMusic', 'done', _musicLabel);
 
@@ -4354,19 +4360,64 @@ async function makeVideoWorkflow() {
           setMakeStep('makeStepVideo', 'done', 'done');
         }
       } else {
-        setMakeStep('makeStepTimeline', 'done', 'audio only');
-        setMakeStep('makeStepVideo', 'done', 'audio only');
-        _finishedUrl = URL.createObjectURL(_mixedBlob);
+        setMakeStep('makeStepTimeline', 'done', 'auto background');
+        const _renderEngine = window.GhostlineMobileLibs?.render;
+        if (_renderEngine?.available()) {
+          try {
+            setMakeStep('makeStepVideo', 'running', 'loading ffmpeg.wasm');
+            await _renderEngine.init((p) => {
+              if (p.progress != null) {
+                setMakeStep('makeStepVideo', 'running',
+                  `loading ffmpeg.wasm · ${Math.round(p.progress * 100)}%`);
+              }
+            });
+            const _wantCaptions = $('makeCaptions')?.value !== 'none';
+            let _audioDur = 0;
+            try {
+              const _actx = new (window.AudioContext || window.webkitAudioContext)();
+              const _abuf = await _actx.decodeAudioData(await _mixedBlob.arrayBuffer());
+              _audioDur = _abuf.duration;
+              _actx.close();
+            } catch (_) {}
+            let _alignedBoundaries = ttsResult.boundaries || null;
+            const _titleStyle = $('makeTitleStyle')?.value || '';
+            const _titleText = (_titleStyle !== 'none')
+              ? ($('makePreferredTitle')?.value?.trim() || script.title || '')
+              : null;
+            setMakeStep('makeStepVideo', 'running', 'rendering');
+            const _rendered = await _renderEngine.assemble({
+              narrationBlob: _mixedBlob,
+              sourceVideoBlob: null,
+              aspect: $('makeAspect')?.value || '9:16',
+              captionText: _wantCaptions ? (script.text || '') : null,
+              captionStyle: $('makeCaptionStyle')?.value || 'tiktok',
+              audioDuration: _audioDur || 0,
+              titleText: _titleText || null,
+              wordBoundaries: _alignedBoundaries,
+            });
+            _finishedUrl = _rendered.url;
+            _usedBrowserRender = true;
+            _attachSrtDownload(_rendered.srtUrl, script.title);
+            setMakeStep('makeStepVideo', 'done', 'done');
+          } catch (_bgErr) {
+            console.warn('Background render failed, falling back to audio:', _bgErr);
+            setMakeStep('makeStepVideo', 'done', 'audio only');
+            _finishedUrl = URL.createObjectURL(_mixedBlob);
+          }
+        } else {
+          setMakeStep('makeStepVideo', 'done', 'audio only');
+          _finishedUrl = URL.createObjectURL(_mixedBlob);
+        }
       }
 
       $('makePreviewVideo').src = _finishedUrl;
       const _pv = $('makePhonePreviewVideo');
       if (_pv) { _pv.src = _finishedUrl; _pv.style.display = 'block'; _pv.load(); $('makePhonePreviewInner')?.classList.add('has-video'); }
-      $('makeResultHint').textContent = useSourceVideo
-        ? (_usedBrowserRender
-          ? 'Rendered entirely in your browser with AI narration and background music.'
-          : 'Rendered on server with AI narration, captions, and background music.')
-        : 'Audio-only render (narration + music). For full video with scenes, use Source Video mode or the desktop app.';
+      $('makeResultHint').textContent = _usedBrowserRender
+        ? 'Rendered entirely in your browser with AI narration, captions, and background music.'
+        : useSourceVideo
+          ? 'Rendered on server with AI narration, captions, and background music.'
+          : 'Audio-only render (narration + music). For full video with scenes, use Source Video mode or the desktop app.';
       $('makeResult').classList.add('shown');
       makeVideoJob = null;
       preparePublishDraft({

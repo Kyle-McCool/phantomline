@@ -829,18 +829,45 @@
       })();
       return this._initPromise;
     }
+    _generateBackgroundPng(vw, vh) {
+      const c = document.createElement('canvas');
+      c.width = vw; c.height = vh;
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, vw * 0.3, vh);
+      g.addColorStop(0, '#0d1517');
+      g.addColorStop(0.5, '#090b0c');
+      g.addColorStop(1, '#0a1214');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, vw, vh);
+      ctx.globalAlpha = 0.07;
+      const rg = ctx.createRadialGradient(vw * 0.5, vh * 0.35, 0, vw * 0.5, vh * 0.35, vw * 0.8);
+      rg.addColorStop(0, '#22e7f5');
+      rg.addColorStop(1, 'transparent');
+      ctx.fillStyle = rg;
+      ctx.fillRect(0, 0, vw, vh);
+      ctx.globalAlpha = 1;
+      return new Promise(r => c.toBlob(r, 'image/png'));
+    }
+
     async assemble({ narrationBlob, sourceVideoBlob, aspect = '9:16',
                      captionText = null, captionStyle = 'tiktok',
                      audioDuration = 0, titleText = null,
                      wordBoundaries = null, onProgress }) {
       const { ffmpeg, util } = await this.init(onProgress);
-      await ffmpeg.writeFile('input.mp4', await util.fetchFile(sourceVideoBlob));
-      await ffmpeg.writeFile('voice.webm', await util.fetchFile(narrationBlob));
 
       const dim = aspect === '9:16' ? '1080:1920' : aspect === '1:1' ? '1080:1080' : '1920:1080';
       const [wStr, hStr] = dim.split(':');
       const vw = parseInt(wStr, 10);
       const vh = parseInt(hStr, 10);
+
+      const useImageBg = !sourceVideoBlob;
+      if (useImageBg) {
+        const bgPng = await this._generateBackgroundPng(vw, vh);
+        await ffmpeg.writeFile('bg.png', new Uint8Array(await bgPng.arrayBuffer()));
+      } else {
+        await ffmpeg.writeFile('input.mp4', await util.fetchFile(sourceVideoBlob));
+      }
+      await ffmpeg.writeFile('voice.webm', await util.fetchFile(narrationBlob));
       const isVertical = vh > vw;
       const filterPad = `scale=${dim}:force_original_aspect_ratio=decrease,pad=${dim}:(ow-iw)/2:(oh-ih)/2:black,setsar=1`;
 
@@ -934,8 +961,11 @@
         filterGraph = filterGraph.substring(0, lastBracket) + '[v]';
       }
 
+      const videoInput = useImageBg
+        ? ['-loop', '1', '-framerate', '30', '-i', 'bg.png']
+        : ['-i', 'input.mp4'];
       const args = [
-        '-i', 'input.mp4',
+        ...videoInput,
         '-i', 'voice.webm',
         ...extraInputs,
         '-filter_complex', filterGraph,

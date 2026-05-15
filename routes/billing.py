@@ -56,9 +56,9 @@ PRICING = {
             "id": "free",
             "name": "Free",
             "tagline": "Try the local pipeline",
-            "price_monthly": 0,
-            "price_yearly": 0,
-            "price_lifetime": 0,
+            "price_monthly": None,
+            "price_yearly": None,
+            "price_lifetime": None,
             "features": [
                 "5 video renders per month",
                 "2 cloud AI trial renders",

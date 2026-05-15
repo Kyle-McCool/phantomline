@@ -143,7 +143,7 @@
               <span class="pricing-price-num">${{ tier.price_monthly }}</span>
               <span class="pricing-price-unit">/mo</span>
               {% if tier.price_yearly %}
-                <span class="pricing-price-alt">or ${{ tier.price_yearly }}/yr</span>
+                <span class="pricing-price-alt">or {% if tier.checkout_url_yearly %}<a href="{{ tier.checkout_url_yearly }}" target="_blank" rel="noopener">${{ tier.price_yearly }}/yr</a>{% else %}${{ tier.price_yearly }}/yr{% endif %}</span>
               {% endif %}
             {% else %}
               <span class="pricing-price-num">$0</span>
