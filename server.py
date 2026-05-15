@@ -322,6 +322,7 @@ def _security_headers(response):
     is_html = ctype.startswith("text/html")
     # XML/plain-text utility responses get only the universal headers.
     if not is_html:
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "no-referrer")
         response.headers["Server"] = "Phantomline"
@@ -366,6 +367,7 @@ def _security_headers(response):
         "form-action 'self'"
     )
     response.headers.setdefault("Content-Security-Policy", csp)
+    response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "no-referrer")

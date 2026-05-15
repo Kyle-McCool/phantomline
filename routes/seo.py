@@ -8,6 +8,7 @@ middleware."""
 import os
 import threading
 import time
+from xml.sax.saxutils import escape as xml_escape
 
 import requests
 from flask import Blueprint, jsonify, request
@@ -130,18 +131,18 @@ def rss_feed():
     for a in published_articles():
         items.append(
             f"    <item>\n"
-            f"      <title>{a['title']}</title>\n"
+            f"      <title>{xml_escape(a['title'])}</title>\n"
             f"      <link>{SITE_URL}/blog/{a['slug']}</link>\n"
-            f"      <description>{a.get('meta_description', '')}</description>\n"
+            f"      <description>{xml_escape(a.get('meta_description', ''))}</description>\n"
             f"      <pubDate>{_rfc822(a.get('published_date', ''))}</pubDate>\n"
             f"    </item>"
         )
     for c in COMPETITORS:
         items.append(
             f"    <item>\n"
-            f"      <title>{c['name']} Alternative | Phantomline</title>\n"
+            f"      <title>{xml_escape(c['name'])} Alternative | Phantomline</title>\n"
             f"      <link>{SITE_URL}/alternatives/{c['slug']}</link>\n"
-            f"      <description>{c.get('meta_description', '')}</description>\n"
+            f"      <description>{xml_escape(c.get('meta_description', ''))}</description>\n"
             f"      <pubDate>{_rfc822('2026-05-02')}</pubDate>\n"
             f"    </item>"
         )
