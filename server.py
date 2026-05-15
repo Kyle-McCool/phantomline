@@ -2073,7 +2073,7 @@ def api_video_ideas():
     data = request.get_json(force=True) or {}
     model = _resolve_ollama_model(data.get("model"))
     if sg.check_ollama() is None and not sg._cloud_backend():
-        return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
+        pass  # Pollinations fallback handles this
 
     niche = (data.get("niche") or "faceless YouTube channel").strip()
     audience = (data.get("audience") or "curious general viewers").strip()
@@ -2263,7 +2263,7 @@ def api_title_ideas():
     data = request.get_json(force=True) or {}
     model = _resolve_ollama_model(data.get("model"))
     if sg.check_ollama() is None and not sg._cloud_backend():
-        return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
+        pass  # Pollinations fallback handles this
 
     topic = (data.get("topic") or "").strip()
     niche = (data.get("niche") or "faceless YouTube channel").strip()
@@ -2404,7 +2404,7 @@ def api_publish_description():
     data = request.get_json(force=True) or {}
     model = _resolve_ollama_model(data.get("model"))
     if sg.check_ollama() is None and not sg._cloud_backend():
-        return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
+        pass  # Pollinations fallback handles this
 
     title = (data.get("title") or "Phantomline video").strip()
     topic = (data.get("topic") or "").strip()
@@ -2582,7 +2582,7 @@ def api_start():
         "seo_keywords": [str(k).strip() for k in seo_kws if str(k).strip()][:8],
     }
     if sg.check_ollama() is None and not sg._cloud_backend():
-        return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
+        pass  # Pollinations fallback handles this
 
     job_id = make_job()
     quota_block = _enforce_render_quota()
@@ -2610,7 +2610,7 @@ def api_start_short():
         "seo_keywords": [str(k).strip() for k in seo_kws if str(k).strip()][:8],
     }
     if sg.check_ollama() is None and not sg._cloud_backend():
-        return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
+        pass  # Pollinations fallback handles this
 
     job_id = make_job()
 
@@ -4374,7 +4374,7 @@ def api_publish_analytics_analyze():
         return jsonify({"ok": False, "error": "Upload a YouTube analytics CSV or TSV first."}), 400
     model = _resolve_ollama_model(request.form.get("model"))
     if sg.check_ollama() is None and not sg._cloud_backend():
-        return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
+        pass  # Pollinations fallback handles this
     try:
         rows = _parse_analytics_upload(f)
     except Exception as exc:
