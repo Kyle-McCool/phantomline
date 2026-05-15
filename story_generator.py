@@ -432,6 +432,15 @@ def check_ollama():
         return None
 
 
+def has_any_llm_backend():
+    """True if any text-generation backend is reachable (cloud key, Ollama, or Pollinations)."""
+    if _cloud_backend():
+        return True
+    if check_ollama() is not None:
+        return True
+    return True  # Pollinations is always available as last-resort fallback
+
+
 _POLLINATIONS_TEXT_URL = "https://text.pollinations.ai/"
 _ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 _OPENAI_URL = "https://api.openai.com/v1/chat/completions"

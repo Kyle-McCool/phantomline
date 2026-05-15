@@ -452,12 +452,15 @@ def install_index():
     return redirect("/install/phantomline", code=301)
 
 
+_INDEXABLE_INSTALL_GUIDES = {"gemini-api", "openrouter-api"}
+
 @pages_bp.route("/install/<tool>")
 def install_page(tool):
     tool_data = INSTALL_TOOLS.get(tool.lower())
     if not tool_data:
         return jsonify({"ok": False, "error": "Unknown install target"}), 404
-    return render_template("install.html", tool=tool_data)
+    indexable = tool.lower() in _INDEXABLE_INSTALL_GUIDES
+    return render_template("install.html", tool=tool_data, indexable=indexable)
 
 
 @pages_bp.route("/download")

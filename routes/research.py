@@ -253,7 +253,7 @@ def api_youtube_seo_research():
         candidates.extend(analytics_context.get("seo_keywords") or [])
         candidates.extend(analytics_context.get("phrases") or [])
     candidates.extend(autocomplete)
-    if sg.check_ollama() is not None:
+    if sg.has_any_llm_backend():
         prompt = _seo_research_prompt(niche=niche, analytics_context=analytics_context)
         try:
             raw = sg.generate(

@@ -6,7 +6,7 @@
 <meta name="description" content="One-click install for {{ tool.label }}: power up Phantomline with {{ tool.subtitle }}." />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#090b0c" />
-<meta name="robots" content="noindex" />
+{% if not indexable %}<meta name="robots" content="noindex" />{% endif %}
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />

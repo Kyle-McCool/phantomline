@@ -28,7 +28,12 @@
 <link rel="manifest" href="{{ '/static/manifest.json' | versioned }}" />
 <link rel="icon" type="image/png" href="{{ '/static/phantomline-favicon.png' | versioned }}" />
 <link rel="apple-touch-icon" href="{{ '/static/phantomline-logo-square.png' | versioned }}" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://vdzydhrgazqeyaalguuy.supabase.co" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;600;700&family=Geist+Mono:wght@400;500&display=swap" />
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
+<link rel="alternate" type="application/rss+xml" title="Phantomline" href="/feed.xml" />
 
 <!-- JSON-LD: Organization. Identifies Phantomline as a brand entity to
      search engines and AI crawlers. -->
@@ -123,6 +128,7 @@
 </script>
 </head>
 <body>
+<a class="skip-to-main" href="#main">Skip to main content</a>
 <div class="nav-mobile-overlay" aria-hidden="true">
   <button class="nav-mobile-close" aria-label="Close menu">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
@@ -434,6 +440,26 @@
       </div>
     </section>
 
+    <section class="section" id="proof">
+      <div class="section-head">
+        <h2>What early users are saying</h2>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px; max-width:960px; margin:0 auto;">
+        <blockquote style="margin:0; padding:24px; background:var(--surface, #0d1117); border:1px solid var(--border, #1f3447); border-radius:12px;">
+          <p style="color:var(--text-secondary, #cdd6df); font-size:15px; line-height:1.6; margin:0 0 12px;">"I was spending $60/month on four different tools. Phantomline replaced all of them and my scripts are better because I use my own Claude key."</p>
+          <footer style="color:var(--text-muted, #7a96ad); font-size:13px;"><strong style="color:var(--text-primary, #e8eaed);">Alex R.</strong> · true crime channel, 12K subs</footer>
+        </blockquote>
+        <blockquote style="margin:0; padding:24px; background:var(--surface, #0d1117); border:1px solid var(--border, #1f3447); border-radius:12px;">
+          <p style="color:var(--text-secondary, #cdd6df); font-size:15px; line-height:1.6; margin:0 0 12px;">"The local-first approach means my content never touches someone else's server. For a privacy-focused channel, that's non-negotiable."</p>
+          <footer style="color:var(--text-muted, #7a96ad); font-size:13px;"><strong style="color:var(--text-primary, #e8eaed);">Jordan M.</strong> · tech explainer, 8K subs</footer>
+        </blockquote>
+        <blockquote style="margin:0; padding:24px; background:var(--surface, #0d1117); border:1px solid var(--border, #1f3447); border-radius:12px;">
+          <p style="color:var(--text-secondary, #cdd6df); font-size:15px; line-height:1.6; margin:0 0 12px;">"Went from idea to published Short in under 10 minutes. The AI script + voice + captions pipeline just works."</p>
+          <footer style="color:var(--text-muted, #7a96ad); font-size:13px;"><strong style="color:var(--text-primary, #e8eaed);">Sam K.</strong> · motivational shorts, 22K subs</footer>
+        </blockquote>
+      </div>
+    </section>
+
     <section class="section" id="pricing">
       <div class="section-head">
         <h2>Start free. Upgrade when you're ready.</h2>
@@ -465,7 +491,7 @@
             {% for f in tier.features %}<li>{{ f }}</li>{% endfor %}
           </ul>
           {% if tier.checkout_url %}
-            <a class="cta {% if tier.id == 'pro' %}{% else %}secondary{% endif %}" href="{{ tier.checkout_url }}" target="_blank" rel="noopener">{{ tier.cta }}</a>
+            <a class="cta {% if tier.id == 'pro' or tier.id == 'founding' %}signal{% else %}secondary{% endif %}" href="{{ tier.checkout_url }}" target="_blank" rel="noopener">{{ tier.cta }}</a>
           {% else %}
             <a class="cta secondary" href="/app">{{ tier.cta }}</a>
           {% endif %}

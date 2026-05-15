@@ -129,29 +129,34 @@ def rss_feed():
     from blog import published_articles
     items = []
     for a in published_articles():
+        url = f"{SITE_URL}/blog/{a['slug']}"
         items.append(
             f"    <item>\n"
             f"      <title>{xml_escape(a['title'])}</title>\n"
-            f"      <link>{SITE_URL}/blog/{a['slug']}</link>\n"
+            f"      <link>{url}</link>\n"
+            f"      <guid isPermaLink=\"true\">{url}</guid>\n"
             f"      <description>{xml_escape(a.get('meta_description', ''))}</description>\n"
             f"      <pubDate>{_rfc822(a.get('published_date', ''))}</pubDate>\n"
             f"    </item>"
         )
     for c in COMPETITORS:
+        url = f"{SITE_URL}/alternatives/{c['slug']}"
         items.append(
             f"    <item>\n"
             f"      <title>{xml_escape(c['name'])} Alternative | Phantomline</title>\n"
-            f"      <link>{SITE_URL}/alternatives/{c['slug']}</link>\n"
+            f"      <link>{url}</link>\n"
+            f"      <guid isPermaLink=\"true\">{url}</guid>\n"
             f"      <description>{xml_escape(c.get('meta_description', ''))}</description>\n"
             f"      <pubDate>{_rfc822('2026-05-02')}</pubDate>\n"
             f"    </item>"
         )
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<rss version="2.0">\n'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
         "  <channel>\n"
         "    <title>Phantomline</title>\n"
         f"    <link>{SITE_URL}/</link>\n"
+        f"    <atom:link href=\"{SITE_URL}/feed.xml\" rel=\"self\" type=\"application/rss+xml\" />\n"
         "    <description>Local-first AI video studio for faceless YouTube creators</description>\n"
         f"    <language>en-us</language>\n"
         f"{''.join(chr(10) + i for i in items)}\n"

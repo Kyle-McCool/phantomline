@@ -1916,11 +1916,21 @@
     padding-top: 16px;
     border-top: 1px solid rgba(255,255,255,0.06);
   }
+  .wiz-nav .btn {
+    width: auto;
+    margin-top: 0;
+    min-width: 160px;
+    padding: 12px 22px;
+  }
+  .wiz-nav .btn.secondary {
+    min-width: 120px;
+  }
   .wiz-render-group {
     display: flex;
     gap: 8px;
     align-items: center;
   }
+  .wiz-render-group .btn { width: auto; margin-top: 0; }
   .wiz-review {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -3023,6 +3033,31 @@
     background: rgba(0,0,0,0.12);
     color: var(--muted);
     font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, transform 60ms ease;
+  }
+  .calendar-day:hover {
+    background: rgba(34, 231, 245, 0.08);
+    border-color: rgba(34, 231, 245, 0.45);
+  }
+  .calendar-day:active {
+    transform: translateY(1px);
+  }
+  .calendar-day:focus-visible {
+    outline: 2px solid var(--accent, #22E7F5);
+    outline-offset: 2px;
+  }
+  .calendar-past {
+    opacity: 0.55;
+  }
+  .calendar-past:hover {
+    background: rgba(244, 67, 67, 0.08);
+    border-color: rgba(244, 67, 67, 0.3);
   }
   .calendar-today {
     border-color: var(--accent, #22E7F5);
@@ -3040,7 +3075,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 11px;
   }
+  .calendar-dot-posted { background: rgba(40, 200, 110, 0.18); }
+  .calendar-dot-failed { background: rgba(244, 67, 67, 0.18); }
   @media (max-width: 1100px) {
     #tab-make .workflow-grid { grid-template-columns: 1fr; }
     .make-studio-panel { position: static; }

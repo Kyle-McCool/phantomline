@@ -5,6 +5,7 @@
 # on the user's local desktop install (see requirements-desktop.txt).
 requests>=2.31
 flask>=3.0
+flask-limiter>=3.5
 numpy>=1.24
 Pillow>=10.0
 edge-tts>=7.0

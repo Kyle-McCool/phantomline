@@ -104,6 +104,23 @@ const OB_NICHE_KEY = 'phantomline-onboarding-niche';
   let connectedChannel = null;
   let selectedNiche = null;
 
+  // Resume after OAuth redirect — skip screens the user already completed.
+  try {
+    const pendingPath = localStorage.getItem('ob_pending_path');
+    const pendingNiche = localStorage.getItem('ob_pending_niche');
+    localStorage.removeItem('ob_pending_path');
+    localStorage.removeItem('ob_pending_niche');
+    if (pendingPath) {
+      currentPath = pendingPath;
+      if (pendingNiche) {
+        selectedNiche = pendingNiche;
+        showScreen('niche');
+      } else {
+        showScreen(pendingPath === 'existing' ? 'niche' : 'niche');
+      }
+    }
+  } catch (_) {}
+
   const SCREENS = {
     intent:               { progress: 20 },
     connect:              { progress: 45 },
@@ -240,13 +257,13 @@ const OB_NICHE_KEY = 'phantomline-onboarding-niche';
 
   if (connectBtn) {
     connectBtn.addEventListener('click', async () => {
-      // Use Supabase OAuth with YouTube scopes if available.
-      // For now, this opens the OAuth flow in the same window;
-      // the callback will land back on /app with tokens in the session.
-      // Until Kyle's store-token endpoint lands, we simulate a skip.
       try {
         const supabase = window.__supabase;
         if (supabase) {
+          try {
+            localStorage.setItem('ob_pending_path', currentPath || '');
+            localStorage.setItem('ob_pending_niche', selectedNiche || '');
+          } catch (_) {}
           const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -256,14 +273,11 @@ const OB_NICHE_KEY = 'phantomline-onboarding-niche';
             },
           });
           if (error) throw error;
-          // OAuth redirect will happen — onboarding state will be incomplete.
-          // On return, the onboarding resumes because OB_COMPLETE_KEY isn't set.
           return;
         }
       } catch (e) {
         console.warn('Onboarding: OAuth unavailable, falling back to skip', e);
       }
-      // Fallback: skip connection, let them enter a niche manually.
       connectSkip.click();
     });
   }
@@ -300,16 +314,18 @@ const OB_NICHE_KEY = 'phantomline-onboarding-niche';
 
   // Custom niche confirm.
   const customConfirm = document.getElementById('obCustomNicheConfirm');
-  if (customConfirm) {
-    customConfirm.addEventListener('click', () => {
-      const input = document.getElementById('obCustomNicheInput');
-      const val = input?.value.trim();
-      if (!val) { input?.focus(); return; }
-      selectedNiche = val;
-      const nicheKey = findClosestRecipe(val);
-      showShowcase('', nicheKey);
-    });
+  const customNicheInput = document.getElementById('obCustomNicheInput');
+  function confirmCustomNiche() {
+    const val = customNicheInput?.value.trim();
+    if (!val) { customNicheInput?.focus(); return; }
+    selectedNiche = val;
+    const nicheKey = findClosestRecipe(val);
+    showShowcase('', nicheKey);
   }
+  if (customConfirm) customConfirm.addEventListener('click', confirmCustomNiche);
+  if (customNicheInput) customNicheInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); confirmCustomNiche(); }
+  });
 
   // --- Showcase screen buttons ---
   const showcaseGo = document.getElementById('obShowcaseGo');
@@ -2290,6 +2306,7 @@ async function _cloudTts(text, voice) {
   }
   const data = await resp.json();
   if (!data.ok) throw new Error(data.error || 'Cloud TTS failed');
+  if (!data.audio_b64) throw new Error('Server returned no audio data');
   const raw = atob(data.audio_b64);
   const bytes = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
@@ -3808,7 +3825,9 @@ async function renderDraftVideoFromCurrentTimeline() {
 }
 
 async function waitForDraftVideo(jobId, onStatus) {
+  const deadline = Date.now() + 15 * 60 * 1000;
   for (;;) {
+    if (Date.now() > deadline) throw new Error('Video render timed out. Check Library for the result.');
     if (typeof _makeRenderAbortIfNeeded === 'function') _makeRenderAbortIfNeeded();
     const d = await apiJson('/api/video/draft/status/' + jobId);
     const j = d.job;
@@ -3866,6 +3885,7 @@ let makeSourceVideoProjectId = null;
 var makeSourceLibraryPick = null;
 var makeSourceLibraryMeta = null;
 let latestMakeVideoProjectId = null;
+let _lastFinishedBlobUrl = null;
 
 async function uploadMakeSourceVideo() {
   if (makeSourceLibraryPick && makeSourceVideoProjectId && makeSourceLibraryMeta) {
@@ -3994,7 +4014,9 @@ function resetMakeSteps() {
 }
 
 async function waitForStoryJob(jobId, onStatus) {
+  const deadline = Date.now() + 15 * 60 * 1000;
   for (;;) {
+    if (Date.now() > deadline) throw new Error('Script generation timed out. Check Library for the result.');
     if (typeof _makeRenderAbortIfNeeded === 'function') _makeRenderAbortIfNeeded();
     const d = await apiJson('/api/status/' + jobId);
     const j = d.job;
@@ -4009,7 +4031,9 @@ async function waitForStoryJob(jobId, onStatus) {
 }
 
 async function waitForMusicProject(jobId, onStatus) {
+  const deadline = Date.now() + 15 * 60 * 1000;
   for (;;) {
+    if (Date.now() > deadline) throw new Error('Music generation timed out. Check Library for the result.');
     if (typeof _makeRenderAbortIfNeeded === 'function') _makeRenderAbortIfNeeded();
     const d = await apiJson('/api/music/status/' + jobId);
     const j = d.job;
@@ -4021,7 +4045,9 @@ async function waitForMusicProject(jobId, onStatus) {
 }
 
 async function waitForMixProject(jobId, onStatus) {
+  const deadline = Date.now() + 15 * 60 * 1000;
   for (;;) {
+    if (Date.now() > deadline) throw new Error('Audio mix timed out. Check Library for the result.');
     if (typeof _makeRenderAbortIfNeeded === 'function') _makeRenderAbortIfNeeded();
     const d = await apiJson('/api/mix/status/' + jobId);
     const j = d.job;
@@ -4105,6 +4131,14 @@ async function makeVideoWorkflow() {
         },
       });
       script = { text: result.text, title: result.title };
+      try {
+        const _saveRes = await apiJson('/api/projects/save-script', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: result.text, title: result.title }),
+        });
+        if (_saveRes.project_id) script.project_id = _saveRes.project_id;
+      } catch (_saveErr) { console.warn('Script save failed:', _saveErr); }
       // Increment free trial counter after a successful cloud render.
       if (_tier === 'free') _ghIncrementCloudTrial();
     } else {
@@ -4268,12 +4302,13 @@ async function makeVideoWorkflow() {
             const _wantCaptions = $('makeCaptions')?.value !== 'none';
             let _audioDur = 0;
             if (_wantCaptions && script.text) {
+              let _actx;
               try {
-                const _actx = new (window.AudioContext || window.webkitAudioContext)();
+                _actx = new (window.AudioContext || window.webkitAudioContext)();
                 const _abuf = await _actx.decodeAudioData(await _mixedBlob.arrayBuffer());
                 _audioDur = _abuf.duration;
-                _actx.close();
               } catch (_) { /* fall back to estimation in assemble() */ }
+              finally { _actx?.close(); }
             }
 
             // Edge-tts word boundaries are ground truth for synthesized speech
@@ -4323,8 +4358,14 @@ async function makeVideoWorkflow() {
             _finishedUrl = _rendered.url;
             _usedBrowserRender = true;
             latestMakeVideoProjectId = null;
-            // Surface the SRT sidecar so the user can upload it to YouTube
-            // (real caption track > YT auto-CC for accessibility & search).
+            try {
+              const _vBlob = await fetch(_rendered.url).then(r => r.blob());
+              const _vFd = new FormData();
+              _vFd.append('file', _vBlob, (script.title || 'render') + '.mp4');
+              _vFd.append('title', script.title || 'Browser render');
+              const _vSave = await apiJson('/api/projects/save-video', { method: 'POST', body: _vFd });
+              if (_vSave.project_id) latestMakeVideoProjectId = _vSave.project_id;
+            } catch (_vErr) { console.warn('Browser video save failed:', _vErr); }
             _attachSrtDownload(_rendered.srtUrl, script.title);
             setMakeStep('makeStepVideo', 'done', 'done');
           } catch (_wasmErr) {
@@ -4373,12 +4414,13 @@ async function makeVideoWorkflow() {
             });
             const _wantCaptions = $('makeCaptions')?.value !== 'none';
             let _audioDur = 0;
+            let _actx;
             try {
-              const _actx = new (window.AudioContext || window.webkitAudioContext)();
+              _actx = new (window.AudioContext || window.webkitAudioContext)();
               const _abuf = await _actx.decodeAudioData(await _mixedBlob.arrayBuffer());
               _audioDur = _abuf.duration;
-              _actx.close();
             } catch (_) {}
+            finally { _actx?.close(); }
             let _alignedBoundaries = ttsResult.boundaries || null;
             const _titleStyle = $('makeTitleStyle')?.value || '';
             const _titleText = (_titleStyle !== 'none')
@@ -4397,6 +4439,14 @@ async function makeVideoWorkflow() {
             });
             _finishedUrl = _rendered.url;
             _usedBrowserRender = true;
+            try {
+              const _vBlob = await fetch(_rendered.url).then(r => r.blob());
+              const _vFd = new FormData();
+              _vFd.append('file', _vBlob, (script.title || 'render') + '.mp4');
+              _vFd.append('title', script.title || 'Browser render');
+              const _vSave = await apiJson('/api/projects/save-video', { method: 'POST', body: _vFd });
+              if (_vSave.project_id) latestMakeVideoProjectId = _vSave.project_id;
+            } catch (_vErr) { console.warn('Browser video save failed:', _vErr); }
             _attachSrtDownload(_rendered.srtUrl, script.title);
             setMakeStep('makeStepVideo', 'done', 'done');
           } catch (_bgErr) {
@@ -4410,6 +4460,7 @@ async function makeVideoWorkflow() {
         }
       }
 
+      _lastFinishedBlobUrl = _finishedUrl;
       $('makePreviewVideo').src = _finishedUrl;
       const _pv = $('makePhonePreviewVideo');
       if (_pv) { _pv.src = _finishedUrl; _pv.style.display = 'block'; _pv.load(); $('makePhonePreviewInner')?.classList.add('has-video'); }
@@ -5237,9 +5288,13 @@ document.querySelectorAll('.publish-nav button').forEach(btn => {
 function updatePublishPreview() {
   const projectId = $('publishVideoProject').value;
   const project = publishVideos.find(v => v.id === projectId);
-  $('publishPreviewBox').innerHTML = project
-    ? `<video controls src="/api/projects/${project.id}/file/video?inline=1"></video>`
-    : '<div class="empty">No media selected</div>';
+  if (project) {
+    $('publishPreviewBox').innerHTML = `<video controls src="/api/projects/${project.id}/file/video?inline=1"></video>`;
+  } else if (_lastFinishedBlobUrl) {
+    $('publishPreviewBox').innerHTML = `<video controls src="${_lastFinishedBlobUrl}"></video>`;
+  } else {
+    $('publishPreviewBox').innerHTML = '<div class="empty">No media selected</div>';
+  }
   const titleVal = $('publishTitle').value.trim();
   const captionVal = $('publishCaption').value.trim();
   $('publishPreviewTitle').textContent = titleVal || 'Untitled video';
@@ -5468,10 +5523,37 @@ function renderPublishCalendar() {
     const d = new Date(start.getTime() + i * 86400000);
     const key = d.toISOString().slice(0, 10);
     const isToday = key === todayKey;
+    const isPast = key < todayKey;
     const posts = publishPosts.filter(p => (p.scheduled_at || '').slice(0, 10) === key);
-    days.push(`<div class="calendar-day${isToday ? ' calendar-today' : ''}"><strong>${d.getMonth() + 1}/${d.getDate()}</strong>${posts.map(p => `<div class="calendar-dot">${escapeHtml(p.title || 'Post')}</div>`).join('')}</div>`);
+    const cls = ['calendar-day'];
+    if (isToday) cls.push('calendar-today');
+    if (isPast) cls.push('calendar-past');
+    if (posts.length) cls.push('calendar-has-posts');
+    const postHtml = posts.map(p => {
+      const status = (p.status || 'scheduled').toLowerCase();
+      return `<div class="calendar-dot calendar-dot-${escapeHtml(status)}" title="${escapeHtml(p.title || 'Post')}">${escapeHtml(p.title || 'Post')}</div>`;
+    }).join('');
+    days.push(`<button type="button" class="${cls.join(' ')}" data-cal-date="${key}" aria-label="Schedule post for ${key}"><strong>${d.getMonth() + 1}/${d.getDate()}</strong>${postHtml}</button>`);
   }
   el.innerHTML = days.join('');
+  el.querySelectorAll('[data-cal-date]').forEach(btn => {
+    btn.addEventListener('click', () => openCalendarComposer(btn.dataset.calDate));
+  });
+}
+
+function openCalendarComposer(dateKey) {
+  // Default to 9:00 AM on the selected day, unless it's today and 9am has passed.
+  const d = new Date(dateKey + 'T09:00:00');
+  const now = new Date();
+  if (d < now) {
+    d.setTime(now.getTime() + 60 * 60 * 1000);
+  }
+  switchPublishView('compose');
+  const input = $('publishScheduledAt');
+  if (input) input.value = localDateTimeValue(d);
+  renderPublishReadinessChecklist();
+  input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  input?.focus();
 }
 
 function renderPublishAnalytics() {

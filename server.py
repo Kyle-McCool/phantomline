@@ -88,9 +88,24 @@ from routes.blog_routes import blog_bp
 from routes.alternatives_routes import alternatives_bp
 from routes.seo import seo_bp, SITE_URL
 from routes.pages import pages_bp
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 app = Flask(__name__)
+def _rate_limit_key():
+    addr = get_remote_address()
+    if addr in ("127.0.0.1", "::1"):
+        return None
+    return addr
+
+limiter = Limiter(
+    _rate_limit_key,
+    app=app,
+    default_limits=["120 per minute"],
+    storage_uri="memory://",
+)
+
 app.register_blueprint(system_bp)
 app.register_blueprint(launch_bp)
 app.register_blueprint(insights_bp)
@@ -258,9 +273,9 @@ def _release_user_context_for_projects(exc):
         except (LookupError, ValueError):
             # Token from a different context (e.g. test isolation) — safe to ignore.
             pass
-# Stories are tiny but uploaded narration audio can be hundreds of MB
-# (an hour of WAV is ~330 MB, MP3 ~50 MB). Allow up to 1 GB.
-app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
+# Uploaded narration audio can be tens of MB (MP3 ~50 MB for an hour).
+# Desktop installs can override via MAX_UPLOAD_MB env var for large WAV files.
+app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_UPLOAD_MB", "100")) * 1024 * 1024
 # Re-read templates on every request so HTML/CSS edits show up without a restart.
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.auto_reload = True
@@ -2570,6 +2585,7 @@ def api_seo_keyword_check():
 
 
 @app.route("/api/start", methods=["POST"])
+@limiter.limit("10 per minute")
 def api_start():
     data = request.get_json(force=True) or {}
     insights_loaded = channel_insights.load(BASE_DIR)
@@ -2596,6 +2612,7 @@ def api_start():
 
 
 @app.route("/api/start_short", methods=["POST"])
+@limiter.limit("10 per minute")
 def api_start_short():
     """One-shot short-form generation (30s—10min). Reuses the same JOBS table
     so the existing /api/status/<id> + /api/script/<id> endpoints work."""
@@ -2714,6 +2731,7 @@ def api_voices():
 
 
 @app.route("/api/tts/cloud", methods=["POST"])
+@limiter.limit("20 per minute")
 def api_tts_cloud():
     """Free server-side TTS via edge-tts (Microsoft neural voices)."""
     import asyncio
@@ -2906,6 +2924,7 @@ def api_tts_download(job_id):
 # ---------------------------------------------------------------------------
 
 @app.route("/api/music/start", methods=["POST"])
+@limiter.limit("10 per minute")
 def api_music_start():
     data = request.get_json(force=True) or {}
     prompt = (data.get("prompt") or "").strip()
@@ -3038,6 +3057,7 @@ def api_music_download(job_id):
 # ---- Mix narration + music ------------------------------------------------
 
 @app.route("/api/mix/start", methods=["POST"])
+@limiter.limit("10 per minute")
 def api_mix_start():
     data = request.get_json(force=True) or {}
     tts_job = data.get("tts_job_id")
@@ -3431,6 +3451,7 @@ def api_video_timeline():
 
 
 @app.route("/api/video/draft/start", methods=["POST"])
+@limiter.limit("6 per minute")
 def api_video_draft_start():
     # Free tier: monthly render quota. Pro/Studio: unlimited.
     allowed, quota_err, quota_state = consume_quota("renders_per_month")
@@ -3698,6 +3719,7 @@ def api_video_source_start():
 
 
 @app.route("/api/cloud/render", methods=["POST"])
+@limiter.limit("6 per minute")
 def api_render_cloud():
     """Lightweight server-side video render for the cloud/BYOK pipeline.
 
@@ -3854,10 +3876,17 @@ def api_render_cloud():
             if not out_path.exists():
                 raise FileNotFoundError("ffmpeg produced no output")
 
+            proj = _register_project(
+                kind=project_store.KIND_VIDEO,
+                title=f"{title} (cloud render)",
+                file_path=str(out_path),
+                role="video",
+                params={"cloud_render": True, "aspect": aspect},
+            )
             with VIDEO_LOCK:
                 job = VIDEO_JOBS[job_id]
-                job["video_path"] = str(out_path)
-                job["project_id"] = None
+                job["video_path"] = str(PROJECTS.file_path(proj["id"], "video")) if proj else str(out_path)
+                job["project_id"] = proj["id"] if proj else None
                 job["status"] = "done"
                 job["done"] = True
         except Exception as exc:
@@ -4578,6 +4607,60 @@ def api_projects_list():
     if kind:
         items = [p for p in items if p.get("kind") == kind]
     return jsonify({"ok": True, "projects": items})
+
+
+@app.route("/api/projects/save-video", methods=["POST"])
+def api_save_video():
+    """Persist a browser-rendered video blob (from ffmpeg.wasm) so it appears
+    in Library and can be published via the Publish workspace."""
+    f = request.files.get("file")
+    if not f or not f.filename:
+        return jsonify({"ok": False, "error": "no video file"}), 400
+    title = (request.form.get("title") or "Browser render").strip()[:200]
+    ext = Path(f.filename).suffix.lower() or ".mp4"
+    if ext not in (".mp4", ".webm"):
+        return jsonify({"ok": False, "error": "unsupported format"}), 400
+    upload_dir = OUTPUT_DIR / "uploaded"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    tmp_path = upload_dir / f"{uuid.uuid4().hex[:8]}_browser{ext}"
+    f.save(str(tmp_path))
+    proj = _register_project(
+        kind=project_store.KIND_VIDEO,
+        title=f"{title} (browser render)",
+        file_path=str(tmp_path),
+        role="video",
+        params={"browser_render": True},
+    )
+    if not proj:
+        tmp_path.unlink(missing_ok=True)
+        return jsonify({"ok": False, "error": "Failed to save video"}), 500
+    return jsonify({"ok": True, "project_id": proj["id"]})
+
+
+@app.route("/api/projects/save-script", methods=["POST"])
+def api_save_script():
+    """Persist a browser-generated script so it appears in Library and can be
+    linked into a bundle. The cloud/BYOK pipeline generates scripts entirely
+    in the browser; this endpoint bridges them into the project store."""
+    data = request.get_json(force=True) or {}
+    text = (data.get("text") or "").strip()
+    title = (data.get("title") or "Untitled script").strip()[:200]
+    if not text:
+        return jsonify({"ok": False, "error": "empty script"}), 400
+    import tempfile as _tmp
+    tmp = Path(_tmp.mktemp(suffix=".txt", prefix="cloud_script_"))
+    tmp.write_text(text, encoding="utf-8")
+    proj = _register_project(
+        kind=project_store.KIND_SHORT,
+        title=title,
+        file_path=str(tmp),
+        role="script",
+        params={"cloud_generated": True},
+    )
+    tmp.unlink(missing_ok=True)
+    if not proj:
+        return jsonify({"ok": False, "error": "Failed to save script"}), 500
+    return jsonify({"ok": True, "project_id": proj["id"]})
 
 
 @app.route("/api/projects/<project_id>")

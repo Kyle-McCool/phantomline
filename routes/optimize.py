@@ -183,8 +183,8 @@ def api_optimize_analyze():
     video = data.get("video") if isinstance(data.get("video"), dict) else None
     if not video or not video.get("id"):
         return jsonify({"ok": False, "error": "Provide the full video object from /api/optimize/video/<id>."}), 400
-    if sg.check_ollama() is None:
-        return jsonify({"ok": False, "error": "Ollama is not running on localhost:11434."}), 503
+    if not sg.has_any_llm_backend():
+        return jsonify({"ok": False, "error": "No LLM backend available (set a cloud API key or start Ollama)."}), 503
     model = _resolve_ollama_model(data.get("model"))
 
     insights = channel_insights.load(BASE_DIR)
