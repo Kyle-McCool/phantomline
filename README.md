@@ -4,7 +4,7 @@
 > No paid APIs. Founding lifetime $79.
 
 **Live:** https://phantomline.xyz
-**Repo:** https://github.com/daculturedswine/phantomline
+**Repo:** https://github.com/Kyle-Anson-McCool/phantomline
 
 Phantomline turns ideas into scripts, narration, captions, music, B-roll, SEO packages, and scheduled YouTube posts. Heavy AI inference runs on the user's machine (Ollama + Kokoro + MusicGen) on desktop, or in the browser (WebLLM + Web Speech + Web Audio + ffmpeg.wasm) on the hosted PWA. Either way, no SaaS bill on the AI side.
 
@@ -34,7 +34,7 @@ The same `server.py` boots in either mode. Heavy ML imports (`tts`, `music`, `vi
 ## Quick start (local dev, full desktop mode)
 
 ```bash
-git clone https://github.com/daculturedswine/phantomline.git
+git clone https://github.com/Kyle-Anson-McCool/phantomline.git
 cd phantomline
 
 # Python venv

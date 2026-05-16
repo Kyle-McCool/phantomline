@@ -52,6 +52,42 @@ def about_page():
     return render_template("about.html")
 
 
+@pages_bp.route("/kyle-anson-mccool")
+def kyle_page():
+    return render_template("kyle.html")
+
+
+@pages_bp.route("/kyle")
+def kyle_short_redirect():
+    return redirect("/kyle-anson-mccool", code=301)
+
+
+@pages_bp.route("/kyle-mccool")
+def kyle_mccool_redirect():
+    return redirect("/kyle-anson-mccool", code=301)
+
+
+@pages_bp.route("/projects/makko-ai")
+def project_makko_ai():
+    return render_template("project_makko_ai.html")
+
+
+@pages_bp.route("/projects/moonray")
+def project_moonray():
+    return render_template("project_moonray.html")
+
+
+@pages_bp.route("/projects/prolocalbuilder")
+def project_prolocalbuilder():
+    return render_template("project_prolocalbuilder.html")
+
+
+@pages_bp.route("/projects")
+@pages_bp.route("/projects/")
+def projects_index():
+    return redirect("/kyle-anson-mccool", code=301)
+
+
 @pages_bp.route("/privacy")
 def privacy_page():
     return render_template("privacy.html")
