@@ -116,8 +116,12 @@ ARTICLES: list[dict] = [
         "reading_time": "8 min",
     },
     {
+        # 2026-05-15: retired. Cannibalized /faceless-youtube-niches (same
+        # primary keyword, the pillar ranked better). 301 in blog_routes.py
+        # consolidates the ranking signal. Slug freed for a future
+        # "low-competition faceless niches 2026" post.
         "slug": "best-faceless-youtube-niches-passive-income",
-        "published": True,
+        "published": False,
         "title": "Best Faceless YouTube Niches for Passive Income in 2026",
         "subtitle": "The niches where faceless channels actually build durable revenue, ranked by CPM, competition, and automation potential.",
         "meta_description": "Best faceless YouTube niches for passive income in 2026: ranked by CPM, competition, evergreen potential, and how automatable the production pipeline is for each niche.",

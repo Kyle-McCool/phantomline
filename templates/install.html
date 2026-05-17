@@ -11,6 +11,63 @@
 <link rel="stylesheet" href="{{ '/static/landing.css' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/article.css' | versioned }}" />
 <link rel="stylesheet" href="{{ '/static/install.css' | versioned }}" />
+{% if indexable %}
+<link rel="canonical" href="{{ canonical_url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Install {{ tool.label }} for Phantomline" />
+<meta property="og:description" content="One-click install for {{ tool.label }}: power up Phantomline with {{ tool.subtitle }}." />
+<meta property="og:url" content="{{ canonical_url }}" />
+<meta property="og:image" content="{{ site_url }}/static/phantomline-og.png" />
+<meta property="og:site_name" content="Phantomline" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Install", "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "{{ tool.label }}",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "description": "{{ tool.subtitle }}",
+  "url": "{{ canonical_url }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to install {{ tool.label }} for Phantomline",
+  "description": "Step-by-step instructions to install {{ tool.label }} and connect it to the Phantomline studio.",
+  "totalTime": "PT10M",
+  "supply": [
+    {"@type": "HowToSupply", "name": "Windows, macOS, or Linux computer"},
+    {"@type": "HowToSupply", "name": "Terminal or PowerShell"}
+  ],
+  "step": [
+    {% for step in tool.manual_steps %}
+    {"@type": "HowToStep", "position": {{ loop.index }}, "name": "{{ step.title }}", "text": "{{ step.body | striptags | replace('"', "'") | trim }}"{% if step.command %}, "url": "{{ canonical_url }}#step-{{ loop.index }}"{% endif %}}{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
 </head>
 <body>
 <div class="wrap">

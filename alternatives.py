@@ -558,7 +558,7 @@ COMPETITORS: list[dict] = [
         "name": "ElevenLabs",
         "tagline": "AI voice generation and cloning",
         "primary_keyword": "ElevenLabs alternative",
-        "title_tag": "ElevenLabs Alternative for Faceless YouTube | Phantomline",
+        "title_tag": "Free ElevenLabs Alternative — 16 AI Voices for YouTube (2026)",
         "meta_description": "Need an ElevenLabs alternative? Phantomline ships local Kokoro TTS with 16 voices, no character cap, and bundles it into a full faceless YouTube pipeline.",
         "h1": "ElevenLabs Alternative for Faceless YouTube Creators",
         "intro": (
@@ -707,7 +707,7 @@ COMPETITORS: list[dict] = [
         "name": "vidIQ",
         "tagline": "YouTube SEO + keyword research + analytics",
         "primary_keyword": "vidIQ alternative",
-        "title_tag": "vidIQ Alternative for Faceless YouTube Creators | Phantomline",
+        "title_tag": "Free vidIQ Alternative — YouTube SEO for Faceless Channels (2026)",
         "meta_description": "Looking for a vidIQ alternative? Phantomline includes YouTube research, keyword scoring, channel insights, and an Optimize Library — bundled with the script and render pipeline, no separate subscription.",
         "h1": "vidIQ Alternative for Faceless YouTube Creators",
         "intro": (
@@ -1546,7 +1546,7 @@ COMPETITORS: list[dict] = [
         "name": "InVideo AI",
         "tagline": "Cloud AI video creation platform",
         "primary_keyword": "InVideo AI alternative",
-        "title_tag": "InVideo AI Alternative for Faceless YouTube Creators | Phantomline",
+        "title_tag": "Free InVideo Alternative (2026) — Local AI for Faceless YouTube",
         "meta_description": "Looking for an InVideo AI alternative? Phantomline is a local-first AI faceless video generator with bring-your-own API key, no per-render fees, and offline rendering.",
         "h1": "InVideo AI Alternative for Faceless YouTube Creators",
         "intro": (
