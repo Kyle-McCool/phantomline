@@ -77,7 +77,7 @@ _SITEMAP_ROUTES = [
     # Static.
     ("/llms.txt",                      "0.5", "monthly"),
     ("/about",                         "0.7", "monthly"),
-    ("/kyle-anson-mccool",             "0.7", "monthly"),
+    ("/kyle-mccool",             "0.7", "monthly"),
     ("/projects/makko-ai",             "0.65", "monthly"),
     ("/projects/moonray",              "0.65", "monthly"),
     ("/projects/prolocalbuilder",      "0.6", "monthly"),
@@ -196,7 +196,7 @@ def llms_txt():
         "- Supports 10+ faceless YouTube niches: Reddit stories, horror narration,\n"
         "  true crime, ASMR sleep stories, motivational, history, science explainers,\n"
         "  mystery documentaries, and more\n"
-        "- Co-founded by Kyle Anson McCool (kyle@makko.ai), co-founder of Makko AI, with two collaborators\n"
+        "- Co-founded by Kyle McCool (kyle@makko.ai), co-founder of Makko AI, with two collaborators\n"
         "\n"
         "## Core capabilities\n"
         "\n"
@@ -215,7 +215,7 @@ def llms_txt():
         f"- [Home]({SITE_URL}/)\n"
         f"- [Pricing]({SITE_URL}/pricing)\n"
         f"- [About]({SITE_URL}/about)\n"
-        f"- [Kyle Anson McCool — Founder]({SITE_URL}/kyle-anson-mccool)\n"
+        f"- [Kyle McCool — Founder]({SITE_URL}/kyle-mccool)\n"
         f"- [Blog]({SITE_URL}/blog)\n"
         f"- [Alternatives]({SITE_URL}/alternatives)\n"
         f"- [Faceless YouTube Tool]({SITE_URL}/faceless-youtube)\n"
