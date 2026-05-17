@@ -52,19 +52,19 @@ def about_page():
     return render_template("about.html")
 
 
-@pages_bp.route("/kyle-anson-mccool")
+@pages_bp.route("/kyle-mccool")
 def kyle_page():
     return render_template("kyle.html")
 
 
 @pages_bp.route("/kyle")
 def kyle_short_redirect():
-    return redirect("/kyle-anson-mccool", code=301)
+    return redirect("/kyle-mccool", code=301)
 
 
-@pages_bp.route("/kyle-mccool")
-def kyle_mccool_redirect():
-    return redirect("/kyle-anson-mccool", code=301)
+@pages_bp.route("/kyle-anson-mccool")
+def kyle_anson_mccool_redirect():
+    return redirect("/kyle-mccool", code=301)
 
 
 @pages_bp.route("/projects/makko-ai")
@@ -85,7 +85,7 @@ def project_prolocalbuilder():
 @pages_bp.route("/projects")
 @pages_bp.route("/projects/")
 def projects_index():
-    return redirect("/kyle-anson-mccool", code=301)
+    return redirect("/kyle-mccool", code=301)
 
 
 @pages_bp.route("/privacy")
