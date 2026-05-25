@@ -130,6 +130,48 @@ ARTICLES: list[dict] = [
         "tags": ["niches", "passive-income", "monetization", "faceless"],
         "reading_time": "12 min",
     },
+    {
+        # Targets "elevenlabs cost", "elevenlabs pricing 2026" — low-comp
+        # commercial queries. Internally links to /alternatives/elevenlabs
+        # to push that striking-distance page toward page 1.
+        "slug": "elevenlabs-cost-2026-real-math",
+        "published": True,
+        "title": "How Much Does ElevenLabs Actually Cost in 2026? (Real Math for YouTube Creators)",
+        "subtitle": "Tier-by-tier cost breakdown, the character math nobody publishes, and where the bill gets uncomfortable.",
+        "meta_description": "A real-world cost breakdown of ElevenLabs for faceless YouTube creators in 2026. Tier-by-tier math, hidden character meters, and what a 30-video-per-month channel actually pays.",
+        "published_date": "2026-05-17",
+        "primary_pillar": "/ai-voice-generator",
+        "tags": ["elevenlabs", "pricing", "tts", "alternatives"],
+        "reading_time": "9 min",
+    },
+    {
+        # Targets "invideo free trial", "invideo cost", "invideo watermark"
+        # — high-intent queries supporting /alternatives/invideo (currently
+        # ranked 11.7, one of our strongest striking-distance pages).
+        "slug": "invideo-free-trial-real-cost-2026",
+        "published": True,
+        "title": "InVideo AI Free Trial: What You Actually Get vs What It Costs in 2026",
+        "subtitle": "Watermarks, weekly caps, and the real price jump once you hit them.",
+        "meta_description": "The real InVideo AI free trial breakdown: watermarks, export caps, character limits, and the price jump once you hit them. What faceless YouTube creators actually need to know in 2026.",
+        "published_date": "2026-05-21",
+        "primary_pillar": "/faceless-youtube",
+        "tags": ["invideo", "pricing", "free-trial", "alternatives"],
+        "reading_time": "8 min",
+    },
+    {
+        # Anchors the $79 Founding Lifetime offer and the BYOK + local-first
+        # cost story. Targets "start faceless youtube channel cheap", "how
+        # much does a faceless channel cost" — top-funnel beginner queries.
+        "slug": "start-faceless-youtube-79-dollars-2026",
+        "published": True,
+        "title": "How to Start a Faceless YouTube Channel for $79 in 2026 (Full Cost Breakdown)",
+        "subtitle": "Hardware you already own, AI tools that don't subscribe you to death, and the one-time stack that replaces $80+/month in SaaS bloat.",
+        "meta_description": "A realistic 2026 cost breakdown for starting a faceless YouTube channel: hardware you already own, AI tools that don't subscribe you to death, and the actual $79 one-time path that replaces the standard $80+/month SaaS stack.",
+        "published_date": "2026-05-25",
+        "primary_pillar": "/faceless-youtube",
+        "tags": ["beginner", "cost", "byok", "faceless", "founding-lifetime"],
+        "reading_time": "11 min",
+    },
 ]
 
 
